@@ -1,0 +1,10 @@
+/.settings
+/cache/*
+/tmp/*
+/stream/*
+.buildpath
+.project
+_notepad++_edit_session
+mpd_sync.sh
+test.php
+test1.php
