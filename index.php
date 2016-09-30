@@ -238,12 +238,14 @@ function selectTab(obj) {
 //  | View 1                                                                 |
 //  +------------------------------------------------------------------------+
 function view1() {
-	global $cfg, $db;
+	global $cfg, $db, $nav;
 	authenticate('access_media');
 	
 	$artist	 	= get('artist');
 	$genre_id 	= get('genre_id');
 	$filter  	= get('filter');
+	require_once('include/header.inc.php');
+	
 	
 	if ($genre_id) {
 		if (substr($genre_id, -1) == '~') {
@@ -273,23 +275,21 @@ function view1() {
 		$thumbnail_url	= 'index.php?action=view2&amp;thumbnail=1&amp;genre_id=' . rawurlencode($genre_id) . '&amp;order=artist';
 		}
 	else {
-		if ($filter == '' || $artist == '') {
+		/* if ($filter == '' || $artist == '') {
 			$artist = 'All album artists';
 			$filter = 'all';
-		}
-		
+		} */
 		$query = '';
-		if ($filter == 'all')			$query = mysqli_query($db, 'SELECT artist_alphabetic FROM album WHERE 1 GROUP BY artist_alphabetic ORDER BY artist_alphabetic');
-		elseif ($filter == 'exact')		$query = mysqli_query($db, 'SELECT artist_alphabetic FROM album WHERE artist_alphabetic = "' .  mysqli_real_escape_string($db,$artist) . '" OR artist = "' .  mysqli_real_escape_string($db,$artist) . '" GROUP BY artist_alphabetic ORDER BY artist_alphabetic');
-		elseif ($filter == 'smart')		$query = mysqli_query($db, 'SELECT artist_alphabetic FROM album WHERE artist_alphabetic LIKE "%' . mysqli_real_escape_like($artist) . '%" OR artist LIKE "%' . mysqli_real_escape_like($artist) . '%" OR artist SOUNDS LIKE "' .  mysqli_real_escape_string($db,$artist) . '" GROUP BY artist_alphabetic ORDER BY artist_alphabetic');
-		elseif ($filter == 'start')		$query = mysqli_query($db, 'SELECT artist_alphabetic FROM album WHERE artist_alphabetic LIKE "' . mysqli_real_escape_like($artist) . '%" GROUP BY artist_alphabetic ORDER BY artist_alphabetic');
-		elseif ($filter == 'symbol')	$query = mysqli_query($db, 'SELECT artist_alphabetic FROM album WHERE artist_alphabetic  NOT BETWEEN "a" AND "zzzzzz" GROUP BY artist_alphabetic ORDER BY artist_alphabetic');
-		//elseif ($filter == 'symbol')	$query = mysqli_query($db, 'SELECT * FROM album ORDER BY artist_alphabetic');
+		if ($filter == 'all')			$query = mysqli_query($db, 'SELECT artist FROM track WHERE 1 GROUP BY artist ORDER BY artist');
+		elseif ($filter == 'exact')		$query = mysqli_query($db, 'SELECT artist FROM track WHERE artist = "' .  mysqli_real_escape_string($db,$artist) . '" OR artist = "' .  mysqli_real_escape_string($db,$artist) . '" GROUP BY artist ORDER BY artist');
+		elseif ($filter == 'smart')		$query = mysqli_query($db, 'SELECT artist FROM track WHERE artist LIKE "%' . mysqli_real_escape_like($artist) . '%" OR artist LIKE "%' . mysqli_real_escape_like($artist) . '%" OR artist SOUNDS LIKE "' .  mysqli_real_escape_string($db,$artist) . '" GROUP BY artist ORDER BY artist');
+		elseif ($filter == 'start')		$query = mysqli_query($db, 'SELECT artist FROM track WHERE artist LIKE "' . mysqli_real_escape_like($artist) . '%" GROUP BY artist ORDER BY artist');
+		elseif ($filter == 'symbol')	$query = mysqli_query($db, 'SELECT artist FROM track WHERE artist REGEXP "^[^a-z]" GROUP BY artist ORDER BY artist');
 		else							message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]filter');
 		
 		if (mysqli_num_rows($query) == 1) {
 			$album = mysqli_fetch_assoc($query);
-			$_GET['artist'] = $album['artist_alphabetic'];
+			$_GET['artist'] = $album['artist'];
 			$_GET['filter'] = 'exact';
 			view2();
 			exit();
@@ -299,24 +299,36 @@ function view1() {
 		$nav			= array();
 		$nav['name'][]	= 'Library';
 		$nav['url'][]	= 'index.php';
-		if ($artist != '') $nav['name'][] = $artist;
-		require_once('include/header.inc.php');
+		if ($artist != '') $nav['name'][] = 'Artist: ' . $artist;
+		elseif ($filter == 'symbol') $nav['name'][] = 'Artist: #';
+		elseif ($filter == 'all') $nav['name'][] = 'All artists';
+		
 		
 		$list_url		= 'index.php?action=view2&amp;thumbnail=0&amp;artist=' . rawurlencode($artist) . '&amp;filter=' . $filter . '&amp;order=artist';
 		$thumbnail_url	= 'index.php?action=view2&amp;thumbnail=1&amp;artist=' . rawurlencode($artist) . '&amp;filter=' . $filter . '&amp;order=artist';
 	} 
-
+	
+	if (count($nav['name']) == 1 )	echo '<span class="nav_home"></span>' . "\n";
+	else {
+	echo '<span class="nav_tree">' . "\n";
+	for ($i=0; $i < count($nav['name']); $i++) {
+		if ($i > 0)	echo '<span class="nav_seperation">></span>' . "\n";
+		if (empty($nav['url'][$i]) == false) echo '<a href="' . $nav['url'][$i] . '">' . html($nav['name'][$i]) . '</a>' . "\n";
+		else echo html($nav['name'][$i]) . "\n";
+	}
+	echo '</span>' . "\n";
+	}
 ?>
 <table cellspacing="0" cellpadding="0" class="border">
 <tr class="header">
 	<td class="space left"></td>
 	<td>Artist</td>
-	<td align="right">
-	<!--
-	<a href="<?php echo $thumbnail_url; ?>"><img src="<?php echo $cfg['img']; ?>small_header_thumbnail.png" alt="" class="small"></a>
-	-->
-	</td>	
 	<td align="right" class="right">
+	<?php 
+	$c = mysqli_num_rows($query); 
+	$a = ($c > 1) ? 'artists' : 'artist';
+	echo ('(' . $c . ' ' . $a . ' found)'); 
+	?> 
 	<!--
 	<a href="<?php echo $list_url; ?>"><img src="<?php echo $cfg['img']; ?>small_header_list.png" alt="" class="small"></a>
 	-->
@@ -328,9 +340,30 @@ function view1() {
 	$i = 0;
 	while ($album = mysqli_fetch_assoc($query)) {
 ?>
-<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+<tr class="artist_list">
 	<td></td>
-	<td colspan="2"><a href="index.php?action=view2&amp;artist=<?php echo rawurlencode($album['artist_alphabetic']); ?>"><?php echo html($album['artist_alphabetic']); ?></a></td>
+	<td>
+	<?php 
+	$artist = '';
+	$exploded = multiexplode($cfg['artist_separator'],$album['artist']);
+		$l = count($exploded);
+		if ($l > 1) {
+			for ($j=0; $j<$l; $j++) {
+				$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$j]) . '">' . html($exploded[$j]) . '</a>';
+				if ($j != $l - 1) $artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($album['artist']) . '&amp;order=year"><span class="artist_all">&</span></a>';
+			}
+			echo $artist;
+		}
+		else {
+			echo '<a href="index.php?action=view2&amp;artist=' . rawurlencode($album['artist']) . '&amp;order=year">' . html($album['artist']) . '</a>';
+		}
+	?>
+	
+	<!--
+	<a href="index.php?action=view2&amp;artist=<?php echo rawurlencode($album['artist']); ?>"><?php echo html($album['artist']); ?></a>
+	-->
+	
+	</td>
 	<td></td>
 </tr>
 <?php
@@ -368,7 +401,7 @@ function view2() {
 	$sort_artist			= 'asc';
 	$sort_album				= 'asc';
 	$sort_genre				= 'asc';
-	$sort_year 				= 'asc';
+	$sort_year 				= 'desc';
 	$sort_decade			= 'asc';
 	
 	$order_bitmap_artist	= '<span class="typcn"></span>';
@@ -437,12 +470,12 @@ function view2() {
 			$sort_genre = 'asc';
 		}
 		elseif ($order == 'year' && $sort == 'asc') {
-			$order_query = 'ORDER BY year, month, artist_alphabetic, album';
+			$order_query = 'ORDER BY album_add_time, year, month, artist_alphabetic, album';
 			$order_bitmap_year = '<span class="fa fa-sort-numeric-asc"></span>';
 			$sort_year = 'desc';
 		}
 		elseif ($order == 'year' && $sort == 'desc') {
-			$order_query = 'ORDER BY year DESC, month DESC, artist_alphabetic DESC, album DESC';
+			$order_query = 'ORDER BY album_add_time DESC, year, month DESC, artist_alphabetic DESC, album DESC';
 			$order_bitmap_year = '<span class="fa fa-sort-numeric-desc"></span>';
 			$sort_year = 'asc';
 		}
@@ -517,7 +550,7 @@ function view2() {
 		$nav['url'][]	= 'index.php';
 		if ($qsType) $nav['name'][] = $cfg['quick_search'][$qsType][0];
 		elseif ($tag) 	$nav['name'][]	= $tag;
-		else 	$nav['name'][]	= $artist;
+		else 	$nav['name'][]	= 'Artist: ' . $artist;
 		
 		
 		
@@ -730,7 +763,7 @@ function view2() {
 			<a <?php echo ($order_bitmap_artist == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=artist&amp;sort=<?php echo $sort_artist; ?>">&nbsp;Artist <?php echo $order_bitmap_artist; ?></a>
 			&nbsp;<a <?php echo ($order_bitmap_album == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=album&amp;sort=<?php echo $sort_album; ?>">Album <?php echo $order_bitmap_album; ?></a>
 			&nbsp;<a <?php echo ($order_bitmap_genre == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=genre&amp;sort=<?php echo $sort_genre; ?>">Genre <?php echo $order_bitmap_genre; ?></a>
-			&nbsp;<a <?php echo ($order_bitmap_year == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=year&amp;sort=<?php echo $sort_year; ?>">Year <?php echo $order_bitmap_year; ?></a>
+			&nbsp;<a <?php echo ($order_bitmap_year == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=year&amp;sort=<?php echo $sort_year; ?>">Add time <?php echo $order_bitmap_year; ?></a>
 			&nbsp;<a <?php echo ($order_bitmap_decade == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=decade&amp;sort=<?php echo $sort_decade; ?>">Decade <?php echo $order_bitmap_decade; ?></a>
 		<?php };?>
 		</td>
@@ -1528,6 +1561,7 @@ window.onload = function () {
 function view1all() {
 	global $cfg, $db;
 	authenticate('access_media');
+	require_once('include/header.inc.php');
 	
 	$artist	 	= get('artist');
 	$filter  	= get('filter');
@@ -1537,7 +1571,7 @@ function view1all() {
 		$filter = 'all';
 	}
 	
-	if ($filter == 'all')		$query = mysqli_query($db, 'SELECT artist FROM track WHERE 1 GROUP BY artist ORDER BY artist');
+	if ($filter == 'all')		$query = mysqli_query($db, 'SELECT DISTINCT artist FROM track ORDER BY artist');
 	elseif ($filter == 'smart')	$query = mysqli_query($db, 'SELECT artist FROM track WHERE artist LIKE "%' . mysqli_real_escape_like($artist) . '%" OR artist SOUNDS LIKE "' . mysqli_real_escape_like($artist) . '" GROUP BY artist ORDER BY artist');
 	else						message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]filter');
 	
@@ -1546,7 +1580,7 @@ function view1all() {
 	$nav['name'][]	= 'Library';
 	$nav['url'][]	= 'index.php';
 	$nav['name'][]	= $artist;
-	require_once('include/header.inc.php');
+	
 ?>
 <table cellspacing="0" cellpadding="0" class="border">
 <tr class="header">
@@ -1556,6 +1590,7 @@ function view1all() {
 </tr>
 
 <?php
+	//$query = mysqli_query($db, 'SELECT DISTINCT artist FROM track ORDER BY artist');
 	$i = 0;
 	while ($track = mysqli_fetch_assoc($query))	{ ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
@@ -1564,9 +1599,9 @@ function view1all() {
 	<td></td>
 </tr>
 <?php
-	}
+}
 echo '</table>' . "\n";
-	require_once('include/footer.inc.php');
+require_once('include/footer.inc.php');
 }
 
 

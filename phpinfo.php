@@ -37,6 +37,6 @@ $phpinfo = ob_get_contents();
 ob_end_clean();
 
 $phpinfo = preg_replace('#a:link \{.+?\}#', 'a:link, a:visited {color: #000099; text-decoration: none;}', $phpinfo);
-$phpinfo = preg_replace('#PHP Version#', '<a href="config.php">netjukebox ' . html(NJB_VERSION) . '</a> | PHP Version', $phpinfo);
+$phpinfo = preg_replace('#PHP Version#', '<a href="config.php">O!MPD ' . html(NJB_VERSION) . '</a> | PHP Version', $phpinfo);
 echo $phpinfo;
 ?>
