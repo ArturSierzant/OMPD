@@ -1,6 +1,5 @@
 /.settings
 /cache/*
-/tmp/*
 /stream/*
 .buildpath
 .project

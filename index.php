@@ -401,14 +401,16 @@ function view2() {
 	$sort_artist			= 'asc';
 	$sort_album				= 'asc';
 	$sort_genre				= 'asc';
-	$sort_year 				= 'desc';
+	$sort_year 				= 'asc';
 	$sort_decade			= 'asc';
+	$sort_addtime 			= 'desc';
 	
 	$order_bitmap_artist	= '<span class="typcn"></span>';
 	$order_bitmap_album		= '<span class="typcn"></span>';
 	$order_bitmap_genre		= '<span class="typcn"></span>';
 	$order_bitmap_year		= '<span class="typcn"></span>';
 	$order_bitmap_decade	= '<span class="typcn"></span>';
+	$order_bitmap_addtime	= '<span class="typcn"></span>';
 	
 	$yearAct				= 0;
 	$yearPrev				= 1;
@@ -470,12 +472,12 @@ function view2() {
 			$sort_genre = 'asc';
 		}
 		elseif ($order == 'year' && $sort == 'asc') {
-			$order_query = 'ORDER BY album_add_time, year, month, artist_alphabetic, album';
+			$order_query = 'ORDER BY year, month, artist_alphabetic, album';
 			$order_bitmap_year = '<span class="fa fa-sort-numeric-asc"></span>';
 			$sort_year = 'desc';
 		}
 		elseif ($order == 'year' && $sort == 'desc') {
-			$order_query = 'ORDER BY album_add_time DESC, year, month DESC, artist_alphabetic DESC, album DESC';
+			$order_query = 'ORDER BY year DESC, month DESC, artist_alphabetic DESC, album DESC';
 			$order_bitmap_year = '<span class="fa fa-sort-numeric-desc"></span>';
 			$sort_year = 'asc';
 		}
@@ -488,6 +490,16 @@ function view2() {
 			$order_query = 'ORDER BY year DESC, month DESC, artist_alphabetic DESC, album DESC';
 			$order_bitmap_decade = '<span class="fa fa-sort-numeric-desc"></span>';
 			$sort_decade = 'asc';
+		}
+		elseif ($order == 'addtime' && $sort == 'asc') {
+			$order_query = 'ORDER BY album_add_time, artist_alphabetic, album';
+			$order_bitmap_addtime = '<span class="fa fa-sort-numeric-asc"></span>';
+			$sort_addtime = 'desc';
+		}
+		elseif ($order == 'addtime' && $sort == 'desc') {
+			$order_query = 'ORDER BY album_add_time DESC, artist_alphabetic DESC, album DESC';
+			$order_bitmap_addtime = '<span class="fa fa-sort-numeric-desc"></span>';
+			$sort_addtime = 'asc';
 		}
 		else
 			message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]order');
@@ -626,6 +638,16 @@ function view2() {
 			$order_bitmap_year = '<span class="fa fa-sort-numeric-desc"></span>';
 			$sort_year = 'asc';
 		}
+		elseif ($order == 'addtime' && $sort == 'asc') {
+			$order_query = 'ORDER BY album_add_time, artist_alphabetic, album';
+			$order_bitmap_addtime = '<span class="fa fa-sort-numeric-asc"></span>';
+			$sort_addtime = 'desc';
+		}
+		elseif ($order == 'addtime' && $sort == 'desc') {
+			$order_query = 'ORDER BY album_add_time DESC, artist_alphabetic DESC, album DESC';
+			$order_bitmap_addtime = '<span class="fa fa-sort-numeric-desc"></span>';
+			$sort_addtime = 'asc';
+		}
 		elseif ($order == 'decade' && $sort == 'asc') {
 			$order_query = 'ORDER BY year, month, artist_alphabetic, album';
 			$order_bitmap_decade = '<span class="fa fa-sort-numeric-asc"></span>';
@@ -763,12 +785,13 @@ function view2() {
 			<a <?php echo ($order_bitmap_artist == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=artist&amp;sort=<?php echo $sort_artist; ?>">&nbsp;Artist <?php echo $order_bitmap_artist; ?></a>
 			&nbsp;<a <?php echo ($order_bitmap_album == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=album&amp;sort=<?php echo $sort_album; ?>">Album <?php echo $order_bitmap_album; ?></a>
 			&nbsp;<a <?php echo ($order_bitmap_genre == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=genre&amp;sort=<?php echo $sort_genre; ?>">Genre <?php echo $order_bitmap_genre; ?></a>
-			&nbsp;<a <?php echo ($order_bitmap_year == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=year&amp;sort=<?php echo $sort_year; ?>">Add time <?php echo $order_bitmap_year; ?></a>
+			&nbsp;<a <?php echo ($order_bitmap_year == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=year&amp;sort=<?php echo $sort_year; ?>">Year <?php echo $order_bitmap_year; ?></a>
 			&nbsp;<a <?php echo ($order_bitmap_decade == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=decade&amp;sort=<?php echo $sort_decade; ?>">Decade <?php echo $order_bitmap_decade; ?></a>
+			&nbsp;<a <?php echo ($order_bitmap_addtime == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=addtime&amp;sort=<?php echo $sort_addtime; ?>">Add time <?php echo $order_bitmap_addtime; ?></a>
 		<?php };?>
 		</td>
 		<td align="right" class="right">
-			(<?php echo ($album_count > 1) ? $album_count . ' albums' :  $album_count . ' album' ?> found)&nbsp;
+			(<?php echo ($album_count > 1) ? $album_count . ' albums' :  $album_count . ' album' ?>)&nbsp;
 		</td>
 	</tr>
 	</table>
