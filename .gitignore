@@ -1,5 +1,7 @@
 /.settings
 /cache/*
+/include/config.inc.php
+/tmp/*
 /stream/*
 .buildpath
 .project
