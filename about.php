@@ -164,6 +164,7 @@ function about() {
 	<td>
 	<ul style="padding-left: 1em;">
 	<li> added artist list in library</li>
+	<li> added sort by 'Add time'</li>
 	
 	</ul>
 	<br>
