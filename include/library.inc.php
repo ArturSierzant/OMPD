@@ -173,6 +173,41 @@ function trackSubMenu($i, $track) {
 </div>
 <?php
 }
+	
+
+	
+//  +---------------------------------------------------------------------------+
+//  | Draws sub menu for file                                                   |
+//  +---------------------------------------------------------------------------+
+
+function fileSubMenu($i, $filepath, $mime) {
+	global $cfg, $db;
+?>
+<div class="menuSub" id="menu-sub-track<?php echo $i ?>" onclick='//offMenuSub(<?php echo $i ?>);'> 
+	
+	<div><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;filepath=' . $filepath . '&amp;track_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'Play file\');" onMouseOut="return nd();"><i id = "insertPlay_' . $i . '" class="fa fa-play-circle fa-fw icon-small"></i>Insert after currently playing track and play</a>'; ?>
+	</div>
+	
+	<div>
+	<?php if ($cfg['access_add'])  echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;filepath=' . $filepath . '&amp;track_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'Insert file\');" onMouseOut="return nd();"><i id="insert_' . $i . '" class="fa fa-indent fa-fw icon-small"></i>Insert after currently playing track</a>';?>
+	</div>
+	
+	<div>
+	<?php if ($cfg['access_add'])  echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;filepath=' . $filepath . '&amp;track_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'Add file\');" onMouseOut="return nd();"><i id="add_' . $i . '" class="fa fa-plus-circle fa-fw icon-small"></i>Add file to playlist</a>';?>
+	</div>
+	
+	<div><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;filepath=' . $filepath . '&amp;track_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'Play file\');" onMouseOut="return nd();"><i id="play_' . $i . '" class="fa fa-play-circle-o fa-fw icon-small"></i>Remove all from playlist and play file</a>'; ?>
+	</div>
+	
+	<div><?php if ($cfg['access_download']) echo '<a href="download.php?action=downloadFile&amp;filepath=' . $cfg['media_dir'] . $filepath .'&amp;mime=' . $mime . '"><i class="fa fa-download fa-fw icon-small"></i>Download file</a>'; ?>
+	</div>
+	
+	<div><?php if ($cfg['access_play']) echo '<a href="getid3/demos/demo.browse.php?filename='. $cfg['media_dir'] . $filepath . '" onClick="showSpinner();"><i class="fa fa-info-circle fa-fw icon-small"></i>File details</a>'; ?>
+	</div>
+	
+</div>
+<?php
+}
 
 
 //  +---------------------------------------------------------------------------+
@@ -278,16 +313,16 @@ function onmouseoverDownloadAlbum($album_id) {
 	if ($exact)	$list = formattedSize($filesize);
 	else		$list = html_entity_decode('&plusmn; ', null, NJB_DEFAULT_CHARSET) . formattedSize($filesize);
 	
-	$list .= '<div class="ol_line"></div>';
+	$list .= '<div class=\'ol_line\'></div>';
 	if ($transcode && count($extensions) == 1)		$list .= $cfg['encode_name'][$cfg['download_id']] . ' (' . $source . ' source)';
 	elseif ($transcode && count($extensions) > 4)	$list .= $cfg['encode_name'][$cfg['download_id']] . ' (mixed source)';
 	elseif ($transcode)								$list .= $cfg['encode_name'][$cfg['download_id']] . '<br>(' . $source . ' source)';
 	else 											$list .= $source;
-	$list .= '<div class="ol_line"></div>';
+	$list .= '<div class=\'ol_line\'></div>';
 	
-	if ($transcode && $exact)		$list .= 'Transcoded:<img src="' . $cfg['img'] . 'tiny_check.png" alt="" class="tiny"><br>';
-	elseif ($transcode && !$exact)	$list .= 'Transcoded:<img src="' . $cfg['img'] . 'tiny_uncheck.png" alt="" class="tiny"><br>';
-	else							$list .= 'Source:<img src="' . $cfg['img'] . 'tiny_check.png" alt="" class="tiny"><br>';
+	if ($transcode && $exact)		$list .= 'Transcoded:<img src=\'' . $cfg['img'] . 'tiny_check.png\' class=\'tiny\'><br>';
+	elseif ($transcode && !$exact)	$list .= 'Transcoded:<img src=\'' . $cfg['img'] . 'tiny_uncheck.png\' class=\'tiny\'><br>';
+	else							$list .= 'Source:<img src=\'' . $cfg['img'] . 'tiny_check.png\' class=\'tiny\'><br>';
 	
 	return 'onMouseOver="return overlib(\'' . addslashes(html($list)) . '\', CAPTION, \'Download album:\', WIDTH, 200);" onMouseOut="return nd();"';
 }
@@ -322,24 +357,24 @@ function onmouseoverDownloadTrack($track_id) {
 			AND  profile	= "' . mysqli_real_escape_string($db, $cfg['download_id']) . '"');
 		if ($cache = mysqli_fetch_assoc($query)) {
 			$list .= formattedSize($cache['filesize']);
-			$list .= '<div class="ol_line"></div>';
+			$list .= '<div class=\'ol_line\'></div>';
 			$list .= $cfg['encode_name'][$cfg['download_id']];
 			$list .= ' (' . $track['extension'] . ' source)';
-			$list .= '<div class="ol_line"></div>';
-			$list .= 'Transcoded:<img src="' . $cfg['img'] . 'tiny_check.png" alt="" class="tiny">';
+			$list .= '<div class=\'ol_line\'></div>';
+			$list .= 'Transcoded:<img src=\'' . $cfg['img'] . 'tiny_check.png\' class=\'tiny\'>';
 		}
 		else {
 			$list .= html_entity_decode('&plusmn; ', null, NJB_DEFAULT_CHARSET) . formattedSize($cfg['encode_bitrate'][$cfg['download_id']] * $track['miliseconds'] / 8 / 1000);
-			$list .= '<div class="ol_line"></div>';
+			$list .= '<div class=\'ol_line\'></div>';
 			$list .= $cfg['encode_name'][$cfg['download_id']];
 			$list .= ' (' . $track['extension'] . ' source)';
-			$list .= '<div class="ol_line"></div>';
-			$list .= 'Transcoded:<img src="' . $cfg['img'] . 'tiny_uncheck.png" alt="" class="tiny">';
+			$list .= '<div class=\'ol_line\'></div>';
+			$list .= 'Transcoded:<img src=\'' . $cfg['img'] . 'tiny_uncheck.png\' class=\'tiny\'>';
 		}
 	}
 	else {
 		$list .= formattedSize($track['filesize']);
-		$list .= '<div class="ol_line"></div>';
+		$list .= '<div class=\'ol_line\'></div>';
 	}
 	
 	if ($track['video_codec'] && $transcode == false) {
@@ -350,20 +385,20 @@ function onmouseoverDownloadTrack($track_id) {
 	}
 	
 	if ($track['audio_dataformat'] && $transcode == false) {
-		if ($track['video_codec']) $list .= '<div class="ol_line"></div>';
+		if ($track['video_codec']) $list .= '<div class=ol_line></div>';
 		$list .= $track['audio_dataformat'] . '<br>';
 		$list .= $track['audio_encoder'] . '<br>';
 		$list .= $track['audio_profile'];
 		if		($track['audio_channels'] == 1)	$channels = 'Mono';
 		elseif	($track['audio_channels'] == 2)	$channels = 'Stereo';
 		else									$channels = $track['audio_channels'] . ' Channels';
-		$list .= '<div class="ol_line"></div>';
+		$list .= '<div class=\'ol_line\'></div>';
 		$list .= $track['audio_bits_per_sample'] . ' bit | ' . $channels . ' | ' . formattedFrequency($track['audio_sample_rate']);
 	}
 	
 	if ($transcode == false) {
-		$list .= '<div class="ol_line"></div>';
-		$list .= 'Source:<img src="' . $cfg['img'] . 'tiny_check.png" alt="" class="tiny">';
+		$list .= '<div class=\'ol_line\'></div>';
+		$list .= 'Source:<img src=\'' . $cfg['img'] . 'tiny_check.png\' class=\'tiny\'>';
 	}
 	
 	if (!$track['video_codec'] && !$track['audio_dataformat'] && $transcode == false)

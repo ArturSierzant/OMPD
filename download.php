@@ -32,9 +32,12 @@ require_once('include/cache.inc.php');
 $action		= get('action');
 $track_id	= get('track_id');
 $album_id	= get('album_id');
+$mime	= get('mime');
+$filepath	= get('filepath');
 
 if		($action == 'downloadAlbum')		downloadAlbum($album_id);
 elseif	($action == 'downloadTrack')		downloadTrack($track_id);
+elseif	($action == 'downloadFile')		downloadFile($filepath, $mime);
 elseif	($action == 'batchValidateCache')	batchValidateCache();
 elseif	($action == 'batchTranscodeInit')	batchTranscodeInit();
 elseif	($action == 'batchTranscode')		batchTranscode();
@@ -407,6 +410,27 @@ function downloadTrack($track_id) {
 	require('include/footer.inc.php');
 }
 
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Download file                                                          |
+//  +------------------------------------------------------------------------+
+function downloadFile($filepath, $mime) { 
+	global $cfg, $db;
+	authenticate('access_download', true);
+	
+	//$download_id = (int) get('download_id');
+		$filepath = str_replace('ompd_ampersand_ompd','&',$filepath);
+		//$file = $cfg['media_dir'] . $track['relative_file'];
+		
+		$pathinfo	= pathinfo($filepath);
+		$filename	= $pathinfo['basename'];
+		$filename	= downloadFilename($filename);
+		
+		streamFile($filepath, $mime, 'attachment', $filename);
+		return true;
+	}
 
 
 

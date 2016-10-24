@@ -555,10 +555,11 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 <?php
 	
 	$header['menu'] = "\t" . '<a href="index.php?action=viewYear">year</a>' . $header['seperation'];
-	$header['menu'] .= "\t" . '<a href="index.php?action=viewNew&page=1">new</a>'. $header['seperation'];
+	//$header['menu'] .= "\t" . '<a href="index.php?action=viewNew&page=1">new</a>'. $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="index.php?action=viewPopular&amp;period=overall">popular</a>' . $header['seperation'];
 	//$header['menu'] .= "\t" . $header['seperation'];
-	$header['menu'] .= '<a href="index.php?action=viewRandomAlbum&amp;order=artist">random</a>';
+	$header['menu'] .= '<a href="index.php?action=viewRandomAlbum&amp;order=artist">random</a>' . $header['seperation'];
+	$header['menu'] .= '<a href="browser.php">files</a>';
 	echo $header['menu'];
 ?>
 

@@ -260,14 +260,15 @@ function addSelect() {
 	require_once('include/play.inc.php');
 	$album_id = get('album_id');
 	$track_id = get('track_id');
-	$favorite_id	= get('favorite_id');
+	//$file_id = get('file_id');
+	$favorite_id = get('favorite_id');
 	$random	= get('random');
 	$data = array();
 	$addResult = 'add_error';
 	
 	if ($cfg['player_type'] == NJB_HTTPQ) {
 		if ($cfg['add_autoplay'] && httpq('getlistlength') == 0)	addTracks('play');
-		else														addTracks('add');
+		else addTracks('add');
 	}
 	elseif ($cfg['player_type'] == NJB_VLC) {
 		addTracks('add');
@@ -285,6 +286,7 @@ function addSelect() {
 	else
 		$data['album_id'] = $album_id;
 	$data['track_id'] = $track_id;
+	//$data['file_id'] = $file_id;
 	$data['favorite_id'] = $favorite_id;
 	$data['random'] = $random;
 	ob_start();
@@ -388,9 +390,13 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert) {
 	
 	$track_id		= get('track_id');
 	$album_id		= get('album_id');
+	$filepath		= get('filepath');
+	$dirpath		= get('dirpath');
 	$favorite_id	= get('favorite_id');
 	$random			= get('random');
 	$insertType		= get('insertType');
+	
+
 	
 	if ($track_id) {
 		$query = mysqli_query($db,'SELECT relative_file FROM track WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
@@ -435,6 +441,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert) {
 			ORDER BY RAND()
 			LIMIT 30');
 	}
+	elseif ($filepath || $dirpath) {}
 	else {
 		message(__FILE__, __LINE__, 'error', '[b]Unsupported query string[/b][br]' . $_SERVER['QUERY_STRING']);
 	}
@@ -455,34 +462,52 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert) {
 	
 	$n = $index;
 	$first = true;
-	while ($track = mysqli_fetch_assoc($query)) {
-		if ($cfg['player_type'] == NJB_HTTPQ) {
-			$file = $cfg['media_share'] . $track['relative_file'];
-			$file = str_replace('/', '\\', $file);
-			httpq('playfile', 'file=' . rawurlencode($file));
-			if ($first && $mode == 'play') {
-				httpq('setplaylistpos', 'index=' . $index);
-				httpq('play');
+	if ($filepath){
+		//$file = rawurldecode($filepath);
+		//$file = $filepath;
+		$filepath = str_replace('ompd_ampersand_ompd','&',$filepath);
+		mpd('addid "' . $filepath . '" ' . $insPos);
+		if ($playAfterInsert) {mpd('play ' . $insPos);}
+		if ($first && $mode == 'play') mpd('play ' . $index);
+	}
+	elseif ($dirpath){
+		//$file = rawurldecode($filepath);
+		//$file = $filepath;
+		$dirpath = str_replace('ompd_ampersand_ompd','&',$dirpath);
+		mpd('add "' . $dirpath . '"');
+		//if ($playAfterInsert) {mpd('play ' . $insPos);}
+		//if ($first && $mode == 'play') mpd('play ' . $index);
+	}
+	else {
+		while ($track = mysqli_fetch_assoc($query)) {
+			if ($cfg['player_type'] == NJB_HTTPQ) {
+				$file = $cfg['media_share'] . $track['relative_file'];
+				$file = str_replace('/', '\\', $file);
+				httpq('playfile', 'file=' . rawurlencode($file));
+				if ($first && $mode == 'play') {
+					httpq('setplaylistpos', 'index=' . $index);
+					httpq('play');
+				}
 			}
+			elseif ($cfg['player_type'] == NJB_VLC) {
+				$file = $cfg['media_share'] . $track['relative_file'];
+				$file = addslashes($file);
+				$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
+				vlc('in_enqueue&input=' . rawurlencode($file));
+				if ($first && $mode == 'play')
+					vlc('pl_play');
+			}
+			elseif ($cfg['player_type'] == NJB_MPD) {
+				$file = $track['relative_file'];
+				$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
+				mpd('addid "' . $file . '" ' . $insPos);
+				if ($playAfterInsert) {mpd('play ' . $insPos);}
+				if ($first && $mode == 'play')
+					mpd('play ' . $index);
+			}
+			$n++;
+			$first = false;
 		}
-		elseif ($cfg['player_type'] == NJB_VLC) {
-			$file = $cfg['media_share'] . $track['relative_file'];
-			$file = addslashes($file);
-			$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
-			vlc('in_enqueue&input=' . rawurlencode($file));
-			if ($first && $mode == 'play')
-				vlc('pl_play');
-		}
-		elseif ($cfg['player_type'] == NJB_MPD) {
-			$file = $track['relative_file'];
-			$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
-			mpd('addid "' . $file . '" ' . $insPos);
-			if ($playAfterInsert) {mpd('play ' . $insPos);}
-			if ($first && $mode == 'play')
-				mpd('play ' . $index);
-		}
-		$n++;
-		$first = false;
 	}
 	
 	if ($cfg['play_queue'] && $mode == 'play' && $n > $cfg['play_queue_limit']) {		
@@ -1185,7 +1210,12 @@ function playlistStatus() {
 		$data['volume']			= (int) $status['volume'];
 		$data['repeat']			= (int) $status['repeat'];
 		$data['shuffle']		= (int) $status['random'];
-		$data['name']			= $currentsong['Name'];
+		if ($currentsong['Name']) {
+			$data['name'] = $currentsong['Name'];
+		}
+		else {
+			$data['name'] = '';
+		}
 		if (isset($currentsong['Title'])) 
 			$data['title']	= $currentsong['Title'];
 		else

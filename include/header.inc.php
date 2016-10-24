@@ -113,24 +113,15 @@ $header['body'] = 'onload="javascript: if (window.initialize) initialize(); cook
 //  +------------------------------------------------------------------------+
 $header['seperation'] = ' <span class="seperation">|</span> ' . "\n";
 if ($cfg['menu'] == 'Library') {
-	/* $header['menu'] = "\t" . '<a href="index.php?action=view2&amp;filter=all&amp;order=artist">all</a>' . $header['seperation'];
-	$header['menu'] .= "\t" . '<a href="index.php?action=view2&amp;filter=symbol&amp;artist=%23&amp;order=artist">#</a>' . $header['seperation'];
-	for ($i = 'a'; $i != 'aa'; $i++)
-		//$header['menu'] .= "\t" . '<a href="index.php?action=view2&amp;filter=start&amp;artist=' . $i . '">' . $i . '</a>' . $header['seperation'];
-		  $header['menu'] .= "\t" . '<a href="index.php?action=view2&amp;filter=start&amp;artist='. $i .'&amp;order=artist">' . $i . '</a>' . $header['seperation'];
-	$header['menu'] .= "\t"  . '<a href="index.php?action=view2&amp;artist=Various%20Artists&amp;filter=exact&amp;order=artist">VA</a>' . $header['seperation'];
-	$header['menu'] .= "\t" . '<a href="index.php?action=viewYear">year</a>' . $header['seperation'];
-	$header['menu'] .= "\t" . '<a href="index.php?action=viewNew">new</a>'. $header['seperation'];
-	$header['menu'] .= "\t" . '<a href="index.php?action=viewPopular&amp;period=overall&amp;order=artist">popular</a>' . $header['seperation'];
-	$header['menu'] .= "\t"  . '<a href="index.php?action=viewRandomAlbum&amp;order=artist">random</a>'; */
+	/* 
+	Defined in template.header.php
+	*/
 	}
 
 elseif ($cfg['menu'] == 'playlist')	{
-	/* $header['menu'] = "\t" . '<a href="javascript:ajaxRequest(\'play.php?action=deletePlayed&amp;menu=playlist\');">delete played</a>' . $header['seperation'];
-	$header['menu'] .= "\t" . '<a href="javascript:ajaxRequest(\'play.php?action=crop&amp;menu=playlist\');">crop playlist</a>' . $header['seperation'];
-	$header['menu'] .= "\t" . '<a class="showPL">show playlist</a>' . $header['seperation'];
-	$header['menu'] .= "\t" . '<a href="javascript:ajaxRequest(\'play.php?action=loopGain&amp;menu=playlist\',evaluateGain);" id="gain"><span id="gain_text" class="gain">gain off</span></a>'  . $header['seperation'];
-	$header['menu'] .= "\t" . '<a href="javascript:ajaxRequest(\'play.php?action=loopGain&amp;menu=playlist\',evaluateGain);" id="gain"><span id="savePlaylist" class="gain">Save</span></a>'; */
+	/* 
+	Defined in template.header.php
+	*/
 }
 
 elseif ($cfg['menu'] == 'favorite')	{

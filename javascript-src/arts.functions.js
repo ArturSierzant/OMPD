@@ -116,6 +116,7 @@ function evaluatePlayTo(data) {
 function evaluateAdd(data) {
 	var timeOut = 2000;
 	if (data.favorite_id) {data.album_id = data.favorite_id};
+	if (data.file_id) {data.album_id = data.file_id};
 	if (data.random) {data.album_id = 'random'};
 	if (data.album_id) { 
 		if (data.addResult == 'add_OK') {

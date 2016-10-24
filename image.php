@@ -41,9 +41,12 @@ $track_id 	= get('track_id');
 $quality	= get('quality') == 'hq' ? 'hq' : 'lq';
 //$quality	= 'hq';
 $image	 	= get('image');
+$image_path	 	= get('image_path');
+$mime	 	= get('mime');
 
 if		(isset($image_id))		image($image_id, $quality, $track_id);
 elseif	(isset($image))			resampleImage($image);
+elseif	(isset($image_path))			streamImage($image_path, $mime);
 elseif	($cfg['image_share'])	shareImage();
 exit();
 
@@ -215,6 +218,26 @@ function resampleImage($image, $size = NJB_IMAGE_SIZE) {
 
 
 
+//  +------------------------------------------------------------------------+
+//  | Stream image                                                           |
+//  +------------------------------------------------------------------------+
+function streamImage($image_path, $mime) {
+	global $cfg, $db;
+	if (file_exists($image_path)) {//this can also be a png or jpg
+		$name = $image_path;
+		$fp = fopen($name, 'rb');
+
+		// send the right headers
+		header("Content-Type: " . $mime);
+		header("Content-Length: " . filesize($name));
+
+		// dump the picture and stop the script
+		fpassthru($fp);
+		exit;
+	}
+}
+	
+	
 //  +------------------------------------------------------------------------+
 //  | Share image                                                            |
 //  +------------------------------------------------------------------------+

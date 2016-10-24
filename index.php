@@ -1069,7 +1069,7 @@ function view3() {
 	$query = mysqli_query($db, 'SELECT track.audio_bits_per_sample, track.audio_sample_rate, track.audio_profile, track.audio_dataformat, track.comment, track.relative_file FROM track left join album on album.album_id = track.album_id where album.album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"
 	LIMIT 1');
 	$album_info = $rel_file = mysqli_fetch_assoc($query);
-	 
+	
 	$query = mysqli_query($db, 'SELECT COUNT(c.album_id) as counter, max(c.time) as time FROM (SELECT time, album_id FROM counter WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" ORDER BY time DESC) c ORDER BY c.time');
 	$played = mysqli_fetch_assoc($query);
 	$rows_played = mysqli_num_rows($query);
@@ -1135,6 +1135,10 @@ function view3() {
 	}
 	if ($cfg['access_download'] && $cfg['album_download'])
 		$basic[] = '<a href="download.php?action=downloadAlbum&amp;album_id=' . $album_id . '&amp;download_id=' . $cfg['download_id'] . '" ' . onmouseoverDownloadAlbum($album_id) . '><i class="fa fa-fw  fa-download  icon-small"></i>Download album</a>';
+	if ($cfg['access_play']){
+		$dir_path = rawurlencode(dirname($cfg['media_dir'] . $rel_file['relative_file']));
+		$basic[] = '<a href="browser.php?dir=' . $dir_path . '"><i class="fa fa-fw  fa-folder-open  icon-small"></i>Browse...</a>';
+	}
 	if ($cfg['access_admin'] && $cfg['album_share_stream'])
 		$basic[] = '<a href="stream.php?action=shareAlbum&amp;album_id='. $album_id . '&amp;sign=' . $cfg['sign'] . '"><i class="fa fa-fw  fa-share-square-o  icon-small"></i>Share stream</a>';
 	if ($cfg['access_admin'] && $cfg['album_share_download'])

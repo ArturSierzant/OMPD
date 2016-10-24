@@ -555,10 +555,11 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 <?php
 	
 	$header['menu'] = "\t" . '<a href="index.php?action=viewYear">year</a>' . $header['seperation'];
-	$header['menu'] .= "\t" . '<a href="index.php?action=viewNew&page=1">new</a>'. $header['seperation'];
+	//$header['menu'] .= "\t" . '<a href="index.php?action=viewNew&page=1">new</a>'. $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="index.php?action=viewPopular&amp;period=overall">popular</a>' . $header['seperation'];
 	//$header['menu'] .= "\t" . $header['seperation'];
-	$header['menu'] .= '<a href="index.php?action=viewRandomAlbum&amp;order=artist">random</a>';
+	$header['menu'] .= '<a href="index.php?action=viewRandomAlbum&amp;order=artist">random</a>' . $header['seperation'];
+	$header['menu'] .= '<a href="browser.php">files</a>';
 	echo $header['menu'];
 ?>
 
@@ -566,9 +567,27 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 
 
 
-<div id="menuSubMiddleMediaAlpha">
+<div id="menuSubMiddleMediaAlpha_old">
 	<?php
 	$header['menu'] = '<a href="index.php?action=view2&amp;filter=all&amp;order=artist"><span>all</span></a>';
+	//ArtS
+	$header['menu'] .= "\t" . '<a href="index.php?action=view2&amp;filter=symbol&amp;artist=%23&amp;order=artist"><span>#</span></a>';
+	for ($i = 'a'; $i != 'aa'; $i++)
+		  $header['menu'] .= "\t" . '<a href="index.php?action=view2&amp;filter=start&amp;artist='. $i .'&amp;order=artist"><span>' . $i . '</span></a>';
+	$header['menu'] .= "\t"  . '<a href="index.php?action=view2&amp;artist=Various%20Artists&amp;filter=exact&amp;order=artist"><span>VA</span></a>';
+	echo $header['menu'];
+	?>
+</div>
+
+<div id="menuSubMiddleMediaAlpha">
+	<?php
+	$header['menu'] = 'Artist<br><a href="index.php?action=view1&amp;filter=all&amp;order=artist"><span>all</span></a>';
+	//ArtS
+	$header['menu'] .= "\t" . '<a href="index.php?action=view1&amp;filter=symbol&amp;artist=&amp;order=artist"><span>#</span></a>';
+	for ($i = 'a'; $i != 'aa'; $i++)
+		  $header['menu'] .= "\t" . '<a href="index.php?action=view1&amp;filter=start&amp;artist='. $i .'&amp;order=artist"><span>' . $i . '</span></a>';
+	
+	$header['menu'] .= '<br>Album artist<br><a href="index.php?action=view2&amp;filter=all&amp;order=artist"><span>all</span></a>';
 	//ArtS
 	$header['menu'] .= "\t" . '<a href="index.php?action=view2&amp;filter=symbol&amp;artist=%23&amp;order=artist"><span>#</span></a>';
 	for ($i = 'a'; $i != 'aa'; $i++)
