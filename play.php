@@ -1210,7 +1210,7 @@ function playlistStatus() {
 		$data['volume']			= (int) $status['volume'];
 		$data['repeat']			= (int) $status['repeat'];
 		$data['shuffle']		= (int) $status['random'];
-		if ($currentsong['Name']) {
+		if (isset($currentsong['Name'])) {
 			$data['name'] = $currentsong['Name'];
 		}
 		else {
