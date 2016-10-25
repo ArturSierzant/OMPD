@@ -1,7 +1,7 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
-//  | http://www.ompd.pl           		                                     |
+//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                           |
+//  | http://www.ompd.pl           		                                       |
 //  |                                                                        |
 //  |                                                                        |
 //  | This program is free software: you can redistribute it and/or modify   |
@@ -26,7 +26,7 @@ require_once('include/play.inc.php');
 if ($cfg['player_type'] == NJB_MPD) {
 	$data = array();
 	
-	$query1=mysqli_query($db,'SELECT player.player_name as pl, player_host, player_port FROM player, session WHERE (sid = BINARY "' . cookie('netjukebox_sid') . '") and player.player_id=session.player_id');
+	$query1=mysqli_query($db,'SELECT player.player_name as pl, player_host, player_port, player_pass FROM player, session WHERE (sid = BINARY "' . cookie('netjukebox_sid') . '") and player.player_id=session.player_id');
 	$session1 = mysqli_fetch_assoc($query1);
 	$data['player'] = $session1['pl'];
 	//$data['host'] = $session1['player_host'];

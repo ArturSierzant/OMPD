@@ -194,7 +194,17 @@ function addClick(){
 };
 
 $(document).ready(function () {
+	<?php 
+	// to prevent recursive call: issue#5
+	if (NJB_SCRIPT != 'message.php') { 
+	?>
+	
 	ajaxRequest('ajax-evaluate-status.php', evaluateVolume);
+	
+	<?php 
+	}; 
+	?>
+	
 	setMaxWidth();
 	$tileSizeArr = calcTileSize();
 	<?php

@@ -2235,6 +2235,11 @@ function viewNewStartPage() {
 	$nav['name'][]	= 'New';
 	
 	require_once('include/header.inc.php');
+	
+	$base		= (cookie('netjukebox_width') - 20) / ($base_size + 10);
+	$colombs	= floor($base);
+	$aval_width = (cookie('netjukebox_width') - 20 - $scroll_bar_correction) - ($colombs - 1) * $spaces;
+	$size = floor($aval_width / $colombs);
 
 	$i			= 0;
 	$query = mysqli_query($db, 'SELECT SUM(discs) AS discs FROM album');
