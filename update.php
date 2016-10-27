@@ -1895,12 +1895,28 @@ function imageUpload($flag_flow) {
 //  | Resample image                                                         |
 //  +------------------------------------------------------------------------+
 Function resampleImage($image, $size = NJB_IMAGE_SIZE) {
-	global $logFile;
+	global $logFile, $image, $flag, $image_front;
 	$extension = strtolower(substr(strrchr($image, '.'), 1));
-	
+	/* 
 	if		($extension == 'jpg')	$src_image = @imageCreateFromJpeg($image)	or message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]' . $image);
 	elseif	($extension == 'png')	$src_image = @imageCreateFromPng($image)	or message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]' . $image);
-	else																		message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]Unsupported extension.');
+	 */
+	if ($extension == 'jpg') {
+		$src_image = @imageCreateFromJpeg($image);
+	}
+	elseif ($extension == 'png') {
+		$src_image = @imageCreateFromPng($image);	
+	}	
+	else {
+		message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]Unsupported extension.');
+	}
+	
+	if ($src_image == false) {
+		logImageError();
+		$image = NJB_HOME_DIR . 'image/no_image.png';
+		$data = @file_get_contents($image);
+		return $data;
+	}
 	
 	if ($extension == 'jpg' && imageSX($src_image) == $size && imageSY($src_image) == $size) {
 		$data = @file_get_contents($image) or message(__FILE__, __LINE__, 'error', '[b]Failed to open file:[/b][br]' . $image);

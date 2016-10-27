@@ -1,8 +1,6 @@
 /.settings
-/cache/*
 /include/config.inc.php
 /tmp/*
-/stream/*
 .buildpath
 .project
 _notepad++_edit_session
