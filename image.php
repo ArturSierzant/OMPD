@@ -70,6 +70,9 @@ function image($image_id, $quality, $track_id) {
 	
 	$bitmap = mysqli_fetch_assoc($query) or imageError();
 	
+	$path_parts = pathinfo($bitmap['image_front']);
+	$file_ext = $path_parts['extension'];
+	
 	//get embedded picture for misc tracks
 	if ((!empty($track_id)) && ((strpos(strtolower($bitmap['relative_file']), strtolower($cfg['misc_tracks_folder'])) !== false) || (strpos(strtolower($bitmap['relative_file']), strtolower($cfg['misc_tracks_misc_artists_folder'])) !== false))) {
 		// Initialize getID3
@@ -85,7 +88,8 @@ function image($image_id, $quality, $track_id) {
 			($getID3->info['comments']['picture'][0]['image_mime'] == 'image/jpeg' || $getID3->info['comments']['picture'][0]['image_mime'] == 'image/png')) {
 				$redImg = $getID3->info['comments']['picture'][0]['data'];
 				header('Cache-Control: max-age=31536000');
-				streamData($redImg, 'image/jpeg', false, false, '"never_expire"');	
+				//streamData($redImg, 'image/jpeg', false, false, '"never_expire"');	
+				streamData($redImg, $getID3->info['comments']['picture'][0]['image_mime'], false, false, '"never_expire"');	
 		}
 		else {
 			/* $image = imagecreatefromjpeg(NJB_HOME_DIR . 'image/misc_image.jpg');
@@ -105,10 +109,20 @@ function image($image_id, $quality, $track_id) {
 		if (strpos($bitmap['image_front'],"misc_image.jpg") === false){ 
 			$path2file = $cfg['media_dir'] . $bitmap['image_front'];
 			if (is_file($path2file)) {
-				$image = imagecreatefromjpeg($path2file);
-				header("Content-type: image/jpeg");
-				imagejpeg($image);
-				imagedestroy($image);
+				if ($file_ext == 'jpg') {
+					$image = imagecreatefromjpeg($path2file);
+					header("Content-type: image/jpeg");
+					imagejpeg($image);
+					imagedestroy($image);
+				}
+				elseif ($file_ext == 'png') {
+					$image = imagecreatefrompng($path2file);
+					header("Content-type: image/png");
+					imagepng($image);
+					imagedestroy($image);
+				}
+				else imageError();
+				
 			}
 			elseif (strpos($bitmap['image_id'],"no_image") !== false) {
 				$image = imagecreatefromjpeg(NJB_HOME_DIR . 'image/no_image.jpg');
@@ -118,6 +132,7 @@ function image($image_id, $quality, $track_id) {
 			}
 			else {
 				//$image = imagecreatefromjpeg('image/no_image.jpg');
+				
 				header('Cache-Control: max-age=31536000');
 				streamData($bitmap['image'], 'image/jpeg', false, false, '"never_expire"');	
 			}

@@ -385,7 +385,7 @@ function insertSelect() {
 //  +------------------------------------------------------------------------+
 //  | Add tracks                                                             |
 //  +------------------------------------------------------------------------+
-function addTracks($mode = 'play', $insPos = '', $playAfterInsert) {
+function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 	global $cfg, $db;
 	
 	$track_id		= get('track_id');

@@ -1,6 +1,5 @@
 /.settings
-/include/config.inc.php
-/tmp/*
+include/config.local.inc.php
 .buildpath
 .project
 _notepad++_edit_session
