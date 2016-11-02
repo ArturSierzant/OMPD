@@ -83,15 +83,10 @@ $temp = dirname(__FILE__);
 $temp = realpath($temp . '/..');
 define('NJB_HOME_DIR', str_replace('\\', '/', $temp) . '/');
 
+require_once(NJB_HOME_DIR . 'include/config.inc.php');
 
-if(file_exists(NJB_HOME_DIR . 'include/config.local.inc.php') === true) {
-	require_once(NJB_HOME_DIR . 'include/config.local.inc.php');
-} 
-else {
-	require_once(NJB_HOME_DIR . 'include/config.inc.php');
-};
 
-// +------------------------------------------------------------------------+
+ // +------------------------------------------------------------------------+
 // | Proxy settings                                                         |
 // +------------------------------------------------------------------------+
 if ($cfg['proxy_enable'] == true) {

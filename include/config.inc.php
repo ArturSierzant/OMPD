@@ -48,6 +48,7 @@ $cfg['mysqli_auto_create_db']       = true;
 //  | Windows:        'D:/Media/';                                           |
 //  | Linux/Unix/OSX: '/var/mpd/music/';                                     |
 //  +------------------------------------------------------------------------+
+
 $cfg['media_dir']                   = '/share/HDA_DATA/ompd/';
 
 
@@ -79,18 +80,17 @@ $cfg['mpd_password']				= "";
 //  +------------------------------------------------------------------------+
 //  | Name and description for blacklist                                     |
 //  +------------------------------------------------------------------------+
-$cfg['blacklist_name']				= 'Blacklist';
-$cfg['blacklist_comment']			= 'Tracks to be skipped';
-
+$cfg['blacklist_name']				  = 'Blacklist';
+$cfg['blacklist_comment']			  = 'Tracks to be skipped';
 
 
 
 //  +------------------------------------------------------------------------+
 //  | Ignore media dir access error                                          |
 //  +------------------------------------------------------------------------+
-//	| Set to true - update process continues w/o error message when	trying   |
-//	| to scan directories with no access                                     |
-//	| Set to false - error message is displayed and update stops             |
+//  | Set to true - update process continues w/o error message when trying   |
+//  | to scan directories with no access                                     |
+//  | Set to false - error message is displayed and update stops             |
 //  +------------------------------------------------------------------------+
 $cfg['ignore_media_dir_access_error'] 	= false;
 
@@ -157,6 +157,8 @@ $cfg['name_source']						= 'tags';
 //  +------------------------------------------------------------------------+
 //  | Separators in song title for search for another versions of song       |
 //  +------------------------------------------------------------------------+
+unset($cfg['separator']);
+
 $cfg['separator'][] = 	" (";
 $cfg['separator'][] = 	" [";
 $cfg['separator'][] = 	" {";
@@ -212,6 +214,8 @@ $cfg['tags_separator'] = 	";";
 //  +------------------------------------------------------------------------+
 //  | Separator for multiple artist (works like 'ft.', 'feat.', etc)         |
 //  +------------------------------------------------------------------------+
+unset($cfg['artist_separator']);
+
 $cfg['artist_separator'][] = 	" i ";
 $cfg['artist_separator'][] = 	"; ";
 $cfg['artist_separator'][] = 	" & ";
@@ -227,6 +231,8 @@ $cfg['artist_separator'][] = 	" ft. ";
 //  +------------------------------------------------------------------------+
 //  | Quick search                                                           |
 //  +------------------------------------------------------------------------+
+unset($cfg['quick_search']);
+
 $cfg['quick_search'][1] = array("Polish Artists","comment LIKE '%polish%'");
 $cfg['quick_search'][2] = array("Female voices","comment LIKE '%ladies%'");
 $cfg['quick_search'][3] = array("Live Concerts","comment LIKE '%live%'");
@@ -256,7 +262,7 @@ $cfg['favorite_comment'] 				= 'My favorites tracks';
 //  | Additional query added to Google search string:                        |
 //  | https://www.google.com/search?q={track artist}+{title}+{string below}  |
 //  | example:                                                               |
-//  | https://www.google.com/search?q=Duran+Duran+Big+Thing+lyrics+site:.pl  |
+//  | https://www.google.com/search?q=Duran+Duran+Big+Thing+lyrics           |
 //  +------------------------------------------------------------------------+
 $cfg['lyrics_search'] 					= 'lyrics';
 
@@ -341,6 +347,8 @@ $cfg['external_storage']            = '/share/Usb/';
 //  +------------------------------------------------------------------------+
 //  | Media extensions                                                       |
 //  +------------------------------------------------------------------------+
+unset($cfg['media_extension']);
+
 // Audio
 $cfg['media_extension'][]           = 'aac';
 $cfg['media_extension'][]           = 'm4a';
@@ -364,6 +372,8 @@ $cfg['media_extension'][]           = 'dsf';
 //  +------------------------------------------------------------------------+
 //  | Decode audio (for stream, download & record)                           |
 //  +------------------------------------------------------------------------+
+unset($cfg['decode_stdout']);
+
 $cfg['decode_stdout']['aac']        = $cfg['bin_dir'] . 'faad -d -o - %source';
 $cfg['decode_stdout']['ape']        = $cfg['bin_dir'] . 'mac %source - -d';
 $cfg['decode_stdout']['flac']       = $cfg['bin_dir'] . 'flac --decode --totally-silent --stdout %source';
@@ -383,6 +393,17 @@ $cfg['decode_stdout']['wv']         = $cfg['bin_dir'] . 'wvunpack -q %source -';
 //  | Tag writing is done by the getID3() library, attached picture is       |
 //  | currently only supported with the id3v2.3 tag                          |
 //  +------------------------------------------------------------------------+
+unset($cfg['encode_name']);
+unset($cfg['encode_mime_type']);
+unset($cfg['encode_extension']);
+unset($cfg['encode_stdout']);
+unset($cfg['encode_file']);
+unset($cfg['encode_bitrate']);
+unset($cfg['encode_vbr']);
+unset($cfg['tag_format']);
+unset($cfg['tag_encoding']);
+unset($cfg['tag_padding']);
+
 $cfg['transcode_treshold']          = 150;
 
 $cfg['encode_name'][]               = 'MP3 @ Low';
@@ -492,6 +513,8 @@ $cfg['image_front_cover_treshold']  = 90000;      // 300 * 300
 //  +------------------------------------------------------------------------+
 //  | No album artist                                                        |
 //  +------------------------------------------------------------------------+
+unset($cfg['no_album_artist']);
+
 $cfg['no_album_artist'][]           = 'compilation';
 $cfg['no_album_artist'][]           = 'radio';
 $cfg['no_album_artist'][]           = 'remix';
@@ -505,6 +528,13 @@ $cfg['no_album_artist'][]           = 'various';
 //  +------------------------------------------------------------------------+
 //  | Internet search                                                        |
 //  +------------------------------------------------------------------------+
+unset($cfg['search_name']);
+unset($cfg['search_url_artist']);
+unset($cfg['search_url_album']);
+unset($cfg['search_url_combined']);
+unset($cfg['search_method']);
+unset($cfg['search_charset']);
+
 $cfg['search_name'][]               = 'AllMusic';
 $cfg['search_url_artist'][]         = 'http://www.allmusic.com/search/artist/%artist';
 $cfg['search_url_album'][]          = 'http://www.allmusic.com/search/album/%album';
@@ -563,6 +593,12 @@ $cfg['search_charset'][]            = 'UTF-8';
 //  | For the Last.fm web services a "API key" is needed. Get this key free  |
 //  | from:  http://www.last.fm/api/account                                  |
 //  +------------------------------------------------------------------------+
+unset($cfg['image_service_name']);
+unset($cfg['image_service_charset']);
+unset($cfg['image_service_url']);
+unset($cfg['image_service_process']);
+unset($cfg['image_service_urldecode']);
+
 /*
 $cfg['image_AWSAccessKeyId']	    = '';
 $cfg['image_AWSSecretAccessKey']    = '';
@@ -641,7 +677,7 @@ $cfg['ip_tools']                    = 'http://www.infosniper.net/index.php?ip_ad
 //  +------------------------------------------------------------------------+
 $cfg['add_autoplay']                = true;
 $cfg['play_queue']                  = false;
-$cfg['play_queue_limit']			= 250;
+$cfg['play_queue_limit']            = 250;
 
 
 
@@ -679,7 +715,7 @@ $cfg['date_format']                 = 'r';
 //  | and UTF-8 for all other operating systems.                             |
 //  +------------------------------------------------------------------------+
 $cfg['default_charset']             = '';
-$cfg['default_filesystem_charset']	= '';
+$cfg['default_filesystem_charset']  = '';
 
 
 
@@ -771,8 +807,20 @@ $cfg['php_info']                    = true;
 
 
 
+
 //  +------------------------------------------------------------------------+
 //  | For testing some stuff (on my system only) - should be set to off      |
 //  +------------------------------------------------------------------------+
-$cfg['testing']				= 'off';
+$cfg['testing']				              = 'off';
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Load file with local setings (if exists) overriding settings           |
+//  | in this file                                                           |
+//  +------------------------------------------------------------------------+
+if(file_exists(NJB_HOME_DIR . 'include/config.local.inc.php') === true) {
+	require_once(NJB_HOME_DIR . 'include/config.local.inc.php');
+} 
 ?>
