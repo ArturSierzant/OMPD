@@ -239,12 +239,13 @@ function evaluateAdd(data) {
 	
 };
 
-function playAlbum(albumId){
+function playAlbum(albumId, md){
 	var request = $.ajax({  
 			url: "play.php",  
 			type: "GET",  
 			data: { action : 'playSelect',
 					album_id : albumId,
+					md : md,
 					},  
 			dataType: "html"
 		}); 
@@ -820,6 +821,9 @@ function setFavorite(data) {
 		$("#save_favorite_star-" + data.track_id).removeClass("fa-star").addClass("fa-star-o");
 		$("#favorite_star-" + data.track_id).removeClass("fa-star").addClass("fa-star-o");
 		$("#addToFavorite_txt-" + data.track_id).text("Add to ");
+		//remove row from 'Favorites tracks of' list in artist search:
+		$("#fav_" + data.track_id).hide();
+		
 	}
 	
 	toggleStarSub(-1);

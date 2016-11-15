@@ -166,6 +166,10 @@ function about() {
 	<li> added artist list in library</li>
 	<li> added sort by 'Add time'</li>
 	<li> added file browser</li>
+	<li> added multi-disc display</li>
+	<li> added grouping of multi-disc albums in album search results</li>
+	<li> added other versions of album display</li>
+	<li> added list of favorite tracks in artist search results</li>
 	
 	</ul>
 	<br>

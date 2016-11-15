@@ -1,7 +1,7 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
-//  | http://www.ompd.pl                   									 |
+//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  | This program is free software: you can redistribute it and/or modify   |
 //  | it under the terms of the GNU General Public License as published by   |
@@ -131,13 +131,36 @@ function album_artist() {
 		}
 	}
 	else {
-	
-	$query = mysqli_query($db,'SELECT * FROM album WHERE artist_alphabetic like "%' . mysqli_real_escape_string($db,$search_string) . '%" ORDER BY year');
-	
-	while ($album = mysqli_fetch_assoc($query)) {		
-				draw_tile($size,$album);
 				
-		}
+		$query = mysqli_query($db,'SELECT * FROM album WHERE artist_alphabetic like "%' . mysqli_real_escape_string($db,$search_string) . '%" ORDER BY year, album');
+		$mdTab = array();
+		while ($album = mysqli_fetch_assoc($query)) {		
+			$multidisc_count = 0;		
+			if ($cfg['group_multidisc'] == true) {
+					$md_indicator = striposa($album['album'], $cfg['multidisk_indicator']);
+					if ($md_indicator !== false) {
+						$md_ind_pos = stripos($album['album'], $md_indicator);
+						$md_title = substr($album['album'], 0,  $md_ind_pos);
+						$query_md = mysqli_query($db, 'SELECT album, image_id, album_id 
+						FROM album 
+						WHERE album LIKE "' . mysqli_real_escape_string($db, $md_title) . '%" AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '" AND album <> "' . mysqli_real_escape_string($db, $album['album']) . '"
+						ORDER BY album');
+						$multidisc_count = mysqli_num_rows($query_md);
+					}
+			}
+			if ($multidisc_count > 0) {
+				if (!in_array($md_title, $mdTab)) {
+					$mdTab[] = $md_title;
+					draw_tile($size,$album);
+				}
+			}
+			else {
+				draw_tile($size,$album);
+			}		
+					
+					//draw_tile($size,$album);
+					
+			}
 	
 	}
 	?>
@@ -328,7 +351,7 @@ function album_title() {
 	<?php
 	
 	
-	$query = mysqli_query($db,'SELECT album_id, image_id, album, artist_alphabetic FROM album WHERE album like "%' . mysqli_real_escape_string($db,$search_string) . '%" ORDER BY artist_alphabetic');
+	$query = mysqli_query($db,'SELECT album_id, image_id, album, artist_alphabetic, year FROM album WHERE album like "%' . mysqli_real_escape_string($db,$search_string) . '%" ORDER BY artist_alphabetic, year, album');
 	
 	while ($album = mysqli_fetch_assoc($query)) {		
 				draw_tile($size,$album);

@@ -54,7 +54,67 @@ $cfg['media_dir']                   = '/share/HDA_DATA/ompd/';
 
 
 
-//	+------------------- NEW IN O!MPD 1.02 ----------------------------------+
+//	+------------------- NEW IN O!MPD 1.03 ----------------------------------+
+
+
+//  +------------------------------------------------------------------------+
+//  | Multi-disc                                                             |
+//  +------------------------------------------------------------------------+
+//  | Show all of the multi-disc albums in album view and group multi-disc   |
+//  | albums into one in search results                                      |
+//  +------------------------------------------------------------------------+
+
+$cfg['show_multidisc'] = true;
+$cfg['group_multidisc'] = true;
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Multidisc indicators                                                   |
+//  +------------------------------------------------------------------------+
+//  | Strings in album title indicating that album is a part                 |
+//  | of multi-disc set                                                      |
+//  +------------------------------------------------------------------------+
+unset($cfg['multidisk_indicator']);
+
+$cfg['multidisk_indicator'][] = "Disc ";
+$cfg['multidisk_indicator'][] = "Disk ";
+$cfg['multidisk_indicator'][] = "CD ";
+$cfg['multidisk_indicator'][] = "CD#";
+$cfg['multidisk_indicator'][] = " CD";
+$cfg['multidisk_indicator'][] = " Vol.";
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Other versions of album                                                |
+//  +------------------------------------------------------------------------+
+//  | Show other versions of album in album view                             |
+//  +------------------------------------------------------------------------+
+
+$cfg['show_album_versions'] = true;
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Multidisc indicators                                                   |
+//  +------------------------------------------------------------------------+
+//  | Strings in album title indicating that album may have other versions   |
+//  | e.g. " (" in:                                                          |
+//  |   Brothers In Arms (24bit-96kHz)                                       |
+//  |   Brothers In Arms (2013 Remaster, MFSL, 24bit-88.2kHz)                |
+//  +------------------------------------------------------------------------+
+unset($cfg['album_versions_indicator']);
+
+$cfg['album_versions_indicator'][] = " (";
+$cfg['album_versions_indicator'][] = " [";
+$cfg['album_versions_indicator'][] = ", ";
+
+
+
+//	+------------------- END OF NEW IN O!MPD 1.02 ---------------------------+
+
+
 
 
 //  +------------------------------------------------------------------------+
@@ -103,9 +163,6 @@ $cfg['ignore_media_dir_access_error'] 	= false;
 $cfg['proxy_enable'] 					= false;
 $cfg['proxy_server'] 					= '192.168.1.1';
 $cfg['proxy_port'] 						= '80'; 
-
-
-//	+------------------- END OF NEW IN O!MPD 1.02 ---------------------------+
 
 
 
@@ -190,10 +247,19 @@ $cfg['separator'][] = 	" 2";
 $cfg['separator'][] = 	" 3";
 $cfg['separator'][] = 	" 4";
 $cfg['separator'][] = 	" 5";
+$cfg['separator'][] = 	" One";
+$cfg['separator'][] = 	" Two";
+$cfg['separator'][] = 	" Three";
+$cfg['separator'][] = 	" Four";
 //$cfg['separator'][] = 	" I";
 $cfg['separator'][] = 	" II";
 $cfg['separator'][] = 	" III";
 $cfg['separator'][] = 	" IV";
+$cfg['separator'][] = 	" V";
+$cfg['separator'][] = 	" VI";
+$cfg['separator'][] = 	" VII";
+$cfg['separator'][] = 	" VIII";
+$cfg['separator'][] = 	" IX";
 $cfg['separator'][] = 	" aka ";
 
 

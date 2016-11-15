@@ -63,6 +63,7 @@ elseif	($action == 'loopGain')			loopGain();
 elseif	($action == 'playlistStatus')	playlistStatus();
 elseif	($action == 'playlistTrack')	playlistTrack();
 elseif	($action == 'updateAddPlay')	updateAddPlay();
+elseif	($action == 'test')				addTracks();
 else	message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]action');
 exit();
 
@@ -395,18 +396,56 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 	$favorite_id	= get('favorite_id');
 	$random			= get('random');
 	$insertType		= get('insertType');
+	//$md				= isset(get('md')) ? get('md') : '';
+	$md				= get('md');
 	
-
 	
 	if ($track_id) {
 		$query = mysqli_query($db,'SELECT relative_file FROM track WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
 	}
 	elseif ($album_id) {
-		$query_str = 'SELECT relative_file FROM track WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '" AND track_id NOT IN (SELECT track_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") ';
-		if ($insertType == 'album' && $insPos > 0) 
-			$query_str = $query_str . ' ORDER BY number DESC, relative_file DESC';
-		else
-			$query_str = $query_str . ' ORDER BY number, relative_file';
+		$select_md = ''; 
+		$md_indicator = '';
+		$mds_updateCounter = array();
+		if ($cfg['group_multidisc'] == true && $md == 'allDiscs') {
+			$query_md = mysqli_query($db,'SELECT album, artist FROM album WHERE album_id = "' . $album_id . '"');
+			$album = mysqli_fetch_assoc($query_md);
+			$md_indicator = striposa($album['album'], $cfg['multidisk_indicator']);
+			if ($md_indicator !== false) {
+				$md_ind_pos = stripos($album['album'], $md_indicator);
+				$md_title = substr($album['album'], 0,  $md_ind_pos);
+				$query_md = mysqli_query($db, 'SELECT album, image_id, album_id 
+				FROM album 
+				WHERE album LIKE "' . mysqli_real_escape_string($db, $md_title) . '%" AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '"
+				ORDER BY album');
+				$mds = '';
+				while ($album_md = mysqli_fetch_assoc($query_md)) {
+					$mds = ($mds == '' ? '"' . $album_md['album_id'] . '"' : $mds . ', "' . $album_md['album_id'] . '"'); 
+					$mds_updateCounter[] = $album_md['album_id'];
+				};
+				if ($mds != ''){
+					$select_md = ' track.album_id IN (' . $mds . ') ';
+				}
+			}
+			$query_str = 'SELECT relative_file 
+			FROM track LEFT JOIN album ON track.album_id = album.album_id 
+			WHERE ' . $select_md . ' AND track.track_id NOT IN 
+			(SELECT track_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") 
+			ORDER BY album.album, track.number, track.relative_file';
+		}
+		if ($cfg['group_multidisc'] == false || $md_indicator == '' || $md != 'allDiscs') {
+			$query_str = 'SELECT relative_file 
+			FROM track 
+			WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '" AND track_id NOT IN 
+			(SELECT track_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") ';
+			$mds_updateCounter[] = $album_id;
+			if ($insertType == 'album' && $insPos > 0) {
+				$query_str = $query_str . ' ORDER BY number DESC, relative_file DESC';
+			}
+			else {
+				$query_str = $query_str . ' ORDER BY number, relative_file';
+			}
+		}
 			
 		$query = mysqli_query($db,$query_str);
 	}
@@ -528,8 +567,11 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 			}
 		}
 	}
-	if ($album_id)
-		updateCounter($album_id, NJB_COUNTER_PLAY);
+	if ($album_id) {
+		foreach ($mds_updateCounter as $md_album_id) {
+			updateCounter($md_album_id, NJB_COUNTER_PLAY);
+		}
+	}
 	
 	return 'add_OK';
 }

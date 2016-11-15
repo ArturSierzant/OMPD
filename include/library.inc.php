@@ -27,8 +27,11 @@
 //  +------------------------------------------------------------------------+
 //  | Tile for album cover and info                                          |
 //  +------------------------------------------------------------------------+
-function draw_tile($size,$album) {
+function draw_tile($size,$album,$multidisc = '') {
 		global $cfg;
+		if ($multidisc != '') {
+			$md = '&md=' . $multidisc;
+		}
 		echo '<div title="Go to album" class="tile pointer" style="width: ' . $size . 'px; height: ' . $size . 'px;">';
 		echo '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="image.php?image_id=' . $album['image_id'] . '" alt="" width="100%" height="100%">';
 		//echo '	<div id="tile_title" class="tile_info">';
@@ -37,8 +40,8 @@ function draw_tile($size,$album) {
 		echo '	<div class="tile_band">' . html($album['artist_alphabetic']) . '</div>';
 		if ($cfg['show_quick_play']) {
 			echo '<div class="quick-play">';
-			if ($cfg['access_add']) echo '<i id="add_' . $album['album_id'] . '" title="Add album to playlist"  onclick="javascript:ajaxRequest(\'play.php?action=updateAddPlay&album_id=' . $album['album_id'] . '\',updateAddPlay);ajaxRequest(\'play.php?action=addSelect&album_id=' . $album['album_id'] . '\',evaluateAdd);" class="fa fa-plus-circle pointer" style="padding-right: 5px;"></i>';
-			if ($cfg['access_play']) echo '<i title="Play album" onclick="javascript: playAlbum(\'' . $album['album_id'] . '\');" class="fa fa-play-circle-o pointer"></i>';
+			if ($cfg['access_add']) echo '<i id="add_' . $album['album_id'] . '" title="Add album to playlist"  onclick="javascript:ajaxRequest(\'play.php?action=updateAddPlay&album_id=' . $album['album_id'] .  '\',updateAddPlay);ajaxRequest(\'play.php?action=addSelect&album_id=' . $album['album_id'] . $md . '\',evaluateAdd);" class="fa fa-plus-circle pointer" style="padding-right: 5px;"></i>';
+			if ($cfg['access_play']) echo '<i title="Play album" onclick="javascript: playAlbum(\'' . $album['album_id'] . '\',\'' . $multidisc . '\');" class="fa fa-play-circle-o pointer"></i>';
 			echo '</div>';
 		}		
 			
@@ -327,6 +330,20 @@ function onmouseoverDownloadAlbum($album_id) {
 	return 'onMouseOver="return overlib(\'' . addslashes(html($list)) . '\', CAPTION, \'Download album:\', WIDTH, 200);" onMouseOut="return nd();"';
 }
 
+
+
+
+//  +------------------------------------------------------------------------+
+//  | strpos for arrays                                                      |
+//  | source: http://stackoverflow.com/questions/6284553                     |
+//  +------------------------------------------------------------------------+
+function striposa($haystack, $needle, $offset=0) {
+    if(!is_array($needle)) $needle = array($needle);
+    foreach($needle as $query) {
+        if(stripos($haystack, $query, $offset) !== false) return $query; // stop on first true result
+    }
+    return false;
+}
 
 
 

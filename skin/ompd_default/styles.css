@@ -2068,7 +2068,7 @@ td.time {
 
 
 	
-td.small_cover {
+td.small_cover, td.small_cover_md {
 	width: 4.3em;
 	height: 4.3em;
 	/*padding: 2px 0px 2px 0px;*/
