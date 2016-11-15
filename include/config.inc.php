@@ -345,6 +345,22 @@ $cfg['external_storage']            = '/share/Usb/';
 
 
 //  +------------------------------------------------------------------------+
+//  | Directory Blacklist (those dirnames will not be scanned)               |
+//  +------------------------------------------------------------------------+
+unset($cfg['directory_blacklist']);
+
+$cfg['directory_blacklist'][]       = 'lost+found';
+$cfg['directory_blacklist'][]       = 'Temporary Items';
+$cfg['directory_blacklist'][]       = 'Network Trash Folder';
+$cfg['directory_blacklist'][]       = 'System Volume Information';
+$cfg['directory_blacklist'][]       = 'RECYCLER';
+$cfg['directory_blacklist'][]       = '$RECYCLE.BIN';
+$cfg['directory_blacklist'][]       = '.@__thumb';
+
+
+
+
+//  +------------------------------------------------------------------------+
 //  | Media extensions                                                       |
 //  +------------------------------------------------------------------------+
 unset($cfg['media_extension']);
