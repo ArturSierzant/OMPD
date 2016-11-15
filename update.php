@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
+//  | O!MPD, Copyright Â© 2015-2016 Artur Sierzant	                         |
 //  | http://www.ompd.pl                                             		 |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright Â© 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -40,13 +40,10 @@ require_once('include/library.inc.php');
 ignore_user_abort(true);
 
 //exit();
-
+$logFile = '';
 if ($cfg['debug']) {
 	$logFile = NJB_HOME_DIR . 'tmp/update_log.txt';
 	ini_set('log_errors', 'On');
-}
-else {
-	$logFile = '';
 }
 
 $cfg['menu'] = 'config';
@@ -432,7 +429,7 @@ function recursiveScan($dir) {
 	}
 	
 	foreach ($entries as $entry) {
-		if ($entry[0] != '.' && !in_array($entry, array('lost+found', 'Temporary Items', 'Network Trash Folder', 'System Volume Information', 'RECYCLER', '$RECYCLE.BIN','.@__thumb'))) {
+		if ($entry[0] != '.' && in_array($entry, $cfg['directory_blacklist']) === FALSE) {
 			if (is_dir($dir . $entry . '/'))
 				recursiveScan($dir . $entry . '/');
 			else {
@@ -500,8 +497,8 @@ function countDirectories($base_dir) {
 		$extension = substr(strrchr($file, '.'), 1);
 		$extension = strtolower($extension);
 		if (in_array($extension, $cfg['media_extension'])) $isMediaDir = 1;
-		if($file == '.' || $file == '..' || $file == '.@__thumb') continue;
 		$dir = $base_dir.DIRECTORY_SEPARATOR.$file;
+		if($file == '.' || $file == '..' || (is_dir($dir) === TRUE && in_array($file, $cfg['directory_blacklist']) === TRUE)) continue;
 		if(is_dir($dir)) {
 			$directories []= $dir;
 			if ($isMediaDir == 1) {
