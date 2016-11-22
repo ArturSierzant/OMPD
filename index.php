@@ -55,6 +55,7 @@ elseif	($action == 'view1all')			view1all();
 elseif	($action == 'view3all')			view3all();
 elseif	($action == 'viewRandomAlbum')	viewRandomAlbum();
 elseif	($action == 'viewRandomTrack')	viewRandomTrack();
+elseif	($action == 'viewRandomFile')	viewRandomFile();
 elseif	($action == 'viewYear')			viewYear();
 elseif	($action == 'viewNew')			viewNew();
 elseif	($action == 'viewPopular')		viewPopular();
@@ -2202,6 +2203,7 @@ function viewRandomAlbum() {
 	<td class="tab_on" onClick="location.href='index.php?action=viewRandomAlbum';">Album</td>
 	<td class="tab_none tabspace"></td>
 	<td class="tab_off" onClick="location.href='index.php?action=viewRandomTrack';">Track</td>
+	<td class="tab_off" onClick="location.href='index.php?action=viewRandomFile';">File</td>
 	<td class="tab_none tabspace"></td>
 	<td class="tab_off" onClick="location.href='genre.php?action=blacklist';">Blacklist</td>
 	<td class="tab_none">&nbsp;</td>
@@ -2281,6 +2283,7 @@ function viewRandomTrack() {
 	<td class="tab_off" onClick="location.href='index.php?action=viewRandomAlbum';">Album</td>
 	<td class="tab_none tabspace"></td>
 	<td class="tab_on" onClick="location.href='index.php?action=viewRandomTrack';">Track</td>
+	<td class="tab_off" onClick="location.href='index.php?action=viewRandomFile';">File</td>
 	<td class="tab_none tabspace"></td>
 	<td class="tab_off" onClick="location.href='genre.php?action=blacklist';">Blacklist</td>
 	<td class="tab_none">&nbsp;</td>
@@ -2379,6 +2382,113 @@ function viewRandomTrack() {
 <?php
 	require_once('include/footer.inc.php');
 }
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | View random file                                                       |
+//  +------------------------------------------------------------------------+
+function viewRandomFile() {
+	global $cfg, $db;
+	
+	authenticate('access_media');
+	
+	// formattedNavigator
+	$nav			= array();
+	$nav['name'][]	= 'Library';
+	$nav['url'][]	= 'index.php';
+	$nav['name'][]	= 'Random';
+	
+	if(!isset($_COOKIE['random_limit'])) {
+		$limit = $cfg['play_queue_limit'];
+	} else {
+		$limit = $_COOKIE['random_limit'];
+	}
+	
+	if(!isset($_COOKIE['random_dir'])) {
+		$dir = $cfg['media_dir'];
+	} else {
+		$dir = str_replace('ompd_ampersand_ompd','&',$_COOKIE['random_dir']);
+	}
+	
+	$selectedDir = isset($_GET['selectedDir']) ? $_GET['selectedDir'] . '/' : $dir;
+
+	require_once('include/header.inc.php');
+?>
+<table cellspacing="0" cellpadding="0" style="width: 100%;">
+<tr>
+	<td>
+<!--  -->
+<table cellspacing="0" cellpadding="0" class="tab">
+<tr>
+	<td class="tab_off" onClick="location.href='index.php?action=viewRandomAlbum';">Album</td>
+	<td class="tab_none tabspace"></td>
+	<td class="tab_off" onClick="location.href='index.php?action=viewRandomTrack';">Track</td>
+	<td class="tab_on" onClick="location.href='index.php?action=viewRandomFile';">File</td>
+	<td class="tab_none tabspace"></td>
+	<td class="tab_off" onClick="location.href='genre.php?action=blacklist';">Blacklist</td>
+	<td class="tab_none">&nbsp;</td>
+</tr>
+</table>
+<table width="100%" cellspacing="0" cellpadding="0" class="tab_border">
+<?php
+	if ($cfg['access_play'] || $cfg['access_add'] || $cfg['access_stream']) { ?>
+<tr class="tab_header">
+	<td>&nbsp;</td>
+	<td></td>
+	<td>&nbsp;</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td style="max-width: 4em;">Select directory:</td>
+	<td></td>
+	<td>
+	<div class="buttons">
+	<input id="randomDir" value="<?php 
+		/* if ($selectedDir != '') {
+			
+			echo str_replace('ompd_ampersand_ompd','&',$selectedDir) . '/';
+		}
+		else {
+			echo $cfg['media_dir'];
+		} */
+		echo $selectedDir;
+	 ?>">
+	<span id="randomBrowse"><i class="fa fa-folder-open-o fa-fw"></i> Browse...</span>
+	</div>
+	</td>
+</tr>
+<tr>
+	<td></td>
+	<td>Limit to:</td>
+	<td></td>
+	<td><input id="randomLimit" value="<?php echo $limit; ?>" style="max-width: 3em;"> tracks</td>
+</tr>
+<tr>
+	<td>&nbsp;</td>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<?php 
+	}
+?>
+</table>
+<br>
+<div class="buttons">
+	<span id="playRandomFile" onmouseover="return overlib('Create playlist and play it');" onmouseout="return nd();">&nbsp;<i class="fa fa-play-circle-o fa-fw"></i> Create random list and play</span>
+</div>
+<div id="errorMessage"></div>
+</td>
+</tr>
+</table>
+<?php
+	
+	require_once('include/footer.inc.php');
+}
+
 
 
 

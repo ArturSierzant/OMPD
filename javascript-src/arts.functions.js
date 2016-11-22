@@ -93,6 +93,25 @@ function updateAddPlay(data) {
 	$('#bar_popularity').css('width', bar_pop);
 };
 
+function evaluateRandom(data) {
+	var timeOut = 2000;
+	if (data.random_files_result == 'random_files_OK') {
+		$('[id="randomPlay_' + data.id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-check-square icon-ok');
+		
+		setTimeout(function(){
+			$('[id="randomPlay_' + data.id +'"]').removeClass('fa-check-square icon-ok').addClass('fa-play-circle-o');
+		}, timeOut);
+	}
+	else {
+		$('[id="randomPlay_' + data.id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-exclamation-triangle icon-nok');
+		
+		setTimeout(function(){
+			$('[id="randomPlay_' + data.id +'"]').removeClass('fa-exclamation-triangle icon-nok').addClass('fa-play-circle-o');
+		}, timeOut);
+		
+	}
+};
+
 
 function evaluatePlayTo(data) {
 	var timeOut = 2000;

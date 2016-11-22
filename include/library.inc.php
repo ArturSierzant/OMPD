@@ -214,6 +214,32 @@ function fileSubMenu($i, $filepath, $mime) {
 
 
 //  +---------------------------------------------------------------------------+
+//  | Draws sub menu for directory                                              |
+//  +---------------------------------------------------------------------------+
+
+function dirSubMenu($i, $dir) {
+	global $cfg, $db;
+	
+	if(!isset($_COOKIE['random_limit'])) {
+		$limit = $cfg['play_queue_limit'];
+	} else {
+		$limit = $_COOKIE['random_limit'];
+	}
+?>
+<div class="menuSub" id="menu-sub-track<?php echo $i ?>" onclick='//offMenuSub(<?php echo $i ?>);'> 
+	
+	<div><?php if ($cfg['access_play']) {
+		echo '<a href="javascript:ajaxRequest(\'ajax-random-files.php?dir=' . str_replace('%26','ompd_ampersand_ompd',urlencode($dir)) . '&amp;limit=' . $limit  . '&amp;id=' . $i .'\',evaluateRandom);" onMouseOver="return overlib(\'Play random files from this dir\');" onMouseOut="return nd();"><i id = "randomPlay_' . $i . '" class="fa fa-play-circle-o fa-fw icon-small"></i>Play random tracks from this dir</a>'; 
+		}
+		?>
+	</div>
+	
+</div>
+<?php
+}
+
+
+//  +---------------------------------------------------------------------------+
 //  | Draws sub menu for track moving/deleting                                  |
 //  +---------------------------------------------------------------------------+
 

@@ -195,6 +195,13 @@ function findSmallest($i, $end, $data)
 
 
 	$self = $_SERVER['PHP_SELF'];
+	$showSelect = isset($_GET['showSelect']) ? $_GET['showSelect'] : '';
+	$showSelectQS = '';
+	$tileSizePHP = isset($_GET['tileSizePHP']) ? ('tileSizePHP=' . $_GET['showSelect'] . '&') : '';
+	
+	if ($showSelect == 'true') {
+		$showSelectQS = 'showSelect=true&';
+	}
 	if (isset($_GET['dir'])) {
 		$dir = $_GET['dir'];
 		$size = strlen($dir);
@@ -213,7 +220,14 @@ function findSmallest($i, $end, $data)
 		$dir = substr($cfg['media_dir'], 0, -1);
 	}
 
-	echo '<span class="nav_tree">DIR : ' . $dir . '</span>';
+	echo '<span class="nav_tree">DIR: ' . $dir . '</span>';
+	if ($showSelect == 'true') {
+		?>
+		<div class="buttons">
+		<span id="selectDir" onclick="window.location.href='index.php?action=viewRandomFile&<?php echo $tileSizePHP; ?>selectedDir=<?php echo str_replace('%26','ompd_ampersand_ompd',urlencode($dir));?>'">Select this directory</span>
+		</div>
+		<?php
+	}
 	echo "\n\n";
 	$dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir);
 	if (is_dir($dir)) {
@@ -241,7 +255,7 @@ function findSmallest($i, $end, $data)
 		echo "<td class='icon'>";
 		echo "</td>";
 		echo "<td>    ";
-		echo "<a href='", $self, "?dir=", rawurlencode($topdir), "'>Up to parent dir</a>\n";
+		echo "<a href='" . $self . "?" . $showSelectQS . "dir=" . rawurlencode($topdir) . "'>Up to parent dir</a>\n";
 		echo "</td>";
 		echo "<td>";
 		//echo "size (bytes)";
@@ -251,6 +265,7 @@ function findSmallest($i, $end, $data)
 		echo "</tr>";
 		
 		for ($i = 0; $i < $size; ++$i) {
+			$j=0;
 			$file_type = "";
 			$topdir = $dir . "/" . $rows[$i]['data'];
 			if ($rows[$i]['dir']) {
@@ -273,14 +288,24 @@ function findSmallest($i, $end, $data)
 				echo '<tr class="artist_list">';
 				if ($file_type == 'dir') {
 					$dirpath = str_ireplace($cfg['media_dir'],'', $topdir);
-					echo "<td class='icon'>";
-					echo "<i class='fa fa-folder-o icon-small'></i>";
-					echo "</td>";
+					//echo "<td class='icon'>";
+					//echo "<i class='fa fa-folder-o icon-small'></i>";
+					//echo "</td>";
+					$j = $i + 10000
+					?>	
+					<td class="icon">
+					<span id="menu-track<?php echo $j ?>">
+					<div onclick='toggleMenuSub(<?php echo $j ?>);'>
+						<i id="menu-icon<?php echo $j ?>" class="fa fa-folder-o icon-small"></i>
+					</div>
+					</span>
+					</td>
+					<?php
 					echo "<td class='icon'>";
 					echo '<a href=\'javascript:ajaxRequest("play.php?action=addSelect&amp;dirpath=' . str_replace('%26','ompd_ampersand_ompd',urlencode($dirpath)) . '&amp;track_id=' . $i . '",evaluateAdd);\' onMouseOver="return overlib(\'Add directory ' . $dirpath . '\');" onMouseOut="return nd();"><i id="add_' . $i . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';
 					echo "</td>";
 					echo "<td>";
-					echo "<a href='" . $self . "?dir=" . rawurlencode($topdir) . "'>" . $rows[$i]['data'] . "</a>\n";
+					echo "<a href='" . $self . "?" . $showSelectQS . "dir=" . rawurlencode($topdir) . "'>" . $rows[$i]['data'] . "</a>\n";
 					echo '';
 					echo "</td>";
 					echo "<td>";
@@ -290,6 +315,13 @@ function findSmallest($i, $end, $data)
 					//echo "<a href='", substr($topdir, $size_document_root,  strlen($topdir) - $size_document_root), "'>open ", $file_type, "</a>\n";
 					echo "</td>";
 					echo "</tr>";
+					?>
+					<tr>
+					<td colspan="6">
+					<?php dirSubMenu($j, $dir . '/'. $rows[$i]['data'] . '/');?>
+					</td>
+					</tr>
+				<?php
 				} 
 				elseif ($file_type == 'file') {
 					$filepath = urlencode(str_ireplace($cfg['media_dir'],'', $topdir));

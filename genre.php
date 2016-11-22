@@ -580,6 +580,7 @@ function blacklist() {
 	<td class="tab_off" onClick="location.href='index.php?action=viewRandomAlbum';">Album</td>
 	<td class="tab_none tabspace"></td>
 	<td class="tab_off" onClick="location.href='index.php?action=viewRandomTrack';">Track</td>
+	<td class="tab_off" onClick="location.href='index.php?action=viewRandomFile';">File</td>
 	<td class="tab_none tabspace"></td>
 	<td class="tab_on" onClick="location.href='genre.php?action=blacklist';">Blacklist</td>
 	<td class="tab_none">&nbsp;</td>

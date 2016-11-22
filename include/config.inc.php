@@ -69,8 +69,9 @@ $cfg['group_multidisc'] = true;
 
 
 
+
 //  +------------------------------------------------------------------------+
-//  | Multidisc indicators                                                   |
+//  | Multi-disc indicators                                                  |
 //  +------------------------------------------------------------------------+
 //  | Strings in album title indicating that album is a part                 |
 //  | of multi-disc set                                                      |
@@ -86,6 +87,7 @@ $cfg['multidisk_indicator'][] = " Vol.";
 
 
 
+
 //  +------------------------------------------------------------------------+
 //  | Other versions of album                                                |
 //  +------------------------------------------------------------------------+
@@ -96,8 +98,9 @@ $cfg['show_album_versions'] = true;
 
 
 
+
 //  +------------------------------------------------------------------------+
-//  | Multidisc indicators                                                   |
+//  | Other versions of album indicators                                     |
 //  +------------------------------------------------------------------------+
 //  | Strings in album title indicating that album may have other versions   |
 //  | e.g. " (" in:                                                          |
@@ -112,7 +115,22 @@ $cfg['album_versions_indicator'][] = ", ";
 
 
 
-//	+------------------- END OF NEW IN O!MPD 1.02 ---------------------------+
+
+//  +------------------------------------------------------------------------+
+//  | Directory Blacklist (those dirnames will not be scanned)               |
+//  +------------------------------------------------------------------------+
+unset($cfg['directory_blacklist']);
+
+$cfg['directory_blacklist'][]       = 'lost+found';
+$cfg['directory_blacklist'][]       = 'Temporary Items';
+$cfg['directory_blacklist'][]       = 'Network Trash Folder';
+$cfg['directory_blacklist'][]       = 'System Volume Information';
+$cfg['directory_blacklist'][]       = 'RECYCLER';
+$cfg['directory_blacklist'][]       = '$RECYCLE.BIN';
+$cfg['directory_blacklist'][]       = '.@__thumb';
+
+
+//	+------------------- END OF NEW IN O!MPD 1.03 ---------------------------+
 
 
 
@@ -406,22 +424,6 @@ $cfg['bin_dir']                     = '/opt/bin/';
 //  | web server has access to the path set in $cfg['external_storage']      |
 //  +------------------------------------------------------------------------+
 $cfg['external_storage']            = '/share/Usb/';
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Directory Blacklist (those dirnames will not be scanned)               |
-//  +------------------------------------------------------------------------+
-unset($cfg['directory_blacklist']);
-
-$cfg['directory_blacklist'][]       = 'lost+found';
-$cfg['directory_blacklist'][]       = 'Temporary Items';
-$cfg['directory_blacklist'][]       = 'Network Trash Folder';
-$cfg['directory_blacklist'][]       = 'System Volume Information';
-$cfg['directory_blacklist'][]       = 'RECYCLER';
-$cfg['directory_blacklist'][]       = '$RECYCLE.BIN';
-$cfg['directory_blacklist'][]       = '.@__thumb';
 
 
 
