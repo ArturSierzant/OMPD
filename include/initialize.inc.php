@@ -763,4 +763,27 @@ function checkDefaultBlacklist() {
 	//echo 'id=' . $cfg['favorite_id'];
 }
 
+
+//  +------------------------------------------------------------------------+
+//  | Log into file for debuggung purposes                                   |
+//  | TODO: why is this accomplished by php's error_log() function?          |
+//  +------------------------------------------------------------------------+
+function cliLog($message) {
+    global $cfg;
+
+    if (!$cfg['debug']) {
+        return;
+    }
+    if($cfg['debug_memory'] !== FALSE) {
+        $message = "[" . convert(memory_get_usage(true)) . "] " . $message;
+    }
+    ini_set('log_errors', 'On');
+    error_log($message . "\n", 3, NJB_HOME_DIR . 'tmp/update_log.txt');
+}
+
+function convert($size) {
+    $unit = array('B','K','M','G','T','P');
+    return @number_format($size/pow(1024,($i=floor(log($size,1024)))),1).$unit[$i];
+}
+
 ?>

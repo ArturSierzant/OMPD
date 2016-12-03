@@ -887,6 +887,7 @@ $cfg['offline_message']             = '[b]This site is temporarily unavailable.[
 //  | $cfg['php_info'] - displays 'PHP information' in 'Configuration'       |
 //  +------------------------------------------------------------------------+
 $cfg['debug']                       = false;
+$cfg['debug_memory']                = false;
 $cfg['php_info']                    = true;
 
 

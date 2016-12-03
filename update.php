@@ -40,11 +40,6 @@ require_once('include/library.inc.php');
 ignore_user_abort(true);
 
 //exit();
-$logFile = '';
-if ($cfg['debug']) {
-	$logFile = NJB_HOME_DIR . 'tmp/update_log.txt';
-	ini_set('log_errors', 'On');
-}
 
 $cfg['menu'] = 'config';
 
@@ -52,7 +47,7 @@ $action = getpost('action');
 
 $flag	= (int) getpost('flag');
 
-if ($logFile != '') error_log("Update started " . $logFile . "\n", 3, $logFile);
+cliLog("Update started");
 
 if		(PHP_SAPI == 'cli')					cliUpdate();
 elseif	($action == 'update')				update();
@@ -72,7 +67,7 @@ exit();
 //  +------------------------------------------------------------------------+
 function update() {
 
-	global $cfg, $db, $lastGenre_id, $getID3, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $last_update, $file, $logFile;
+	global $cfg, $db, $lastGenre_id, $getID3, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $last_update, $file;
 	authenticate('access_admin', false, true);
 	
 	
@@ -82,7 +77,7 @@ function update() {
 	$cfg['cli_update'] = false;
 	$startTime = new DateTime();
 	
-	if ($logFile != '') error_log("Update start time: " . date("Ymd H:i:s") . "\n", 3, $logFile);
+	cliLog("Update start time: " . date("Ymd H:i:s"));
 
 	$path = $cfg['media_dir'];
 	$curFilesCounter = 0;
@@ -389,7 +384,7 @@ function update() {
 			last_update = '" . date('Y-m-d, H:i:s')   . "'
 			");
 		
-		if ($logFile != '') error_log("Update stop time: " . date("Ymd H:i:s") . "\n", 3, $logFile);
+		cliLog("Update stop time: " . date("Ymd H:i:s"));
 		backgroundQueries();
 	}
 	else {
@@ -414,65 +409,83 @@ function update() {
 //  | Recursive scan                                                         |
 //  +------------------------------------------------------------------------+
 function recursiveScan($dir) {
-	global $cfg, $db, $logFile;
-	
-	$album_id	= '';
-	$file		= array();
-	$filename	= array();
-	
-	if ($logFile != '') error_log("recursiveScan: " . $dir . "\n", 3, $logFile);
-	if ($cfg['ignore_media_dir_access_error']) {
-		$entries = @scandir($dir);
+    global $cfg, $db;
+
+    $album_id = '';
+    $file     = array();
+    $filename = array();
+
+    cliLog("recursiveScan: " . $dir);
+    // TODO: consider to remove. @see https://github.com/ArturSierzant/OMPD/issues/15
+    if ($cfg['ignore_media_dir_access_error']) {
+        $entries = @scandir($dir);
+    }
+    else {
+        $entries = @scandir($dir) or message(__FILE__, __LINE__, 'error', '[b]Failed to open directory:[/b][br]' . $dir . '[list][*]Check media_dir value in the config.inc.php file[*]Check file permission[/list]');
+    }
+
+    foreach ($entries as $entry) {
+        if ($entry[0] === '.' || in_array($entry, $cfg['directory_blacklist']) === TRUE) {
+            continue;
+        }
+        if (is_dir($dir . $entry . '/')) {
+            recursiveScan($dir . $entry . '/');
+            continue;
+        }
+
+        $extension = strtolower(substr(strrchr($entry, '.'), 1));
+        if (in_array($extension, $cfg['media_extension'])) {
+            $entry = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $entry);
+            $dir_d = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $dir);
+            $file[]     = $dir_d . $entry;
+            $filename[] = substr($entry, 0, -strlen($extension) - 1);
+            continue;
+        }
+        if ($extension == 'id') {
+            $album_id = substr($entry, 0, -3);
+        }
 	}
-	else {
-		$entries = @scandir($dir) or message(__FILE__, __LINE__, 'error', '[b]Failed to open directory:[/b][br]' . $dir . '[list][*]Check media_dir value in the config.inc.php file[*]Check file permission[/list]');
-	}
-	
-	foreach ($entries as $entry) {
-		if ($entry[0] != '.' && in_array($entry, $cfg['directory_blacklist']) === FALSE) {
-			if (is_dir($dir . $entry . '/'))
-				recursiveScan($dir . $entry . '/');
-			else {
-				$extension = substr(strrchr($entry, '.'), 1);
-				$extension = strtolower($extension);
-				if (in_array($extension, $cfg['media_extension'])) {
-					$entry = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $entry);
-					$dir_d = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $dir);
-					$file[] 	= $dir_d . $entry;
-					$filename[] = substr($entry, 0, -strlen($extension) - 1);
-				}
-				elseif ($extension == 'id')
-					$album_id = substr($entry, 0, -3);
-			}
-		}
-	}
-	
-	
-	if (count($file) > 0) {
-		mysqli_query($db,"UPDATE album_id SET 
-		updated		= '1'
-		WHERE 
-		path		= '" . mysqli_real_escape_string($db,$dir) . "'
-		LIMIT 1");
-		
-		if (mysqli_affected_rows($db) == 0) {
-			if ($album_id == '') $album_id = base_convert(uniqid(), 16, 36);
-			$album_add_time = time();
-			mysqli_query($db,"INSERT INTO album_id (album_id, path, album_add_time, updated) VALUES
-			('" . mysqli_real_escape_string($db,$album_id) . "','" . mysqli_real_escape_string($db,$dir) . "','" . $album_add_time . "','1')");
-		}
-		else {
-			$ids = mysqli_query($db,"SELECT album_id, album_add_time FROM album_id WHERE
-			path = '" . mysqli_real_escape_string($db,$dir) . "' LIMIT 1");
-			$row = mysqli_fetch_assoc($ids);
-			$album_id = $row["album_id"];
-			$album_add_time = $row["album_add_time"];
-		}
-		
-		if ($logFile != '') error_log( "Going into fileStructure for album_id: " . $album_id . "\n", 3, $logFile);
-		
-		fileStructure($dir, $file, $filename, $album_id, $album_add_time);
-	}
+
+    if (count($file) === 0) {
+        unset($entries);
+        unset($entry);
+        unset($filename);
+        unset($file);
+        unset($dir);
+        return;
+    }
+
+    $db->query("
+        UPDATE album_id
+        SET updated = '1'
+        WHERE path = '" . $db->real_escape_string($dir) . "'
+        LIMIT 1"
+    );
+    if ($db->affected_rows == 0) {
+        $album_id = ($album_id == '') ? base_convert(uniqid(), 16, 36) : $album_id;
+        $album_add_time = time();
+        $db->query("
+            INSERT INTO album_id
+                (album_id, path, album_add_time, updated)
+            VALUES
+                ('" . $album_id . "',
+                '" . $db->real_escape_string($dir) . "',
+                '" . $album_add_time . "','1')"
+        );
+    } else {
+        $result = $db->query("
+           SELECT album_id, album_add_time
+           FROM album_id
+           WHERE path = '" . $db->real_escape_string($dir) . "'
+           LIMIT 1"
+        );
+        $row = $result->fetch_assoc();
+        $album_id = $row["album_id"];
+        $album_add_time = $row["album_add_time"];
+        $result->free_result();
+    }
+    cliLog("Going into fileStructure for album_id: " . $album_id);
+    fileStructure($dir, $file, $filename, $album_id, $album_add_time);
 }
 
 
@@ -519,7 +532,7 @@ function countDirectories($base_dir) {
 //  | File structure                                                         |
 //  +------------------------------------------------------------------------+
 Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
-	global $cfg, $db, $lastGenre_id, $getID3, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $prevDirsCounter, $last_update, $logFile, $image, $flag, $image_front;
+	global $cfg, $db, $lastGenre_id, $getID3, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $prevDirsCounter, $last_update, $image, $flag, $image_front;
 	
 	
 	// Also needed for track update!
@@ -615,7 +628,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	}
 	
 	if ($isUpdateRequired) {
-		if ($logFile != '') error_log("fileStructure file[0]: " . $file[0] . "\n  mem: " . convert(memory_get_usage(true)) . "\n", 3, $logFile);
+		cliLog("fileStructure file[0]: " . $file[0]);
 
 		$file_d = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file[0]);
 		
@@ -714,7 +727,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 		$number		= NULL;
 		
 		for ($i=0; $i < count($filename); $i++) {
-			if ($logFile != '') error_log("fileStructure TrackUpdate: " . $file[$i] . "\n", 3, $logFile);
+			cliLog("fileStructure TrackUpdate: " . $file[$i]);
 			
 			$relative_file = substr($file[$i], strlen($cfg['media_dir']));
 			
@@ -846,11 +859,11 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	$flag = 0; // No image
 	$misc_tracks = false;
 	
-	if ($logFile != '') error_log("fileStructure ImageUpdate: " . $file[0] . "\n", 3, $logFile);
+	cliLog("fileStructure ImageUpdate: " . $file[0]);
 	
 	$dir_d = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir);
 	
-	if ($logFile != '') error_log("fileStructure ImageUpdate d: " . var_export(is_file($dir . $cfg['image_front'] . '.jpg'),true) . "\n", 3, $logFile);
+	cliLog("fileStructure ImageUpdate d: " . var_export(is_file($dir . $cfg['image_front'] . '.jpg'),true));
 	
 	if		(is_file($dir . $cfg['image_front'] . '.jpg')) { $image = $dir . $cfg['image_front'] . '.jpg'; $flag = 3;} // Stored image
 	elseif	(is_file($dir . $cfg['image_front'] . '.png')) { $image = $dir . $cfg['image_front'] . '.png'; $flag = 3; } // Stored image
@@ -861,7 +874,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	}
 	elseif	($cfg['image_read_embedded']) {
 		
-		if ($logFile != '') error_log("fileStructure ImageUpdateEmbeded: " . $file[0] . "\n", 3, $logFile);
+		cliLog("fileStructure ImageUpdateEmbeded: " . $file[0]);
 		$file_d = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file[0]);
 		$ThisFileInfo = $getID3->analyze($file_d);
 		getid3_lib::CopyTagsToComments($ThisFileInfo); 
@@ -921,7 +934,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 		$image_id = (($flag == 3) ? $album_id : 'no_image');
 		$image_id .= '_' . base_convert(NJB_IMAGE_SIZE * 100 + NJB_IMAGE_QUALITY, 10, 36) . base_convert($filemtime, 10, 36) . base_convert($filesize, 10, 36);
 		
-		//if ($logFile != '') error_log("imagesize - image_id - image: " . $imagesize . " - " . $image_id . " - " . $image . " - " . $filesize . " - " . $filemtime . "\n", 3, $logFile);
+		//cliLog("imagesize - image_id - image: " . $imagesize . " - " . $image_id . " - " . $image . " - " . $filesize . " - " . $filemtime);
 		
 		$image_front = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $image_front);
 	
@@ -997,26 +1010,18 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 };
 
 
-function convert($size)
-{
-	$unit = array('b','kb','mb','gb','tb','pb');
-	return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
-}
-
 //  +------------------------------------------------------------------------+
 //  | File info loop                                                         |
 //  +------------------------------------------------------------------------+
 function fileInfoLoop() {
-	global $cfg, $db, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $prevDirsCounter, $prevFilesCounter, $logFile;
+	global $cfg, $db, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $prevDirsCounter, $prevFilesCounter;
 
     $filesCounter = $db->query("
         SELECT COUNT(track_id) AS totalTracks
         FROM track
         WHERE updated;")->fetch_assoc()['totalTracks'];
 
-    if ($logFile != '') {
-        error_log( "TOTAL FILES TO SCAN: " . $filesCounter . "\n", 3, $logFile);
-    }
+    cliLog( "TOTAL FILES TO SCAN: " . $filesCounter);
 
     // Initialize getID3
     $getID3 = new getID3;
@@ -1028,9 +1033,7 @@ function fileInfoLoop() {
     $batchSize = 1000;
     $batchCounter = 0;
     while($continue === TRUE) {
-        if ($logFile != '') {
-            error_log( "processing batch LIMIT  " . $curFilesCounter . ",". $batchSize."\n  mem: " . convert(memory_get_usage(true)) . "\n", 3, $logFile);
-        }
+        cliLog("processing batch LIMIT  " . $curFilesCounter . ",". $batchSize);
         $query = "
             SELECT relative_file, filesize, filemtime, album_id
             FROM track
@@ -1061,7 +1064,7 @@ function fileInfoLoop() {
 //  | File info for a single file                                            |
 //  +------------------------------------------------------------------------+
 function fileInfo($track, $getID3 = NULL) {
-    global $cfg, $db, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $prevDirsCounter, $prevFilesCounter, $logFile, $updated;
+    global $cfg, $db, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $prevDirsCounter, $prevFilesCounter, $updated;
 
     if($getID3 === NULL) {
         $getID3 = new getID3;
@@ -1071,9 +1074,7 @@ function fileInfo($track, $getID3 = NULL) {
     $file = $cfg['media_dir'] . $track['relative_file'];
     //convert file names to default charset
     $file = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file);
-    if ($logFile != '') {
-        error_log( "fileInfo: [" . $curFilesCounter . "] " . $file . "\n", 3, $logFile);
-    }
+    cliLog( "fileInfo: [" . $curFilesCounter . "] " . $file);
 
     // TODO: do not exit the whole import/update procedure in case single files are not processable
     if (is_file($file) == false) {
@@ -1810,7 +1811,7 @@ function imageUpload($flag_flow) {
 //  | Resample image                                                         |
 //  +------------------------------------------------------------------------+
 Function resampleImage($image, $size = NJB_IMAGE_SIZE) {
-	global $logFile, $image, $flag, $image_front;
+	global $image, $flag, $image_front;
 	$extension = strtolower(substr(strrchr($image, '.'), 1));
 	/* 
 	if		($extension == 'jpg')	$src_image = @imageCreateFromJpeg($image)	or message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]' . $image);
@@ -1862,7 +1863,7 @@ Function resampleImage($image, $size = NJB_IMAGE_SIZE) {
 	
 	imageDestroy($src_image);
 	
-	//error_log("image data: " . $data . "\n", 3, $logFile);
+	//cliLog("image data: " . $data);
 	
 	return $data;
 }
