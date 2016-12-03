@@ -59,6 +59,7 @@ function parseTrackNumber($data) {
     if (isset($data['comments']['track_number'][0])) {
         return postProcessTrackNumber($data['comments']['track_number'][0]);
     }
+    // TODO: handling NULL-values when building the query. for now return a string
     return 'NULL';
 }
 
@@ -78,6 +79,7 @@ function parseYear($data) {
     if (isset($data['comments']['creation_date'][0])) {
         return postProcessYear($data['comments']['creation_date'][0]);
     }
+    // TODO: handling NULL-values when building the query. for now return a string
     return 'NULL';
 }
 
@@ -89,6 +91,12 @@ function postProcessYear($yearString) {
 }
 
 function parseComment($data) {
+    if(isset($data['comments']['comment']) === FALSE) {
+        return '';
+    }
+    if(is_array($data['comments']['comment']) === FALSE) {
+        return '';
+    }
     $commentsArray = array_values($data['comments']['comment']);
     if(isset($commentsArray[0])) {
         return $commentsArray[0];
@@ -220,6 +228,7 @@ function parseAudioDynamicRange($data) {
     if(isset($data['tags']['id3v2']['text']['DYNAMIC RANGE'])) {
         return intval($data['tags']['id3v2']['text']['DYNAMIC RANGE']);
     }
+    // TODO: handling NULL-values when building the query. for now return a string
     return 'NULL';
 }
 
