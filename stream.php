@@ -38,7 +38,7 @@ $action		= get('action');
 $album_id	= get('album_id');
 
 if		($action == 'playlist')		playlist();
-elseif	($action == 'playTo')		playTo();
+//elseif	($action == 'playTo')		playTo();
 elseif	($action == 'stream')		stream();
 elseif	($action == 'streamTo')		streamTo();
 elseif	($action == 'shareAlbum')	shareAlbum($album_id);
@@ -177,7 +177,7 @@ function playlist() {
 	$entries = @scandir($dir) or message(__FILE__, __LINE__, 'error', '[b]Failed to open directory:[/b][br]' . $dir);
 	foreach ($entries as $entry) {
 		$file = $dir . $entry;
-		if (!in_array($entry, array('.', '..', 'index.php')) && is_file($file) && filemtime($file) < filemtime(NJB_HOME_DIR . $m3u) - 86400)
+		if (!in_array($entry, array('.', '..', 'index.php','.gitignore')) && is_file($file) && filemtime($file) < filemtime(NJB_HOME_DIR . $m3u) - 86400)
 			@unlink($file);
 	}
 	
@@ -189,7 +189,7 @@ function playlist() {
 	exit();
 }
 
-
+/* 
 
 //  +------------------------------------------------------------------------+
 //  | Play to                                                                |
@@ -354,7 +354,7 @@ function playTo() {
 	echo safe_json_encode($data);	
 	exit();
 }
-
+ */
 
 
 
