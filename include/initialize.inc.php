@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | O!MPD, Copyright Â© 2015-2016 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright Â© 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -176,6 +176,7 @@ if (function_exists('iconv') == false)
 //  +------------------------------------------------------------------------+
 require_once(NJB_HOME_DIR . 'include/library.inc.php');
 require_once(NJB_HOME_DIR . 'include/globalize.inc.php');
+require_once(NJB_HOME_DIR . 'include/tagProcessor.inc.php');
 
 // To prevent mysql error snowball effect, and to speed up the message.php and cache.php script.
 if (NJB_SCRIPT != 'message.php' && NJB_SCRIPT != 'cache.php')

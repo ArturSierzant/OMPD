@@ -345,7 +345,7 @@ function update() {
 		$cfg['timer'] = 0; // force update
 		
 		
-		fileInfo();
+		fileInfoLoop();
 		
 		updateGenre();
 		
@@ -533,7 +533,9 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	$aGenre 			= 'Unknown Genre';
 	$aGenre_id			= 0;
 	$album_dr			= NULL;
+
 	$isUpdateRequired	= false;
+    $new_array          = array();
 	
 	if ($cfg['name_source'] != 'tags') {
 		if (preg_match('#^(0{0,1}1)(0{1,3}1)+\.\s+.+#', $filename[0], $match) && preg_match('#^(\d{' . strlen($match[1] . $match[2]) . '})+\.\s+.+#', $filename[count($filename)-1])) {
@@ -613,7 +615,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	}
 	
 	if ($isUpdateRequired) {
-		if ($logFile != '') error_log("fileStructure file[0]: " . $file[0] . "\n", 3, $logFile);
+		if ($logFile != '') error_log("fileStructure file[0]: " . $file[0] . "\n  mem: " . convert(memory_get_usage(true)) . "\n", 3, $logFile);
 
 		$file_d = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file[0]);
 		
@@ -995,245 +997,161 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 };
 
 
+function convert($size)
+{
+	$unit = array('b','kb','mb','gb','tb','pb');
+	return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
+}
 
 //  +------------------------------------------------------------------------+
-//  | File info                                                              |
+//  | File info loop                                                         |
 //  +------------------------------------------------------------------------+
-function fileInfo() {
+function fileInfoLoop() {
 	global $cfg, $db, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $prevDirsCounter, $prevFilesCounter, $logFile;
-	
-	
-	$year = NULL;
-	$dr = NULL;
-	// Initialize getID3
-	$getID3 = new getID3;
-	//initial settings for getID3:
-	include 'include/getID3init.inc.php';
-	
-	$updated = false;
-	$query = mysqli_query($db,'SELECT relative_file, filesize, filemtime, album_id FROM track WHERE updated ORDER BY relative_file');
-	$filesCounter = mysqli_num_rows($query);
-	while ($track = mysqli_fetch_assoc($query)) {
-		++$curFilesCounter;
-		$file = $cfg['media_dir'] . $track['relative_file'];
-		//convert file names to default charset
-		$file = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file);
-		if ($logFile != '') error_log( "fileInfo: " . $file . "\n", 3, $logFile);
-		if (is_file($file) == false)
-			message(__FILE__, __LINE__, 'error', '[b]Failed to read file:[/b][br]' . $file . '[list][*]Update again[*]Check file permission[/list]');
-		
-		$filemtime = filemtime($file);
-		$filesize = filesize($file);
-		$force_filename_update = false;
-		
-		if ($filesize != $track['filesize'] || filemtimeCompare($filemtime, $track['filemtime']) == false || $force_filename_update) {
-			if ($cfg['cli_update'] == false && ((microtime(true) - $cfg['timer']) * 1000) > $cfg['update_refresh_time'] && ($curFilesCounter/$filesCounter > ($prevFilesCounter/$filesCounter + 0.005))) {
-				$prevFilesCounter = $curFilesCounter;
-				
-				mysqli_query($db,'update update_progress set 
-				file_info = "<div class=\'out\'><div class=\'in\' style=\'width:' . html(floor($curFilesCounter/$filesCounter * 200)) . 'px\'></div></div> ' . html(floor($curFilesCounter/$filesCounter * 100)) . '%"');
-				
-				$cfg['timer'] = microtime(true);
-				$updated = true;
-			}
-			if ($cfg['cli_update'] && $cfg['cli_silent_update'] == false)
-				echo $file . "\n";
-					
-			//$file = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET,'UTF-8', $file);			
-			$ThisFileInfo = $getID3->analyze($file);
-			getid3_lib::CopyTagsToComments($ThisFileInfo);
-			//print $ThisFileInfo['id3v1']['genre'];
-			$mime_type					= (isset($ThisFileInfo['mime_type'])) ? $ThisFileInfo['mime_type'] : 'application/octet-stream';
-			$miliseconds				= (isset($ThisFileInfo['playtime_seconds'])) ? round($ThisFileInfo['playtime_seconds'] * 1000) : 0;
-			$audio_bitrate				= 0;
-			$audio_bits_per_sample		= 0;
-			$audio_sample_rate			= 0;
-			$audio_channels				= 0;
-			$audio_lossless				= 0;
-			$audio_compression_ratio	= 0;
-			$audio_dataformat			= '';
-			$audio_encoder 				= '';
-			$audio_bitrate_mode			= '';
-			$audio_profile				= '';
-			$video_dataformat			= '';
-			$video_codec				= '';
-			$video_resolution_x			= 0;
-			$video_resolution_y			= 0;
-			$video_framerate			= 0;
-			$track_id					= $track['album_id'] . '_' . fileId($file);
-			$error						= (isset($ThisFileInfo['error'])) ? implode('<br>', $ThisFileInfo['error']) : '';
-			
-			if (isset($ThisFileInfo['comments']['albumartist'][0])) 
-				$artist = $ThisFileInfo['comments']['albumartist'][0];
-			elseif (isset($ThisFileInfo['comments']['band'][0]))
-				$artist = $ThisFileInfo['comments']['band'][0];
-			//elseif (isset($ThisFileInfo['ape']['comments']['albumartist'][0])) 
-			//	$artist = $ThisFileInfo['ape']['comments']['albumartist'][0];
-			else
-				$artist = 'Unknown AlbumArtist';
-			
-			
-			//if (isset($ThisFileInfo['comments']['artist'][1])) 
-			//	$track_artist = $ThisFileInfo['comments']['artist'][1];
-			if (isset($ThisFileInfo['comments']['artist'][0])) 
-				$track_artist = $ThisFileInfo['comments']['artist'][0]; 
-			/* elseif	(isset($ThisFileInfo['id3v2']['comments']['artist'][0]))
-				$track_artist = $ThisFileInfo['id3v2']['comments']['artist'][0]; 
-			elseif (isset($ThisFileInfo['ape']['comments']['artist'][0])) 
-				$track_artist = $ThisFileInfo['ape']['comments']['artist'][0]; */
-			else 
-				$track_artist = 'Unknown TrackArtist';
-			
-			//if (isset($ThisFileInfo['comments']['title'][1])) 
-			//	$title = $ThisFileInfo['comments']['title'][1];
-			if (isset($ThisFileInfo['comments']['title'][0])) 
-				$title = $ThisFileInfo['comments']['title'][0]; 
-			/* elseif (isset($ThisFileInfo['id3v2']['comments']['title'][0])) 
-				$title = $ThisFileInfo['id3v2']['comments']['title'][0];
-			elseif(isset($ThisFileInfo['ape']['comments']['title'][0])) 
-				$title = $ThisFileInfo['ape']['comments']['title'][0]; */
-			else
-				$title = 'Unknown Title';
-			
-			if (isset($ThisFileInfo['comments']['track'][0])) $number = $ThisFileInfo['comments']['track'][0];
-			elseif (isset($ThisFileInfo['comments']['tracknumber'][0])) $number = $ThisFileInfo['comments']['tracknumber'][0];
-			elseif (isset($ThisFileInfo['comments']['track_number'][0])) $number = $ThisFileInfo['comments']['track_number'][0];
-			else $number = NULL;
-			//support for track_number in form: 01/11
-			$numbers = explode("/", $number);
-			$number = $numbers[0];
-			
-			if (isset($ThisFileInfo['comments']['genre'][0]))
-				$genre = $ThisFileInfo['comments']['genre'][0];
-			/* elseif (isset($ThisFileInfo['id3v2']['comments']['genre'][0])) 
-				$genre = $ThisFileInfo['id3v2']['comments']['genre'][0];
-			elseif (isset($ThisFileInfo['ape']['comments']['genre'][0])) 
-				$genre = $ThisFileInfo['ape']['comments']['genre'][0]; */
-			else
-				$genre = 'Unknown Genre';
-			
-			$a = array_values($ThisFileInfo['comments']['comment']);
-			if (isset($a[0]))
-				$comment = $a[0];
-			/* elseif (isset($ThisFileInfo['id3v2']['comments']['comment'][0]))
-				$comment = $ThisFileInfo['id3v2']['comments']['comment'][0];
-			elseif (isset($ThisFileInfo['ape']['comments']['comment'][0])) 
-				$comment = $ThisFileInfo['ape']['comments']['comment'][0]; */
-			else 
-				$comment = '';
-			
-			if (isset($ThisFileInfo['comments']['year'][0])) $year = $ThisFileInfo['comments']['year'][0];
-			elseif (isset($ThisFileInfo['comments']['date'][0])) $year = $ThisFileInfo['comments']['date'][0];
-			elseif (isset($ThisFileInfo['comments']['creation_date'][0])) $year = $ThisFileInfo['comments']['creation_date'][0];
-			else $year = NULL;
-			
-			if (preg_match('#[1][9][0-9]{2}|[2][0-9]{3}#', $year, $match)) {
-				$year	= $match[0];
-			}
-		
-			if (isset($ThisFileInfo['comments']['dynamic range'][0])) $dr = $ThisFileInfo['comments']['dynamic range'][0];
-			elseif (isset($ThisFileInfo['tags']['id3v2']['text']['DYNAMIC RANGE'])) $dr = $ThisFileInfo['tags']['id3v2']['text']['DYNAMIC RANGE'];
-			
-			
-			/* if (isset($ThisFileInfo['comments']['date'][0])) $year = $ThisFileInfo['comments']['date'][0];
-			elseif (isset($ThisFileInfo['comments']['year'][0])) $year = $ThisFileInfo['comments']['year'][0]; */
 
-			if (isset($ThisFileInfo['audio']['dataformat'])) {
-				$audio_dataformat = $ThisFileInfo['audio']['dataformat'];
-				$audio_encoder = (isset($ThisFileInfo['audio']['encoder'])) ? $ThisFileInfo['audio']['encoder'] : 'Unknown encoder';
-				
-				if (isset($ThisFileInfo['mpc']['header']['profile']))			$audio_profile = $ThisFileInfo['mpc']['header']['profile'];
-				if (isset($ThisFileInfo['aac']['header']['profile_text']))		$audio_profile = $ThisFileInfo['aac']['header']['profile_text'];
-				
-				if (empty($ThisFileInfo['audio']['lossless']) == false) {
-					$audio_lossless = 1;
-					if (empty($ThisFileInfo['audio']['compression_ratio']) == false) {
-						if ($ThisFileInfo['audio']['compression_ratio'] == 1)
-						$audio_profile = 'Lossless';
-						else $audio_profile = 'Lossless compression';
-					}
-					else $audio_profile = 'Lossless';
-				}
-				
-				if (isset($ThisFileInfo['audio']['compression_ratio']))			$audio_compression_ratio = $ThisFileInfo['audio']['compression_ratio'];
-				if (isset($ThisFileInfo['audio']['bitrate_mode']))				$audio_bitrate_mode = $ThisFileInfo['audio']['bitrate_mode'];
-				if (isset($ThisFileInfo['audio']['bitrate']))					$audio_bitrate = $ThisFileInfo['audio']['bitrate'];
-				if (!$audio_profile)											$audio_profile = $audio_bitrate_mode . ' ' . round($audio_bitrate / 1000, 1) . '  kbps';
-			
-				$audio_bits_per_sample	= (isset($ThisFileInfo['audio']['bits_per_sample'])) ? $ThisFileInfo['audio']['bits_per_sample'] : 16;
-				$audio_sample_rate		= (isset($ThisFileInfo['audio']['sample_rate'])) ? $ThisFileInfo['audio']['sample_rate'] : 44100;
-				$audio_channels			= (isset($ThisFileInfo['audio']['channels'])) ? $ThisFileInfo['audio']['channels'] : 2;
-				$audio_bitrate			= round($audio_bitrate); // integer in database					
-			}
-			if (isset($ThisFileInfo['video']['dataformat'])) {
-				$video_dataformat = $ThisFileInfo['video']['dataformat'];
-				$video_codec = (isset($ThisFileInfo['video']['codec'])) ? $ThisFileInfo['video']['codec'] : 'Unknown codec';
-				
-				if (isset($ThisFileInfo['video']['resolution_x']))		$video_resolution_x	= $ThisFileInfo['video']['resolution_x'];
-				if (isset($ThisFileInfo['video']['resolution_y']))		$video_resolution_y	= $ThisFileInfo['video']['resolution_y'];
-				if (isset($ThisFileInfo['video']['frame_rate']))		$video_framerate	= $ThisFileInfo['video']['frame_rate'] . ' fps';
-			}
-	
-			mysqli_query($db,'UPDATE track SET
-				mime_type					= "' . mysqli_real_escape_string($db,$mime_type) . '",
-				filesize					= ' . (int) $filesize . ',
-				filemtime					= ' . (int) $filemtime . ',
-				miliseconds					= ' . (int) $miliseconds . ',
-				audio_bitrate				= ' . (int) $audio_bitrate . ',
-				audio_bits_per_sample		= ' . (int) $audio_bits_per_sample . ',
-				audio_sample_rate			= ' . (int) $audio_sample_rate . ',
-				audio_channels				= ' . (int) $audio_channels . ',
-				audio_lossless				= ' . (int) $audio_lossless . ',
-				audio_compression_ratio		= ' . (float) $audio_compression_ratio . ',			
-				audio_dataformat			= "' . mysqli_real_escape_string($db,$audio_dataformat) . '",
-				audio_encoder 				= "' . mysqli_real_escape_string($db,$audio_encoder) . '",
-				audio_profile				= "' . mysqli_real_escape_string($db,$audio_profile) . '",
-				video_dataformat			= "' . mysqli_real_escape_string($db,$video_dataformat) . '",
-				video_codec					= "' . mysqli_real_escape_string($db,$video_codec) . '",
-				video_resolution_x			= ' . (int) $video_resolution_x . ',
-				video_resolution_y			= ' . (int) $video_resolution_y . ',
-				video_framerate				= ' . (int) $video_framerate . ',
-				error						= "' . mysqli_real_escape_string($db,$error) . '",
-				track_id					= "' . mysqli_real_escape_string($db,$track_id) . '",
-				number					= "' . mysqli_real_escape_string($db,$number) . '",
-				genre			= "' . mysqli_real_escape_string($db,$genre) . '",
-				title			= "' . mysqli_real_escape_string($db,$title) . '",
-				artist			= "' . mysqli_real_escape_string($db,$track_artist) . '",
-				comment			= "' . mysqli_real_escape_string($db,$comment) . '",
-				track_artist			= "' . mysqli_real_escape_string($db,$track_artist) . '",
-				year			= ' . ((is_null($year)) ? 'NULL' : (int) $year) . ',
-				dr		= ' . ((is_null($dr)) ? 'NULL' : (int) $dr) . '
-				WHERE relative_file 		= BINARY "' . mysqli_real_escape_string($db,$track['relative_file']) . '"');
-			}
-		/* if ($updated && ((microtime(true) - $cfg['timer']) * 1000) > 500) {
-			echo '<script type="text/javascript">document.getElementById(\'fileinfo\').innerHTML=\'<img src="' . $cfg['img'] . 'small_animated_progress.gif" alt="" class="small">\';</script>' . "\n";
-			@ob_flush();
-			flush();
-			$updated = false;
-		} */
-	
-		if ($cfg['name_source'] != 'tags') {
-			
-			$result = mysqli_query($db,'SELECT genre_id FROM genre WHERE genre="' . mysqli_real_escape_string($db,$genre) . '"');
-			if (mysqli_num_rows($result)==0) {	
-				mysqli_query($db,'INSERT INTO genre (genre_id, genre)
-							VALUES ("' . mysqli_real_escape_string($db,$lastGenre_id) . '",
-									"' . mysqli_real_escape_string($db,$genre) . '")');
-				$aGenre_id = $lastGenre_id;
-				++$lastGenre_id;
-				
-			} else {
-					$row=mysqli_fetch_assoc($result);
-					$genre_id=$row["genre_id"];
-			}	
-		}
-	
-	}
-	// Close getID3				
-	unset($getID3);
+    $filesCounter = $db->query("
+        SELECT COUNT(track_id) AS totalTracks
+        FROM track
+        WHERE updated;")->fetch_assoc()['totalTracks'];
+
+    if ($logFile != '') {
+        error_log( "TOTAL FILES TO SCAN: " . $filesCounter . "\n", 3, $logFile);
+    }
+
+    // Initialize getID3
+    $getID3 = new getID3;
+    //initial settings for getID3:
+    include 'include/getID3init.inc.php';
+
+    $updated = FALSE;
+    $continue = TRUE;
+    $batchSize = 1000;
+    $batchCounter = 0;
+    while($continue === TRUE) {
+        if ($logFile != '') {
+            error_log( "processing batch LIMIT  " . $curFilesCounter . ",". $batchSize."\n  mem: " . convert(memory_get_usage(true)) . "\n", 3, $logFile);
+        }
+        $query = "
+            SELECT relative_file, filesize, filemtime, album_id
+            FROM track
+            WHERE updated
+            ORDER BY relative_file
+            LIMIT " . $curFilesCounter . "," . $batchSize . ";";
+        $result = $db->query($query);
+        while($track = $result->fetch_assoc()) {
+            $curFilesCounter++;
+            fileInfo($track, $getID3);
+        }
+        // free some memory
+        $result->free_result();
+
+        // reset getID3
+        unset($getID3);
+        $getID3 = new getID3;
+        include 'include/getID3init.inc.php';
+
+        if($curFilesCounter >= $filesCounter) {
+            $continue = FALSE;
+        }
+    }
 }
 
 
+//  +------------------------------------------------------------------------+
+//  | File info for a single file                                            |
+//  +------------------------------------------------------------------------+
+function fileInfo($track, $getID3 = NULL) {
+    global $cfg, $db, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $prevDirsCounter, $prevFilesCounter, $logFile, $updated;
+
+    if($getID3 === NULL) {
+        $getID3 = new getID3;
+        include 'include/getID3init.inc.php';
+    }
+
+    $file = $cfg['media_dir'] . $track['relative_file'];
+    //convert file names to default charset
+    $file = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file);
+    if ($logFile != '') {
+        error_log( "fileInfo: [" . $curFilesCounter . "] " . $file . "\n", 3, $logFile);
+    }
+
+    // TODO: do not exit the whole import/update procedure in case single files are not processable
+    if (is_file($file) == false) {
+        message(__FILE__, __LINE__, 'error', '[b]Failed to read file:[/b][br]' . $file . '[list][*]Update again[*]Check file permission[/list]');
+    }
+
+    if ($cfg['cli_update'] == false && ((microtime(true) - $cfg['timer']) * 1000) > $cfg['update_refresh_time'] && ($curFilesCounter/$filesCounter > ($prevFilesCounter/$filesCounter + 0.005))) {
+        // write import/update progress to database
+        $prevFilesCounter = $curFilesCounter;
+        // TODO: add some decimals to displayed percent value for avouiding visually "freezes" on huge collections
+        mysqli_query($db,'UPDATE update_progress SET
+        file_info = "<div class=\'out\'><div class=\'in\' style=\'width:' . html(floor($curFilesCounter/$filesCounter * 200)) . 'px\'></div></div> ' . html(floor($curFilesCounter/$filesCounter * 100)) . '%"');
+        $cfg['timer'] = microtime(true);
+    }
+
+    $metaData = array();
+    $filesize = filesize($file);
+    $filemtime = filemtime($file);
+    $force_filename_update = false;
+
+    if ($filesize != $track['filesize'] || filemtimeCompare($filemtime, $track['filemtime']) == false || $force_filename_update) {
+        // TODO: does cli_update still exist? would be great but obviously this is old netjukebox code
+        //if ($cfg['cli_update'] && $cfg['cli_silent_update'] == false)
+        //    echo $file . "\n";
+
+        $metaData = $getID3->analyze($file);
+        getid3_lib::CopyTagsToComments($metaData);
+
+        // TODO: does it make sense to populate artist and track_artist with the same value?
+        $query = 'UPDATE track SET
+            mime_type               = "' . mysqli_real_escape_string($db, parseMimeType($metaData)) . '",
+            filesize                = ' . (int) $filesize . ',
+            filemtime               = ' . (int) $filemtime . ',
+            miliseconds             = ' . (int) parseMiliseconds($metaData) . ',
+            audio_bitrate           = ' . (int) parseAudioBitRate($metaData) . ',
+            audio_bits_per_sample   = ' . (int) parseAudioBitsPerSample($metaData) . ',
+            audio_sample_rate       = ' . (int) parseAudioSampleRate($metaData) . ',
+            audio_channels          = ' . (int) parseAudioChannels($metaData) . ',
+            audio_lossless          = ' . (int) parseAudioLossless($metaData) . ',
+            audio_compression_ratio = ' . (float) parseAudioCompressionRatio($metaData) . ',
+            audio_dataformat        = "' . mysqli_real_escape_string($db, parseAudioDataformat($metaData)) . '",
+            audio_encoder           = "' . mysqli_real_escape_string($db, parseAudioEncoder($metaData)) . '",
+            audio_profile           = "' . mysqli_real_escape_string($db, parseAudioProfile($metaData)) . '",
+            video_dataformat        = "' . mysqli_real_escape_string($db, parseVideoDataformat($metaData)) . '",
+            video_codec             = "' . mysqli_real_escape_string($db, parseVideoCodec($metaData)) . '",
+            video_resolution_x      = ' . (int) parseVideoResolutionX($metaData) . ',
+            video_resolution_y      = ' . (int) parseVideoResolutionY($metaData) . ',
+            video_framerate         = ' . (int) parseVideoFrameRate($metaData) . ',
+            error                   = "' . mysqli_real_escape_string($db, parseError($metaData)) . '",
+            track_id                = "' . mysqli_real_escape_string($db, $track['album_id'] . '_' . fileId($file)) . '",
+            number                  = "' . mysqli_real_escape_string($db, parseTrackNumber($metaData)) . '",
+            genre                   = "' . mysqli_real_escape_string($db, parseGenre($metaData)) . '",
+            title                   = "' . mysqli_real_escape_string($db, parseTrackTitle($metaData)) . '",
+            artist                  = "' . mysqli_real_escape_string($db, parseTrackArtist($metaData)) . '",
+            comment                 = "' . mysqli_real_escape_string($db, parseComment($metaData)) . '",
+            track_artist            = "' . mysqli_real_escape_string($db, parseTrackArtist($metaData)) . '",
+            year                    = ' . parseYear($metaData) . ',
+            dr                      = ' . parseAudioDynamicRange($metaData) . '
+            WHERE relative_file     = BINARY "' . mysqli_real_escape_string($db,$track['relative_file']) . '";';
+        mysqli_query($db, $query);
+    }
+
+    // TODO: is this code really used or an old netjukebox corpse?
+    if ($cfg['name_source'] === 'tags') {
+        return;
+    }
+    $result = mysqli_query($db,'SELECT genre_id FROM genre WHERE genre="' . mysqli_real_escape_string($db, parseGenre($metaData)) . '"');
+    if (mysqli_num_rows($result)==0) {
+        mysqli_query($db,'INSERT INTO genre (genre_id, genre)
+                    VALUES ("' . mysqli_real_escape_string($db, $lastGenre_id) . '",
+                            "' . mysqli_real_escape_string($db, parseGenre($metaData)) . '")');
+        $aGenre_id = $lastGenre_id;
+        ++$lastGenre_id;
+        return;
+    }
+    $row = mysqli_fetch_assoc($result);
+    $genre_id = $row["genre_id"];
+}
 
 
 //  +------------------------------------------------------------------------+
