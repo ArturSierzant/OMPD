@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | O!MPD, Copyright Â© 2015-2016 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright Â© 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -176,6 +176,7 @@ if (function_exists('iconv') == false)
 //  +------------------------------------------------------------------------+
 require_once(NJB_HOME_DIR . 'include/library.inc.php');
 require_once(NJB_HOME_DIR . 'include/globalize.inc.php');
+require_once(NJB_HOME_DIR . 'include/tagProcessor.inc.php');
 
 // To prevent mysql error snowball effect, and to speed up the message.php and cache.php script.
 if (NJB_SCRIPT != 'message.php' && NJB_SCRIPT != 'cache.php')
@@ -760,6 +761,29 @@ function checkDefaultBlacklist() {
 		$cfg['blacklist_id'] = $favorite['favorite_id'];
 	}
 	//echo 'id=' . $cfg['favorite_id'];
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Log into file for debuggung purposes                                   |
+//  | TODO: why is this accomplished by php's error_log() function?          |
+//  +------------------------------------------------------------------------+
+function cliLog($message) {
+    global $cfg;
+
+    if (!$cfg['debug']) {
+        return;
+    }
+    if($cfg['debug_memory'] !== FALSE) {
+        $message = "[" . convert(memory_get_usage(true)) . "] " . $message;
+    }
+    ini_set('log_errors', 'On');
+    error_log($message . "\n", 3, NJB_HOME_DIR . 'tmp/update_log.txt');
+}
+
+function convert($size) {
+    $unit = array('B','K','M','G','T','P');
+    return @number_format($size/pow(1024,($i=floor(log($size,1024)))),1).$unit[$i];
 }
 
 ?>

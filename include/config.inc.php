@@ -385,6 +385,16 @@ $cfg['max_items_per_page']				= 63;
 
 
 
+//  +------------------------------------------------------------------------+
+//  | Limit of displayed tracks in current playlist                          |
+//  +------------------------------------------------------------------------+
+//  | theoretically ten thousands of tracks could be in current playlist     |
+//  | which causes every browser to freeze                                   |
+//  +------------------------------------------------------------------------+
+$cfg['current_playlist_max_displayed_items'] = 500;
+
+
+
 
 //  +------------------------------------------------------------------------+
 //  | Binary directory                                                       |
@@ -887,6 +897,7 @@ $cfg['offline_message']             = '[b]This site is temporarily unavailable.[
 //  | $cfg['php_info'] - displays 'PHP information' in 'Configuration'       |
 //  +------------------------------------------------------------------------+
 $cfg['debug']                       = false;
+$cfg['debug_memory']                = false;
 $cfg['php_info']                    = true;
 
 
