@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | O!MPD, Copyright Â© 2015-2016 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright Â© 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -191,12 +191,31 @@ if (count($file) == 0) {
 </div>
 <!-- end info + controll -->
 
-
+<?php
+// calculate the portion which should be rendered
+$min_index = 0;
+$max_index = $cfg['current_playlist_max_displayed_items'];
+$string_listlength =  '(' . $listlength . ' Tracks)';
+if($listlength > $cfg['current_playlist_max_displayed_items']) {
+    $min_index = $listpos;
+    $max_index = $listpos + $cfg['current_playlist_max_displayed_items'];
+    if(($listlength - $cfg['current_playlist_max_displayed_items']) < $listpos ) {
+        $min_index = $listlength - $cfg['current_playlist_max_displayed_items'];
+        $max_index = $cfg['current_playlist_max_displayed_items'];
+    }
+    $string_listlength = '(showing '.($min_index+1) . '-' . ($max_index+1) . ' of ' . $listlength . ' Tracks)';
+}
+?>
 <div id="playlist">
 <!--
 <span  class="playlist-title">Play list</span><span class="hidePL">&nbsp;(hide)</span>
 -->
-<span  class="playlist-title">Playlist</span><span id="end_time_1"></span><span id="end_in_1"></span><span id="total_time_1"></span>
+<span  class="playlist-title">Playlist</span>
+<span id="end_time_1"></span>
+<span id="end_in_1"></span>
+<span id="total_time_1"></span>
+<span class="pl-track-number"><?php echo $string_listlength; ?></span>
+
 <table cellspacing="0" cellpadding="0" class="border">
 <tr class="header">
 	<td class="small_cover"></td>
@@ -213,9 +232,34 @@ if (count($file) == 0) {
 $playtime = array();
 $track_id = array();
 $playlistTT = 0;
-for ($i=0; $i < $listlength; $i++)
-	{
-	$query = mysqli_query($db,'SELECT track.title, track.artist, track.track_artist, track.featuring, track.miliseconds, track.track_id, track.genre, album.genre_id, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, track.album_id, track.number, track.track_id, track.year as trackYear FROM track, album WHERE track.album_id=album.album_id AND track.relative_file = "' . mysqli_real_escape_string($db,$file[$i]) . '"');
+for ($i=0; $i < $listlength; $i++) {
+    if($i < $min_index || $i > $max_index) {
+        // TODO: display 'show more'-links in frontend to ajax-load a bunch of not rendered playlistitems at begin and end of current playlist
+        // or a pagination for current playlist?
+        // TODO: reload playlist when pressing "play-next-button" to assure the current track will be displayed
+        continue;
+    }
+	$query = $db->query('
+        SELECT
+            track.title,
+            track.artist,
+            track.track_artist,
+            track.featuring,
+            track.miliseconds,
+            track.track_id,
+            track.genre,
+            album.genre_id,
+            track.audio_dataformat,
+            track.audio_bits_per_sample,
+            track.audio_sample_rate,
+            track.album_id,
+            track.number,
+            track.track_id,
+            track.year as trackYear
+        FROM track, album
+        WHERE track.album_id=album.album_id
+            AND track.relative_file = "' . $db->real_escape_string($file[$i]) . '";'
+    );
 	$table_track = mysqli_fetch_assoc($query);
 	$playtime[] = (int) $table_track['miliseconds'];
 	$playlistTT = $playlistTT + (int) $table_track['miliseconds'];
