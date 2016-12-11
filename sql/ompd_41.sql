@@ -26,9 +26,9 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 
 CREATE TABLE IF NOT EXISTS `album` (
-  `artist` varchar(255) NOT NULL DEFAULT '',
-  `artist_alphabetic` varchar(255) NOT NULL DEFAULT '',
-  `album` varchar(255) NOT NULL DEFAULT '',
+  `artist` varchar(4094) NOT NULL DEFAULT '',
+  `artist_alphabetic` varchar(4094) NOT NULL DEFAULT '',
+  `album` varchar(4094) NOT NULL DEFAULT '',
   `year` smallint(4) unsigned DEFAULT NULL,
   `month` tinyint(2) unsigned DEFAULT NULL,
   `genre_id` varchar(10) NOT NULL DEFAULT '',
@@ -296,9 +296,9 @@ CREATE TABLE IF NOT EXISTS `share_stream` (
 --
 
 CREATE TABLE IF NOT EXISTS `track` (
-  `artist` varchar(255) NOT NULL DEFAULT '',
-  `title` varchar(255) NOT NULL DEFAULT '',
-  `featuring` varchar(255) NOT NULL DEFAULT '',
+  `artist` varchar(4094) NOT NULL DEFAULT '',
+  `title` varchar(4094) NOT NULL DEFAULT '',
+  `featuring` varchar(4094) NOT NULL DEFAULT '',
   `relative_file` text NOT NULL DEFAULT '',
   `mime_type` varchar(64) NOT NULL DEFAULT '',
   `filesize` bigint(20) unsigned NOT NULL DEFAULT '0',
@@ -326,7 +326,7 @@ CREATE TABLE IF NOT EXISTS `track` (
   `transcoded` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `updated` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `genre` text NULL,
-  `track_artist` varchar(255) NULL,
+  `track_artist` varchar(4094) NULL,
   `comment` text NULL,
   `year` smallint(4) unsigned DEFAULT NULL,
   `dr` tinyint(3) unsigned  DEFAULT NULL,
