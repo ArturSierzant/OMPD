@@ -29,7 +29,7 @@
 //  +------------------------------------------------------------------------+
 //  | MySQL configuration                                                    |
 //  +------------------------------------------------------------------------+
-$cfg['mysqli_host']                 = '127.0.0.1';
+$cfg['mysqli_host']                 = '192.168.1.251';
 $cfg['mysqli_db']                   = 'ompd';
 $cfg['mysqli_user']                 = '';
 $cfg['mysqli_password']             = '';
@@ -48,91 +48,13 @@ $cfg['mysqli_auto_create_db']       = true;
 //  | Windows:        'D:/Media/';                                           |
 //  | Linux/Unix/OSX: '/var/mpd/music/';                                     |
 //  +------------------------------------------------------------------------+
-
-$cfg['media_dir']                   = '/share/HDA_DATA/ompd/';
-
-
-
-
-//	+------------------- NEW IN O!MPD 1.03 ----------------------------------+
-
-
-//  +------------------------------------------------------------------------+
-//  | Multi-disc                                                             |
-//  +------------------------------------------------------------------------+
-//  | Show all of the multi-disc albums in album view and group multi-disc   |
-//  | albums into one in search results                                      |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_multidisc'] = true;
-$cfg['group_multidisc'] = true;
+$cfg['media_dir']                   = '/var/lib/mpd/music/';
+$cfg['media_dir_subpaths']          = 'LossLess/Jazz/;LossLess/Italiani/;LossLess/Classical/;LossLess/Misc/;HiRes/';
 
 
 
 
-//  +------------------------------------------------------------------------+
-//  | Multi-disc indicators                                                  |
-//  +------------------------------------------------------------------------+
-//  | Strings in album title indicating that album is a part                 |
-//  | of multi-disc set                                                      |
-//  +------------------------------------------------------------------------+
-unset($cfg['multidisk_indicator']);
-
-$cfg['multidisk_indicator'][] = "Disc ";
-$cfg['multidisk_indicator'][] = "Disk ";
-$cfg['multidisk_indicator'][] = "CD ";
-$cfg['multidisk_indicator'][] = "CD#";
-$cfg['multidisk_indicator'][] = " CD";
-$cfg['multidisk_indicator'][] = " Vol.";
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Other versions of album                                                |
-//  +------------------------------------------------------------------------+
-//  | Show other versions of album in album view                             |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_album_versions'] = true;
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Other versions of album indicators                                     |
-//  +------------------------------------------------------------------------+
-//  | Strings in album title indicating that album may have other versions   |
-//  | e.g. " (" in:                                                          |
-//  |   Brothers In Arms (24bit-96kHz)                                       |
-//  |   Brothers In Arms (2013 Remaster, MFSL, 24bit-88.2kHz)                |
-//  +------------------------------------------------------------------------+
-unset($cfg['album_versions_indicator']);
-
-$cfg['album_versions_indicator'][] = " (";
-$cfg['album_versions_indicator'][] = " [";
-$cfg['album_versions_indicator'][] = ", ";
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Directory Blacklist (those dirnames will not be scanned)               |
-//  +------------------------------------------------------------------------+
-unset($cfg['directory_blacklist']);
-
-$cfg['directory_blacklist'][]       = 'lost+found';
-$cfg['directory_blacklist'][]       = 'Temporary Items';
-$cfg['directory_blacklist'][]       = 'Network Trash Folder';
-$cfg['directory_blacklist'][]       = 'System Volume Information';
-$cfg['directory_blacklist'][]       = 'RECYCLER';
-$cfg['directory_blacklist'][]       = '$RECYCLE.BIN';
-$cfg['directory_blacklist'][]       = '.@__thumb';
-
-
-//	+------------------- END OF NEW IN O!MPD 1.03 ---------------------------+
-
-
+//	+------------------- NEW IN O!MPD 1.02 ----------------------------------+
 
 
 //  +------------------------------------------------------------------------+
@@ -158,19 +80,20 @@ $cfg['mpd_password']				= "";
 //  +------------------------------------------------------------------------+
 //  | Name and description for blacklist                                     |
 //  +------------------------------------------------------------------------+
-$cfg['blacklist_name']				  = 'Blacklist';
-$cfg['blacklist_comment']			  = 'Tracks to be skipped';
+$cfg['blacklist_name']				= 'Blacklist';
+$cfg['blacklist_comment']			= 'Tracks to be skipped';
+
 
 
 
 //  +------------------------------------------------------------------------+
 //  | Ignore media dir access error                                          |
 //  +------------------------------------------------------------------------+
-//  | Set to true - update process continues w/o error message when trying   |
-//  | to scan directories with no access                                     |
-//  | Set to false - error message is displayed and update stops             |
+//	| Set to true - update process continues w/o error message when	trying   |
+//	| to scan directories with no access                                     |
+//	| Set to false - error message is displayed and update stops             |
 //  +------------------------------------------------------------------------+
-$cfg['ignore_media_dir_access_error'] 	= false;
+$cfg['ignore_media_dir_access_error'] 	= true;
 
 
 
@@ -181,6 +104,9 @@ $cfg['ignore_media_dir_access_error'] 	= false;
 $cfg['proxy_enable'] 					= false;
 $cfg['proxy_server'] 					= '192.168.1.1';
 $cfg['proxy_port'] 						= '80'; 
+
+
+//	+------------------- END OF NEW IN O!MPD 1.02 ---------------------------+
 
 
 
@@ -232,8 +158,6 @@ $cfg['name_source']						= 'tags';
 //  +------------------------------------------------------------------------+
 //  | Separators in song title for search for another versions of song       |
 //  +------------------------------------------------------------------------+
-unset($cfg['separator']);
-
 $cfg['separator'][] = 	" (";
 $cfg['separator'][] = 	" [";
 $cfg['separator'][] = 	" {";
@@ -265,19 +189,10 @@ $cfg['separator'][] = 	" 2";
 $cfg['separator'][] = 	" 3";
 $cfg['separator'][] = 	" 4";
 $cfg['separator'][] = 	" 5";
-$cfg['separator'][] = 	" One";
-$cfg['separator'][] = 	" Two";
-$cfg['separator'][] = 	" Three";
-$cfg['separator'][] = 	" Four";
 //$cfg['separator'][] = 	" I";
 $cfg['separator'][] = 	" II";
 $cfg['separator'][] = 	" III";
 $cfg['separator'][] = 	" IV";
-$cfg['separator'][] = 	" V";
-$cfg['separator'][] = 	" VI";
-$cfg['separator'][] = 	" VII";
-$cfg['separator'][] = 	" VIII";
-$cfg['separator'][] = 	" IX";
 $cfg['separator'][] = 	" aka ";
 
 
@@ -298,8 +213,6 @@ $cfg['tags_separator'] = 	";";
 //  +------------------------------------------------------------------------+
 //  | Separator for multiple artist (works like 'ft.', 'feat.', etc)         |
 //  +------------------------------------------------------------------------+
-unset($cfg['artist_separator']);
-
 $cfg['artist_separator'][] = 	" i ";
 $cfg['artist_separator'][] = 	"; ";
 $cfg['artist_separator'][] = 	" & ";
@@ -315,8 +228,12 @@ $cfg['artist_separator'][] = 	" ft. ";
 //  +------------------------------------------------------------------------+
 //  | Quick search                                                           |
 //  +------------------------------------------------------------------------+
-unset($cfg['quick_search']);
-
+$cfg['quick_search'][1] = array("Italian Artists","relative_file LIKE '%Italian%'");
+$cfg['quick_search'][2] = array("All Jazz","relative_file LIKE '%Jazz%'");
+$cfg['quick_search'][3] = array("HiRes","relative_file LIKE '%HiRes%'");
+$cfg['quick_search'][4] = array("Lossy 320","relative_file LIKE '%Lossy320%'");
+$cfg['quick_search'][5] = array("Classical","relative_file LIKE '%Classical%'");
+/*
 $cfg['quick_search'][1] = array("Polish Artists","comment LIKE '%polish%'");
 $cfg['quick_search'][2] = array("Female voices","comment LIKE '%ladies%'");
 $cfg['quick_search'][3] = array("Live Concerts","comment LIKE '%live%'");
@@ -325,7 +242,7 @@ $cfg['quick_search'][5] = array("HD Audio","audio_bits_per_sample > 16 OR audio_
 $cfg['quick_search'][6] = array("Japanese Editions","album LIKE '%japan%' OR comment LIKE '%SHM-CD%'");
 $cfg['quick_search'][7] = array("Pop of the 80's","genre ='Pop' and ((album.year BETWEEN 1980 AND 1989) or comment like '%80s%')");
 $cfg['quick_search'][8] = array("AOR","comment like '%AOR%'");
-
+*/
 
 
 
@@ -346,7 +263,7 @@ $cfg['favorite_comment'] 				= 'My favorites tracks';
 //  | Additional query added to Google search string:                        |
 //  | https://www.google.com/search?q={track artist}+{title}+{string below}  |
 //  | example:                                                               |
-//  | https://www.google.com/search?q=Duran+Duran+Big+Thing+lyrics           |
+//  | https://www.google.com/search?q=Duran+Duran+Big+Thing+lyrics+site:.pl  |
 //  +------------------------------------------------------------------------+
 $cfg['lyrics_search'] 					= 'lyrics';
 
@@ -431,8 +348,6 @@ $cfg['external_storage']            = '/share/Usb/';
 //  +------------------------------------------------------------------------+
 //  | Media extensions                                                       |
 //  +------------------------------------------------------------------------+
-unset($cfg['media_extension']);
-
 // Audio
 $cfg['media_extension'][]           = 'aac';
 $cfg['media_extension'][]           = 'm4a';
@@ -456,8 +371,6 @@ $cfg['media_extension'][]           = 'dsf';
 //  +------------------------------------------------------------------------+
 //  | Decode audio (for stream, download & record)                           |
 //  +------------------------------------------------------------------------+
-unset($cfg['decode_stdout']);
-
 $cfg['decode_stdout']['aac']        = $cfg['bin_dir'] . 'faad -d -o - %source';
 $cfg['decode_stdout']['ape']        = $cfg['bin_dir'] . 'mac %source - -d';
 $cfg['decode_stdout']['flac']       = $cfg['bin_dir'] . 'flac --decode --totally-silent --stdout %source';
@@ -477,17 +390,6 @@ $cfg['decode_stdout']['wv']         = $cfg['bin_dir'] . 'wvunpack -q %source -';
 //  | Tag writing is done by the getID3() library, attached picture is       |
 //  | currently only supported with the id3v2.3 tag                          |
 //  +------------------------------------------------------------------------+
-unset($cfg['encode_name']);
-unset($cfg['encode_mime_type']);
-unset($cfg['encode_extension']);
-unset($cfg['encode_stdout']);
-unset($cfg['encode_file']);
-unset($cfg['encode_bitrate']);
-unset($cfg['encode_vbr']);
-unset($cfg['tag_format']);
-unset($cfg['tag_encoding']);
-unset($cfg['tag_padding']);
-
 $cfg['transcode_treshold']          = 150;
 
 $cfg['encode_name'][]               = 'MP3 @ Low';
@@ -584,7 +486,7 @@ $cfg['album_copy']                  = true; //available when $cfg['external_stor
 //  | new: New added album.                                                  |
 //  | played: Recently played or streamed album.                             |
 //  +------------------------------------------------------------------------+
-$cfg['image_read_embedded']         = true;
+$cfg['image_read_embedded']         = false;
 $cfg['image_share']                 = true;
 $cfg['image_share_mode']            = 'played';
 $cfg['image_front']                 = 'folder'; // .jpg and .png
@@ -597,8 +499,6 @@ $cfg['image_front_cover_treshold']  = 90000;      // 300 * 300
 //  +------------------------------------------------------------------------+
 //  | No album artist                                                        |
 //  +------------------------------------------------------------------------+
-unset($cfg['no_album_artist']);
-
 $cfg['no_album_artist'][]           = 'compilation';
 $cfg['no_album_artist'][]           = 'radio';
 $cfg['no_album_artist'][]           = 'remix';
@@ -612,13 +512,6 @@ $cfg['no_album_artist'][]           = 'various';
 //  +------------------------------------------------------------------------+
 //  | Internet search                                                        |
 //  +------------------------------------------------------------------------+
-unset($cfg['search_name']);
-unset($cfg['search_url_artist']);
-unset($cfg['search_url_album']);
-unset($cfg['search_url_combined']);
-unset($cfg['search_method']);
-unset($cfg['search_charset']);
-
 $cfg['search_name'][]               = 'AllMusic';
 $cfg['search_url_artist'][]         = 'http://www.allmusic.com/search/artist/%artist';
 $cfg['search_url_album'][]          = 'http://www.allmusic.com/search/album/%album';
@@ -677,12 +570,6 @@ $cfg['search_charset'][]            = 'UTF-8';
 //  | For the Last.fm web services a "API key" is needed. Get this key free  |
 //  | from:  http://www.last.fm/api/account                                  |
 //  +------------------------------------------------------------------------+
-unset($cfg['image_service_name']);
-unset($cfg['image_service_charset']);
-unset($cfg['image_service_url']);
-unset($cfg['image_service_process']);
-unset($cfg['image_service_urldecode']);
-
 /*
 $cfg['image_AWSAccessKeyId']	    = '';
 $cfg['image_AWSSecretAccessKey']    = '';
@@ -705,7 +592,6 @@ $cfg['image_service_charset'][]     = 'UTF-8';
 $cfg['image_service_url'][]         = 'http://ecs.amazonaws.de/onca/xml?Service=AWSECommerceService&AWSAccessKeyId=%awsaccesskeyid&AssociateTag=%associatetag&Operation=ItemSearch&ResponseGroup=Images&SearchIndex=Music&Type=Lite&Artist=%artist&Title=%album&Timestamp=%timestamp';
 $cfg['image_service_process'][]     = 'amazon';
 $cfg['image_service_urldecode'][]   = null;
-*/
 
 $cfg['image_service_name'][]        = 'Slothradio';
 $cfg['image_service_charset'][]     = 'UTF-8';
@@ -731,15 +617,13 @@ $cfg['image_service_url'][]         = 'http://images.google.com/images?gbv=1&q=%
 $cfg['image_service_process'][]     = '#/imgres\?imgurl=(http://.+?)&amp;.+?&amp;h=([0-9]+?)&amp;w=([0-9]+?)&amp;#s';
 $cfg['image_service_urldecode'][]   = true;
 
-/*
 $cfg['image_lastfm_api_key']        = '';
-
 $cfg['image_service_name'][]        = 'Last.fm';
 $cfg['image_service_charset'][]     = 'UTF-8';
 $cfg['image_service_url'][]         = 'http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=%api_key&artist=%artist&album=%album'; 
 $cfg['image_service_process'][]     = 'lastfm';
 $cfg['image_service_urldecode'][]   = null;
-*/
+/**/
 
 
 
@@ -761,7 +645,7 @@ $cfg['ip_tools']                    = 'http://www.infosniper.net/index.php?ip_ad
 //  +------------------------------------------------------------------------+
 $cfg['add_autoplay']                = true;
 $cfg['play_queue']                  = false;
-$cfg['play_queue_limit']            = 250;
+$cfg['play_queue_limit']			= 250;
 
 
 
@@ -799,7 +683,7 @@ $cfg['date_format']                 = 'r';
 //  | and UTF-8 for all other operating systems.                             |
 //  +------------------------------------------------------------------------+
 $cfg['default_charset']             = '';
-$cfg['default_filesystem_charset']  = '';
+$cfg['default_filesystem_charset']	= '';
 
 
 
@@ -886,25 +770,13 @@ $cfg['offline_message']             = '[b]This site is temporarily unavailable.[
 //  |                                                                        |
 //  | $cfg['php_info'] - displays 'PHP information' in 'Configuration'       |
 //  +------------------------------------------------------------------------+
-$cfg['debug']                       = false;
+$cfg['debug']                       = true;
 $cfg['php_info']                    = true;
-
 
 
 
 //  +------------------------------------------------------------------------+
 //  | For testing some stuff (on my system only) - should be set to off      |
 //  +------------------------------------------------------------------------+
-$cfg['testing']				              = 'off';
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Load file with local setings (if exists) overriding settings           |
-//  | in this file                                                           |
-//  +------------------------------------------------------------------------+
-if(file_exists(NJB_HOME_DIR . 'include/config.local.inc.php') === true) {
-	require_once(NJB_HOME_DIR . 'include/config.local.inc.php');
-} 
+$cfg['testing']				= 'off';
 ?>
