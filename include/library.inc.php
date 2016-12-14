@@ -55,7 +55,9 @@ function draw_tile($size,$album,$multidisc = '') {
 //  +---------------------------------------------------------------------------+
 
 function multiexplode ($delimiters,$string) {
-   
+    if (empty($delimiters)) {
+        return array($string);
+    }
     $ready = str_ireplace($delimiters, $delimiters[0], $string);
     $launch = explode($delimiters[0], $ready);
     return  $launch;
