@@ -287,7 +287,7 @@ function update($path_to_update) {
 		mysqli_query($db,"update update_progress set 
 			structure_image = 'Requesting MPD update...'");
 		
-		mpdUpdate();
+		mpdUpdate($path_to_update);
 		
 		//exit();
 		
