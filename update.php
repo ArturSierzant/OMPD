@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright Â© 2015-2016 Artur Sierzant	                         |
+//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
 //  | http://www.ompd.pl                                             		 |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright Â© 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -40,51 +40,101 @@ require_once('include/library.inc.php');
 ignore_user_abort(true);
 
 //exit();
-$logFile = '';
+
 if ($cfg['debug']) {
 	$logFile = NJB_HOME_DIR . 'tmp/update_log.txt';
 	ini_set('log_errors', 'On');
+}
+else {
+	$logFile = '';
 }
 
 $cfg['menu'] = 'config';
 
 $action = getpost('action');
+$path = getpost('path'); 
 
 $flag	= (int) getpost('flag');
 
 if ($logFile != '') error_log("Update started " . $logFile . "\n", 3, $logFile);
 
-if		(PHP_SAPI == 'cli')					cliUpdate();
-elseif	($action == 'update')				update();
-elseif	($action == 'imageUpdate')			imageUpdate($flag);
-elseif	($action == 'saveImage')			saveImage($flag);
-elseif	($action == 'selectImageUpload')	selectImageUpload($flag);
-elseif	($action == 'imageUpload')			imageUpload($flag);
+if		(PHP_SAPI == 'cli')					    cliUpdate();
+elseif	($action == 'update' && empty($path) )	selectUpdatePath();
+elseif	($action == 'update' && !empty($path) )	update($path);
+elseif	($action == 'imageUpdate')			    imageUpdate($flag);
+elseif	($action == 'saveImage')			    saveImage($flag);
+elseif	($action == 'selectImageUpload')	    selectImageUpload($flag);
+elseif	($action == 'imageUpload')			    imageUpload($flag);
 else	message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]action');
 exit();
 
 
 
+function cliUpdate() {
+update();
+}
 
-
+function selectUpdatePath() {
+	global $cfg, $db, $logFile;
+	authenticate('access_admin', false, true);
+ 
+    $path = getpost('path'); 
+    
+ 	$nav			= array();
+	$nav['name'][]	= 'Configuration';
+	$nav['url'][]	= 'config.php';
+	$nav['name'][]	= 'Update';
+	require_once('include/header.inc.php');
+    
+    $q = mysqli_query($db,'SELECT value FROM server WHERE name ="paths"');
+    $row = mysqli_fetch_assoc($q);
+    ?>
+    <script>
+        hideSpinner();
+    </script>
+	
+    <form action="update.php" method="post">
+        <input type="hidden" name="sign" value="<?php echo getpost('sign'); ?>">
+		<input type="hidden" name="action" value="update">
+        <div width="65%"> 
+            <p>
+            <input type="text" name="path" list="paths">
+            <datalist id="paths">
+    <?php
+            	foreach(explode(';',$row['value']) as $key) {		
+                   echo "<option value=" . $key . ">" . $key . " </option>";
+            };
+    ?>
+            </datalist>
+            <input type="submit" value="ok"></p>
+        </div>
+    </form>   
+    <?php
+    $cfg['footer'] = 'dynamic';
+	require('include/footer.inc.php');
+}
 //  +------------------------------------------------------------------------+
 //  | Update                                                                 |
 //  +------------------------------------------------------------------------+
-function update() {
+function update($path_to_update) {
 
 	global $cfg, $db, $lastGenre_id, $getID3, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $last_update, $file, $logFile;
-	authenticate('access_admin', false, true);
+	authenticate('access_admin');
 	
 	
 	require_once('getid3/getid3/getid3.php');
 	require_once('include/play.inc.php'); // Needed for mpdUpdate()
 	
 	$cfg['cli_update'] = false;
+    $cfg['cli_silent_update'] = true;
 	$startTime = new DateTime();
 	
-	if ($logFile != '') error_log("Update start time: " . date("Ymd H:i:s") . "\n", 3, $logFile);
+	if ($logFile != '') error_log("Update start time: " . date("Y-m-d H:i:s") . "\n", 3, $logFile);
 
-	$path = $cfg['media_dir'];
+    //janus patch
+    //$path = $cfg['media_dir'];
+    //$path_to_update = "LossLess/Italiani/";
+    $path = $cfg['media_dir'] . $path_to_update;
 	$curFilesCounter = 0;
 	$curDirsCounter = 0;
 	$dirsCounter = 1;
@@ -124,7 +174,7 @@ function update() {
 <tr class="header">
 	<td class="space"></td>
 	<td class="update_text">Update</td>
-	<td>Progress</td>
+	<td>Progress for <?php echo $path_to_update?></td>
 	<td class="space"></td>
 </tr>
 <tr class="line"><td colspan="4"></td></tr>
@@ -229,8 +279,7 @@ function update() {
 			structure_image = '',
 			file_info = '',
 			cleanup = '',
-			update_time = '',
-			last_update = 'Update in progress..'");
+			update_time = 'Update in progress..'");
 		
 		//@ob_flush();
 		//flush();
@@ -238,7 +287,7 @@ function update() {
 		mysqli_query($db,"update update_progress set 
 			structure_image = 'Requesting MPD update...'");
 		
-		mpdUpdate();
+		mpdUpdate($path_to_update);
 		
 		//exit();
 		
@@ -264,11 +313,13 @@ function update() {
 			mysqli_query($db,'UPDATE server SET value = "' . mysqli_real_escape_string($db,NJB_IMAGE_SIZE) . '" WHERE name = "image_size" LIMIT 1');
 			mysqli_query($db,'UPDATE server SET value = "' . mysqli_real_escape_string($db,NJB_IMAGE_QUALITY) . '" WHERE name = "image_quality" LIMIT 1');
 		}
+
+        
+		mysqli_query($db,'UPDATE album_id SET updated = 0 where path like "' . $path . '%"');
+		mysqli_query($db,'UPDATE album SET updated = 0 WHERE album_id IN (SELECT album_id from album_id where not updated)');
+		mysqli_query($db,'UPDATE track SET updated = 0 WHERE album_id IN (SELECT album_id from album_id where not updated)');
+		mysqli_query($db,'UPDATE bitmap SET updated = 0 WHERE album_id IN (SELECT album_id from album_id where not updated)');
 		
-		mysqli_query($db,'UPDATE album SET updated = 0');
-		mysqli_query($db,'UPDATE track SET updated = 0');
-		mysqli_query($db,'UPDATE bitmap SET updated = 0');
-		mysqli_query($db,'UPDATE album_id SET updated = 0');
 		//mysqli_query($db,'TRUNCATE album_id');
 		
 		//mysqli_query($db,'UPDATE genre SET updated = 0 WHERE genre <> ""');
@@ -286,7 +337,10 @@ function update() {
 		//recursiveScanCount_add2table($cfg['media_dir']);
 		//recursiveScanCount($cfg['media_dir']);
 		clearstatcache();
-		countDirectories($cfg['media_dir']);
+        
+        //janus patch
+		//countDirectories($cfg['media_dir']);
+        countDirectories($path);
 		if ($dirsCounter == 1) $dirsCounter = 0;
 		/* $result = mysqli_query($db,"update update_progress set 
 			update_status = 0,
@@ -295,17 +349,23 @@ function update() {
 			");
 		exit(); */
 		
-		recursiveScan($cfg['media_dir']);
+        
+        recursiveScan($path);
 		
 		//exit();
 		
+        
+        
 		mysqli_query($db,'UPDATE update_progress SET	structure_image = "<div class=\'out\'><div class=\'in\' style=\'width: 200px\'></div></div> 100%"');
 		
 		sleep(1);
-		
-		mysqli_query($db,'DELETE FROM album WHERE NOT updated');
-		mysqli_query($db,'DELETE FROM track WHERE NOT updated');
-		mysqli_query($db,'DELETE FROM bitmap WHERE NOT updated');
+        if(empty($path_to_update)) {
+            mysqli_query($db,'DELETE FROM album WHERE NOT updated');
+            mysqli_query($db,'DELETE FROM track WHERE NOT updated');
+            mysqli_query($db,'DELETE FROM bitmap WHERE NOT updated');
+        }
+        
+        
 		//mysqli_query($db,'DELETE FROM genre WHERE NOT updated');
 		
 		
@@ -345,7 +405,7 @@ function update() {
 		$cfg['timer'] = 0; // force update
 		
 		
-		fileInfo();
+		fileInfo($path_to_update);
 		
 		updateGenre();
 		
@@ -389,7 +449,7 @@ function update() {
 			last_update = '" . date('Y-m-d, H:i:s')   . "'
 			");
 		
-		if ($logFile != '') error_log("Update stop time: " . date("Ymd H:i:s") . "\n", 3, $logFile);
+		if ($logFile != '') error_log("Update stop time: " . date("Y-m-d H:i:s") . "\n", 3, $logFile);
 		backgroundQueries();
 	}
 	else {
@@ -429,7 +489,7 @@ function recursiveScan($dir) {
 	}
 	
 	foreach ($entries as $entry) {
-		if ($entry[0] != '.' && in_array($entry, $cfg['directory_blacklist']) === FALSE) {
+		if ($entry[0] != '.' && !in_array($entry, array('lost+found', 'Temporary Items', 'Network Trash Folder', 'System Volume Information', 'RECYCLER', '$RECYCLE.BIN','.@__thumb'))) {
 			if (is_dir($dir . $entry . '/'))
 				recursiveScan($dir . $entry . '/');
 			else {
@@ -497,8 +557,8 @@ function countDirectories($base_dir) {
 		$extension = substr(strrchr($file, '.'), 1);
 		$extension = strtolower($extension);
 		if (in_array($extension, $cfg['media_extension'])) $isMediaDir = 1;
+		if($file == '.' || $file == '..' || $file == '.@__thumb') continue;
 		$dir = $base_dir.DIRECTORY_SEPARATOR.$file;
-		if($file == '.' || $file == '..' || (is_dir($dir) === TRUE && in_array($file, $cfg['directory_blacklist']) === TRUE)) continue;
 		if(is_dir($dir)) {
 			$directories []= $dir;
 			if ($isMediaDir == 1) {
@@ -569,23 +629,25 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	
 	
 	if ($cfg['name_source'] == 'tags') {
+        ++$curDirsCounter; 	
+        if ($cfg['cli_update'] == false && ((microtime(true) - $cfg['timer']) * 1000) > $cfg['update_refresh_time'] && ($curDirsCounter/($dirsCounter+0.005) > ($prevDirsCounter/($dirsCounter + 0.005)))) {
+            
+            $prevDirsCounter = $curDirsCounter;
+            
+            mysqli_query($db,'update update_progress set 
+                structure_image = "<div class=\'out\'><div class=\'in\' style=\'width:' . html(floor($curDirsCounter/($dirsCounter+0.005) * 200)) . 'px\'></div></div> ' . html(floor($curDirsCounter/($dirsCounter+0.005) * 100)) . '%"');
+            $cfg['timer'] = microtime(true);
+        }
+        //dir modified: files or dirs added
+        if (filemtime(dirname($file[0])) > $last_update) {
+            $isUpdateRequired = true;
+        }
 	
-	++$curDirsCounter; 	
-	if ($cfg['cli_update'] == false && ((microtime(true) - $cfg['timer']) * 1000) > $cfg['update_refresh_time'] && ($curDirsCounter/$dirsCounter > ($prevDirsCounter/$dirsCounter + 0.005))) {
-		
-		$prevDirsCounter = $curDirsCounter;
-		
-		mysqli_query($db,'update update_progress set 
-			structure_image = "<div class=\'out\'><div class=\'in\' style=\'width:' . html(floor($curDirsCounter/$dirsCounter * 200)) . 'px\'></div></div> ' . html(floor($curDirsCounter/$dirsCounter * 100)) . '%"');
-		$cfg['timer'] = microtime(true);
-	}
+
 
 	
-	//dir modified: files or dirs added
-	if (filemtime(dirname($file[0])) > $last_update) {
-		$isUpdateRequired = true;
-	}
 	else {
+        $new_array[] = null;
 		$q = mysqli_query($db,'SELECT relative_file, filemtime FROM track WHERE album_id = BINARY "' . mysqli_real_escape_string($db,$album_id) . '"');
 		while($row = mysqli_fetch_assoc($q)){
 				$row['relative_file'] = $cfg['media_dir'] . $row['relative_file'];
@@ -710,7 +772,10 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 		// Track update
 		$disc		= 1;
 		$number		= NULL;
-		
+		$track_artist	= "";
+		$title		= "";
+		$featuring	= "";
+            
 		for ($i=0; $i < count($filename); $i++) {
 			if ($logFile != '') error_log("fileStructure TrackUpdate: " . $file[$i] . "\n", 3, $logFile);
 			
@@ -870,7 +935,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 				if ($ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/jpeg')	$image = NJB_HOME_DIR . 'tmp/' . $cfg['image_front'] . '.jpg';
 				if ($ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/png')	$image = NJB_HOME_DIR . 'tmp/' . $cfg['image_front'] . '.png';
 				if (file_put_contents($image, $ThisFileInfo['comments']['picture'][0]['data']) === false) 
-					message(__FILE__, __LINE__, 'error', '[b]Failed to write image to:[/b][br]' . $image .'[br] file: ' . $file[0] .'[br] data: [br]Check write permissions.');
+					$cfg['ignore_media_dir_access_error'] or message(__FILE__, __LINE__, 'error', '[b]Failed to write image to:[/b][br]' . $image .'[br] file: ' . $file[0] .'[br] data: [br]Check write permissions.');
 				$flag = 0; // No image
 				
 		}
@@ -999,7 +1064,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 //  +------------------------------------------------------------------------+
 //  | File info                                                              |
 //  +------------------------------------------------------------------------+
-function fileInfo() {
+function fileInfo($path_to_update) {
 	global $cfg, $db, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $prevDirsCounter, $prevFilesCounter, $logFile;
 	
 	
@@ -1011,7 +1076,7 @@ function fileInfo() {
 	include 'include/getID3init.inc.php';
 	
 	$updated = false;
-	$query = mysqli_query($db,'SELECT relative_file, filesize, filemtime, album_id FROM track WHERE updated ORDER BY relative_file');
+	$query = mysqli_query($db,'SELECT relative_file, filesize, filemtime, album_id FROM track WHERE updated  AND relative_file LIKE "' . $path_to_update .'%" ORDER BY relative_file');
 	$filesCounter = mysqli_num_rows($query);
 	while ($track = mysqli_fetch_assoc($query)) {
 		++$curFilesCounter;
@@ -1019,19 +1084,21 @@ function fileInfo() {
 		//convert file names to default charset
 		$file = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file);
 		if ($logFile != '') error_log( "fileInfo: " . $file . "\n", 3, $logFile);
-		if (is_file($file) == false)
-			message(__FILE__, __LINE__, 'error', '[b]Failed to read file:[/b][br]' . $file . '[list][*]Update again[*]Check file permission[/list]');
+		if (is_file($file) == false) {
+			$cfg['ignore_media_dir_access_error'] or message(__FILE__, __LINE__, 'error', '[b]Failed to read file:[/b][br]' . $file . '[list][*]Update again[*]Check file permission[/list]');
+            if ($logFile != '') error_log( "fileInfo: Failed to read file:" . $file . "\n", 3, $logFile);
+        }
 		
 		$filemtime = filemtime($file);
 		$filesize = filesize($file);
 		$force_filename_update = false;
 		
 		if ($filesize != $track['filesize'] || filemtimeCompare($filemtime, $track['filemtime']) == false || $force_filename_update) {
-			if ($cfg['cli_update'] == false && ((microtime(true) - $cfg['timer']) * 1000) > $cfg['update_refresh_time'] && ($curFilesCounter/$filesCounter > ($prevFilesCounter/$filesCounter + 0.005))) {
+			if ($cfg['cli_update'] == false && ((microtime(true) - $cfg['timer']) * 1000) > $cfg['update_refresh_time'] && ($curFilesCounter/$filesCounter > $prevFilesCounter/($filesCounter + 0.005))) {
 				$prevFilesCounter = $curFilesCounter;
 				
 				mysqli_query($db,'update update_progress set 
-				file_info = "<div class=\'out\'><div class=\'in\' style=\'width:' . html(floor($curFilesCounter/$filesCounter * 200)) . 'px\'></div></div> ' . html(floor($curFilesCounter/$filesCounter * 100)) . '%"');
+				file_info = "<div class=\'out\'><div class=\'in\' style=\'width:' . html(floor($curFilesCounter/($filesCounter+0.005) * 200)) . 'px\'></div></div> ' . html(floor($curFilesCounter/($filesCounter+0.005) * 100)) . '%"');
 				
 				$cfg['timer'] = microtime(true);
 				$updated = true;
@@ -1111,17 +1178,25 @@ function fileInfo() {
 				$genre = $ThisFileInfo['ape']['comments']['genre'][0]; */
 			else
 				$genre = 'Unknown Genre';
-			
+			/*
 			$a = array_values($ThisFileInfo['comments']['comment']);
 			if (isset($a[0]))
 				$comment = $a[0];
-			/* elseif (isset($ThisFileInfo['id3v2']['comments']['comment'][0]))
+		    elseif (isset($ThisFileInfo['id3v2']['comments']['comment'][0]))
 				$comment = $ThisFileInfo['id3v2']['comments']['comment'][0];
 			elseif (isset($ThisFileInfo['ape']['comments']['comment'][0])) 
-				$comment = $ThisFileInfo['ape']['comments']['comment'][0]; */
+				$comment = $ThisFileInfo['ape']['comments']['comment'][0];
 			else 
 				$comment = '';
-			
+			*/
+            if (isset($ThisFileInfo['comments']['comment'])) {
+                $a = array_values($ThisFileInfo['comments']['comment']);
+                if (isset($a[0]))
+                    $comment = $a[0];
+                else 
+                    $comment = '';
+            } else $comment = '';
+            
 			if (isset($ThisFileInfo['comments']['year'][0])) $year = $ThisFileInfo['comments']['year'][0];
 			elseif (isset($ThisFileInfo['comments']['date'][0])) $year = $ThisFileInfo['comments']['date'][0];
 			elseif (isset($ThisFileInfo['comments']['creation_date'][0])) $year = $ThisFileInfo['comments']['creation_date'][0];
@@ -1306,7 +1381,7 @@ function databaseCleanup() {
 //  | Image update                                                           |
 //  +------------------------------------------------------------------------+
 function imageUpdate($flag) {
-	global $cfg, $db;
+	global $cfg, $db, $logFile;
 	authenticate('access_admin');
 	
 	$size				= get('size');
@@ -1347,7 +1422,7 @@ function imageUpdate($flag) {
 			FROM album, bitmap
 			WHERE bitmap.flag = 0
 			AND bitmap.album_id = album.album_id
-			ORDER BY album.artist_alphabetic, album.album');
+			ORDER BY album.artist_alphabetic, album.album LIMIT 3');
 	}
 	elseif ($flag == 9 && $cfg['album_update_image']) {
 		$album_id = getpost('album_id');
@@ -1361,6 +1436,7 @@ function imageUpdate($flag) {
 		message(__FILE__, __LINE__, 'error', '[b]Error internet image update[/b][br]Unsupported flag set');
 	
 	
+    if ($logFile != '') error_log(" imageUpdate flag=" . $flag . "\n", 3, $logFile);
 	$album = mysqli_fetch_assoc($query);
 	if ($album == '') {
 		header('Location: ' . NJB_HOME_URL . 'config.php');
@@ -1422,7 +1498,8 @@ function imageUpdate($flag) {
 	elseif ($cfg['image_service_process'][$image_service_id] == 'lastfm') {
 		// Last.fm web services
 		$url = str_replace('%api_key', rawurlencode($cfg['image_lastfm_api_key']), $url);
-		$xml = @simplexml_load_file($url) or message(__FILE__, __LINE__, 'error', '[b]Failed to open XML file:[/b][br]' . $url);
+        if ($logFile != '') error_log("lastfm url: " . $url  . "\n", 3, $logFile);
+		$xml = @simplexml_load_file($url); //or message(__FILE__, __LINE__, 'error', '[b]Failed to open XML file:[/b][br]' . $url);
 			
 		foreach ($xml->album->image as $image) {
 			$imagesize = @getimagesize($image);
@@ -1432,22 +1509,23 @@ function imageUpdate($flag) {
 			$responce_url[]			= $image;
 			$responce_pixels[]		= $width * $height;
 			$responce_resolution[]	= $width . 'x' . $height;
-			$responce_squire[]		= ($width/$height > 0.95 && $width/$height < 1.05) ? true : false;
+			$responce_squire[]		= $height > 0 and ($width/$height > 0.95 && $width/$height < 1.05) ? true : false;
 		}
 	}	
 	else {
 		// Regular expression
+        if ($logFile != '') error_log("url: " . $url  . "\n", 3, $logFile);
 		$content = @file_get_contents($url) or message(__FILE__, __LINE__, 'error', '[b]Failed to open url:[/b][br]' . $url);
 		
 		if (preg_match_all($cfg['image_service_process'][$image_service_id], $content, $match)) {
-			foreach ($match[1] as $key => $image) {
+			foreach ($match[2] as $key => $image) {
 				if ($cfg['image_service_urldecode'][$image_service_id])
 					$image = rawurldecode($image);
 				$extension = substr(strrchr($image, '.'), 1);
 				$extension = strtolower($extension);
 				if (!in_array($extension, array('gif', 'bmp'))) {
 					if (isset($match[2][$key]) && isset($match[3][$key])) {
-						$width = $match[2][$key];
+						$width = $match[1][$key];
 						$height = $match[3][$key];
 					}
 					else {
@@ -1603,6 +1681,8 @@ function imageUpdate($flag) {
 	$url = '<a href="update.php?action=selectImageUpload&amp;flag=' . $flag . '&amp;album_id=' . $album['album_id'] . '"' . $mouseover . '><img src="skin/' . rawurlencode($cfg['skin']) . '/img/large_upload.png" alt="" width="' . $size . '" height="' . $size . '" class="align"><\/a>';
 	echo '<script type="text/javascript">document.getElementById(\'image' . $i . '\').innerHTML=\'' . $url . '\';</script>' . "\n";
 	
+    $cfg['footer'] = '';
+	require('include/footer.inc.php');
 	$cfg['footer'] = 'close';
 	require('include/footer.inc.php');
 }
@@ -1614,16 +1694,23 @@ function imageUpdate($flag) {
 //  | Save image                                                             |
 //  +------------------------------------------------------------------------+
 function saveImage($flag_flow) {
-	global $cfg, $db;
+	global $cfg, $db, $logFile;
 	authenticate('access_admin', false, true);
+    error_reporting(-1);
+	ini_set('display_errors', 'On');
 	
 	$source = get('image');
 	$album_id = get('album_id');
 	
 	$query		= mysqli_query($db,'SELECT relative_file FROM track WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '"');
 	$track		= mysqli_fetch_assoc($query);
-	$image_dir	= $cfg['media_dir'] . $track['relative_file'];
+	//$image_dir	= $cfg['media_dir'] . $track['relative_file'];
+    $image_dir	=  NJB_HOME_DIR . 'tmp/' . $track['relative_file'];
 	$image_dir	= substr($image_dir, 0, strrpos($image_dir, '/') + 1);
+	if ($logFile != '') error_log("for album_id=" . $album_id . " create dir ". $image_dir  . "\n", 3, $logFile);
+
+	if(!file_exists($image_dir)) 
+		mkdir($image_dir, 0777, true);
 	
 	if ($track == false)
 		message(__FILE__, __LINE__, 'error', '[b]Error[/b][br]album_id not found in database');
@@ -1665,6 +1752,7 @@ function saveImage($flag_flow) {
 	$image_id	.= '_' . base_convert(NJB_IMAGE_SIZE * 100 + NJB_IMAGE_QUALITY, 10, 36) . base_convert($filemtime, 10, 36) . base_convert($filesize, 10, 36); 
 	 
 	$relative_image = substr($image, strlen($cfg['media_dir']));
+    if ($logFile != '') error_log("relative_image ". $relative_image  . "\n", 3, $logFile);
 	mysqli_query($db,'UPDATE bitmap SET
 		image				= "' . mysqli_real_escape_string($db,resampleImage($image)) . '",
 		filesize			= ' . (int) $filesize . ',
@@ -1892,28 +1980,12 @@ function imageUpload($flag_flow) {
 //  | Resample image                                                         |
 //  +------------------------------------------------------------------------+
 Function resampleImage($image, $size = NJB_IMAGE_SIZE) {
-	global $logFile, $image, $flag, $image_front;
+	global $logFile;
 	$extension = strtolower(substr(strrchr($image, '.'), 1));
-	/* 
+	
 	if		($extension == 'jpg')	$src_image = @imageCreateFromJpeg($image)	or message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]' . $image);
 	elseif	($extension == 'png')	$src_image = @imageCreateFromPng($image)	or message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]' . $image);
-	 */
-	if ($extension == 'jpg') {
-		$src_image = @imageCreateFromJpeg($image);
-	}
-	elseif ($extension == 'png') {
-		$src_image = @imageCreateFromPng($image);	
-	}	
-	else {
-		message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]Unsupported extension.');
-	}
-	
-	if ($src_image == false) {
-		logImageError();
-		$image = NJB_HOME_DIR . 'image/no_image.png';
-		$data = @file_get_contents($image);
-		return $data;
-	}
+	else																		message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]Unsupported extension.');
 	
 	if ($extension == 'jpg' && imageSX($src_image) == $size && imageSY($src_image) == $size) {
 		$data = @file_get_contents($image) or message(__FILE__, __LINE__, 'error', '[b]Failed to open file:[/b][br]' . $image);

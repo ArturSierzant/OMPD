@@ -25,7 +25,7 @@
 //  +------------------------------------------------------------------------+
 //  | play.inc.php                                                           |
 //  +------------------------------------------------------------------------+
-if (PHP_SAPI == 'cli' && isset($cfg['player_id']) == false)
+if (PHP_SAPI == 'cli' || isset($cfg['player_id']) == false)
 	$cfg['player_id'] = 0;
 
 $query = mysqli_query($db,'SELECT player_name, player_type, player_host, player_port, player_pass, media_share, player_id
@@ -197,6 +197,9 @@ function mpd($command,$player_host="",$player_port="") {
 function mpdSilent($command,$player_host="",$player_port="") {
 	global $cfg;
 	
+    if(substr($command, -1) == '/') {
+        $command = substr($command, 0, -1);
+    }
 	if ($player_host=="" && $player_port==""){
 		$player_host = $cfg['player_host'];
 		$player_port = $cfg['player_port'];
@@ -275,7 +278,7 @@ function mpdSilent($command,$player_host="",$player_port="") {
 //  +------------------------------------------------------------------------+
 //  | Music Player Daemon update                                             |
 //  +------------------------------------------------------------------------+
-function mpdUpdate() {
+function mpdUpdate($subfolder="") {
 	global $cfg, $db;
 	// Store current player settings
 	$temp['player_host'] = $cfg['player_host'];
@@ -292,7 +295,7 @@ function mpdUpdate() {
 		$cfg['player_host'] = $player['player_host'];
 		$cfg['player_port'] = $player['player_port'];
 		$cfg['player_pass'] = $player['player_pass'];
-		mpdSilent('update');
+		mpdSilent('update '.$subfolder);
 		//mpd('update');
 	}
 	
