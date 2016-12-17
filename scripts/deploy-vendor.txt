@@ -7,3 +7,7 @@ james-heinrich/getid3/getid3
 
 components/jquery/jquery.min.js
 components/jquery/jquery.min.map
+
+twig/twig/lib
+twig/twig/test/bootstrap.php
+twig/twig/LICENSE

@@ -24,41 +24,6 @@
 //  +------------------------------------------------------------------------+
 
 
-//  +------------------------------------------------------------------------+
-//  | css hash                                                               |
-//  +------------------------------------------------------------------------+
-function css_hash() {
-	global $cfg;
-	
-	$hash_data =  filemtime(NJB_HOME_DIR . 'cache.php');
-	$hash_data .= filemtime(NJB_HOME_DIR . 'skin/' . $cfg['skin'] . '/styles.css');
-	
-	return md5($hash_data);
-}
-
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | javascript hash                                                        |
-//  +------------------------------------------------------------------------+
-function javascript_hash() {
-	global $cfg;
-	
-	$source = array('javascript-src/initialize.js',
-					'javascript-src/overlib.js',
-					'javascript-src/overlib_cssstyle.js',
-					'javascript-src/sha1.js');
-	
-	$hash_data = filemtime(NJB_HOME_DIR . 'cache.php');
-	foreach ($source as $file)
-		$hash_data .= filemtime(NJB_HOME_DIR . $file);
-	
-	return md5($hash_data);
-}
-
-
 
 
 //  +------------------------------------------------------------------------+

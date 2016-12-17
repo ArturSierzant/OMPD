@@ -6,6 +6,16 @@ namespace Composer\Autoload;
 
 class ComposerStaticInite9a93e31f98117343108ff58b77c3028
 {
+    public static $prefixesPsr0 = array (
+        'T' => 
+        array (
+            'Twig_' => 
+            array (
+                0 => __DIR__ . '/..' . '/twig/twig/lib',
+            ),
+        ),
+    );
+
     public static $classMap = array (
         'AMFReader' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.flv.php',
         'AMFStream' => __DIR__ . '/..' . '/james-heinrich/getid3/getid3/module.audio-video.flv.php',
@@ -92,6 +102,7 @@ class ComposerStaticInite9a93e31f98117343108ff58b77c3028
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
+            $loader->prefixesPsr0 = ComposerStaticInite9a93e31f98117343108ff58b77c3028::$prefixesPsr0;
             $loader->classMap = ComposerStaticInite9a93e31f98117343108ff58b77c3028::$classMap;
 
         }, null, ClassLoader::class);
