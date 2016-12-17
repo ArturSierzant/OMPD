@@ -84,6 +84,7 @@ $temp = realpath($temp . '/..');
 define('NJB_HOME_DIR', str_replace('\\', '/', $temp) . '/');
 
 require_once(NJB_HOME_DIR . 'include/config.inc.php');
+require_once(NJB_HOME_DIR . 'vendor-dist/autoload.php');
 
 
  // +------------------------------------------------------------------------+

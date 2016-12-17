@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
-//  | http://www.ompd.pl                                             		 |
+//  | O!MPD, Copyright Â© 2015-2016 Artur Sierzant                            |
+//  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright Â© 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -100,7 +100,7 @@ $header['head'] .= "\t" . '<link rel="stylesheet" type="text/css" href="fonts/ty
 $header['head'] .= "\t" . '<link rel="stylesheet" type="text/css" href="cache.php?action=css&amp;skin=' . rawurlencode($cfg['skin']) . '&amp;hash=' . css_hash() . '">' . "\n";
 $header['head'] .= "\t" . '<script src="cache.php?action=javascript&amp;hash=' . javascript_hash() . '" type="text/javascript"></script>' . "\n";
 
-//$header['head'] .= "\t" . '<script src="jquery/jquery.js"></script>' . "\n";
+//$header['head'] .= "\t" . '<script src="vendor-dist/components/jquery/jquery.min.js"></script>' . "\n";
 
 
 $header['body'] = 'onload="javascript: if (window.initialize) initialize(); cookie(); "';

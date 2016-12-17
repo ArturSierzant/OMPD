@@ -1,7 +1,7 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
-//  | http://www.ompd.pl                                             		 |
+//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
 //  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
@@ -34,9 +34,8 @@
 ini_set('max_execution_time', '0');
 //$updateStage = $_GET["updateStage"];
 require_once('include/initialize.inc.php');
-require_once('include/cache.inc.php');
-require_once('include/library.inc.php');
-
+require_once(NJB_HOME_DIR . 'include/cache.inc.php');
+require_once(NJB_HOME_DIR . 'include/library.inc.php');
 ignore_user_abort(true);
 
 //exit();
@@ -71,7 +70,6 @@ function update() {
 	authenticate('access_admin', false, true);
 	
 	
-	require_once('getid3/getid3/getid3.php');
 	require_once('include/play.inc.php'); // Needed for mpdUpdate()
 	
 	$cfg['cli_update'] = false;
@@ -200,7 +198,7 @@ function update() {
 	$cfg['footer'] = 'dynamic';
 	require('include/footer.inc.php');
 	
-	$getID3 = new getID3;
+	$getID3 = new \getID3;
 	//initial settings for getID3:
 	include 'include/getID3init.inc.php';
 	
@@ -633,7 +631,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 		$file_d = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file[0]);
 		
 		$ThisFileInfo = $getID3->analyze($file_d);
-		getid3_lib::CopyTagsToComments($ThisFileInfo); 
+		\getid3_lib::CopyTagsToComments($ThisFileInfo);
 		if (isset($ThisFileInfo['comments']['albumartist'][0])) $artist = $ThisFileInfo['comments']['albumartist'][0];
 		elseif (isset($ThisFileInfo['comments']['band'][0])) $artist = $ThisFileInfo['comments']['band'][0];
 		//elseif (isset($ThisFileInfo['comments']['albumartist'][0])) $artist = $ThisFileInfo['comments']['albumartist'][0];
@@ -778,7 +776,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 					$file_d = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file[$i]);
 					$ThisFileInfo = $getID3->analyze($file_d);
 		
-					getid3_lib::CopyTagsToComments($ThisFileInfo);
+					\getid3_lib::CopyTagsToComments($ThisFileInfo);
 					
 					
 					//$number = $ThisFileInfo['comments']['tracknumber'][0];
@@ -877,7 +875,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 		cliLog("fileStructure ImageUpdateEmbeded: " . $file[0]);
 		$file_d = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file[0]);
 		$ThisFileInfo = $getID3->analyze($file_d);
-		getid3_lib::CopyTagsToComments($ThisFileInfo); 
+		\getid3_lib::CopyTagsToComments($ThisFileInfo);
 		if (isset($ThisFileInfo['error']) == false &&
 			isset($ThisFileInfo['comments']['picture'][0]['image_mime']) &&
 			isset($ThisFileInfo['comments']['picture'][0]['data']) &&
@@ -1025,7 +1023,7 @@ function fileInfoLoop() {
     cliLog( "TOTAL FILES TO SCAN: " . $filesCounter);
 
     // Initialize getID3
-    $getID3 = new getID3;
+    $getID3 = new \getID3;
     //initial settings for getID3:
     include 'include/getID3init.inc.php';
 
@@ -1051,7 +1049,7 @@ function fileInfoLoop() {
 
         // reset getID3
         unset($getID3);
-        $getID3 = new getID3;
+        $getID3 = new \getID3;
         include 'include/getID3init.inc.php';
 
         if($curFilesCounter >= $filesCounter) {
@@ -1068,7 +1066,7 @@ function fileInfo($track, $getID3 = NULL) {
     global $cfg, $db, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $prevDirsCounter, $prevFilesCounter, $updated;
 
     if($getID3 === NULL) {
-        $getID3 = new getID3;
+        $getID3 = new \getID3;
         include 'include/getID3init.inc.php';
     }
 
@@ -1102,7 +1100,7 @@ function fileInfo($track, $getID3 = NULL) {
         //    echo $file . "\n";
 
         $metaData = $getID3->analyze($file);
-        getid3_lib::CopyTagsToComments($metaData);
+        \getid3_lib::CopyTagsToComments($metaData);
 
         // TODO: does it make sense to populate artist and track_artist with the same value?
         $query = 'UPDATE track SET
