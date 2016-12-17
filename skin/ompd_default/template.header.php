@@ -13,7 +13,7 @@ if (isset($header) == false)
 <link rel="icon" type="image/png" sizes="196x196" href="image/favicon.png?v=2">
 
 
-<script src="jquery/jquery-1.11.3.min.js"></script>
+<script src="vendor-dist/components/jquery/jquery.min.js"></script>
 <script src="javascript-src/spin.min.js"></script>
 <script src="javascript-src/arts.functions.js"></script>
  

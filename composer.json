@@ -1,0 +1,12 @@
+{
+    "minimum-stability": "dev",
+    "require": {
+        "james-heinrich/getid3": "dev-master",
+        "components/jquery": "1.11.*"
+    },
+    "repositories": [
+    ],
+    "config" : {
+    	"component-dir": "vendor/components"
+    }
+}

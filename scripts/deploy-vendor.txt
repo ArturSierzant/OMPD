@@ -1,0 +1,9 @@
+autoload.php
+composer
+
+james-heinrich/getid3/licenses
+james-heinrich/getid3/license.txt
+james-heinrich/getid3/getid3
+
+components/jquery/jquery.min.js
+components/jquery/jquery.min.map

@@ -1,6 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | netjukebox, Copyright � 2001-2012 Willem Bartels                       |
+//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | http://www.ompd.pl                                                     |
+//  |                                                                        |
+//  |                                                                        |
+//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -117,15 +121,13 @@ function cacheUpdateTag($track_id, $profile, $file) {
 	$hash = md5($hash);
 	
 	if ($hash != $cache['tag_hash']) {
-		require_once(NJB_HOME_DIR . 'getid3/getid3/getid3.php');
-		require_once(NJB_HOME_DIR . 'getid3/getid3/write.php');
 		
 		// Initialize getID3 engine
-		$getID3 = new getID3;
+		$getID3 = new \getID3;
 		$getID3->setOption(array('encoding'=>$cfg['tag_encoding'][$profile]));
 				
 		// Initialize getID3 tag-writing module
-		$tagwriter = new getid3_writetags;
+		$tagwriter = new \getid3_writetags;
 		
 		$tagwriter->filename	= $file;
 		$tagwriter->tagformats	= array($cfg['tag_format'][$profile]); // array('id3v2.3');
