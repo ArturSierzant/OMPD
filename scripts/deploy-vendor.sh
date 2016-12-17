@@ -27,7 +27,7 @@
 
 # This script copies directories and files from the gitignored "vendor" dirctory
 # to "vendor-dist" but skips a lot of stuff like demos and non-minified scripts.
-# All files and directories that are relevant for sliMpd are listed in "deploy-vendor.txt"
+# All files and directories that are relevant for O!MPD are listed in "deploy-vendor.txt"
 # Some missing licenses of "vendor" packages gets copied as well (from "licenses" directory).
 # Limiting to only used vendor files decreases O!MPD's repo size
 
