@@ -51,7 +51,8 @@ function viewHome() {
         'show_last_played' => $cfg['show_last_played'],
         'albums_lastplayed' => array(),
         'disc_count' => (int) $db->query('SELECT SUM(discs) AS disc_count FROM album;')->fetch_assoc()['disc_count'],
-        'album_count' => (int) $db->query('SELECT COUNT(*) AS album_count FROM album WHERE album_add_time;')->fetch_assoc()['album_count']
+        'album_count' => (int) $db->query('SELECT COUNT(*) AS album_count FROM album WHERE album_add_time;')->fetch_assoc()['album_count'],
+        'cfg' => $cfg
     );
     
     // is this used in paginator?

@@ -1,3 +1,4 @@
+{# NOTE: linebreaks within albumTile-loops has to be commented because of css inline-block #}
 <div class="area">
 	{% if not album_count %}
 		<div>
@@ -18,17 +19,17 @@
 		{% if show_last_played %}
 		<h1>&nbsp;Recently played albums</h1>
 		<div class="full">
-			{% for album in albums_lastplayed %}
-				{% include 'partials/albumTile.htm' %}
-			{% endfor %}
+			{% for album in albums_lastplayed %}{#
+				#}{% include 'partials/albumTile.htm' %}{#
+			#}{% endfor %}
 		</div>
 		{% endif %}
 
 		<h1>&nbsp;New albums</h1>
 		<div class="albums_container">
-			{% for album in albums %}
-				{% include 'partials/albumTile.htm' with { multidisc: album.multidisc } %}
-			{% endfor %}
+			{% for album in albums %}{#
+				#}{% include 'partials/albumTile.htm' with { multidisc: album.multidisc } %}{#
+			#}{% endfor %}
 		</div>
 	{% endif %}
 	<table cellspacing="0" cellpadding="0" class="border">

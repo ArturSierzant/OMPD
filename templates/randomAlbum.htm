@@ -1,3 +1,4 @@
+{# NOTE: linebreaks within albumTile-loops has to be commented because of css inline-block #}
 <table cellspacing="0" cellpadding="0" style="width: 100%;">
 	<tr>
 		<td>
@@ -24,9 +25,9 @@
 				</tr>
 			</table>
 			<div class="albums_container">
-			{% for album in albums %}
-				{% include 'partials/albumTile.htm' %}
-			{% endfor %}
+			{% for album in albums %}{#
+				#}{% include 'partials/albumTile.htm' %}{#
+			#}{% endfor %}
 			</div>
 			<table width="100%" cellspacing="0" cellpadding="0" class="tab_border">
 				<tr class="smallspace">

@@ -1,13 +1,14 @@
+{# NOTE: a lot of linebreaks has to be commented because of css inline-block #}
 <div title="Go to album" class="tile pointer" style="width: {{ size }}px; height: {{ size }}px;">
 	<img onclick="location.href='index.php?action=view3&amp;album_id={{ album.album_id }}';" src="image.php?image_id={{ album.image_id }}" alt="" width="100%" height="100%">
 	<div class="tile_info" style="cursor: initial;">
 		<div class="tile_title">{{ album.album }}</div>
 		<div class="tile_band">{{ album.artist_alphabetic }}</div>
-		{% if cfg.show_quick_play %}
-		{% set multidiscParam = (multidisc) ? '&md='~multidisc : '' %}
-		<div class="quick-play">
-			{% if cfg.access_add %}
-			<i
+		{% if cfg.show_quick_play %}{#
+		#}{% set multidiscParam = (multidisc) ? '&md='~multidisc : '' %}{#
+		#}<div class="quick-play">{#
+			#}{% if cfg.access_add %}{#
+			#}<i
 				id="add_{{ album.album_id }}"
 				title="Add album to playlist"
 				class="fa fa-plus-circle pointer"
@@ -21,12 +22,12 @@
 					'play.php?action=addSelect&album_id={{ album.album_id }}{{ multidiscParam }}',
 					evaluateAdd
 				);">
-			</i>
-			{% endif %}
-			{% if cfg.access_play %}
-			<i title="Play album" onclick="javascript: playAlbum('{{ album.album_id }}','{{multidiscParam}}');" class="fa fa-play-circle-o pointer"></i>
-			{% endif %}
-		</div>
+			</i>{#
+			#}{% endif %}{#
+			#}{% if cfg.access_play %}{#
+			#}<i title="Play album" onclick="javascript: playAlbum('{{ album.album_id }}','{{multidiscParam}}');" class="fa fa-play-circle-o pointer"></i>{#
+			#}{% endif %}{#
+		#}</div>
 		{% endif %}
 	</div>
-</div>
+</div>{# no linebreak here as well #}
