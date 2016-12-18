@@ -73,9 +73,6 @@ $base_size = 150;
 $spaces = 1;
 $str_limit = 20;
 
-date_default_timezone_set('Europe/Warsaw');
-
-
 //  +------------------------------------------------------------------------+
 //  | Get home directory & load config file                                  |
 //  +------------------------------------------------------------------------+
@@ -85,8 +82,11 @@ define('NJB_HOME_DIR', str_replace('\\', '/', $temp) . '/');
 
 require_once(NJB_HOME_DIR . 'include/config.inc.php');
 
+if (array_key_exists('timezone', $cfg)) {
+    date_default_timezone_set($cfg['timezone']);
+}
 
- // +------------------------------------------------------------------------+
+// +------------------------------------------------------------------------+
 // | Proxy settings                                                         |
 // +------------------------------------------------------------------------+
 if ($cfg['proxy_enable'] == true) {

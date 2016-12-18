@@ -875,8 +875,12 @@ $cfg['admin_login_message']         = '';
 $cfg['offline']                     = false;
 $cfg['offline_message']             = '[b]This site is temporarily unavailable.[/b][br]We apologize for the inconvenience.';
 
-
-
+//  +------------------------------------------------------------------------+
+//  | Timezone Setting                                                       |
+//  +------------------------------------------------------------------------+
+//  | Comment out this line to use PHP's default                             |
+//  +------------------------------------------------------------------------+
+$cfg['timezone'] = 'Europe/Warsaw';
 
 //  +------------------------------------------------------------------------+
 //  | Debug                                                                  |
