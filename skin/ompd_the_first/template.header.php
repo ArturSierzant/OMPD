@@ -12,10 +12,11 @@ if (isset($header) == false)
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="icon" type="image/png" sizes="196x196" href="image/favicon.png?v=2">
 
-
-<script src="vendor-dist/components/jquery/jquery.min.js"></script>
-<script src="javascript-src/spin.min.js"></script>
-<script src="javascript-src/arts.functions.js"></script>
+<script type="text/javascript" src="vendor-dist/components/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="javascript-src/spin.min.js"></script>
+<script type="text/javascript" src="javascript-src/arts.functions.js"></script>
+<script type="text/javascript" src="index.php?action=jsConf"></script>
+<script type="text/javascript" src="javascript-src/ompd.js"></script>
  
 <?php
 $query1=mysqli_query($db,'SELECT player.player_name as pl, player.player_host as host, player.player_port as port FROM player, session WHERE (sid = BINARY "' . cookie('netjukebox_sid') . '") and player.player_id=session.player_id');

@@ -95,7 +95,6 @@ foreach(
         'controller/view3.php',
         'controller/viewHome.php',
         'controller/viewNew.php',
-        'controller/viewNewStartPage.php',
         'controller/viewPopular.php',
         'controller/viewRandomAlbum.php',
         'controller/viewRandomFile.php',

@@ -52,5 +52,9 @@ switch(get('action')) {
     case 'viewYear':        viewYear(); break;
     case 'viewNew':         viewNew(); break;
     case 'viewPopular':     viewPopular(); break;
+    case 'jsConf':
+        header('Content-Type: application/javascript');
+        echo $twig->render('js/ompd-conf.js', ['cfg' => $cfg]);
+        break;
     default: message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]action'); break;
 }
