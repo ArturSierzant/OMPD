@@ -28,7 +28,7 @@
 //  | View 3                                                                 |
 //  +------------------------------------------------------------------------+
 function view3() {
-    global $cfg, $db;
+    global $cfg, $db, $twig;
 
     $album_id = get('album_id');
     
@@ -130,29 +130,53 @@ function view3() {
     
     $featuring = false;
     
-    $query = mysqli_query($db, 'SELECT track.audio_bits_per_sample, track.audio_sample_rate, track.audio_profile, track.audio_dataformat, track.comment, track.relative_file FROM track left join album on album.album_id = track.album_id where album.album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"
-    LIMIT 1');
-    $album_info = $rel_file = mysqli_fetch_assoc($query);
-    
-    $query = mysqli_query($db, 'SELECT COUNT(c.album_id) as counter, max(c.time) as time FROM (SELECT time, album_id FROM counter WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" ORDER BY time DESC) c ORDER BY c.time');
-    $played = mysqli_fetch_assoc($query);
-    $rows_played = mysqli_num_rows($query);
-    
-    $query = mysqli_query($db, 'SELECT album_id, COUNT(*) AS counter
+    $query = '
+        SELECT
+            track.audio_bits_per_sample,
+            track.audio_sample_rate,
+            track.audio_profile,
+            track.audio_dataformat,
+            track.comment,
+            track.relative_file
+        FROM track
+        LEFT JOIN album ON album.album_id = track.album_id
+        WHERE album.album_id = "' .  $db->real_escape_string($album_id) . '"
+        LIMIT 1;';
+    $album_info = $rel_file = $db->query($query)->fetch_assoc();
+
+    $query = '
+        SELECT
+            COUNT(c.album_id) AS counter,
+            MAX(c.time) AS time
+        FROM (
+            SELECT time, album_id
             FROM counter
-            GROUP BY album_id
-            ORDER BY counter DESC
-            LIMIT 1');
-    $max_played = mysqli_fetch_assoc($query);
-    $rows_max_played = mysqli_num_rows($query);
-    
+            WHERE album_id = "' .  $db->real_escape_string($album_id) . '"
+            ORDER BY time DESC
+        ) c
+        ORDER BY c.time;';
+    $result = $db->query($query);
+    $played = $result->fetch_assoc();
+    $rows_played = $result->num_rows;
+
+    $query = '
+        SELECT
+            album_id,
+            COUNT(*) AS counter
+        FROM counter
+        GROUP BY album_id
+        ORDER BY counter DESC
+        LIMIT 1;';
+    $result = $db->query($query);
+    $max_played = $result->fetch_assoc();
+    $rows_max_played = $result->num_rows;
+
+
     // formattedNavigator
     $nav            = array();
-
     $nav['name'][]  = $album['artist'] . ' - ' . $album['album'];
-    
     require_once('include/header.inc.php');
-    
+
     $advanced = array();
     if ($cfg['access_admin'] && $cfg['album_copy'] && is_dir($cfg['external_storage']))
         $advanced[] = '<a href="download.php?action=copyAlbum&amp;album_id='. $album_id . '&amp;sign=' . $cfg['sign'] . '"><i class="fa fa-fw  fa-copy icon-small"></i>Copy album</a>';
@@ -251,7 +275,7 @@ function view3() {
         <img src="image/loader.gif" alt="">
     </div>
     <span id="image">
-        <img id="image_in" src="image/transparent.gif" alt="">
+        <img id="image_in" src="image.php?image_id=<?php echo $image_id ?>&quality=hq" alt="">
     </span>
 </div>
 
@@ -299,113 +323,48 @@ else
 <span id="popularity"><?php echo $popularity; ?></span>%
 </div>
 
-<div id="additional-info">
-    <?php if ($album['album_genre'] != '') { ?>
-    <div class="line">
-        <div class="add-info-left">Genre:</div>
-        <div class="add-info-right"><a href="<?php echo 'index.php?action=view2&order=artist&sort=asc&&genre_id=' . $album['genre_id'];?>"><?php echo trim($album['album_genre']);?></a></div>
-    </div>
-    <?php }; ?>
-    
-    <?php if ($album['year'] != '') { ?>
-    <div class="line">
-        <div class="add-info-left">Year:</div>
-        <div class="add-info-right"><a href="<?php echo 'index.php?action=view2&order=artist&sort=asc&year=' . $album['year'];?>"><?php echo trim($album['year']);?></a></div>
-    </div>
-    <?php }; ?>
-    
-    <?php if (($album_info['audio_bits_per_sample'] != '') && ($album_info['audio_sample_rate'] != '')) { ?>
-    <div class="line">
-        <div class="add-info-left">File format:
-        </div>
-        <div class="add-info-right">
-        <?php 
-        echo   
-         '' . $album_info['audio_bits_per_sample'] . 'bit - ' . $album_info['audio_sample_rate']/1000 . 'kHz '; 
-         ?>
-        </div>
-    </div>
-    <?php }; ?>
-    
-    <?php if ($album_info['audio_dataformat'] != '' && $album_info['audio_profile'] != '') { ?>
-    <div class="line">
-        <div class="add-info-left">File type:
-        </div>
-        <div class="add-info-right">
-        <?php 
-        if ($album_info['audio_dataformat'] != '' && $album_info['audio_profile'] != '')
-        echo strtoupper($album_info['audio_dataformat']) . ' - ' . $album_info['audio_profile'] . ''; ?>
-        </div>
-    </div>
-    <?php }; ?>
-    
-    <div class="line">
-        <div class="add-info-left">Added at:</div>
-        <div class="add-info-right"><?php echo date("Y-m-d H:i:s",$album['album_add_time']); ?>
-        </div>
-    </div>
-    
-    <div class="line">
-        <div class="add-info-left">Played:</div>
-        <div class="add-info-right"><span id="played"><?php 
-        if ($played['counter'] == 0) {
-            echo 'Never';
+
+<?php
+
+//  +------------------------------------------------------------------------+
+//  | Additional Info                                                        |
+//  +------------------------------------------------------------------------+
+    $vars = array(
+        'album' => array_merge($album, $album_info),
+        'played' => $played,
+        'cfg' => $cfg
+    );
+
+    // fetch played history for albumtracks
+    $query = '
+        SELECT time, album_id
+        FROM counter
+        WHERE album_id="' .  $db->real_escape_string($album_id) . '" ORDER BY time DESC
+    ';
+    $result = $db->query($query);
+    while($historyEntry = $result->fetch_assoc()) {
+        $vars['playedHistory'][] = $historyEntry;
+    }
+
+    // fetch comment and split
+    $sep = 'no_sep';
+    if (strpos($album_info['comment'], $cfg['tags_separator']) !== false) {
+        $sep = $cfg['tags_separator'];
+    }
+    elseif ($cfg['testing'] == 'on' && strpos($album_info['comment']," ") !== false) {
+        $sep = " ";
+    }
+    if ($sep != 'no_sep') {
+        foreach (array_filter(explode($sep, $album_info['comment'])) as $value) {
+            $vars['tags'][] = trim($value);
         }
-        else {
-            echo $played['counter']; 
-            echo ($played['counter'] == 1) ? ' time' : ' times'; 
-        }
-        ?></span>
-        </div>
-    </div>
-    
-    <div class="line">
-        <div class="add-info-left">Last time:</div>
-        <div class="add-info-right"><span id="last_played"><?php echo ($played['time']) ? (date("Y-m-d H:i",$played['time']) . '<span id="playedCal" class=" icon-anchor" onclick="togglePlayedHistory();">&nbsp;&nbsp;<i class="fa fa-calendar fa-lg"></i></span>') : '-'; ?></span>
-        </div>
-    </div>
-    
-    <div id="playedHistory" class="line" style="display: none;">
-        <div class="add-info-left"></div>
-        <div class="add-info-right">Played on:</div>
-        <?php 
-        $queryHist = mysqli_query($db, 'SELECT time, album_id FROM counter WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" ORDER BY time DESC');
-        while($playedHistory = mysqli_fetch_assoc($queryHist)) { ?>
-        <div class="add-info-left"></div>
-        <div class="add-info-right"><span><?php echo ($playedHistory['time']) ? date("Y-m-d H:i",$playedHistory['time']) : '-'; ?></span>
-        </div>
-        <?php } ?>
-    </div>
-    
-    <?php if ($album_info['comment'] && $cfg['show_comments_as_tags'] === true) { ?>
-    <div class="line">
-        <div class="add-info-left"><i class="fa fa-tags fa-lg"></i> Tags:</div>
-        <div class="add-info-right"><div class="buttons">
-        <?php
-            $sep = 'no_sep';
-            if (strpos($album_info['comment'],$cfg['tags_separator']) !== false) {
-                $sep = $cfg['tags_separator'];
-            }
-            elseif ($cfg['testing'] == 'on' && strpos($album_info['comment']," ") !== false) {
-                $sep = " ";
-            }
-            if ($sep != 'no_sep') {
-                $tags = array_filter(explode($sep,$album_info['comment']));
-                foreach ($tags as $value) { 
-                    echo '<span><a href="index.php?action=view2&order=artist&sort=asc&&tag=' . trim($value) . '">' . trim($value) . '</a></span>' ;
-                    //echo '<span>' . ($value) . '</span>' ;
-                }
-            }
-            else {
-                echo '<span><a href="index.php?action=view2&order=artist&sort=asc&&tag=' . $album_info['comment'] . '">' . $album_info['comment'] . '</a></span>' ;
-                //echo '<span>' . ($album_info['comment']) . '</span>';
-            }
-        ?>
-        </div>
-        </div>
-    </div>
-    <?php }; ?>
-</div>
+    }
+    else {
+        $vars['tags'][] = $album_info['comment'];
+    }
+    echo $twig->render('albumdetail/partials/additionalInfo.htm', $vars);
+
+?>
 
 <br>    
 <table cellspacing="0" cellpadding="0" id="basic" class="fullscreen">
@@ -454,64 +413,30 @@ else
     } ?>
 </table>
 <br>
-<?php 
-if ($cfg['show_multidisc'] == true && $multidisc_count > 0) {
-?>
-<div id="multidisc">
-<table>
-<tr class="line"><td colspan="3"></td></tr>
-<tr class="header">
-<td colspan="3">
-Other discs in this set:
-</td>
-</tr> 
-<?php 
-    while ($multidisc = mysqli_fetch_assoc($query_md)) {
-        echo '<tr class="line"><td colspan="3"></td></tr>
-        <tr>
-        <td class="small_cover_md"><a><img src="image.php?image_id=' . rawurlencode($multidisc['image_id']) . '" width="100%"></a></td>
-        <td><a href="index.php?action=view3&amp;album_id=' . rawurlencode($multidisc['album_id']) . '">' . $multidisc['album'] . '</a></td>
-        <td class="iconDel">
-        <a href="javascript:ajaxRequest(\'play.php?action=updateAddPlay&amp;album_id=' . $multidisc['album_id'] . '\',updateAddPlay);ajaxRequest(\'play.php?action=addSelect&amp;album_id='. $multidisc['album_id'] . '\',evaluateAdd);"><i id="add_' . $multidisc['album_id'] . '" class="fa fa-fw  fa-plus-circle  icon-small"></i></a>
-        </td>
-        </tr>'; 
+<?php
+
+
+    //  +------------------------------------------------------------------------+
+    //  | Multidiscs                                                             |
+    //  +------------------------------------------------------------------------+
+    if ($cfg['show_multidisc'] == true && $multidisc_count > 0) {
+        while($multidisc = $query_md->fetch_assoc()) {
+            $vars['multidiscs'][] = $multidisc;
+        }
+        echo $twig->render('albumdetail/partials/multidiscs.htm', $vars);
     }
-?>
 
-</table>
-</div>
-<?php 
-}
-?>
-
-<?php 
-if ($cfg['show_album_versions'] == true && $album_versions_count > 0) {
-?>
-<div id="album_versions">
-<table>
-<tr class="line"><td colspan="3"></td></tr>
-<tr class="header">
-<td colspan="3">
-Other versions of this album:
-</td>
-</tr>
-<?php 
-    while ($multidisc = mysqli_fetch_assoc($query_av)) {
-        echo '<tr class="line"><td colspan="3"></td></tr>
-        <tr>
-        <td class="small_cover_md"><a><img src="image.php?image_id=' . rawurlencode($multidisc['image_id']) . '" width="100%"></a></td>
-        <td><a href="index.php?action=view3&amp;album_id=' . rawurlencode($multidisc['album_id']) . '">' . $multidisc['album'] . '</a></td>
-        <td class="iconDel">
-        <a href="javascript:ajaxRequest(\'play.php?action=updateAddPlay&amp;album_id=' . $multidisc['album_id'] . '\',updateAddPlay);ajaxRequest(\'play.php?action=addSelect&amp;album_id='. $multidisc['album_id'] . '\',evaluateAdd);"><i id="add_' . $multidisc['album_id'] . '" class="fa fa-fw  fa-plus-circle  icon-small"></i></a>
-        </td>
-        </tr>'; 
+    //  +------------------------------------------------------------------------+
+    //  | Album versions                                                         |
+    //  +------------------------------------------------------------------------+
+    if ($cfg['show_album_versions'] == true && $album_versions_count > 0) {
+        while($multidisc = $query_av->fetch_assoc()) {
+            $vars['albumVersions'][] = $multidisc;
+        }
+        echo $twig->render('albumdetail/partials/albumVersions.htm', $vars);
     }
-?>
 
-</table>
-</div>
-<?php 
-}
+
 ?>
 <br>
 </div>
@@ -550,25 +475,44 @@ Other versions of this album:
         WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" AND disc = ' . (int) $disc . ' 
         
         ORDER BY number,relative_file'); */
-        
-        
-        $query = mysqli_query($db,'SELECT track.track_artist, track.artist, track.title, track.featuring, track.miliseconds, track.track_id, track.number, track.relative_file, f.blacklist_pos as blacklist_pos, f. favorite_pos as favorite_pos
-        FROM track left join 
-            (
-        SELECT favoriteitem.track_id as track_id, b.position as blacklist_pos, f.position as favorite_pos
-                FROM favoriteitem 
-                LEFT JOIN 
-            (SELECT track_id, position FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") b ON favoriteitem.track_id = b.track_id 
-                    LEFT JOIN 
-                        (SELECT track_id, position FROM favoriteitem WHERE favorite_id = "' . $cfg['favorite_id'] . '") f ON favoriteitem.track_id = f.track_id
-      ) f
-    ON track.track_id = f.track_id
-        WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" AND disc = ' . (int) $disc . ' 
+
+        $query = '
+        SELECT
+            track.track_artist,
+            track.artist,
+            track.title,
+            track.featuring,
+            track.miliseconds,
+            track.track_id,
+            track.number,
+            track.relative_file,
+            f.blacklist_pos as blacklist_pos,
+            f.favorite_pos as favorite_pos
+        FROM track
+        LEFT JOIN (
+            SELECT
+                favoriteitem.track_id as track_id,
+                b.position as blacklist_pos,
+                f.position as favorite_pos
+            FROM favoriteitem
+            LEFT JOIN (
+                SELECT track_id, position
+                FROM favoriteitem
+                WHERE favorite_id = "' . $cfg['blacklist_id'] . '"
+            ) b ON favoriteitem.track_id = b.track_id
+            LEFT JOIN (
+                SELECT track_id, position
+                FROM favoriteitem
+                WHERE favorite_id= "' . $cfg['favorite_id'] . '"
+            ) f ON favoriteitem.track_id = f.track_id
+        ) f ON track.track_id = f.track_id
+        WHERE album_id = "' .  $db->real_escape_string($album_id) . '" AND disc=' . (int) $disc . '
         GROUP BY track.track_id
-        ORDER BY number,relative_file');
+        ORDER BY number,relative_file;';
         
+        $result = $db->query($query);
         $i = 0;
-        while ($track = mysqli_fetch_assoc($query)) { ?>
+        while ($track = $result->fetch_assoc()) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
     
     <td class="icon">
@@ -692,7 +636,6 @@ function setAlbumInfoWidth() {
 window.onload = function () {
     //setAlbumInfoWidth();
     setBarLength();
-    $("#image_in").attr("src","image.php?image_id=<?php echo $image_id ?>&quality=hq");
     $("#cover-spinner").hide();
     //addFavSubmenuActions();
     return(true);
