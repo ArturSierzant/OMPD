@@ -32,11 +32,11 @@ function viewRandomAlbum() {
     authenticate('access_media');
 
     // formattedNavigator
-    $nav            = array();
-    $nav['name'][]  = 'Library';
-    $nav['url'][]   = 'index.php';
-    $nav['name'][]  = 'Random';
-
+    $nav = array(
+        'name' => array('Library'),
+        'url'  => array('index.php'),
+        'name' => array('Random')
+    );
     // TODO: refacture to template based rendering of surrounding markup/header
     require_once('include/header.inc.php');
 
@@ -67,6 +67,6 @@ function viewRandomAlbum() {
     }
     echo $twig->render('randomAlbum.htm', $vars);
 
-    // TODO: refacture to template based rendering of surrounding markup/header
+    // TODO: refacture to template based rendering of surrounding markup/footer
     require_once('include/footer.inc.php');
 }

@@ -25,165 +25,111 @@
 
 
 //  +------------------------------------------------------------------------+
-//  | Home                                                                   |
+//  | View Home                                                              |
 //  +------------------------------------------------------------------------+
 function viewHome() {
-    global $cfg, $db;
+    global $cfg, $db, $base_size, $spaces, $scroll_bar_correction, $tileSizePHP, $twig;
+
     authenticate('access_media');
     genreNavigator('start');
+
+    // TODO: refacture to template based rendering of surrounding markup/header
+    // formattedNavigator
+    $nav = array(
+        'name' => array('Library'),
+        'url'  => array('index.php'),
+        'name' => array('New')
+    );
+    require_once('include/header.inc.php');
+
+    $base       = (cookie('netjukebox_width') - 20) / ($base_size + 10);
+    $colombs    = floor($base);
+    $aval_width = (cookie('netjukebox_width') - 20 - $scroll_bar_correction) - ($colombs - 1) * $spaces;
+    $vars = array(
+        'size' => floor($aval_width / $colombs),
+        'show_suggested' => false,
+        'show_last_played' => $cfg['show_last_played'],
+        'albums_lastplayed' => array(),
+        'disc_count' => (int) $db->query('SELECT SUM(discs) AS disc_count FROM album;')->fetch_assoc()['disc_count'],
+        'album_count' => (int) $db->query('SELECT COUNT(*) AS album_count FROM album WHERE album_add_time;')->fetch_assoc()['album_count']
+    );
     
-    ?>
-    
-<script type="text/javascript">
-<!--
-
-var baseUrl = 'json.php?action=suggestAlbumArtist&artist=';
-
-function showStatus() {
-    alert ('ok');
-}
-    
-function initialize() {
-    //document.searchform.txt.name = 'artist';
-    //document.searchform.txt.focus();
-    //evaluateSuggest('');
-}
+    // is this used in paginator?
+    $cfg['items_count'] = $vars['album_count'];
 
 
-function evaluateSuggest(list) {
-    var suggest;
-    if (list == '') {
-        suggest = '<form action="">';
-        suggest += '<input type="text" value="no suggestion" readonly class="autosugest_readonly">';
-        suggest += '<\/form>';
+    if($vars['disc_count'] < 1) {
+        // nothing more to do with empty database
+        echo $twig->render('home/layout.htm', $vars);
+        require_once('include/footer.inc.php');
+        return;
     }
-    else {
-        suggest = '<form action="" name="suggest" id="suggest" onSubmit="suggestKeyStroke(1)" onClick="suggestKeyStroke(1)" onKeyDown="return suggestKeyStroke(event)">';
-        suggest += '<select name="txt" size="6" class="autosugest">';
-        for (var i in list)
-            suggest += '<option value="' + list[i] + '">' + list[i] + '<\/option>';
-        suggest += '<\/select><\/form>';
-    }
-    //document.getElementById('suggest').innerHTML = suggest;
-}
 
+    $vars['show_suggested'] = $cfg['show_suggested'];
 
-function searchformKeyStroke(e) {
-    var keyPressed;
-    if (typeof e.keyCode != 'undefined')    keyPressed = e.keyCode;
-    else if (typeof e.which != 'undefined') keyPressed = e.which;
-    if (keyPressed == 40 && typeof document.suggest == 'object') // Down key
-        {//document.suggest.txt.focus()
-        };
-}
+    if($cfg['show_last_played'] = true) {
+        $vars['show_last_played'] = true;
+        $query = '
+            SELECT DISTINCT album.album_id, album.image_id, album.album, album.artist_alphabetic
+            FROM album
+            RIGHT JOIN
+                (SELECT album_id, MAX(time) AS m_time
+                 FROM counter
+                 GROUP BY album_id
+                 ORDER BY m_time DESC) as c
+            ON c.album_id = album.album_id
+            LIMIT 10
+        ';
+        $result = $db->query($query);
+        while ($album = $result->fetch_assoc()) {
+            // TODO: do we really need a different "size" for drawTile. there was some code with $tileSizePHP
+            $vars['albums_lastplayed'][] = $album;
+        }
+    }
 
+    $query = '
+        SELECT *
+        FROM album
+        WHERE album_add_time
+        ORDER BY album_add_time DESC, album DESC
+        LIMIT ' . $cfg['max_items_per_page'];
 
-function suggestKeyStroke(e) {
-    var keyPressed;
-    if (e == 1)                                 keyPressed = 13;
-    else if (typeof e.keyCode != 'undefined')   keyPressed = e.keyCode;
-    else if (typeof e.which != 'undefined')     keyPressed = e.which;
-    if (keyPressed == 13 && document.suggest.txt.value != '') { // Enter key
-        if (document.searchform.action.value == 'view1all')
-            document.searchform.action.value = 'view3all';
-        document.searchform.txt.value = document.suggest.txt.value;
-        document.searchform.filter.value = 'exact';
-        document.searchform.submit();
-        return false;
+    $result = $db->query($query);
+    $mdTab = array();
+    while ($album = $result->fetch_assoc()) {
+        $multidisc_count = 0;
+        if ($cfg['group_multidisc'] == true) {
+            $md_indicator = striposa($album['album'], $cfg['multidisk_indicator']);
+            if ($md_indicator !== false) {
+                $md_ind_pos = stripos($album['album'], $md_indicator);
+                $md_title = substr($album['album'], 0,  $md_ind_pos);
+                $query = '
+                    SELECT album, image_id, album_id
+                    FROM album
+                    WHERE
+                        album LIKE "' . $db->real_escape_string($md_title) . '%"
+                        AND artist = "' . $db->real_escape_string($album['artist']) . '"
+                        AND album <> "' . $db->real_escape_string($album['album']) . '"
+                    ORDER BY album;';
+                $resultMd = $db->query($query);
+                $multidisc_count = $resultMd->num_rows;
+            }
+        }
+        if ($multidisc_count === 0) {
+            // TODO: do we really need a different "size" for drawTile. there was some code with $tileSizePHP
+            $vars['albums'][] = $album;
+            continue;
+        }
+        if (in_array($md_title, $mdTab)) {
+            //$album_count--; // TODO: variable $album_count seems to be unused at all!?
+            continue;
+        }
+        $mdTab[] = $md_title;
+        $album['multidisc'] = 'allDiscs';
+        $vars['albums'][] = $album;
     }
-    else if (keyPressed == 38 && document.suggest.txt.selectedIndex == 0) { // Up key
-        document.suggest.txt.selectedIndex = -1;
-        document.searchform.txt.focus();
-        return false;
-    }
-}
-    
+    echo $twig->render('home/layout.htm', $vars);
 
-function selectTab(obj) {
-    if (obj.id == 'albumartist') {
-        document.getElementById('albumartist').className = 'tab_on';
-        document.getElementById('trackartist').className = 'tab_off';
-        document.getElementById('tracktitle').className  = 'tab_off';
-        document.getElementById('albumtitle').className  = 'tab_off';
-        document.getElementById('quicksearch').className  = 'tab_off';
-        document.getElementById('searchform').style.visibility  = 'visible';
-        document.getElementById('quicksearchform').style.visibility  = 'hidden';
-        document.searchform.txt.select();
-        document.searchform.txt.focus();
-        document.searchform.txt.name = 'artist';
-        document.searchform.action.value = 'view1';
-        baseUrl = 'json.php?action=suggestAlbumArtist&artist=';
-        ajaxRequest(baseUrl + <?php echo (NJB_DEFAULT_CHARSET == 'UTF-8') ? 'encodeURIComponent' : 'escape'; ?>(document.searchform.txt.value), evaluateSuggest);
-    }
-    else if (obj.id == 'albumtitle') {
-        document.getElementById('albumartist').className = 'tab_off';
-        document.getElementById('trackartist').className = 'tab_off';
-        document.getElementById('tracktitle').className  = 'tab_off';
-        document.getElementById('albumtitle').className  = 'tab_on';
-        document.getElementById('quicksearch').className  = 'tab_off';
-        document.getElementById('searchform').style.visibility  = 'visible';
-        document.getElementById('quicksearchform').style.visibility  = 'hidden';
-        document.searchform.txt.select();
-        document.searchform.txt.focus();
-        document.searchform.txt.name = 'title';
-        document.searchform.action.value = 'view2';
-        baseUrl = 'json.php?action=suggestAlbumTitle&title=';
-        ajaxRequest(baseUrl + <?php echo (NJB_DEFAULT_CHARSET == 'UTF-8') ? 'encodeURIComponent' : 'escape'; ?>(document.searchform.txt.value), evaluateSuggest);
-    }
-    else if (obj.id == 'trackartist') {
-        document.getElementById('albumartist').className = 'tab_off';
-        document.getElementById('trackartist').className = 'tab_on';
-        document.getElementById('tracktitle').className  = 'tab_off';
-        document.getElementById('albumtitle').className  = 'tab_off';
-        document.getElementById('quicksearch').className  = 'tab_off';
-        document.getElementById('searchform').style.visibility  = 'visible';
-        document.getElementById('quicksearchform').style.visibility  = 'hidden';
-        document.searchform.txt.select();
-        document.searchform.txt.focus();
-        document.searchform.txt.name = 'artist';
-        document.searchform.action.value = 'view1all';
-        baseUrl = 'json.php?action=suggestTrackArtist&artist=';
-        ajaxRequest(baseUrl + <?php echo (NJB_DEFAULT_CHARSET == 'UTF-8') ? 'encodeURIComponent' : 'escape'; ?>(document.searchform.txt.value), evaluateSuggest);
-    }
-    else if (obj.id == 'tracktitle') {
-        document.getElementById('albumartist').className = 'tab_off';
-        document.getElementById('trackartist').className = 'tab_off';
-        document.getElementById('tracktitle').className  = 'tab_on';
-        document.getElementById('albumtitle').className  = 'tab_off';
-        document.getElementById('quicksearch').className  = 'tab_off';
-        document.getElementById('searchform').style.visibility  = 'visible';
-        document.getElementById('quicksearchform').style.visibility  = 'hidden';
-        document.searchform.txt.select();
-        document.searchform.txt.focus();
-        document.searchform.txt.name = 'title';
-        document.searchform.action.value = 'view3all';
-        baseUrl = 'json.php?action=suggestTrackTitle&title=';
-        ajaxRequest(baseUrl + <?php echo (NJB_DEFAULT_CHARSET == 'UTF-8') ? 'encodeURIComponent' : 'escape'; ?>(document.searchform.txt.value), evaluateSuggest);
-    }
-    
-    else if (obj.id == 'quicksearch') {
-        document.getElementById('albumartist').className = 'tab_off';
-        document.getElementById('trackartist').className = 'tab_off';
-        document.getElementById('tracktitle').className  = 'tab_off';
-        document.getElementById('albumtitle').className  = 'tab_off';
-        document.getElementById('quicksearch').className  = 'tab_on';
-        document.getElementById('searchform').style.visibility  = 'hidden';
-        document.getElementById('quicksearchform').style.visibility  = 'visible';
-        document.searchform.txt.select();
-        document.searchform.txt.focus();
-        document.searchform.txt.name = 'title';
-        document.searchform.action.value = 'view3all';
-        baseUrl = 'json.php?action=suggestTrackTitle&title=';
-        ajaxRequest(baseUrl + <?php echo (NJB_DEFAULT_CHARSET == 'UTF-8') ? 'encodeURIComponent' : 'escape'; ?>(document.searchform.txt.value), evaluateSuggest);
-    }
-}
-//-->
-</script>
-<!-- <div style="height: 8px;"></div> -->
-<div class="area">
-<?php viewNewStartPage(); ?>  
-</div>
-<?php
+    // TODO: refacture to template based rendering of surrounding markup/footer
     require_once('include/footer.inc.php');
 }
-
