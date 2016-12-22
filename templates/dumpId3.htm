@@ -1,0 +1,53 @@
+{# TODO: move to css file and include it #}
+<style type="text/css">
+.dump-id3 td {
+    font: 9pt sans-serif;
+    padding: 1px 5px;
+}
+
+.dump {
+    border-top:  solid 1px #cccccc;
+    border-left: solid 1px #cccccc;
+    margin: 2px;
+}
+
+.dump td {
+    font: 9pt sans-serif;
+    border-right:  solid 1px #cccccc;
+    border-bottom: solid 1px #cccccc;
+}
+
+.dump_string {
+    font-weight: bold;
+    color: rgb(59,187,47);
+    font-family: sans-serif;
+    word-break: break-all;
+}
+
+.dump_integer {
+    color: #FF5050;
+    font-weight: bold;
+}
+
+.dump_double {
+    color: #FF9900;
+    font-weight: bold;
+}
+
+.dump_boolean {
+    color: #5487F4;
+    font-weight: bold;
+}
+
+.error {
+    color: red
+}
+</style>
+
+<div class="dump-id3">
+	<h3>
+	Powered by <b>getID3() v{{getid3version}}</b>
+	<a class="col2 item-link" href="https://github.com/JamesHeinrich/getID3">https://github.com/JamesHeinrich/getID3</a>
+	</h3>
+	{% include 'partials/table-var-dump.htm' %}
+</div>

@@ -1,0 +1,91 @@
+{#
+  in the former php rendering there was this line
+  $track['relative_file'] = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $track['relative_file']);
+  TODO: do we need this? case yes extend track array in all controllers with something like $track['url_file_path']
+#}
+
+{% set track_id = track.track_id %}
+{% if track.tid %}
+	{# needed in search.php 'Track Artist' #}
+	{% set track_id = track.tid %}
+{% endif %}
+
+<div class="menuSub" id="menu-sub-track{{ trackIndex }}" onclick='//offMenuSub({{ trackIndex }});'> 
+	{% if cfg.access_play %}
+	<div>
+		<a href="javascript:
+			ajaxRequest(
+				'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id={{ track_id }}',
+				evaluateAdd
+			);"
+			onMouseOver="return overlib('Play track {{ track.number }}');"
+			onMouseOut="return nd();">
+			<i id = "insertPlay_{{ track_id }}" class="fa fa-play-circle fa-fw icon-small"></i>Insert after currently playing track and play
+		</a>
+	</div>
+	{% endif %}
+	{% if cfg.access_add %}
+	<div>
+		<a href="javascript:
+			ajaxRequest(
+				'play.php?action=insertSelect&amp;track_id={{ track_id }}',
+				evaluateAdd
+			);"
+			onMouseOver="return overlib('Insert track {{ track.number }}');"
+			onMouseOut="return nd();">
+			<i id="insert_{{ track_id }}" class="fa fa-indent fa-fw icon-small"></i>Insert after currently playing track
+		</a>
+	</div>
+	{% endif %}
+	{% if cfg.access_add %}
+	<div>
+		<a href="javascript:
+			ajaxRequest(
+				'play.php?action=addSelect&amp;track_id={{ track_id }}',
+				evaluateAdd
+			);"
+			onMouseOver="return overlib('Add track {{ track.number }}');"
+			onMouseOut="return nd();">
+			<i id="add_{{ track_id }}" class="fa fa-plus-circle fa-fw icon-small"></i>Add track to playlist
+		</a>
+	</div>
+	{% endif %}
+	{% if cfg.access_play %}
+	<div>
+		<a href="javascript:
+			ajaxRequest(
+				'play.php?action=playSelect&amp;track_id={{ track_id }}',
+				evaluateAdd
+			);"
+			onMouseOver="return overlib('Play track {{ track.number }}');"
+			onMouseOut="return nd();">
+			<i id="play_{{ track_id }}" class="fa fa-play-circle-o fa-fw icon-small"></i>Remove all from playlist and play track
+		</a>
+	</div>
+	{% endif %}
+	{% if cfg.access_stream %}
+	<div>
+		<a href="stream.php?action=playlist&amp;track_id={{ track_id }}&amp;stream_id={{ cfg.stream_id }}"
+			onMouseOver="return overlib('Stream track {{ track.number }}');"
+			onMouseOut="return nd();">
+			<i class="fa fa-rss fa-fw icon-small"></i>Stream track
+		</a>
+	</div>
+	{% endif %}
+	{% if cfg.access_download %}
+	<div>
+		<a href="download.php?action=downloadTrack&amp;track_id={{ track_id }}&amp;download_id={{ cfg.download_id }}"
+			{{ track.onMouseOverDownloadAttr|raw }} >
+			<i class="fa fa-download fa-fw icon-small"></i>Download track
+		</a>
+	</div>
+	{% endif %}
+	{% if cfg.access_play %}
+	<div>
+		<a href="index.php?action=viewDumpId3&amp;filename={{ cfg.media_dir~track.relative_file|url_encode }}"
+			onClick="showSpinner();">
+			<i class="fa fa-info-circle fa-fw icon-small"></i>File details
+		</a>
+	</div>
+	{% endif %}
+</div>

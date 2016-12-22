@@ -88,11 +88,13 @@ foreach(
     array(
         'include/config.inc.php',
         'vendor-dist/autoload.php',
+        'tools/OmpdTwigExtension.php',
         'controller/view1all.php',
         'controller/view1.php',
         'controller/view2.php',
         'controller/view3all.php',
         'controller/view3.php',
+        'controller/viewDumpId3.php',
         'controller/viewHome.php',
         'controller/viewNew.php',
         'controller/viewPopular.php',
@@ -214,6 +216,7 @@ $twig = new \Twig_Environment(
     )
 );
 $twig->addExtension(new \Twig_Extension_Debug());
+$twig->addExtension(new \OmpdTwigExtension());
 
 //  +------------------------------------------------------------------------+
 //  | set variables that are available in all twig-templates                 |

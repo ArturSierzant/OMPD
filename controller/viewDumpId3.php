@@ -25,37 +25,37 @@
 
 
 //  +------------------------------------------------------------------------+
-//  | index.php                                                              |
+//  | View Dump ID3                                                          |
 //  +------------------------------------------------------------------------+
-//error_reporting(-1);
-//ini_set("display_errors", 1);
+function viewDumpId3() {
+    global $cfg, $twig;
 
-require_once('include/initialize.inc.php');
+    authenticate('access_media');
+    genreNavigator('start');
 
-if (cookie('netjukebox_width')<385) {$base_size = 90;}
-elseif (cookie('netjukebox_width')<641) {$base_size = 120;}
-else {$base_size = 150;}
+    // TODO: refacture to template based rendering of surrounding markup/header
+    // formattedNavigator
+    $nav = array(
+        'name' => array('Library'),
+        'url'  => array('index.php'),
+        'name' => array('New')
+    );
+    require_once('include/header.inc.php');
 
-$cfg['menu']	= 'Library';
-$tileSizePHP	= get('tileSizePHP')	or $tileSizePHP = false;
 
-switch(get('action')) {
-    case '':                viewHome(); break;
-    case 'view1':           view1(); break;
-    case 'view2':           view2(); break;
-    case 'view3':           view3(); break;
-    case 'view1all':        view1all(); break;
-    case 'view3all':        view3all(); break;
-    case 'viewRandomAlbum': viewRandomAlbum(); break;
-    case 'viewRandomTrack': viewRandomTrack(); break;
-    case 'viewRandomFile':  viewRandomFile(); break;
-    case 'viewYear':        viewYear(); break;
-    case 'viewNew':         viewNew(); break;
-    case 'viewPopular':     viewPopular(); break;
-    case 'viewDumpId3':     viewDumpId3(); break;
-    case 'jsConf':
-        header('Content-Type: application/javascript');
-        echo $twig->render('js/ompd-conf.js', ['cfg' => $cfg]);
-        break;
-    default: message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]action'); break;
+    $getID3 = new \getID3;
+    $tagData = $getID3->analyze(get('filename'));
+    \getid3_lib::CopyTagsToComments($tagData);
+    \getid3_lib::ksort_recursive($tagData);
+
+    $vars = array(
+        'dumpvar' => $tagData,
+        'getid3version' => $getID3->version(),
+        'cfg' => $cfg
+    );
+
+    echo $twig->render('dumpId3.htm', $vars);
+
+    // TODO: refacture to template based rendering of surrounding markup/footer
+    require_once('include/footer.inc.php');
 }

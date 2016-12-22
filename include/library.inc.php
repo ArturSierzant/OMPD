@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | O!MPD, Copyright ï¿½ 2015-2016 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright ï¿½ 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -90,7 +90,8 @@ function findCoreTrackTitle($title) {
 //  +---------------------------------------------------------------------------+
 //  | Draws sub menu for add/remove to/from favorite                            |
 //  +---------------------------------------------------------------------------+
-
+//  this already exists as twig template @see templates/partials/starSubMenu.htm
+//  TODO: remove php function calls with twig includes 
 function starSubMenu($i, $isFavorite, $isBlacklist, $track_id) {
 	global $cfg, $db;
 	$addFavorite_txt = ($isFavorite ? 'Remove from ' : 'Add to ');
@@ -134,13 +135,13 @@ function starSubMenu($i, $isFavorite, $isBlacklist, $track_id) {
 </div>
 <?php 
 }
-	
 
-	
+
 //  +---------------------------------------------------------------------------+
 //  | Draws sub menu for track                                                  |
 //  +---------------------------------------------------------------------------+
-
+//  this already exists as twig template @see templates/partials/trackSubMenu.htm
+//  TODO: remove php function calls with twig includes 
 function trackSubMenu($i, $track) {
 	global $cfg, $db;
 	if ($track['tid']) {
@@ -170,7 +171,7 @@ function trackSubMenu($i, $track) {
 	<div><?php if ($cfg['access_download']) echo '<a href="download.php?action=downloadTrack&amp;track_id=' . $track['track_id'] .'&amp;download_id=' . $cfg['download_id'] . '" ' . onmouseoverDownloadTrack($track['track_id']) . '><i class="fa fa-download fa-fw icon-small"></i>Download track</a>'; ?>
 	</div>
 	
-	<div><?php if ($cfg['access_play']) echo '<a href="getid3/demos/demo.browse.php?filename='. $cfg['media_dir'] . urlencode($track['relative_file']) . '" onClick="showSpinner();"><i class="fa fa-info-circle fa-fw icon-small"></i>File details</a>'; ?>
+	<div><?php if ($cfg['access_play']) echo '<a href="index.php?action=viewDumpId3?filename='. $cfg['media_dir'] . urlencode($track['relative_file']) . '" onClick="showSpinner();"><i class="fa fa-info-circle fa-fw icon-small"></i>File details</a>'; ?>
 	</div>
 	
 </div>
@@ -205,7 +206,7 @@ function fileSubMenu($i, $filepath, $mime) {
 	<div><?php if ($cfg['access_download']) echo '<a href="download.php?action=downloadFile&amp;filepath=' . $cfg['media_dir'] . $filepath .'&amp;mime=' . $mime . '"><i class="fa fa-download fa-fw icon-small"></i>Download file</a>'; ?>
 	</div>
 	
-	<div><?php if ($cfg['access_play']) echo '<a href="getid3/demos/demo.browse.php?filename='. $cfg['media_dir'] . $filepath . '" onClick="showSpinner();"><i class="fa fa-info-circle fa-fw icon-small"></i>File details</a>'; ?>
+	<div><?php if ($cfg['access_play']) echo '<a href="index.php?action=viewDumpId3?filename='. $cfg['media_dir'] . $filepath . '" onClick="showSpinner();"><i class="fa fa-info-circle fa-fw icon-small"></i>File details</a>'; ?>
 	</div>
 	
 </div>

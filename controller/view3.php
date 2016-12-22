@@ -59,9 +59,7 @@ function view3() {
         header('Location: ' . NJB_HOME_URL . 'index.php?action=view3&album_id=' . rawurldecode($album_id));
         exit();
     }
-    
-    
-    
+
     authenticate('access_media');
     
     $query = mysqli_query($db, 'SELECT artist_alphabetic, artist, album, year, month, image_id, album_add_time, genre.genre as album_genre, album.genre_id
@@ -127,7 +125,8 @@ function view3() {
             $album_versions_count = mysqli_num_rows($query_av);
         }
     }
-    
+
+    // TODO: variable $featuring seems to be unused
     $featuring = false;
     
     $query = '
@@ -270,58 +269,58 @@ function view3() {
 
 
 <div id="album-info-area">
-<div id="image_container">
-    <div id="cover-spinner">
-        <img src="image/loader.gif" alt="">
+    <div id="image_container">
+        <div id="cover-spinner">
+            <img src="image/loader.gif" alt="">
+        </div>
+        <span id="image">
+            <img id="image_in" src="image.php?image_id=<?php echo $image_id ?>&quality=hq" alt="">
+        </span>
     </div>
-    <span id="image">
-        <img id="image_in" src="image.php?image_id=<?php echo $image_id ?>&quality=hq" alt="">
-    </span>
-</div>
 
 
 <!-- start options -->
 
 
 
-<div class="album-info-area-right">
+    <div class="album-info-area-right">
 
-<div id="album-info" class="line">
-    <div class="sign-play">
-    <i class="fa fa-play-circle-o pointer"></i>
-    </div>
-    <div class="col-right">
-        <div id="album-info-title"><?php echo $album['album']?></div>
-        <div id="album-info-artist"><?php 
-        $artist = '';
-        $exploded = multiexplode($cfg['artist_separator'],$album['artist']);
-        $l = count($exploded);
-        if ($l > 1) {
-            for ($i=0; $i<$l; $i++) {
-                $artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$i]) . '">' . html($exploded[$i]) . '</a>';
-                if ($i != $l - 1) $artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($album['artist']) . '&amp;order=year"><span class="artist_all">&</span></a>';
+    <div id="album-info" class="line">
+        <div class="sign-play">
+            <i class="fa fa-play-circle-o pointer"></i>
+        </div>
+        <div class="col-right">
+            <div id="album-info-title"><?php echo $album['album']?></div>
+            <div id="album-info-artist"><?php 
+            $artist = '';
+            $exploded = multiexplode($cfg['artist_separator'],$album['artist']);
+            $l = count($exploded);
+            if ($l > 1) {
+                for ($i=0; $i<$l; $i++) {
+                    $artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$i]) . '">' . html($exploded[$i]) . '</a>';
+                    if ($i != $l - 1) $artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($album['artist']) . '&amp;order=year"><span class="artist_all">&</span></a>';
+                }
+                echo $artist;
             }
-            echo $artist;
-        }
-        else {
-            echo '<a href="index.php?action=view2&amp;artist=' . rawurlencode($album['artist']) . '&amp;order=year">' . html($album['artist']) . '</a>';
-        }
-        ?></div>
+            else {
+                echo '<a href="index.php?action=view2&amp;artist=' . rawurlencode($album['artist']) . '&amp;order=year">' . html($album['artist']) . '</a>';
+            }
+            ?></div>
+        </div>
     </div>
-</div>
-<div class="line">
-<div class="add-info-left">Popularity:</div>
-<div id="bar-popularity-out" class="out"><div id="bar_popularity" class="in"></div></div>
+    <div class="line">
+        <div class="add-info-left">Popularity:</div>
+        <div id="bar-popularity-out" class="out">
+                <div id="bar_popularity" class="in"></div>
+        </div>
 &nbsp;
 <?php 
-$popularity = 0;
-if ($rows_max_played == 0 || $rows_played == 0) 
-    $popularity = 0;
-else
-    $popularity = round($played['counter'] / $max_played['counter'] * 100);
+$popularity = ($rows_max_played != 0 && $rows_played != 0)
+    ? round($played['counter'] / $max_played['counter'] * 100)
+    : 0;
 ?>
-<span id="popularity"><?php echo $popularity; ?></span>%
-</div>
+        <span id="popularity"><?php echo $popularity; ?></span>%
+    </div>
 
 
 <?php
@@ -366,7 +365,7 @@ else
 
 ?>
 
-<br>    
+<br>
 <table cellspacing="0" cellpadding="0" id="basic" class="fullscreen">
 <?php
     for ($i = 0; $i < 10; $i=$i+2) { ?>
@@ -443,39 +442,18 @@ else
 <!-- end options -->    
 </div>
 
-<div id="playlist">
-<span  class="playlist-title">Tracklist</span>
-<table cellspacing="0" cellpadding="0" class="border">
-<tr class="header">
-    <td class="icon"></td><!-- track menu -->
-    <td class="icon"></td>
-    <td class="trackNumber">#</td>
-    <td>Title</td>
-    <td class="track-list-artist">Artist</td>
-    <td class="textspace track-list-artist"></td>
-    <td><?php if ($featuring) echo'Featuring'; ?></td><!-- optional featuring -->
-    <td ></td>
-    <td align="right" class="time">Time</td>
-    <td class="space right"><div class="space"></div></td>
-</tr>
-<?php
-    $query = mysqli_query($db, 'SELECT discs FROM album WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');
-    $album = mysqli_fetch_assoc($query);
-    for ($disc = 1; $disc <= $album['discs']; $disc++) {
-        /* $query = mysqli_query($db, '
-        SELECT track.track_artist, track.artist, track.title, track.featuring, track.miliseconds, track.track_id, track.number, favoriteitem.favorite_id
-        FROM track LEFT JOIN favoriteitem ON track.track_id = favoriteitem.track_id
-        WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" AND disc = ' . (int) $disc . ' 
-        GROUP BY track.track_id
-        ORDER BY relative_file');
-         */
-        /* $query = mysqli_query($db, '
-        SELECT track.track_artist, track.artist, track.title, track.featuring, track.miliseconds, track.track_id, track.number, track.relative_file
-        FROM track 
-        WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" AND disc = ' . (int) $disc . ' 
-        
-        ORDER BY number,relative_file'); */
 
+<?php
+    //  +------------------------------------------------------------------------+
+    //  | Tracklist                                                               |
+    //  +------------------------------------------------------------------------+
+    $totalDiscs = $db->query('
+        SELECT discs
+        FROM album
+        WHERE album_id = "' .  $db->real_escape_string($album_id) . '"'
+    )->fetch_assoc()['discs'];
+
+    for ($disc = 1; $disc <= $totalDiscs; $disc++) {
         $query = '
         SELECT
             track.track_artist,
@@ -511,110 +489,25 @@ else
         ORDER BY number,relative_file;';
         
         $result = $db->query($query);
-        $i = 0;
-        while ($track = $result->fetch_assoc()) { ?>
-<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
-    
-    <td class="icon">
-    <span id="menu-track<?php echo $i ?>">
-    <div onclick='toggleMenuSub(<?php echo $i ?>);'>
-        <i id="menu-icon<?php echo $i ?>" class="fa fa-bars icon-small"></i>
-    </div>
-    </span>
-    </td>
-    
-    <td class="icon">
-    <span>
-    <?php if ($cfg['access_add'])  echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;track_id=' . $track['track_id'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . $track['number'] . '\');" onMouseOut="return nd();"><i id="add_' . $track['track_id'] . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';?>
-    </span>
-    </td>
-    
-    <td class="trackNumber"><?php if ($cfg['access_play'])      echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id=' . $track['track_id'] . '\');" onMouseOver="return overlib(\'Play track ' . $track['number'] . '\');" onMouseOut="return nd();">' . html($track['number']) . '.</a>';?></td>
-    <td><?php if ($cfg['access_play'])      echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id=' . $track['track_id'] . '\');" onMouseOver="return overlib(\'Play track ' . $track['number'] . '\');" onMouseOut="return nd();">' . html($track['title']) . '</a>';
-            elseif ($cfg['access_add'])     echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;track_id=' . $track['track_id'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . $track['number'] . '\');" onMouseOut="return nd();">' . html($track['title']) . '</a>';
-            elseif ($cfg['access_stream'])  echo '<a href="stream.php?action=playlist&amp;track_id=' . $track['track_id'] . '&amp;stream_id=' . $cfg['stream_id'] . '" onMouseOver="return overlib(\'Stream track ' . $track['number'] . '\');" onMouseOut="return nd();">' . html($track['title']) . '</a>';
-            else                            echo html($track['title']); ?>
-    <span class="track-list-artist-narrow">by <?php echo html($track['track_artist']); ?></span>        
-    </td>
-    
-    <td class="track-list-artist">
-    <?php
-    $artist = '';
-        $exploded = multiexplode($cfg['artist_separator'],$track['track_artist']);
-        $l = count($exploded);
-        if ($l > 1) {
-            for ($j=0; $j<$l; $j++) {
-                $artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$j]) . '">' . html($exploded[$j]) . '</a>';
-                if ($j != $l - 1) $artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['track_artist']) . '&amp;order=year"><span class="artist_all">&</span></a>';
-            }
-            echo $artist;
+        while ($track = $result->fetch_assoc()) {
+            $explodedArtists = multiexplode($cfg['artist_separator'], $track['track_artist']);
+            $track['artists'] = $explodedArtists;
+            // TODO: convert onmouseoverDownloadTrack() to twig based rendering. for now fetch the php built markup...
+            $track['onMouseOverDownloadAttr'] = onmouseoverDownloadTrack($track['track_id']);
+            $vars['album']['albumdiscs'][$disc]['tracks'][] = $track;
         }
-        else {
-            echo '<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['track_artist']) . '&amp;order=year">' . html($track['track_artist']) . '</a>';
-        }
-        ?>
-    
-    <?php /* if (mysqli_num_rows(mysqli_query($db, 'SELECT track_id FROM track WHERE track_artist like "%' .  mysqli_real_escape_string($db,$track['track_artist']) . '%"')) > 1) echo '<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['track_artist']) . '&amp;order=year">' . html($track['track_artist']) . '</a>'; else echo html($track['track_artist']);  */?>
-    </td>
-    <td class="track-list-artist"></td>
-    <td><?php if ($track['featuring']) echo html($track['featuring']); ?></td>
-    <?php
-    //$queryFav = mysqli_query($db, "SELECT favorite_id FROM favoriteitem WHERE track_id = '" . $track['track_id'] . "' AND favorite_id = '" . $cfg['favorite_id'] . "'");
-    $isFavorite = false;
-    $isBlacklist = false;
-    if ($track['favorite_pos']) $isFavorite = true;
-    if ($track['blacklist_pos']) $isBlacklist = true;
-    $tid = $track['track_id'];
-    ?>
-    
-    
-    <td onclick="toggleStarSub(<?php echo $i ?>,'<?php echo $tid ?>');" class="pl-favorites">
-        <span id="blacklist-star-bg<?php echo $tid ?>" class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
-        <i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
-        </span>
-    </td>
-    
-    <td align="right"><?php echo formattedTime($track['miliseconds']); ?></td>
-    <td></td>
-</tr>
-<tr class="line">
-    <td></td>
-    <td colspan="16"></td>
-</tr>
-
-<tr>
-<td colspan="10">
-<?php starSubMenu($i, $isFavorite, $isBlacklist, $tid);?>
-</td>
-</tr>
-
-<tr>
-<td colspan="10">
-<?php trackSubMenu($i, $track);?>
-</td>
-</tr>
-<?php
-        }
-        $query = mysqli_query($db, 'SELECT SUM(miliseconds) AS sum_miliseconds FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" AND disc = ' . (int) $disc);
-        $track = mysqli_fetch_assoc($query); ?>
-
-<!--
-<tr class="footer">
-    <td class="track-list-artist"></td>
-    <td class="track-list-artist"></td>
-    <td class="track-list-artist"></td>
-    <td colspan="7" align="right">Total: <?php echo formattedTime($track['sum_miliseconds']); ?></td>
-    
-    <td></td>
-</tr>
--->
-
-<?php if ($disc < $album['discs']) echo '<tr class="line"><td colspan="15"></td></tr>' . "\n";
+        $vars['album']['albumdiscs'][$disc]['sum_miliseconds'] = $db->query('
+            SELECT SUM(miliseconds) AS sum_miliseconds
+            FROM track
+            WHERE album_id = "' . $db->real_escape_string($album_id) . '" AND disc = ' . (int) $disc
+        )->fetch_assoc()['sum_miliseconds'];
     }
-    echo '</table>';
+    // TODO: convert listOfFavorites() to twig based rendering. for now fetch the php built markup...
+    $vars['listOfFavorites'] = listOfFavorites();
+    echo $twig->render('albumdetail/partials/tracklist.htm', $vars);
+
 ?>
-<div><h1><div class="total-time">Total: <?php echo formattedTime($track['sum_miliseconds']); ?></div></h1>
-</div>
+
 <script type="text/javascript">
 
 $(".sign-play").click(function(){
@@ -642,7 +535,6 @@ window.onload = function () {
 };
 </script>
 <?php
-    echo '</div>' . "\n";
     require_once('include/footer.inc.php');
 }
 

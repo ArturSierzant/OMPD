@@ -1,0 +1,37 @@
+<div class="menuSubRight" id="menu-star-track{{ trackIndex }}">
+	<div>
+		<span id="track_addToFavorite-{{ track.track_id }}" class="icon-anchor">
+			<span id="addToFavorite_txt-{{ track.track_id }}">
+				{{ track.favorite_pos ? 'Remove from' : 'Add to' }}
+			</span>{{ cfg.favorite_name }}
+			<i id="save_favorite_star-{{ track.track_id }}" class="fa fa-star{{ track.favorite_pos ? '' : '-o' }} fa-fw larger"></i>
+		</span>
+	</div>
+	<div>
+		<span id="track_addToBlacklist-{{ track.track_id }}" class="icon-anchor">
+			<span id="addToBlacklist_txt-{{ track.track_id }}">
+				{{ track.blacklist_pos ? 'Remove from' : 'Add to' }}
+			</span>{{ cfg.blacklist_name }}
+			<span id="blacklist-star-bg-sub{{ track.track_id }}" class="larger blackstar {{ track.blacklist_pos ? 'blackstar-selected' : '' }}">
+				<i id="blacklist_star-{{ trackIndex }}" class="fa fa-star-o fa-fw"></i>
+			</span>
+		</span>
+	</div>
+	<div class="menuSubStarSave">
+		Save as&nbsp;<input id="savePlaylistAsName-{{ track.track_id }}"><span class="savePlaylistCol3"></span><br>
+		Comment&nbsp;<input id="savePlaylistComment-{{ track.track_id }}">
+		<span id="playlistSaveAs-{{ track.track_id }}">
+			<i class="fa fa-floppy-o fa-fw"></i> Save
+		</span>
+	</div>
+	<div class="menuSubStarAdd">
+		Add to&nbsp;
+		<select id="savePlaylistAddTo-{{ track.track_id }}">
+			{# TODO: refactoring of includes/library.inc.php:listOfFavorites() to twig based rendering #}
+			{{ listOfFavorites|raw }}
+		</select>
+		<span id="playlistAddTo-{{ track.track_id }}">
+			<i class="fa fa-plus-circle fa-fw"></i> Add
+		</span>
+	</div>
+</div>

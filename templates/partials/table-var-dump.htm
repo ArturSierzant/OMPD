@@ -1,0 +1,49 @@
+{% if dumpvar is typeArray %}
+	{% if wrapTD %}<td>{% endif %}
+	<table class="dump" cellspacing="0" cellpadding="2">
+		{% for i,var in dumpvar %}
+		<tr>
+			<td valign="top"><b>{{i}}</b></td>
+			<td valign="top">{{var|getType}}
+			{% if (var is typeArray) or (var is typeString) %}&nbsp;({{var|length}}){% endif %}
+			{% if (i == 'data') and (dumpvar.image_mime) %}
+				</td><td>{{var|dumpImagestream(dumpvar.image_mime)|raw}}</td></tr>
+			{% else %}
+				 </td>
+				 {% include 'partials/table-var-dump.htm' with { dumpvar: var, wrapTD: 1 } %}
+				 </tr>
+			{% endif %}
+		{% endfor %}
+	</table>
+	{% if wrapTD %}</td>{% endif %}
+{% endif %}
+{% if dumpvar is typeBoolean %}
+	{% if wrapTD %}<td class="dump_boolean">{% endif %}
+	{% if dumpvar %}TRUE{% else %}FALSE{% endif %}
+	{% if wrapTD %}</td>{% endif %}
+{% endif %}
+{% if dumpvar is typeInteger %}
+	{% if wrapTD %}<td class="dump_integer">{% endif %}
+	{{dumpvar}}
+	{% if wrapTD %}</td>{% endif %}
+{% endif %}
+{% if (dumpvar is typeDouble) or (dumpvar is typeFloat) %}
+	{% if wrapTD %}<td class="dump_double">{% endif %}
+	{{dumpvar}}
+	{% if wrapTD %}</td>{% endif %}
+{% endif %}
+{% if dumpvar is typeString %}
+	{% if wrapTD %}<td class="dump_string">{% endif %}
+	{{dumpvar|nl2br}}
+	{% if wrapTD %}</td>{% endif %}
+{% endif %}
+{% if dumpvar is typeObject %}
+	{% if wrapTD %}<td class="dump_object">{% endif %}
+	TODO: dump type Object
+	{% if wrapTD %}</td>{% endif %}
+{% endif %}
+{% if dumpvar is typeNull %}
+	{% if wrapTD %}<td class="dump_null">{% endif %}
+	NULL
+	{% if wrapTD %}</td>{% endif %}
+{% endif %}

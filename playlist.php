@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | O!MPD, Copyright ï¿½ 2015-2016 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright ï¿½ 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -813,7 +813,7 @@ function evaluateTrack(data) {
 	//console.log ("rel_file=" + rel_file);
 	var params = data.audio_dataformat + '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + 'bit - ' + data.audio_sample_rate/1000 + 'kHz&nbsp;&bull;&nbsp;' + data.audio_profile;
 	//if (data.dr) params = params + '&nbsp;&bull;&nbsp;DR=' + data.dr;
-	params = params + '&nbsp;&bull;<a href="getid3/demos/demo.browse.php?filename=<?php echo $cfg['media_dir']; ?>' + rel_file + '">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;file details</a>';
+	params = params + '&nbsp;&bull;<a href="index.php?action=viewDumpId3&filename=<?php echo $cfg['media_dir']; ?>' + rel_file + '">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;file details</a>';
 	
 	document.getElementById('parameters').innerHTML = params;
 	
