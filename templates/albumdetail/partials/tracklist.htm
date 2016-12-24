@@ -33,11 +33,7 @@
 			<td class="icon">
 				<span>
 					{% if cfg.access_add %}
-					<a href="javascript:
-						ajaxRequest(
-							'play.php?action=addSelect&amp;track_id={{ track.track_id }}',
-							evaluateAdd
-						);"
+					<a href="javascript:{{ track.track_id|ajaxTrackAdd }}"
 						onMouseOver="return overlib('Add track {{ track.number }}');"
 						onMouseOut="return nd();">
 						<i id="add_{{ track.track_id }}" class="fa fa-plus-circle fa-fw icon-small"></i>
@@ -47,7 +43,7 @@
 			</td>
 			<td class="trackNumber">
 				{% if cfg.access_play %}
-				<a href="javascript:ajaxRequest('play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id={{ track.track_id }}');"
+				<a href="javascript:{{ track.track_id|ajaxTrackInsert(1) }}"
 					onMouseOver="return overlib('Play track {{ track.number }}');"
 					onMouseOut="return nd();">
 					{{ track.number }}
@@ -56,13 +52,13 @@
 			</td>
 			<td>
 				{% if cfg.access_play %}
-				<a href="javascript:ajaxRequest('play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id={{ track.track_id }}');"
+				<a href="javascript:{{ track.track_id|ajaxTrackInsert(1) }}"
 					onMouseOver="return overlib('Play track {{ track.number }}');"
 					onMouseOut="return nd();">
 					{{ track.title }}
 				</a>
 				{% elseif cfg.access_add %}
-				<a href="javascript:ajaxRequest('play.php?action=addSelect&amp;track_id={{ track.track_id }}', evaluateAdd);"
+				<a href="javascript:{{ track.track_id|ajaxTrackAdd }}"
 					onMouseOver="return overlib('Add track {{ track.number }}');"
 					onMouseOut="return nd();">
 					{{ track.title }}

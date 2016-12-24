@@ -58,7 +58,32 @@ class OmpdTwigExtension extends \Twig_Extension {
                         </a>';
                 }
                 return "<i>invalid image data</i></td></tr>";
-            })
+            }),
+
+            new \Twig_SimpleFilter(
+                'ajaxTrackInsert',
+                function ($trackId, $play = FALSE) {
+                    $play = ($play === FALSE) ? '' : '&amp;playAfterInsert=yes';
+                    return "ajaxRequest('play.php?action=insertSelect". $play ."&amp;track_id=". $trackId ."', evaluateAdd);";
+                },
+                array('is_safe' => array('html'))
+            ),
+
+            new \Twig_SimpleFilter(
+                'ajaxTrackAdd',
+                function ($trackId) {
+                    return "ajaxRequest('play.php?action=addSelect&amp;track_id=". $trackId ."', evaluateAdd);";
+                },
+                array('is_safe' => array('html'))
+            ),
+
+            new \Twig_SimpleFilter(
+                'ajaxTrackPlay',
+                function ($trackId) {
+                    return "ajaxRequest('play.php?action=playSelect&amp;track_id=". $trackId ."', evaluateAdd);";
+                },
+                array('is_safe' => array('html'))
+            )
         );
     }
 

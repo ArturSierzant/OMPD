@@ -13,11 +13,7 @@
 <div class="menuSub" id="menu-sub-track{{ trackIndex }}" onclick='//offMenuSub({{ trackIndex }});'> 
 	{% if cfg.access_play %}
 	<div>
-		<a href="javascript:
-			ajaxRequest(
-				'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id={{ track_id }}',
-				evaluateAdd
-			);"
+		<a href="javascript:{{ track_id|ajaxTrackInsert(1) }}"
 			onMouseOver="return overlib('Play track {{ track.number }}');"
 			onMouseOut="return nd();">
 			<i id = "insertPlay_{{ track_id }}" class="fa fa-play-circle fa-fw icon-small"></i>Insert after currently playing track and play
@@ -26,11 +22,7 @@
 	{% endif %}
 	{% if cfg.access_add %}
 	<div>
-		<a href="javascript:
-			ajaxRequest(
-				'play.php?action=insertSelect&amp;track_id={{ track_id }}',
-				evaluateAdd
-			);"
+		<a href="javascript:{{ track_id|ajaxTrackInsert }}"
 			onMouseOver="return overlib('Insert track {{ track.number }}');"
 			onMouseOut="return nd();">
 			<i id="insert_{{ track_id }}" class="fa fa-indent fa-fw icon-small"></i>Insert after currently playing track
@@ -39,11 +31,7 @@
 	{% endif %}
 	{% if cfg.access_add %}
 	<div>
-		<a href="javascript:
-			ajaxRequest(
-				'play.php?action=addSelect&amp;track_id={{ track_id }}',
-				evaluateAdd
-			);"
+		<a href="javascript:{{ track_id|ajaxTrackAdd }}"
 			onMouseOver="return overlib('Add track {{ track.number }}');"
 			onMouseOut="return nd();">
 			<i id="add_{{ track_id }}" class="fa fa-plus-circle fa-fw icon-small"></i>Add track to playlist
@@ -52,11 +40,7 @@
 	{% endif %}
 	{% if cfg.access_play %}
 	<div>
-		<a href="javascript:
-			ajaxRequest(
-				'play.php?action=playSelect&amp;track_id={{ track_id }}',
-				evaluateAdd
-			);"
+		<a href="javascript:{{ track_id|ajaxTrackPlay }}"
 			onMouseOver="return overlib('Play track {{ track.number }}');"
 			onMouseOut="return nd();">
 			<i id="play_{{ track_id }}" class="fa fa-play-circle-o fa-fw icon-small"></i>Remove all from playlist and play track
