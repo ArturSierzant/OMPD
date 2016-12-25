@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
-//  | http://www.ompd.pl                                             		 |
+//  | O!MPD, Copyright Â© 2015-2016 Artur Sierzant                            |
+//  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright Â© 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -22,41 +22,6 @@
 //  | You should have received a copy of the GNU General Public License      |
 //  | along with this program.  If not, see <http://www.gnu.org/licenses/>.  |
 //  +------------------------------------------------------------------------+
-
-
-//  +------------------------------------------------------------------------+
-//  | css hash                                                               |
-//  +------------------------------------------------------------------------+
-function css_hash() {
-	global $cfg;
-	
-	$hash_data =  filemtime(NJB_HOME_DIR . 'cache.php');
-	$hash_data .= filemtime(NJB_HOME_DIR . 'skin/' . $cfg['skin'] . '/styles.css');
-	
-	return md5($hash_data);
-}
-
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | javascript hash                                                        |
-//  +------------------------------------------------------------------------+
-function javascript_hash() {
-	global $cfg;
-	
-	$source = array('javascript-src/initialize.js',
-					'javascript-src/overlib.js',
-					'javascript-src/overlib_cssstyle.js',
-					'javascript-src/sha1.js');
-	
-	$hash_data = filemtime(NJB_HOME_DIR . 'cache.php');
-	foreach ($source as $file)
-		$hash_data .= filemtime(NJB_HOME_DIR . $file);
-	
-	return md5($hash_data);
-}
 
 
 
@@ -100,7 +65,7 @@ $header['head'] .= "\t" . '<link rel="stylesheet" type="text/css" href="fonts/ty
 $header['head'] .= "\t" . '<link rel="stylesheet" type="text/css" href="cache.php?action=css&amp;skin=' . rawurlencode($cfg['skin']) . '&amp;hash=' . css_hash() . '">' . "\n";
 $header['head'] .= "\t" . '<script src="cache.php?action=javascript&amp;hash=' . javascript_hash() . '" type="text/javascript"></script>' . "\n";
 
-//$header['head'] .= "\t" . '<script src="jquery/jquery.js"></script>' . "\n";
+//$header['head'] .= "\t" . '<script src="vendor-dist/components/jquery/jquery.min.js"></script>' . "\n";
 
 
 $header['body'] = 'onload="javascript: if (window.initialize) initialize(); cookie(); "';

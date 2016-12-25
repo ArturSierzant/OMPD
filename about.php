@@ -30,7 +30,6 @@
 //  | about.php                                                              |
 //  +------------------------------------------------------------------------+
 require_once('include/initialize.inc.php');
-require_once('getid3/getid3/getid3.php'); // for version info
 //require_once('include/header.inc.php');
 
 $cfg['menu'] = 'about';
@@ -51,13 +50,12 @@ function versionCheck($ttl) {
 	global $cfg, $db;
 	
 	if ($cfg['latest_version_idle_time'] < time() - $ttl) {
+	    $cfg['latest_version'] = 'Unresolved';
 		if ($cfg['latest_version'] = @file_get_contents('http://www.ompd.pl/version.txt')) {
 			$cfg['latest_version_idle_time'] = time();
 			mysqli_query($db,'UPDATE server SET value = "' . mysqli_real_escape_string($db,$cfg['latest_version']) . '" WHERE name = "latest_version"');
 			mysqli_query($db,'UPDATE server SET value = "' . (int) $cfg['latest_version_idle_time']  . '" WHERE name = "latest_version_idle_time"');
 		}
-		else
-			$cfg['latest_version'] = 'Unresolved';		
 	}
 	if (version_compare(NJB_VERSION, $cfg['latest_version'], '<') || $cfg['latest_version'] == 'Unresolved')	return false;
 	else																										return true;
@@ -277,7 +275,7 @@ function about() {
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td>getID3() <?php $getID3 = new getID3; echo $getID3->version(); ?></td>
+	<td>getID3() <?php $getID3 = new \getID3; echo $getID3->version(); ?></td>
 	<td></td>
 	<td><a href="http://www.getid3.org" target="_new">http://www.getid3.org</a></td>
 	<td></td>

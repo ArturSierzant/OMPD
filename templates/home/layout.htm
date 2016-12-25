@@ -1,0 +1,38 @@
+{# NOTE: linebreaks within albumTile-loops has to be commented because of css inline-block #}
+<div class="area">
+	{% if not album_count %}
+		<div>
+			<h1>
+				<br>Welcome to O!MPD.<br><br>Your database is empty. Please <a href="config.php">update it.</a><br><br>
+			</h1>
+		</div>
+	{% else %}
+		{% if show_suggested %}
+		<div id="suggested">
+			<h1>&nbsp;Albums not played for more than 3 months (random)&nbsp;&nbsp;&nbsp;<i class="fa fa-refresh pointer icon-anchor larger" id="iframeRefresh"></i></h1>
+			<div id="suggested_full" class="full">
+				<div id="suggested_container"></div>
+			</div>
+		</div>
+		{% endif %}
+
+		{% if show_last_played %}
+		<h1>&nbsp;Recently played albums</h1>
+		<div class="full">
+			{% for album in albums_lastplayed %}{#
+				#}{% include 'partials/albumTile.htm' %}{#
+			#}{% endfor %}
+		</div>
+		{% endif %}
+
+		<h1>&nbsp;New albums</h1>
+		<div class="albums_container">
+			{% for album in albums %}{#
+				#}{% include 'partials/albumTile.htm' with { multidisc: album.multidisc } %}{#
+			#}{% endfor %}
+		</div>
+	{% endif %}
+	<table cellspacing="0" cellpadding="0" class="border">
+		<tr class="line"><td colspan="11"></td></tr>
+	</table>
+</div>

@@ -1,0 +1,39 @@
+{# NOTE: linebreaks within albumTile-loops has to be commented because of css inline-block #}
+<table cellspacing="0" cellpadding="0" style="width: 100%;">
+	<tr>
+		<td>
+			<table cellspacing="0" cellpadding="0" class="tab">
+				<tr>
+					<td class="tab_on" onClick="location.href='index.php?action=viewRandomAlbum';">Album</td>
+					<td class="tab_none tabspace"></td>
+					<td class="tab_off" onClick="location.href='index.php?action=viewRandomTrack';">Track</td>
+					<td class="tab_off" onClick="location.href='index.php?action=viewRandomFile';">File</td>
+					<td class="tab_none tabspace"></td>
+					<td class="tab_off" onClick="location.href='genre.php?action=blacklist';">Blacklist</td>
+					<td class="tab_none">&nbsp;</td>
+				</tr>
+			</table>
+			<table width="100%" cellspacing="0" cellpadding="0" class="tab_border">
+				<tr>
+					<td colspan="{{ colombs + 2 }}"></td>
+				</tr>
+				<tr class="line">
+					<td colspan="{{ colombs + 2 }}"></td>
+				</tr>
+				<tr class="odd smallspace">
+					<td></td>
+				</tr>
+			</table>
+			<div class="albums_container">
+			{% for album in albums %}{#
+				#}{% include 'partials/albumTile.htm' %}{#
+			#}{% endfor %}
+			</div>
+			<table width="100%" cellspacing="0" cellpadding="0" class="tab_border">
+				<tr class="smallspace">
+					<td colspan="{{ colombs + 2 }}"></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>

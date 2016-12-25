@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
-//  | http://www.ompd.pl                                             		 |
+//  | O!MPD, Copyright Â© 2015-2016 Artur Sierzant                            |
+//  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright Â© 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -34,7 +34,7 @@
 //ini_set('display_errors', 'On');
 
 require_once('include/initialize.inc.php');
-require_once('include/stream.inc.php');
+require_once(NJB_HOME_DIR . 'include/stream.inc.php');
 
 $image_id 	= get('image_id');
 $track_id 	= get('track_id');
@@ -58,7 +58,6 @@ exit();
 //  +------------------------------------------------------------------------+
 function image($image_id, $quality, $track_id) {
 	global $cfg, $db;
-	require_once('getid3/getid3/getid3.php');
 	/* $query  = mysqli_query($db,'SELECT image, image_front FROM bitmap WHERE image_id = "' . mysqli_real_escape_string($db,$image_id) . '" LIMIT 1');
 	$bitmap = mysqli_fetch_assoc($query) or imageError(); */
 	
@@ -76,7 +75,7 @@ function image($image_id, $quality, $track_id) {
 	//get embedded picture for misc tracks
 	if ((!empty($track_id)) && ((strpos(strtolower($bitmap['relative_file']), strtolower($cfg['misc_tracks_folder'])) !== false) || (strpos(strtolower($bitmap['relative_file']), strtolower($cfg['misc_tracks_misc_artists_folder'])) !== false))) {
 		// Initialize getID3
-		$getID3 = new getID3;
+		$getID3 = new \getID3;
 		//initial settings for getID3:
 		include 'include/getID3init.inc.php';
 		$path2file = $cfg['media_dir'] . $bitmap['relative_file'];

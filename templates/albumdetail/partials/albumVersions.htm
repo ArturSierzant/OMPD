@@ -1,0 +1,49 @@
+{#
+	obviously we have the same markup as albumdetail/partials/multidisc.htm
+	differences are: container-class, heading and items-array
+	TODO: use the same twig template for multidiscs and albumVersions
+#}
+<div id="album_versions">
+	<table>
+		<tr class="line">
+			<td colspan="3"></td>
+		</tr>
+		<tr class="header">
+			<td colspan="3">Other versions of this album:</td>
+		</tr>
+		{% for albumVersion in albumVersions %}
+		<tr class="line">
+			<td colspan="3"></td>
+		</tr>
+		<tr>
+			<td class="small_cover_md">
+				{# 
+					TODO: an anchor without href is useless and invalid!
+					TODO: is there a need for rawurlencode of image_id & album_id ?
+				#}
+				<a>
+					<img src="image.php?image_id={{ albumVersion.image_id|url_encode(true) }}" width="100%">
+				</a>
+			</td>
+			<td>
+				<a href="index.php?action=view3&amp;album_id={{ albumVersion.album_id|url_encode(true) }}">
+					{{ albumVersion.album }}
+				</a>
+			</td>
+			<td class="iconDel">
+				<a href="javascript:
+					ajaxRequest(
+						'play.php?action=updateAddPlay&amp;album_id={{ albumVersion.album_id }}',
+						updateAddPlay
+					);
+					ajaxRequest(
+						'play.php?action=addSelect&amp;album_id={{ albumVersion.album_id }}',
+						evaluateAdd
+					);">
+					<i id="add_{{ albumVersion.album_id }}" class="fa fa-fw  fa-plus-circle  icon-small"></i>
+				</a>
+			</td>
+		</tr>
+		{% endfor %} 
+	</table>
+</div>

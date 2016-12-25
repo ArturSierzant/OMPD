@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | O!MPD, Copyright Â© 2015-2016 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright Â© 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -64,6 +64,7 @@ $cfg['username']			= '';
 $cfg['sign_validated']		= false;
 $cfg['align']				= false;
 
+
 //  +------------------------------------------------------------------------+
 //  | Initialize by ArtS                                                     |
 //  +------------------------------------------------------------------------+
@@ -77,16 +78,36 @@ date_default_timezone_set('Europe/Warsaw');
 
 
 //  +------------------------------------------------------------------------+
-//  | Get home directory & load config file                                  |
+//  | Get home directory & load config file & controllers                    |
 //  +------------------------------------------------------------------------+
 $temp = dirname(__FILE__);
 $temp = realpath($temp . '/..');
 define('NJB_HOME_DIR', str_replace('\\', '/', $temp) . '/');
 
-require_once(NJB_HOME_DIR . 'include/config.inc.php');
+foreach(
+    array(
+        'include/config.inc.php',
+        'vendor-dist/autoload.php',
+        'tools/OmpdTwigExtension.php',
+        'controller/view1all.php',
+        'controller/view1.php',
+        'controller/view2.php',
+        'controller/view3all.php',
+        'controller/view3.php',
+        'controller/viewDumpId3.php',
+        'controller/viewHome.php',
+        'controller/viewNew.php',
+        'controller/viewPopular.php',
+        'controller/viewRandomAlbum.php',
+        'controller/viewRandomFile.php',
+        'controller/viewRandomTrack.php',
+        'controller/viewYear.php'
+    ) as $fileName) {
+    require_once(NJB_HOME_DIR . $fileName);
+}
 
 
- // +------------------------------------------------------------------------+
+// +------------------------------------------------------------------------+
 // | Proxy settings                                                         |
 // +------------------------------------------------------------------------+
 if ($cfg['proxy_enable'] == true) {
@@ -176,10 +197,37 @@ if (function_exists('iconv') == false)
 //  +------------------------------------------------------------------------+
 require_once(NJB_HOME_DIR . 'include/library.inc.php');
 require_once(NJB_HOME_DIR . 'include/globalize.inc.php');
+require_once(NJB_HOME_DIR . 'include/tagProcessor.inc.php');
 
 // To prevent mysql error snowball effect, and to speed up the message.php and cache.php script.
 if (NJB_SCRIPT != 'message.php' && NJB_SCRIPT != 'cache.php')
 	require_once(NJB_HOME_DIR . 'include/mysqli.inc.php');
+
+
+//  +------------------------------------------------------------------------+
+//  | start template engine                                                  |
+//  +------------------------------------------------------------------------+
+\Twig_Autoloader::register();
+$loader = new \Twig_Loader_Filesystem('templates');
+$twig = new \Twig_Environment(
+    $loader,
+    array(
+        'debug' => true
+    )
+);
+$twig->addExtension(new \Twig_Extension_Debug());
+$twig->addExtension(new \OmpdTwigExtension());
+
+//  +------------------------------------------------------------------------+
+//  | set variables that are available in all twig-templates                 |
+//  +------------------------------------------------------------------------+
+$twig->addGlobal('ompd', array(
+    'NJB_HOME_URL' => NJB_HOME_URL,
+    'NJB_HOME_DIR' => NJB_HOME_DIR,
+    'NJB_SCRIPT' => NJB_SCRIPT,
+    'NJB_DEFAULT_CHARSET' => NJB_DEFAULT_CHARSET
+));
+
 
 //  +------------------------------------------------------------------------+
 //  | Check and set default favorite and blacklist playlist					 |
@@ -760,6 +808,58 @@ function checkDefaultBlacklist() {
 		$cfg['blacklist_id'] = $favorite['favorite_id'];
 	}
 	//echo 'id=' . $cfg['favorite_id'];
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | css hash                                                               |
+//  +------------------------------------------------------------------------+
+function css_hash() {
+    global $cfg;
+    $hash_data =  filemtime(NJB_HOME_DIR . 'cache.php');
+    $hash_data .= filemtime(NJB_HOME_DIR . 'skin/' . $cfg['skin'] . '/styles.css');
+    return md5($hash_data);
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | javascript hash                                                        |
+//  +------------------------------------------------------------------------+
+function javascript_hash() {
+    global $cfg;
+    $hash_data = filemtime(NJB_HOME_DIR . 'cache.php');
+    foreach (array(
+        'javascript-src/initialize.js',
+        'javascript-src/overlib.js',
+        'javascript-src/overlib_cssstyle.js',
+        'javascript-src/sha1.js') as $file) {
+        $hash_data .= filemtime(NJB_HOME_DIR . $file);
+    }
+    return md5($hash_data);
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Log into file for debuggung purposes                                   |
+//  | TODO: why is this accomplished by php's error_log() function?          |
+//  +------------------------------------------------------------------------+
+function cliLog($message) {
+    global $cfg;
+
+    if (!$cfg['debug']) {
+        return;
+    }
+    if($cfg['debug_memory'] !== FALSE) {
+        $message = "[" . convert(memory_get_usage(true)) . "] " . $message;
+    }
+    ini_set('log_errors', 'On');
+    error_log($message . "\n", 3, NJB_HOME_DIR . 'tmp/update_log.txt');
+}
+
+function convert($size) {
+    $unit = array('B','K','M','G','T','P');
+    return @number_format($size/pow(1024,($i=floor(log($size,1024)))),1).$unit[$i];
 }
 
 ?>

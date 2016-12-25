@@ -1,0 +1,106 @@
+
+<div id="additional-info">
+	{% if album.album_genre %}
+	<div class="line">
+		<div class="add-info-left">Genre:</div>
+		<div class="add-info-right">
+			<a href="index.php?action=view2&order=artist&sort=asc&genre_id={{ album.genre_id }}">{{ album.album_genre }}</a>
+		</div>
+	</div>
+	{% endif %}
+
+	{% if album.year %}
+	<div class="line">
+		<div class="add-info-left">Year:</div>
+		<div class="add-info-right">
+			<a href="index.php?action=view2&order=artist&sort=asc&year={{ album.year }}">{{ album.year }}</a>
+		</div>
+	</div>
+	{% endif %}
+
+	{% if (album.audio_bits_per_sample) and (album.audio_sample_rate) %}
+	<div class="line">
+		<div class="add-info-left">File format:</div>
+		<div class="add-info-right">
+			{{ album.audio_bits_per_sample }} bit - {{ album.audio_sample_rate/1000 }} kHz
+		</div>
+	</div>
+	{% endif %}
+
+	{% if (album.audio_dataformat) and (album.audio_profile) %}
+	<div class="line">
+		<div class="add-info-left">File type:</div>
+		<div class="add-info-right">
+			{{ album.audio_dataformat|upper }} - {{ album.audio_profile }}
+		</div>
+	</div>
+	{% endif %}
+
+	<div class="line">
+		<div class="add-info-left">Added at:</div>
+		<div class="add-info-right">
+			{{ album.album_add_time|date("Y-m-d H:i:s") }}
+		</div>
+	</div>
+
+	<div class="line">
+		<div class="add-info-left">Played:</div>
+		<div class="add-info-right">
+			<span id="played">
+				{% if played.counter %}
+					{{ played.counter }}{{ (played.counter == 1) ? "time" : "times" }}
+				{% else %}
+					Never
+				{% endif %}
+			</span>
+		</div>
+	</div>
+
+	<div class="line">
+		<div class="add-info-left">Last time:</div>
+		<div class="add-info-right">
+			<span id="last_played">
+				{% if played.time %}
+					{{ played.time|date("Y-m-d H:i") }}
+					<span id="playedCal" class=" icon-anchor" onclick="togglePlayedHistory();">
+						&nbsp;&nbsp;<i class="fa fa-calendar fa-lg"></i>
+					</span>
+				{% else %}
+					-
+				{% endif %}
+			</span>
+		</div>
+	</div>
+
+	<div id="playedHistory" class="line" style="display: none;">
+		<div class="add-info-left"></div>
+		<div class="add-info-right">Played on:</div>
+		{% for historyEntry in playedHistory %}
+		<div class="add-info-left"></div>
+		<div class="add-info-right">
+			<span>
+				{% if historyEntry.time %}
+					{{ historyEntry.time|date("Y-m-d H:i") }}
+				{% else %}
+					-
+				{% endif %}
+			</span>
+		</div>
+		{% endfor %}
+	</div>
+
+	{% if (album.comment) and (cfg.show_comments_as_tags) %}
+	<div class="line">
+		<div class="add-info-left"><i class="fa fa-tags fa-lg"></i> Tags:</div>
+		<div class="add-info-right">
+			<div class="buttons">
+				{% for tag in tags %}
+				<span>
+					<a href="index.php?action=view2&order=artist&sort=asc&&tag={{ tag }}">{{ tag }}</a>
+				</span>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+	{% endif %}
+</div>
