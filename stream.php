@@ -446,12 +446,14 @@ function stream() {
 
 
 //  +------------------------------------------------------------------------+
-//  | Stream                                                                 |
+//  | Stream to other mpd in network                                         |
 //  +------------------------------------------------------------------------+
 function streamTo() {
 	global $cfg, $db;
 	
 	$track_id	= get('track_id');
+	$filepath	= get('filepath');
+	$filepath 	= str_replace('ompd_ampersand_ompd','&',$filepath);
 	$stream_id	= (int) get('stream_id');
 	$sid		= get('sid');
 	$hash		= get('hash');
@@ -463,6 +465,13 @@ function streamTo() {
 	
 	/* if ($hash)	authenticateStream();
 	else		authenticateShareStream(); */
+	
+	if ($filepath) {
+		$mime = mime_content_type_replacement($filepath);
+		if (strpos($mime, 'audio') !== false) {
+			streamFile($filepath, $mime);
+		}
+	}
 	
 	$query = mysqli_query($db,'SELECT
 		LOWER(SUBSTRING_INDEX(relative_file, ".", -1)) AS extension,

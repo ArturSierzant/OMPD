@@ -35,9 +35,19 @@ $album_id	= get('album_id');
 $mime	= get('mime');
 $filepath	= get('filepath');
 
+
+
+//restrict acccess to files/folders outside media_dir
+if (!$cfg['allow_access_to_all_files']) {
+	$pos = strpos($filepath,$cfg['media_dir']);
+	if ($pos === false ) {
+		message(__FILE__, __LINE__, 'error', '[b]Access forbidden[/b]');
+	exit();
+	}
+}
 if		($action == 'downloadAlbum')		downloadAlbum($album_id);
 elseif	($action == 'downloadTrack')		downloadTrack($track_id);
-elseif	($action == 'downloadFile')		downloadFile($filepath, $mime);
+elseif	($action == 'downloadFile')			downloadFile($filepath, $mime);
 elseif	($action == 'batchValidateCache')	batchValidateCache();
 elseif	($action == 'batchTranscodeInit')	batchTranscodeInit();
 elseif	($action == 'batchTranscode')		batchTranscode();

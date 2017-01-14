@@ -26,10 +26,15 @@
 //  | Stream file                                                            |
 //  +------------------------------------------------------------------------+
 function streamFile($file, $mime_type, $content_disposition = '', $filename = '', $etag = '') {
+	
 	ini_set('zlib.output_compression', 'off');
 	ini_set('max_execution_time', 0);
 	
+	
 	$filename	= str_replace('"', '\"', $filename); // Needed for double quoted content disposition
+	
+	$file = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file);
+	
 	$filesize	= filesize($file);
 	$filemtime	= filemtime($file);
 	$etag 		= ($etag == '') ? '"' . md5($filesize . '-' . $filemtime) . '"' : $etag;
@@ -106,6 +111,30 @@ function streamFile($file, $mime_type, $content_disposition = '', $filename = ''
 		$filehandle = @fopen($file, 'rb') or exit();
 		while (!feof($filehandle))
 			echo fread($filehandle, 1024 * 8);
+		
+		/*  set_time_limit(0);
+		$filePath = $file;
+		$strContext=stream_context_create(
+				array(
+						'http'=>array(
+						'method'=>'GET',
+						'header'=>"Accept-language: en\r\n"
+						)
+				)
+		);
+		$fpOrigin=fopen($filePath, 'rb', false, $strContext);
+		//header('Content-Disposition: inline; filename="02. ABC - When Smokey Sings.mp3"');
+		//header('Pragma: no-cache');
+		header('Content-type: audio/mpeg');
+		header ("Content-Transfer-Encoding: binary");
+		header ("Pragma: no-cache");
+		//header('Content-Length: '.filesize($filePath));
+		while(!feof($fpOrigin)){
+			$buffer=fread($fpOrigin, 4096);
+			echo $buffer;
+			flush();
+		}
+		fclose($fpOrigin); */
 	}
 }
 

@@ -51,10 +51,12 @@ require_once('include/initialize.inc.php');
 $cfg['menu'] = 'Library';
 authenticate('access_playlist');
 require_once('include/header.inc.php');
+require_once('include/library.inc.php');
 require_once('include/play.inc.php');
 
 error_reporting(-1);
 @ini_set('display_errors', 0);
+
 
 function sortRows($data)
 {
@@ -67,7 +69,7 @@ function sortRows($data)
 		$data[$i] = $tmp;
 	}
 
-	return ( $data );
+	return ($data);
 }
 
 function findSmallest($i, $end, $data)
@@ -99,163 +101,187 @@ function findSmallest($i, $end, $data)
 	return ( $min['pos'] );
 }
 
-// mime_content_type replacement by svogal:
-// http://php.net/manual/en/function.mime-content-type.php#87856
-//if(!function_exists('mime_content_type')) {
 
-    function mime_content_type_new($filename) {
-
-        $mime_types = array(
-
-            'txt' => 'text/plain',
-            'htm' => 'text/html',
-            'html' => 'text/html',
-            'php' => 'text/html',
-            'css' => 'text/css',
-            'js' => 'application/javascript',
-            'json' => 'application/json',
-            'xml' => 'application/xml',
-            'swf' => 'application/x-shockwave-flash',
-            'flv' => 'video/x-flv',
-
-            // images
-            'png' => 'image/png',
-            'jpe' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'jpg' => 'image/jpeg',
-            'gif' => 'image/gif',
-            'bmp' => 'image/bmp',
-            'ico' => 'image/vnd.microsoft.icon',
-            'tiff' => 'image/tiff',
-            'tif' => 'image/tiff',
-            'svg' => 'image/svg+xml',
-            'svgz' => 'image/svg+xml',
-
-            // archives
-            'zip' => 'application/zip',
-            'rar' => 'application/x-rar-compressed',
-            'exe' => 'application/x-msdownload',
-            'msi' => 'application/x-msdownload',
-            'cab' => 'application/vnd.ms-cab-compressed',
-
-            // audio/video
-            'mp3' => 'audio/mpeg',
-            'mp2' => 'audio/mpeg',
-            'mpc' => 'audio/mpeg',
-			'ogg' => 'audio/ogg', 
-			'oga' => 'audio/ogg', 
-			'ape' => 'audio/ape', 
-			'dsf' => 'audio/dsf', 
-			'flac' => 'audio/flac', 
-			'wv' => 'audio/wv', 
-			'wav' => 'audio/wav', 
-			'wma' => 'audio/x-ms-wma',
-			'aac' => 'audio/aac',
-			'm4a' => 'audio/m4a',
-			'm4b' => 'audio/m4b',
-			'm4b' => 'audio/m4b',
-			
-            'qt' => 'video/quicktime',
-            'mov' => 'video/quicktime',
-
-            // adobe
-            'pdf' => 'application/pdf',
-            'psd' => 'image/vnd.adobe.photoshop',
-            'ai' => 'application/postscript',
-            'eps' => 'application/postscript',
-            'ps' => 'application/postscript',
-
-            // ms office
-            'doc' => 'application/msword',
-            'rtf' => 'application/rtf',
-            'xls' => 'application/vnd.ms-excel',
-            'ppt' => 'application/vnd.ms-powerpoint',
-
-            // open office
-            'odt' => 'application/vnd.oasis.opendocument.text',
-            'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
-        );
-
-        $ext = strtolower(array_pop(explode('.',$filename)));
-        if (array_key_exists($ext, $mime_types)) {
-            return $mime_types[$ext];
-        }
-        elseif (function_exists('finfo_open')) {
-            $finfo = finfo_open(FILEINFO_MIME);
-            $mimetype = finfo_file($finfo, $filename);
-            finfo_close($finfo);
-            return $mimetype;
-        }
-        else {
-            return 'application/octet-stream';
-        }
-    }
-//}
-
-
-
-	$self = $_SERVER['PHP_SELF'];
-	$showSelect = isset($_GET['showSelect']) ? $_GET['showSelect'] : '';
-	$showSelectQS = '';
-	$tileSizePHP = isset($_GET['tileSizePHP']) ? ('tileSizePHP=' . $_GET['showSelect'] . '&') : '';
-	
-	if ($showSelect == 'true') {
-		$showSelectQS = 'showSelect=true&';
+$self = $_SERVER['PHP_SELF'];
+$showSelect = isset($_GET['showSelect']) ? $_GET['showSelect'] : '';
+$showSelectQS = '';
+$tileSizePHP = isset($_GET['tileSizePHP']) ? ('tileSizePHP=' . $_GET['showSelect'] . '&') : '';
+//show 'Select this dir' button
+if ($showSelect == 'true') {
+	$showSelectQS = 'showSelect=true&';
+}
+if (isset($_GET['dir'])) {
+	$dir = str_replace('ompd_ampersand_ompd','&',$_GET['dir']);
+	$allowAccess = false;
+	//restrict acccess to files/folders outside media_dir
+	if (!$cfg['allow_access_to_all_files']) {
+		//$pos = strpos($_GET['dir'],$cfg['media_dir']);
+		$pos = strpos($dir,$cfg['media_dir']);
+		if ($pos !== false) {
+			$allowAccess = true;
+		}
 	}
-	if (isset($_GET['dir'])) {
-		$dir = $_GET['dir'];
+	else {
+		$allowAccess = true;
+	}
+	if ($allowAccess) {
+		//$dir = $_GET['dir'];
 		$size = strlen($dir);
-		while ($dir[$size - 1] == '/') {
-			$dir = substr($dir, 0, $size - 1);
-			$size = strlen($dir);
+		if ($dir == '/') {
+			//echo print_r($dir . '<br><br>');
+			$dir = '';
+			//echo print_r($dir . '<br><br>');
 		}
-	} else {
-		/* $dir = $_SERVER["SCRIPT_FILENAME"];
-		$size = strlen($dir);
-		while ($dir[$size - 1] != '/') {
-			$dir = substr($dir, 0, $size - 1);
-			$size = strlen($dir);
+		else {
+			while ($dir[$size - 1] == '/') {
+				$dir = substr($dir, 0, $size - 1);
+				$size = strlen($dir);
+			}
 		}
-		$dir = substr($dir, 0, $size - 1); */
+	}
+	else {
 		$dir = substr($cfg['media_dir'], 0, -1);
 	}
-
-	echo '<span class="nav_tree">DIR: ' . $dir . '</span>';
-	if ($showSelect == 'true') {
-		?>
-		<div class="buttons">
-		<span id="selectDir" onclick="window.location.href='index.php?action=viewRandomFile&<?php echo $tileSizePHP; ?>selectedDir=<?php echo str_replace('%26','ompd_ampersand_ompd',urlencode($dir));?>'">Select this directory</span>
-		</div>
-		<?php
+} 
+else {
+	/* $dir = $_SERVER["SCRIPT_FILENAME"];
+	$size = strlen($dir);
+	while ($dir[$size - 1] != '/') {
+		$dir = substr($dir, 0, $size - 1);
+		$size = strlen($dir);
 	}
-	echo "\n\n";
-	$dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir);
-	if (is_dir($dir)) {
-		if ($handle = opendir($dir)) {
-			$dir = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $dir);
-			$size_document_root = strlen($_SERVER['DOCUMENT_ROOT']);
-			$pos = strrpos($dir, "/");
-			$topdir = substr($dir, 0, $pos + 1);
-			$i = 0;
-  	  		while (false !== ($file = readdir($handle))) {
-        		if ($file != "." && $file != "..") {
-					$rows[$i]['data'] = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $file);
-					$rows[$i]['dir'] = is_dir(iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir) . "/" . $file);
-					$i++;
-				}
-			}
-    		closedir($handle);
+	$dir = substr($dir, 0, $size - 1); */
+	$dir = substr($cfg['media_dir'], 0, -1);
+}
+//echo print_r($dir . '<br><br>');
+$actDir = ($dir == '') ? '/' : $dir;
+if ($actDir != '/') {
+	$actDirSplitted = explode('/',$actDir);
+	$actDirToHref = '';
+	$actDirToShow = '';
+	//echo print_r($dir . '<br><br>');
+	foreach ($actDirSplitted as $part){
+		if (NJB_WINDOWS == 1) {
+			if ($part != '') $actDirToHref .= $part . '/';
 		}
+		else {
+			if ($part != '') $actDirToHref .= '/'. $part;
+		}
+		$actDirToShow .= '<a href="' . $self. '?dir=' . rawurlencode($actDirToHref) . '">' . $part . '</a>/';
+	}
+} 
+else {
+	$actDirToShow = '/';
+}
+echo '<span class="nav_tree">DIR: ' . $actDirToShow . '</span>';
+if ($showSelect == 'true') {
+	?>
+	<div class="buttons">
+	<span id="selectDir" onclick="window.location.href='index.php?action=viewRandomFile&<?php echo $tileSizePHP; ?>selectedDir=<?php echo str_replace('%26','ompd_ampersand_ompd',urlencode($dir));?>'">Select this directory</span>
+	</div>
+	<?php
+}
+?>
 
-		$size = count($rows);
-		$rows = sortRows($rows);
-		echo "<table class='border' cellspacing='0' cellpadding='0'>";
+<script>
+$(window).on('load', function (e) {
+	var h = $("#fixedMenu").height();
+	h =  -(h + 5); 
+	//only this works in Chrome
+	setTimeout(function(){ window.scrollBy(0, h); }, 1);
+});
+</script>
+<?php
+$dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir);
+if (is_dir($dir) || $dir == '') {
+	if ($dir == '') $dir = '/';
+	/* if ($handle = opendir($dir)) {
+		$dir = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $dir);
+		$size_document_root = strlen($_SERVER['DOCUMENT_ROOT']);
+		$pos = strrpos($dir, "/");
+		$topdir = substr($dir, 0, $pos + 1);
+		if ($dir == '/') $topdir = '/';
+		$i = 0;
+		while (false !== ($file = readdir($handle))) {
+			if ($file != "." && $file != "..") {
+				$rows[$i]['data'] = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $file);
+				$rows[$i]['dir'] = is_dir(iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir) . "/" . $file);
+				$i++;
+			}
+		}
+		closedir($handle);
+	} */
+	if ($handle = opendir($dir)) {
+		$rows = array();
+		$rows_non_alphanumeric = array();
+		$rows_f = array();
+		$rows_f_non_alphanumeric = array();
+		$dir = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $dir);
+		$size_document_root = strlen($_SERVER['DOCUMENT_ROOT']);
+		$pos = strrpos($dir, "/");
+		$topdir = substr($dir, 0, $pos + 1);
+		if ($dir == '/') $topdir = '/';
+		$i = 0;
+		while ($files[] = readdir($handle)); 
+		natcasesort($files);
+		closedir($handle);
+		foreach ($files as $file) {
+			if ($file != "." && $file != ".." && $file) {
+				if (ctype_alnum(substr($file,0,1))) {
+					if (is_dir(iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir) . "/" . $file)) {
+						$rows[$i]['data'] = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $file);
+						$rows[$i]['dir'] = is_dir(iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir) . "/" . $file);
+					}
+					else {
+						$rows_f[$i]['data'] = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $file);
+						$rows_f[$i]['dir'] = is_dir(iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir) . "/" . $file);
+					}
+				}
+				else {
+					if (is_dir(iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir) . "/" . $file)) {
+						$rows_non_alphanumeric[$i]['data'] = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $file);
+						$rows_non_alphanumeric[$i]['dir'] = is_dir(iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir) . "/" . $file);
+					}
+					else {
+						$rows_f_non_alphanumeric[$i]['data'] = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $file);
+						$rows_f_non_alphanumeric[$i]['dir'] = is_dir(iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir) . "/" . $file);
+					}
+				}
+				$i++;
+			}
+			
+		}
+		$rows = array_merge($rows_non_alphanumeric, $rows, $rows_f_non_alphanumeric, $rows_f);
+	}
+
+	$size = count($rows);
+	//$rows = sortRows($rows);
+	//echo print_r($rows);
+	echo "<table class='border' cellspacing='0' cellpadding='0'>";
+	$showUpDir = false;
+	
+	if ($dir != '/') {
+		$pos = strpos($topdir,$cfg['media_dir']);
+		if ($cfg['allow_access_to_all_files']) {
+			$showUpDir = true;
+		}
+		elseif ($pos !== false) {
+			$showUpDir = true; 
+		}
+	}
+	
+	if ($showUpDir) {
+		if ($actDir <> '/') {
+			$pos = strrpos($actDir,'/');
+			$inPagePos = substr($actDir,$pos + 1,strlen($actDir) - $pos);
+			$inPagePos = myUrlencode($inPagePos);
+		}
 		echo "<tr class='artist_list'>";
 		echo "<td class='icon'><i class='fa fa-level-up icon-small'></i></td>";
 		echo "<td class='icon'>";
 		echo "</td>";
 		echo "<td>    ";
-		echo "<a href='" . $self . "?" . $showSelectQS . "dir=" . rawurlencode($topdir) . "'>Up to parent dir</a>\n";
+		echo "<a href='" . $self . "?" . $showSelectQS . "dir=" . rawurlencode($topdir) . "#" . $inPagePos . "'>Up to parent dir</a>\n";
 		echo "</td>";
 		echo "<td>";
 		//echo "size (bytes)";
@@ -263,49 +289,98 @@ function findSmallest($i, $end, $data)
 		echo "<td>    ";
 		echo "</td>";
 		echo "</tr>";
-		
-		for ($i = 0; $i < $size; ++$i) {
-			$j=0;
-			$file_type = "";
+	}
+	for ($i = 0; $i < $size; ++$i) {
+		$j=0;
+		$file_type = "";
+		if ($dir == '/') {
+			$topdir = "/" . $rows[$i]['data'];
+		}
+		else {
 			$topdir = $dir . "/" . $rows[$i]['data'];
-			if ($rows[$i]['dir']) {
-				$file_type = "dir";
+		}
+		if ($rows[$i]['dir']) {
+			$file_type = "dir";
+		}
+		else {
+			$mime = mime_content_type_replacement($topdir);
+			if (strpos($mime, 'audio') !== false) {
+				$file_type = "file";
+				$rows[$i]['file_type'] = 'audio';
 			}
-			else {
-				$mime = mime_content_type_new($topdir);
-				if (strpos($mime, 'audio') !== false) {
-					$file_type = "file";
-					$rows[$i]['file_type'] = 'audio';
-				}
-				elseif (strpos($mime, 'image') !== false) {
-					$file_type = "file";
-					$rows[$i]['file_type'] = 'image';
-					$rows[$i]['mime'] = $mime;
-				}
+			elseif (strpos($mime, 'image') !== false) {
+				$file_type = "file";
+				$rows[$i]['file_type'] = 'image';
+				$rows[$i]['mime'] = $mime;
 			}
-			
-			if ($file_type == 'dir' || $file_type == 'file') {
-				echo '<tr class="artist_list">';
-				if ($file_type == 'dir') {
-					$dirpath = str_ireplace($cfg['media_dir'],'', $topdir);
-					//echo "<td class='icon'>";
-					//echo "<i class='fa fa-folder-o icon-small'></i>";
-					//echo "</td>";
-					$j = $i + 10000
-					?>	
+		}
+		
+		if ($file_type == 'dir' || $file_type == 'file') {
+			echo '<tr class="artist_list">';
+			if ($file_type == 'dir') {
+				$dirpath = str_ireplace($cfg['media_dir'],'', $topdir);
+				$aName = myUrlencode($rows[$i]['data']);
+				//echo "<td class='icon'>";
+				//echo "<i class='fa fa-folder-o icon-small'></i>";
+				//echo "</td>";
+				$j = $i + 100000
+				?>	
+				<td class="icon">
+				<a name="<?php echo $aName; ?>"></a>
+				<span id="menu-track<?php echo $j ?>">
+				<div onclick='toggleMenuSub(<?php echo $j ?>);'>
+					<i id="menu-icon<?php echo $j ?>" class="fa fa-folder-o icon-small"></i>
+				</div>
+				</span>
+				</td>
+				<?php
+				echo "<td class='icon'>";
+				
+				$dirpath = myUrlencode($dirpath);
+				$fulldirpath = myUrlencode($topdir);
+				
+				echo '<a href=\'javascript:ajaxRequest("play.php?action=addSelect&amp;dirpath=' . $dirpath . '&amp;track_id=' . $i . '&amp;fulldirpath=' . $fulldirpath . '",evaluateAdd);\' onMouseOver="return overlib(\'Add this directory to playlist\');" onMouseOut="return nd();"><i id="add_' . $i . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';
+				echo "</td>";
+				echo "<td>";
+				echo "<a href='" . $self . "?" . $showSelectQS . "dir=" . rawurlencode($topdir) . "'>" . $rows[$i]['data'] . "</a>\n";
+				echo '';
+				echo "</td>";
+				echo "<td>";
+				//echo filesize($topdir);
+				echo "</td>";
+				echo "<td>    ";
+				//echo "<a href='", substr($topdir, $size_document_root,  strlen($topdir) - $size_document_root), "'>open ", $file_type, "</a>\n";
+				echo "</td>";
+				echo "</tr>";
+				?>
+				<tr>
+				<td colspan="6">
+				<?php dirSubMenu($j, $dir . '/'. $rows[$i]['data']);?>
+				</td>
+				</tr>
+			<?php
+			} 
+			elseif ($file_type == 'file') {
+				$filepath = myUrlencode($topdir);
+				if ($rows[$i]['file_type'] == 'audio') {
+				?>
 					<td class="icon">
-					<span id="menu-track<?php echo $j ?>">
-					<div onclick='toggleMenuSub(<?php echo $j ?>);'>
-						<i id="menu-icon<?php echo $j ?>" class="fa fa-folder-o icon-small"></i>
+					<span id="menu-track<?php echo $i ?>">
+					<div onclick='toggleMenuSub(<?php echo $i ?>);'>
+						<i id="menu-icon<?php echo $i ?>" class="fa fa-bars icon-small"></i>
 					</div>
 					</span>
 					</td>
-					<?php
-					echo "<td class='icon'>";
-					echo '<a href=\'javascript:ajaxRequest("play.php?action=addSelect&amp;dirpath=' . str_replace('%26','ompd_ampersand_ompd',urlencode($dirpath)) . '&amp;track_id=' . $i . '",evaluateAdd);\' onMouseOver="return overlib(\'Add directory ' . $dirpath . '\');" onMouseOut="return nd();"><i id="add_' . $i . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';
+				<?php
+					//echo '<td class="icon pointer" onclick="doPlayAction(\'addSelect\',\'' . $filepath . '\',\'' . $i . '\',\'\',evaluateAdd)" onMouseOver="return overlib(\'Add file\');" onMouseOut="return nd();">';
+					echo '<td class="icon">';
+					echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;filepath=' . $filepath . '&amp;track_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'Add file\');" onMouseOut="return nd();"><i id="add_' . $i . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';
+					//echo '<i id="add_' . $i . '" class="fa fa-plus-circle fa-fw icon-small"></i>';
 					echo "</td>";
-					echo "<td>";
-					echo "<a href='" . $self . "?" . $showSelectQS . "dir=" . rawurlencode($topdir) . "'>" . $rows[$i]['data'] . "</a>\n";
+					//echo '<td class="icon-anchor" onclick="doPlayAction(\'insertSelect\',\'' . $filepath . '\',\'' . $i . '\',\'yes\',evaluateAdd)"  onMouseOver="return overlib(\'Insert and play file\');" onMouseOut="return nd();">';
+					echo '<td>';
+					echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;filepath=' . $filepath . '&amp;track_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'Play file\');" onMouseOut="return nd();">' . $rows[$i]['data'] . '</a>';
+					//echo $rows[$i]['data'];
 					echo '';
 					echo "</td>";
 					echo "<td>";
@@ -318,82 +393,46 @@ function findSmallest($i, $end, $data)
 					?>
 					<tr>
 					<td colspan="6">
-					<?php dirSubMenu($j, $dir . '/'. $rows[$i]['data'] . '/');?>
+					<?php fileSubMenu($i, $filepath, $mime);?>
 					</td>
 					</tr>
-				<?php
-				} 
-				elseif ($file_type == 'file') {
-					$filepath = urlencode(str_ireplace($cfg['media_dir'],'', $topdir));
-					$filepath = str_replace('%26','ompd_ampersand_ompd',$filepath);
-					if ($rows[$i]['file_type'] == 'audio') {
-					?>
-						<td class="icon">
-						<span id="menu-track<?php echo $i ?>">
-						<div onclick='toggleMenuSub(<?php echo $i ?>);'>
-							<i id="menu-icon<?php echo $i ?>" class="fa fa-bars icon-small"></i>
-						</div>
-						</span>
-						</td>
 					<?php
-						echo "<td class='icon'>";
-						echo '<a href=\'javascript:ajaxRequest("play.php?action=addSelect&amp;filepath=' . $filepath . '&amp;track_id=' . $i . '",evaluateAdd);\' onMouseOver="return overlib(\'Add track ' . str_ireplace($cfg['media_dir'],'', $topdir) . '\');" onMouseOut="return nd();"><i id="add_' . $i . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';
-						echo "</td>";
-						echo "<td>";
-						echo '<a href=\'javascript:ajaxRequest("play.php?action=insertSelect&amp;filepath=' . $filepath . '&amp;track_id=' . $i . '&amp;playAfterInsert=yes",evaluateAdd);\' onMouseOver="return overlib(\'Insert and play track ' . str_ireplace($cfg['media_dir'],'', $topdir) . '\');" onMouseOut="return nd();">' . $rows[$i]['data'] . '</a>';
-						echo '';
-						echo "</td>";
-						echo "<td>";
-						//echo filesize($topdir);
-						echo "</td>";
-						echo "<td>    ";
-						//echo "<a href='", substr($topdir, $size_document_root,  strlen($topdir) - $size_document_root), "'>open ", $file_type, "</a>\n";
-						echo "</td>";
-						echo "</tr>";
-						?>
-						<tr>
-						<td colspan="6">
-						<?php fileSubMenu($i, $filepath, $mime);?>
-						</td>
-						</tr>
-						<?php
-					}
-					elseif ($rows[$i]['file_type'] == 'image') {
-						echo "<td class='icon'>";
-						echo '<i id="add_' . $i . '" class="fa fa-file-image-o fa-fw icon-small"></i>';
-						echo "</td>";
-						echo "<td></td>";
-						echo "<td>";
-						echo "<a href='image.php?image_path=" . rawurlencode($topdir) . "&amp;mime=" . $mime . "'>" . $rows[$i]['data'] . "</a>\n";
-						echo '';
-						echo "</td>";
-						echo "<td>";
-						//echo filesize($topdir);
-						echo "</td>";
-						echo "<td>    ";
-						//echo "<a href='", substr($topdir, $size_document_root,  strlen($topdir) - $size_document_root), "'>open ", $file_type, "</a>\n";
-						echo "</td>";
-						echo "</tr>";
-					}
 				}
-				
-				
+				elseif ($rows[$i]['file_type'] == 'image') {
+					echo "<td class='icon'>";
+					echo '<i id="add_' . $i . '" class="fa fa-file-image-o fa-fw icon-small"></i>';
+					echo "</td>";
+					echo "<td></td>";
+					echo "<td>";
+					echo "<a href='image.php?image_path=" . rawurlencode($topdir) . "&amp;mime=" . $mime . "'>" . $rows[$i]['data'] . "</a>\n";
+					echo '';
+					echo "</td>";
+					echo "<td>";
+					//echo filesize($topdir);
+					echo "</td>";
+					echo "<td>    ";
+					//echo "<a href='", substr($topdir, $size_document_root,  strlen($topdir) - $size_document_root), "'>open ", $file_type, "</a>\n";
+					echo "</td>";
+					echo "</tr>";
+				}
 			}
-			
 		}
-		echo "</table>";
-	} else if (is_file($dir)) {
-		
-		$pos = strrpos($dir, "/");
-		$topdir = substr($dir, 0, $pos);
-		echo "<a href='", $self, "?dir=", $topdir, "'>", $topdir, "</a>\n\n";
-		$file = file($dir);
-		$size = count($file);
-		for ($i = 0; $i < $size; ++$i)
-			echo htmlentities($file[$i], ENT_QUOTES);
-	} else {
-		echo "bad file or unable to open";
 	}
+	echo "</table>";
+} 
+else if (is_file($dir)) {
+	
+	$pos = strrpos($dir, "/");
+	$topdir = substr($dir, 0, $pos);
+	echo "<a href='", $self, "?dir=", $topdir, "'>", $topdir, "</a>\n\n";
+	$file = file($dir);
+	$size = count($file);
+	for ($i = 0; $i < $size; ++$i)
+		echo htmlentities($file[$i], ENT_QUOTES);
+} 
+else {
+	echo "Unable to open";
+}
 
 
 require_once('include/footer.inc.php');

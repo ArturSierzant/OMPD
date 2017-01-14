@@ -709,7 +709,7 @@ function view2() {
 	}
 	
 	if ($tag) {
-		$order_query = 'ORDER BY album.artist, year';
+		$order_query = 'ORDER BY album.artist, year, album';
 		//ONLY_FULL_GROUP_BY
 		$query_str = ('SELECT album, album.artist, artist_alphabetic, album.year, month, genre_id, image_id, album.album_id, comment FROM album, track WHERE album.album_id=track.album_id AND comment like "%' . $tag . '%" GROUP BY track.album_id ' . $order_query);		
 		//$query_str = ('SELECT album, album.artist, artist_alphabetic, album.year, month, genre_id, image_id, album.album_id, comment FROM album, track WHERE album.album_id=track.album_id AND comment like "%' . $tag . '%" GROUP BY track.album_id, album, album.artist, artist_alphabetic, album.year, month, genre_id, image_id, album.album_id, comment ' . $order_query);		
@@ -1248,6 +1248,7 @@ function view3() {
 	}
 	
 	if ($cfg['show_album_versions'] == true) {
+		$album_versions_count = 0;
 		$av_indicator = striposa($album['album'], $cfg['album_versions_indicator']);
 		if ($av_indicator !== false) {
 			$mdqs = '';
@@ -1282,7 +1283,7 @@ function view3() {
 			}
 			$query_av = mysqli_query($db, 'SELECT album, image_id, album_id 
 			FROM album 
-			WHERE ' . $qs . ' AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '" 
+			WHERE (' . $qs . ') AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '" 
 			ORDER BY album');
 			$album_versions_count = mysqli_num_rows($query_av);
 		}
@@ -1329,7 +1330,7 @@ function view3() {
 	$search = array();
 	
 	
-	$playerQuery = mysqli_query($db, 'SELECT * FROM player ORDER BY player_name');
+	/* $playerQuery = mysqli_query($db, 'SELECT * FROM player ORDER BY player_name');
 	$playerCount = mysqli_num_rows($playerQuery);
 	if ($playerCount > 1) {
 		$playTo = array();
@@ -1340,23 +1341,24 @@ function view3() {
 			
 		}
 		$playTo[] = '<a href="javascript:showHide(\'basic\',\'playTo\');"><i class="fa fa-fw  fa-reply  icon-small"></i>Go back</a>';
-	}
+	} */
 	
 	if ($cfg['access_play'])
 		$basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;album_id=' . $album_id . '\',evaluateAdd);ajaxRequest(\'play.php?action=updateAddPlay&amp;album_id=' . $album_id . '\',updateAddPlay);"><i id="play_' . $album_id . '" class="fa fa-fw fa-play-circle-o  icon-small"></i>Play album</a>';
 	if ($cfg['access_add']){
 		//ajaxRequest(\'play.php?action=addSelect&amp;album_id=' . $album_id . '\');
-		$basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=updateAddPlay&album_id=' . $album_id . '\',updateAddPlay);ajaxRequest(\'play.php?action=addSelect&album_id=' . $album_id . '\',evaluateAdd);"><i id="add_' . $album_id . '" class="fa fa-fw  fa-plus-circle  icon-small"></i>Add to playlist</a>';
+		$basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&album_id=' . $album_id . '\',evaluateAdd);ajaxRequest(\'play.php?action=updateAddPlay&album_id=' . $album_id . '\',updateAddPlay);"><i id="add_' . $album_id . '" class="fa fa-fw  fa-plus-circle  icon-small"></i>Add to playlist</a>';
 		$basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;album_id=' . $album_id . '&amp;insertType=album\',evaluateAdd);ajaxRequest(\'play.php?action=updateAddPlay&amp;album_id=' . $album_id . '\',updateAddPlay);"><i id="insert_' . $album_id . '" class="fa fa-fw fa-indent icon-small"></i>Insert into playlist</a>';
 	}
 	if ($cfg['access_add'] && $cfg['access_play'])
 		$basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;album_id=' . $album_id . '&amp;insertType=album\',evaluateAdd);ajaxRequest(\'play.php?action=updateAddPlay&amp;album_id=' . $album_id . '\',updateAddPlay);"><i id="insertPlay_' . $album_id . '" class="fa fa-fw  fa-play-circle icon-small"></i>Insert and play</a>';
-	if ($cfg['access_stream']){
+	 if ($cfg['access_stream']){
 		$basic[] = '<a href="stream.php?action=playlist&amp;album_id=' . $album_id . '&amp;stream_id=' . $cfg['stream_id'] . '"><i class="fa fa-fw  fa-rss  icon-small"></i>Stream album</a>';
-		if ($playerCount > 1) {
+	 }
+	/*	if ($playerCount > 1) {
 			$basic[] = '<a  href="javascript:showHide(\'basic\',\'playTo\');"><i class="fa fa-fw  fa-share-square-o  icon-small"></i>Play to...</a>';
 		}
-	}
+	} */
 	if ($cfg['access_download'] && $cfg['album_download'])
 		$basic[] = '<a href="download.php?action=downloadAlbum&amp;album_id=' . $album_id . '&amp;download_id=' . $cfg['download_id'] . '" ' . onmouseoverDownloadAlbum($album_id) . '><i class="fa fa-fw  fa-download  icon-small"></i>Download album</a>';
 	if ($cfg['access_play']){
@@ -1591,6 +1593,8 @@ else
 <?php
 	} ?>
 </table>
+
+<!--
 <table cellspacing="0" cellpadding="0" id="playTo" style="display: none;" class="fullscreen">
 <?php
 	for ($i = 0; $i < 10; $i=$i+2) { ?>
@@ -1601,6 +1605,8 @@ else
 <?php
 	} ?>
 </table>
+-->
+
 <table cellspacing="0" cellpadding="0" id="advanced" style="display: none;">
 <?php
 	for ($i = 0; $i < 10; $i=$i+2) { ?>
@@ -1619,23 +1625,29 @@ if ($cfg['show_multidisc'] == true && $multidisc_count > 0) {
 ?>
 <div id="multidisc">
 <table>
-<tr class="line"><td colspan="3"></td></tr>
+<tr class="line"><td colspan="4"></td></tr>
 <tr class="header">
-<td colspan="3">
+<td colspan="4">
 Other discs in this set:
 </td>
 </tr> 
 <?php 
 	while ($multidisc = mysqli_fetch_assoc($query_md)) {
-		echo '<tr class="line"><td colspan="3"></td></tr>
+		echo '<tr class="line"><td colspan="4"></td></tr>
 		<tr>
 		<td class="small_cover_md"><a><img src="image.php?image_id=' . rawurlencode($multidisc['image_id']) . '" width="100%"></a></td>
 		<td><a href="index.php?action=view3&amp;album_id=' . rawurlencode($multidisc['album_id']) . '">' . $multidisc['album'] . '</a></td>
-		<td class="iconDel">
-		<a href="javascript:ajaxRequest(\'play.php?action=updateAddPlay&amp;album_id=' . $multidisc['album_id'] . '\',updateAddPlay);ajaxRequest(\'play.php?action=addSelect&amp;album_id='. $multidisc['album_id'] . '\',evaluateAdd);"><i id="add_' . $multidisc['album_id'] . '" class="fa fa-fw  fa-plus-circle  icon-small"></i></a>
+		<td class="icon">
+		<a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;album_id=' . $multidisc['album_id'] . '\',evaluateAdd);"><i id="play_' . $multidisc['album_id'] . '" class="fa fa-fw fa-play-circle-o  icon-small"></i></a>
+		</td>
+		<td class="icon">
+		<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;album_id='. $multidisc['album_id'] . '\',evaluateAdd);"><i id="add_' . $multidisc['album_id'] . '" class="fa fa-fw  fa-plus-circle  icon-small"></i></a>
 		</td>
 		</tr>'; 
 	}
+if ($album_versions_count == 0) {
+	echo '<tr class="line"><td colspan="4"></td></tr>';
+}
 ?>
 
 </table>
@@ -1649,31 +1661,34 @@ if ($cfg['show_album_versions'] == true && $album_versions_count > 0) {
 ?>
 <div id="album_versions">
 <table>
-<tr class="line"><td colspan="3"></td></tr>
+<tr class="line"><td colspan="4"></td></tr>
 <tr class="header">
-<td colspan="3">
+<td colspan="4">
 Other versions of this album:
 </td>
 </tr>
 <?php 
 	while ($multidisc = mysqli_fetch_assoc($query_av)) {
-		echo '<tr class="line"><td colspan="3"></td></tr>
+		echo '<tr class="line"><td colspan="4"></td></tr>
 		<tr>
 		<td class="small_cover_md"><a><img src="image.php?image_id=' . rawurlencode($multidisc['image_id']) . '" width="100%"></a></td>
 		<td><a href="index.php?action=view3&amp;album_id=' . rawurlencode($multidisc['album_id']) . '">' . $multidisc['album'] . '</a></td>
-		<td class="iconDel">
-		<a href="javascript:ajaxRequest(\'play.php?action=updateAddPlay&amp;album_id=' . $multidisc['album_id'] . '\',updateAddPlay);ajaxRequest(\'play.php?action=addSelect&amp;album_id='. $multidisc['album_id'] . '\',evaluateAdd);"><i id="add_' . $multidisc['album_id'] . '" class="fa fa-fw  fa-plus-circle  icon-small"></i></a>
+		<td class="icon">
+		<a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;album_id=' . $multidisc['album_id'] . '\',evaluateAdd);"><i id="play_' . $multidisc['album_id'] . '" class="fa fa-fw fa-play-circle-o  icon-small"></i></a>
+		</td>
+		<td class="icon">
+		<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;album_id='. $multidisc['album_id'] . '\',evaluateAdd);"><i id="add_' . $multidisc['album_id'] . '" class="fa fa-fw  fa-plus-circle  icon-small"></i></a>
 		</td>
 		</tr>'; 
 	}
 ?>
-
+<tr class="line"><td colspan="4"></td></tr>
 </table>
 </div>
 <?php 
 }
 ?>
-<br>
+
 </div>
 <!-- end options -->	
 </div>
@@ -2412,7 +2427,7 @@ function viewRandomFile() {
 		$dir = str_replace('ompd_ampersand_ompd','&',$_COOKIE['random_dir']);
 	}
 	
-	$selectedDir = isset($_GET['selectedDir']) ? $_GET['selectedDir'] . '/' : $dir;
+	$selectedDir = isset($_GET['selectedDir']) ? str_replace('ompd_ampersand_ompd','&',$_GET['selectedDir']) : $dir;
 
 	require_once('include/header.inc.php');
 ?>
@@ -3082,7 +3097,7 @@ function viewPopular() {
 	</div>
 	
 	<div>
-	<?php if ($cfg['access_add'])  echo '<a href="javascript:ajaxRequest(\'play.php?action=updateAddPlay&album_id=' . $album['album_id'] . '\',updateAddPlay);ajaxRequest(\'play.php?action=addSelect&album_id=' . $album['album_id'] . '\',evaluateAdd);"><i id="add_' . $album['album_id'] . '" class="fa fa-plus-circle fa-fw icon-small"></i>Add to playlist</a>';?>
+	<?php if ($cfg['access_add'])  echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&album_id=' . $album['album_id'] . '\',evaluateAdd);ajaxRequest(\'play.php?action=updateAddPlay&album_id=' . $album['album_id'] . '\',updateAddPlay);"><i id="add_' . $album['album_id'] . '" class="fa fa-plus-circle fa-fw icon-small"></i>Add to playlist</a>';?>
 	</div>
 	
 	<div onClick="offMenuSub('');">

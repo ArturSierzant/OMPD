@@ -31,17 +31,18 @@ $file = array();
 $file_count = 0;
 
 $dir = str_replace('ompd_ampersand_ompd','&',$dir);
+$dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir);
 
 setcookie('random_limit', $limit, time() + (86400 * 30 * 365), "/"); // 86400 = 1 day
 setcookie('random_dir', $dir, time() + (86400 * 30 * 365), "/");
 
-$query1=mysqli_query($db,'SELECT player.player_name as pl, player.player_host as host, player.player_port as port FROM player, session WHERE (sid = BINARY "' . cookie('netjukebox_sid') . '") and player.player_id=session.player_id');
+$query1 = mysqli_query($db,'SELECT player.player_name as pl, player.player_host as host, player.player_port as port FROM player, session WHERE (sid = BINARY "' . cookie('netjukebox_sid') . '") and player.player_id=session.player_id');
 $session1 = mysqli_fetch_assoc($query1);
-$player1=$session1['pl'];
-$player1_host=$session1['host'];
-$player1_port=$session1['port'];
+$player1 = $session1['pl'];
+$player1_host = $session1['host'];
+$player1_port = $session1['port'];
 
-recursiveScan($dir);
+recursiveScan($dir. '/');
 
 $file_count = count($file);
 if ($limit > $file_count) {
@@ -52,7 +53,11 @@ $file = get_random_elements($file,$limit);
 
 mpd('clear', $player1_host, $player1_port);
 foreach ($file as $f) {
-	mpd ('add "' . $f . '"', $player1_host, $player1_port);
+	$mpdCommand = mpd ('add "' . str_ireplace($cfg['media_dir'], '', $f) . '"', $player1_host, $player1_port);
+	if ($mpdCommand == 'ACK_ERROR_NO_EXIST') {
+			//file not found in MPD database - add stream
+			playTo(0,'',$f,'',$player1_host, $player1_port);	
+	}
 }
 mpd('play', $player1_host, $player1_port);
 
@@ -96,7 +101,8 @@ function recursiveScan($dir) {
 				if (in_array($extension, $cfg['media_extension'])) {
 					$entry = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $entry);
 					$dir_d = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $dir);
-					$file[] = str_ireplace($cfg['media_dir'], '', $dir_d . $entry);
+					//$file[] = str_ireplace($cfg['media_dir'], '', $dir_d . $entry);
+					$file[] = $dir_d . $entry;
 				}
 			}
 		}

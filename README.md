@@ -39,6 +39,8 @@ The installation instruction can be found on http://www.ompd.pl
 All configuration parameters can be set in:
 `include/config.inc.php`
 
+You can also copy this file into `include/config.local.inc.php` and there make all nessesary changes - those changes will override default values from `include/config.inc.php`
+
 ## Very large files
 
 O!MPD should support files larger than 2GB (64-bit PHP installations only) - but it was not tested.

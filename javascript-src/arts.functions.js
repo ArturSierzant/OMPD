@@ -97,16 +97,17 @@ function evaluateRandom(data) {
 	var timeOut = 2000;
 	if (data.random_files_result == 'random_files_OK') {
 		$('[id="randomPlay_' + data.id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-check-square icon-ok');
+		offMenuSub('');
 		
 		setTimeout(function(){
-			$('[id="randomPlay_' + data.id +'"]').removeClass('fa-check-square icon-ok').addClass('fa-play-circle-o');
+			$('[id="randomPlay_' + data.id +'"]').removeClass('fa-check-square icon-ok').addClass('fa-random');
 		}, timeOut);
 	}
 	else {
 		$('[id="randomPlay_' + data.id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-exclamation-triangle icon-nok');
 		
 		setTimeout(function(){
-			$('[id="randomPlay_' + data.id +'"]').removeClass('fa-exclamation-triangle icon-nok').addClass('fa-play-circle-o');
+			$('[id="randomPlay_' + data.id +'"]').removeClass('fa-exclamation-triangle icon-nok').addClass('fa-random');
 		}, timeOut);
 		
 	}
@@ -799,7 +800,7 @@ function playlistSave(action, id, saveTrackId, host, port) {
 				}
 				switch(action){
 					case "SaveAs":
-						if(json.action_status) {
+						if(json.action_status && !json.not_compatible) {
 							$('select[id^="savePlaylistAddTo"]').empty();
 							$('select[id^="savePlaylistAddTo"]').html(json.select_options);
 							setTimeout(function(){
@@ -925,4 +926,28 @@ function addFavSubmenuActions() {
 			ajaxRequest('ajax-blacklist.php?action=' + action + '&track_id=' + tid, setBlacklist);
 			
 		});
-}
+};
+
+function doPlayAction(action, filepath, track_id, playAfterInsert, doFunction) {
+	$.ajax({
+			type: "GET",
+			url: "play.php",
+			data: { 'action': action, 'filepath': filepath, 'track_id' : track_id, 'playAfterInsert' : playAfterInsert },
+			dataType : 'json',
+			success : function(json) {
+				doFunction(json);
+			},
+			error : function(jqXHR, textStatus, error) {
+				/* var http = new XMLHttpRequest();
+				http.send(jqXHR.responseText); */
+		
+				var timeOut = 2000;
+				$('[id="add_' + track_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-exclamation-triangle icon-nok');
+			
+				setTimeout(function(){
+					$('[id="add_' + track_id +'"]').removeClass('fa-exclamation-triangle icon-nok').addClass('fa-plus-circle');
+				}, timeOut);
+				
+			}	
+		});
+};

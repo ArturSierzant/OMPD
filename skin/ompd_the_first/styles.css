@@ -1008,6 +1008,8 @@ div.playlist_status_on_border	{border: solid 1px rgb(77, 144, 254);}
 
 .pl-track-title {
 	font-size: 1.3em;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	}
 .pl-track-number {
 	font-size: 0.8em;
@@ -1016,6 +1018,8 @@ div.playlist_status_on_border	{border: solid 1px rgb(77, 144, 254);}
 .pl-track-artist {
 	font-size: 1.1em;
 	padding-top: 0.769em;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	}
 
 .pl-track-favorites {

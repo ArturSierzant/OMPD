@@ -213,16 +213,30 @@ if (count($file) == 0) {
 $playtime = array();
 $track_id = array();
 $playlistTT = 0;
-for ($i=0; $i < $listlength; $i++)
-	{
-	$query = mysqli_query($db,'SELECT track.title, track.artist, track.track_artist, track.featuring, track.miliseconds, track.track_id, track.genre, album.genre_id, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, track.album_id, track.number, track.track_id, track.year as trackYear FROM track, album WHERE track.album_id=album.album_id AND track.relative_file = "' . mysqli_real_escape_string($db,$file[$i]) . '"');
+for ($i=0; $i < $listlength; $i++) {
+	//streaming track outside of mpd library	
+	$pos = strpos($file[$i],'track_id=');	
+	if ($pos === false) {
+		$query = mysqli_query($db,'SELECT track.title, track.artist, track.track_artist, track.featuring, track.miliseconds, track.track_id, track.genre, album.genre_id, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, track.album_id, track.number, track.track_id, track.year as trackYear FROM track, album WHERE track.album_id=album.album_id AND track.relative_file = "' . 	mysqli_real_escape_string($db,$file[$i]) . '"');
+	} 
+	else {
+		$t_id = substr($file[$i],$pos + 9, 19);
+		$query = mysqli_query($db,'SELECT track.title, track.artist, track.track_artist, track.featuring, track.miliseconds, track.track_id, track.genre, album.genre_id, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, track.album_id, track.number, track.track_id, track.year as trackYear FROM track, album WHERE track.album_id=album.album_id AND track.track_id = "' . 	mysqli_real_escape_string($db,$t_id) . '"');
+	}
 	$table_track = mysqli_fetch_assoc($query);
 	$playtime[] = (int) $table_track['miliseconds'];
 	$playlistTT = $playlistTT + (int) $table_track['miliseconds'];
 	$track_id[] = (string) $table_track['track_id'];
 	$genre_id[] = (string) $table_track['genre_id'];
 	$number[] = (string) $table_track['number'];
-	if (!isset($table_track['artist'])) {//track not found in DB - take info from MPD
+	
+	$is_file_stream = false;
+	$pos = strpos($file[$i],'filepath=');
+	if ($pos !== false) {
+		$is_file_stream = true;
+	}
+	//track not found in OMPD DB - take info from MPD, unless this is a stream of file
+	if (!isset($table_track['artist']) && !$is_file_stream) {
 		$playlistinfo = mpd('playlistinfo ' . $i);
 		if (isset($playlistinfo['Artist'])) 
 			$table_track['track_artist']	= $playlistinfo['Artist'];
@@ -247,6 +261,17 @@ for ($i=0; $i < $listlength; $i++)
 		$table_track['miliseconds'] = $playlistinfo['Time'] * 1000;
 		
 	}
+	//this is stream of a file
+	elseif ($is_file_stream) {
+		//TODO: take info from file using getid3
+		$playlistinfo = mpd('playlistinfo ' . $i);
+		$table_track['number'] = $playlistinfo['Pos'] + 1;
+		$filepath = substr($file[$i],$pos + 9, strlen($file[$i]) - $pos);
+		$filepath = urldecode($filepath);
+		$table_track['title'] = basename($filepath);
+		$pos = strpos($filepath, $table_track['title']);
+		$table_track['album'] = substr($filepath, 0, $pos);
+	}
 	$query2 = mysqli_query($db,'SELECT album, year, image_id FROM album WHERE album_id="' . $table_track['album_id'] . '"');
 	$image_id = mysqli_fetch_assoc($query2);
 ?>
@@ -254,12 +279,6 @@ for ($i=0; $i < $listlength; $i++)
 	
 	<td class="small_cover">
 	<a id="track<?php echo $i; ?>_image" href="javascript:ajaxRequest('play.php?action=playIndex&amp;index=<?php echo $i ?>&amp;menu=playlist',evaluateListpos);"><img src="image.php?image_id=<?php echo $image_id['image_id'] ?>&track_id=<?php echo $table_track['track_id'] ?>" alt="" width="100%"></a></td>
-	
-	<!--<td class="play-indicator">
-	<a class="play-indicator" id="track<?php echo $i; ?>_play" style="<?php if ($i == $listpos) echo 'visibility: visible;'; else echo 'visibility: hidden;'; ?>" href="javascript:ajaxRequest('play.php?action=playIndex&amp;index=<?php echo $i ?>&amp;menu=playlist', evaluateListpos);">
-	<canvas width="30px" height="30px">
-	</a></td>
-	-->
 	
 	<td class="play-indicator">
 	<div id="track<?php echo $i; ?>_play" style="<?php if ($i == $listpos) echo 'visibility: visible;'; else echo 'visibility: hidden;'; ?>" onclick="javascript:ajaxRequest('play.php?action=playIndex&amp;index=<?php echo $i ?>&amp;menu=playlist',evaluateListpos);">
@@ -335,17 +354,13 @@ for ($i=0; $i < $listlength; $i++)
 	</td>
 	
 	<td class="time"><?php if (isset($table_track['miliseconds'])) echo formattedTime($table_track['miliseconds']); ?></td>
+
 	
-	<!--
-	<td id="track<?php echo $i; ?>_delete" class="iconDel" <?php if ($cfg['access_play']) 
-	echo 'onclick="javascript:showSpinner();ajaxRequest(\'play.php?action=deleteIndex&amp;index=' . $i . '&amp;menu=playlist\',evaluateListpos);"'; ?>><i class="fa fa-times-circle sign"></i></td>
-	-->
-	
-	<td class="iconDel" style="position: relative;">
+	<td class="iconDel">
 		<div  id="menu-icon-div<?php echo $i ?>" <?php echo 'onclick="toggleMenuSub(' . $i . ');"'; ?>>
 			<i id="menu-icon<?php echo $i ?>" class="fa fa-bars fa-fw sign"></i>
 		</div>
-		<div  id="menu-insert-div<?php echo $i ?>" style="display: none; position: absolute; bottom: 0;" onclick="moveTrack(<?php echo $i ?>,-1,false)">
+		<div  id="menu-insert-div<?php echo $i ?>" style="display: none; /* position: absolute; */ bottom: 0;" onclick="moveTrack(<?php echo $i ?>,-1,false)">
 			<i class="fa fa-angle-down fa-fw sign"></i>
 		</div>
 	</td>
@@ -488,9 +503,9 @@ function evaluateStatus(data) {
 	if (!current_track_id) { //track not found in DB, get data from MPD
 		data.max = data.Time;
 		var title = data.title;
-		if (title.indexOf("action=streamTo") != -1) {
+		/* if (title.indexOf("action=streamTo") != -1) {
 			title = data.name; 
-		}
+		} */
 		document.getElementById('title1').innerHTML = document.getElementById('title').innerHTML =  title;
 		var rel_file = encodeURIComponent(data.relative_file);
 		//console.log ("rel_file=" + rel_file);
@@ -609,7 +624,7 @@ function evaluateIsplaying(isplaying, idx) {
 			$("#play").removeClass();
 			$("#play").addClass("playlist_status_off");
 			$("#play").html('<i class="fa fa-play sign-ctrl"></i>');
-			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=play&amp;menu=playlist', evaluateIsplaying);");
+			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=play&menu=playlist', evaluateIsplaying);");
 			$('#track' + idx + '_play').hide();
 			document.getElementById('time').innerHTML = formattedTime(0);
 			document.getElementById('timebar').style.width = 0;
@@ -623,7 +638,7 @@ function evaluateIsplaying(isplaying, idx) {
 			$("#play").removeClass();
 			//$("#play").addClass("playlist_status_on");
 			$("#play").addClass("playlist_status_off");
-			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=pause&amp;menu=playlist', evaluateIsplaying);");
+			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=pause&menu=playlist', evaluateIsplaying);");
 			$('#track' + idx + '_play').show();
 		}
 		else if (isplaying == 3) {
@@ -634,7 +649,7 @@ function evaluateIsplaying(isplaying, idx) {
 			$("#play").removeClass();
 			//$("#play").addClass("blink_me playlist_status_on");
 			$("#play").addClass("playlist_status_off");
-			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=play&amp;menu=playlist', evaluateIsplaying);");
+			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=play&menu=playlist', evaluateIsplaying);");
 			$('#track' + idx + '_play').hide();
 		}
 		previous_isplaying = isplaying

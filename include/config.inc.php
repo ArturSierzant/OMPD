@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                           |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright © 2001-2012 Willem Bartels                      |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -54,7 +54,7 @@ $cfg['media_dir']                   = '/share/HDA_DATA/ompd/';
 
 
 
-//	+------------------- NEW IN O!MPD 1.03 ----------------------------------+
+//  +------------------- NEW IN O!MPD 1.03 ----------------------------------+
 
 
 //  +------------------------------------------------------------------------+
@@ -74,7 +74,7 @@ $cfg['group_multidisc'] = true;
 //  | Multi-disc indicators                                                  |
 //  +------------------------------------------------------------------------+
 //  | Strings in album title indicating that album is a part                 |
-//  | of multi-disc set                                                      |
+//  | of a multi-disc set                                                    |
 //  +------------------------------------------------------------------------+
 unset($cfg['multidisk_indicator']);
 
@@ -95,6 +95,21 @@ $cfg['multidisk_indicator'][] = " Vol.";
 //  +------------------------------------------------------------------------+
 
 $cfg['show_album_versions'] = true;
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Allow access to all files                                              |
+//  +------------------------------------------------------------------------+
+//  | When set to true, it allows to access to files outside of media        |
+//  | directory in file browser and for download.                            |
+//  | WARNING! Can be dangerous - it allows to access all files your web     |
+//  | server has access to - including files with passwords                  |
+//  | USE WITH CARE!                                                         |
+//  +------------------------------------------------------------------------+
+
+$cfg['allow_access_to_all_files'] = false;
 
 
 
@@ -130,7 +145,7 @@ $cfg['directory_blacklist'][]       = '$RECYCLE.BIN';
 $cfg['directory_blacklist'][]       = '.@__thumb';
 
 
-//	+------------------- END OF NEW IN O!MPD 1.03 ---------------------------+
+//  +------------------- END OF NEW IN O!MPD 1.03 ---------------------------+
 
 
 
@@ -158,6 +173,7 @@ $cfg['mpd_password']				= "";
 //  +------------------------------------------------------------------------+
 //  | Name and description for blacklist                                     |
 //  +------------------------------------------------------------------------+
+
 $cfg['blacklist_name']				  = 'Blacklist';
 $cfg['blacklist_comment']			  = 'Tracks to be skipped';
 
@@ -175,9 +191,10 @@ $cfg['ignore_media_dir_access_error'] 	= false;
 
 
 
-// +------------------------------------------------------------------------+
-// | Proxy                                                                  |
-// +------------------------------------------------------------------------+
+//  +------------------------------------------------------------------------+
+//  | Proxy                                                                  |
+//  +------------------------------------------------------------------------+
+
 $cfg['proxy_enable'] 					= false;
 $cfg['proxy_server'] 					= '192.168.1.1';
 $cfg['proxy_port'] 						= '80'; 
@@ -288,6 +305,7 @@ $cfg['separator'][] = 	" aka ";
 //  +------------------------------------------------------------------------+
 //  | Separator in COMMENT splitting COMMENT into tags                       |
 //  +------------------------------------------------------------------------+
+
 $cfg['tags_separator'] = 	";";
 
 
@@ -334,6 +352,7 @@ $cfg['quick_search'][8] = array("AOR","comment like '%AOR%'");
 //  +------------------------------------------------------------------------+
 //  | Name and Description for playlist with tracks marked with star         |
 //  +------------------------------------------------------------------------+
+
 $cfg['favorite_name'] 					= 'Favorites';
 $cfg['favorite_comment'] 				= 'My favorites tracks';
 
@@ -348,6 +367,7 @@ $cfg['favorite_comment'] 				= 'My favorites tracks';
 //  | example:                                                               |
 //  | https://www.google.com/search?q=Duran+Duran+Big+Thing+lyrics           |
 //  +------------------------------------------------------------------------+
+
 $cfg['lyrics_search'] 					= 'lyrics';
 
 
@@ -358,6 +378,7 @@ $cfg['lyrics_search'] 					= 'lyrics';
 //  +------------------------------------------------------------------------+
 //  | Name of folder with misc tracks of misc artists                        |
 //  +------------------------------------------------------------------------+
+
 $cfg['misc_tracks_misc_artists_folder']	= 'Various Tracks';
 
 
@@ -369,6 +390,7 @@ $cfg['misc_tracks_misc_artists_folder']	= 'Various Tracks';
 //  | Name of folder with misc tracks of one artist (must be different then  |
 //  | above).                                                                |
 //  +------------------------------------------------------------------------+
+
 $cfg['misc_tracks_folder']				= 'Various Tracks of ';
 
 
@@ -405,6 +427,7 @@ $cfg['max_items_per_page']				= 63;
 //  | Windows:        'start /b /low ...';                                   |
 //  | Linux/Unix/OSX: 'nice -n 20 ...';                                      |
 //  +------------------------------------------------------------------------+
+
 //$cfg['bin_dir']                     = 'nice -n 20 /usr/bin/';
 $cfg['bin_dir']                     = '/opt/bin/';
 
@@ -423,6 +446,7 @@ $cfg['bin_dir']                     = '/opt/bin/';
 //  | External storage features are only visible in netjukebox when the      |
 //  | web server has access to the path set in $cfg['external_storage']      |
 //  +------------------------------------------------------------------------+
+
 $cfg['external_storage']            = '/share/Usb/';
 
 
@@ -445,6 +469,7 @@ $cfg['media_extension'][]           = 'oga';
 $cfg['media_extension'][]           = 'wma';
 // Losless audio
 $cfg['media_extension'][]           = 'ape';
+$cfg['media_extension'][]           = 'aif';
 $cfg['media_extension'][]           = 'flac';
 $cfg['media_extension'][]           = 'wv';
 $cfg['media_extension'][]           = 'wav';
@@ -512,6 +537,7 @@ $cfg['tag_format'][]                = 'id3v2.3';
 $cfg['tag_encoding'][]              = 'UTF-8';
 $cfg['tag_padding'][]               = 25600;
 
+
 $cfg['encode_name'][]               = 'MP3 @ HiFi';
 $cfg['encode_mime_type'][]          = 'audio/mpeg';
 $cfg['encode_extension'][]          = 'mp3';
@@ -537,6 +563,7 @@ $cfg['tag_padding'][]               = 25600;
 //  |                                                                        |
 //  | http://www.7-zip.org                                                   |
 //  +------------------------------------------------------------------------+
+
 $cfg['download_album_mime_type']	= 'application/zip';
 $cfg['download_album_extension']    = 'zip';
 $cfg['download_album_cmd']          = $cfg['bin_dir'] . '7za a -tzip -mx0 -- %destination @%list';
@@ -554,6 +581,7 @@ $cfg['download_album_cmd']          = $cfg['bin_dir'] . '7za a -tzip -mx0 -- %de
 //  | When setting the expire value to 0 these files will not expire.        |
 //  | The cache will maximum use 95% of the total available space.           |
 //  +------------------------------------------------------------------------+
+
 $cfg['cache_expire_wav']            = 3600;
 $cfg['cache_expire_zip']            = 14400; // 3600 * 4
 
@@ -563,6 +591,7 @@ $cfg['cache_expire_zip']            = 14400; // 3600 * 4
 //  +------------------------------------------------------------------------+
 //  | Album features                                                         |
 //  +------------------------------------------------------------------------+
+
 $cfg['album_download']              = true;
 $cfg['album_copy']                  = true; //available when $cfg['external_storage'] points existing directory
 
@@ -584,6 +613,7 @@ $cfg['album_copy']                  = true; //available when $cfg['external_stor
 //  | new: New added album.                                                  |
 //  | played: Recently played or streamed album.                             |
 //  +------------------------------------------------------------------------+
+
 $cfg['image_read_embedded']         = true;
 $cfg['image_share']                 = true;
 $cfg['image_share_mode']            = 'played';
@@ -747,6 +777,7 @@ $cfg['image_service_urldecode'][]   = null;
 //  +------------------------------------------------------------------------+
 //  | Internet ip tools                                                      |
 //  +------------------------------------------------------------------------+
+
 $cfg['ip_tools']                    = 'http://www.infosniper.net/index.php?ip_address=%ip&map_source=1&overview_map=1&lang=1&map_type=1&zoom_level=5';
 // $cfg['ip_tools']                    = 'http://ip-lookup.net/index.php?ip=%ip';
 
@@ -759,6 +790,7 @@ $cfg['ip_tools']                    = 'http://www.infosniper.net/index.php?ip_ad
 //  | play_queue: Will queue files to the playlist with "play" and start     |
 //  | playing the last queued track or album.                                |
 //  +------------------------------------------------------------------------+
+
 $cfg['add_autoplay']                = true;
 $cfg['play_queue']                  = false;
 $cfg['play_queue_limit']            = 250;
@@ -769,6 +801,7 @@ $cfg['play_queue_limit']            = 250;
 //  +------------------------------------------------------------------------+
 //  | Auto suggest limit (search results)                                    |
 //  +------------------------------------------------------------------------+
+
 $cfg['autosuggest_limit']           = 25;
 
 
@@ -777,6 +810,7 @@ $cfg['autosuggest_limit']           = 25;
 //  +------------------------------------------------------------------------+
 //  | Update refresh time (in miliseconds)                                   |
 //  +------------------------------------------------------------------------+
+
 $cfg['update_refresh_time']         = 1000;
 
 
@@ -787,6 +821,7 @@ $cfg['update_refresh_time']         = 1000;
 //  +------------------------------------------------------------------------+
 //  | The date_format syntax is identical to the PHP date() function.        |
 //  +------------------------------------------------------------------------+
+
 $cfg['date_format']                 = 'r';
 
 
@@ -798,6 +833,7 @@ $cfg['date_format']                 = 'r';
 //  | When leaving empty it will use the ISO-8859-1 characterset for Windows |
 //  | and UTF-8 for all other operating systems.                             |
 //  +------------------------------------------------------------------------+
+
 $cfg['default_charset']             = '';
 $cfg['default_filesystem_charset']  = '';
 
@@ -807,6 +843,7 @@ $cfg['default_filesystem_charset']  = '';
 //  +------------------------------------------------------------------------+
 //  | Allow deleting duplicate and error files.                              |
 //  +------------------------------------------------------------------------+
+
 $cfg['delete_file']                = false;
 
 
@@ -819,6 +856,7 @@ $cfg['delete_file']                = false;
 //  | supported these caracters. Don't use forwardslash or backslash in the  |
 //  | filenames                                                              |
 //  +------------------------------------------------------------------------+
+
 $cfg['escape_char']['?']            = '^';   // question mark
 $cfg['escape_char'][':']            = ';';   // colon
 $cfg['escape_char']['"']            = "''";  // double quote
@@ -842,6 +880,7 @@ $cfg['album_copy_char_limit']                       = array('"', '*', ':', '<', 
 //  +------------------------------------------------------------------------+
 //  | Authenticate                                                           |
 //  +------------------------------------------------------------------------+
+
 $cfg['anonymous_user']              = 'anonymous';
 $cfg['session_lifetime']            = 604800; // 3600 * 24 * 7;
 $cfg['share_stream_lifetime']       = 604800;
@@ -863,6 +902,7 @@ $cfg['login_delay']                 = 2000;
 //  | [email]info@example.com[/email]                                        |
 //  | [list][*]first[*]second[/list]                                         |
 //  +------------------------------------------------------------------------+
+
 $cfg['admin_about_message']         = '';
 $cfg['admin_login_message']         = '';
 
@@ -872,6 +912,7 @@ $cfg['admin_login_message']         = '';
 //  +------------------------------------------------------------------------+
 //  | Offline message                                                        |
 //  +------------------------------------------------------------------------+
+
 $cfg['offline']                     = false;
 $cfg['offline_message']             = '[b]This site is temporarily unavailable.[/b][br]We apologize for the inconvenience.';
 
@@ -886,6 +927,7 @@ $cfg['offline_message']             = '[b]This site is temporarily unavailable.[
 //  |                                                                        |
 //  | $cfg['php_info'] - displays 'PHP information' in 'Configuration'       |
 //  +------------------------------------------------------------------------+
+
 $cfg['debug']                       = false;
 $cfg['php_info']                    = true;
 
@@ -895,6 +937,7 @@ $cfg['php_info']                    = true;
 //  +------------------------------------------------------------------------+
 //  | For testing some stuff (on my system only) - should be set to off      |
 //  +------------------------------------------------------------------------+
+
 $cfg['testing']				              = 'off';
 
 
@@ -904,6 +947,7 @@ $cfg['testing']				              = 'off';
 //  | Load file with local setings (if exists) overriding settings           |
 //  | in this file                                                           |
 //  +------------------------------------------------------------------------+
+
 if(file_exists(NJB_HOME_DIR . 'include/config.local.inc.php') === true) {
 	require_once(NJB_HOME_DIR . 'include/config.local.inc.php');
 } 

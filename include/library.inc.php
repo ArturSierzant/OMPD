@@ -167,6 +167,28 @@ function trackSubMenu($i, $track) {
 	<div><?php if ($cfg['access_stream']) echo '<a href="stream.php?action=playlist&amp;track_id=' . $track['track_id'] . '&amp;stream_id=' . $cfg['stream_id'] . '" onMouseOver="return overlib(\'Stream track ' . $track['number'] . '\');" onMouseOut="return nd();"><i class="fa fa-rss fa-fw icon-small"></i>Stream track</a>'; ?>
 	</div>
 	
+	<!--
+	<div><?php if ($cfg['access_stream']) {
+		$playerQuery = mysqli_query($db, 'SELECT * FROM player ORDER BY player_name');
+		$player1 = 11;
+		$player2 = 'RasPi';
+		echo '<a href="javascript:ajaxRequest(\'stream.php?action=playTo&amp;track_id=' . $track['track_id'] . '&amp;stream_id=' . $cfg['stream_id'] . '&amp;player_id=' . $player1 . '\',evaluatePlayTo)"><i id="playTo_' . $player1 . '" class="fa fa-fw  fa-share-square-o  icon-small"></i>Play to </a>';
+		echo '<select id="selectSource">';
+		while ($player = mysqli_fetch_assoc($playerQuery)) {
+		?>
+			<option value="<?php echo $player['player_id']; ?>"
+			<?php if($cfg['player_id'] == $player['player_id']) {
+				echo " selected";
+			}?>
+			><?php echo html($player['player_name']); ?></option>
+		<?php
+		}
+		echo '</select>'; 
+	}
+	?>
+	</div>
+	-->
+	
 	<div><?php if ($cfg['access_download']) echo '<a href="download.php?action=downloadTrack&amp;track_id=' . $track['track_id'] .'&amp;download_id=' . $cfg['download_id'] . '" ' . onmouseoverDownloadTrack($track['track_id']) . '><i class="fa fa-download fa-fw icon-small"></i>Download track</a>'; ?>
 	</div>
 	
@@ -202,10 +224,13 @@ function fileSubMenu($i, $filepath, $mime) {
 	<div><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;filepath=' . $filepath . '&amp;track_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'Play file\');" onMouseOut="return nd();"><i id="play_' . $i . '" class="fa fa-play-circle-o fa-fw icon-small"></i>Remove all from playlist and play file</a>'; ?>
 	</div>
 	
-	<div><?php if ($cfg['access_download']) echo '<a href="download.php?action=downloadFile&amp;filepath=' . $cfg['media_dir'] . $filepath .'&amp;mime=' . $mime . '"><i class="fa fa-download fa-fw icon-small"></i>Download file</a>'; ?>
+	<div><?php if ($cfg['access_download']) echo '<a href="download.php?action=downloadFile&amp;filepath=' . $filepath .'&amp;mime=' . $mime . '"><i class="fa fa-download fa-fw icon-small"></i>Download file</a>'; ?>
 	</div>
+	<?php 
 	
-	<div><?php if ($cfg['access_play']) echo '<a href="getid3/demos/demo.browse.php?filename='. $cfg['media_dir'] . $filepath . '" onClick="showSpinner();"><i class="fa fa-info-circle fa-fw icon-small"></i>File details</a>'; ?>
+	$filepath = myUrldecode($filepath);
+	?>
+	<div><?php if ($cfg['access_play']) echo '<a href="getid3/demos/demo.browse.php?filename=' . $filepath . '" onClick="showSpinner();"><i class="fa fa-info-circle fa-fw icon-small"></i>File details</a>'; ?>
 	</div>
 	
 </div>
@@ -225,11 +250,26 @@ function dirSubMenu($i, $dir) {
 	} else {
 		$limit = $_COOKIE['random_limit'];
 	}
+	$dirpath = str_ireplace($cfg['media_dir'],'', $dir);
+	//$dirpath = str_replace('%26','ompd_ampersand_ompd',urlencode($dirpath));
+	//$dir = str_replace('%26','ompd_ampersand_ompd',urlencode($dir));
+	$dirpath = myUrlencode($dirpath);
+	$dir = myUrlencode($dir);
 ?>
 <div class="menuSub" id="menu-sub-track<?php echo $i ?>" onclick='//offMenuSub(<?php echo $i ?>);'> 
 	
 	<div><?php if ($cfg['access_play']) {
-		echo '<a href="javascript:ajaxRequest(\'ajax-random-files.php?dir=' . str_replace('%26','ompd_ampersand_ompd',urlencode($dir)) . '&amp;limit=' . $limit  . '&amp;id=' . $i .'\',evaluateRandom);" onMouseOver="return overlib(\'Play random files from this dir\');" onMouseOut="return nd();"><i id = "randomPlay_' . $i . '" class="fa fa-play-circle-o fa-fw icon-small"></i>Play random tracks from this dir</a>'; 
+		echo '<a href="javascript:ajaxRequest(\'play.php?dirpath=' . $dirpath . '&amp;fulldirpath=' . $dir . '&amp;action=playSelect&amp;id=' . $i .'\',evaluateAdd);" onMouseOver="return overlib(\'Play all files from this dir\');" onMouseOut="return nd();"><i id = "play_' . $i . '" class="fa fa-play-circle-o fa-fw icon-small"></i>Play all files from this dir</a>'; 
+		}
+		?>
+	</div>
+	<div><?php if ($cfg['access_play']) {
+		echo '<a href="javascript:ajaxRequest(\'play.php?dirpath=' . $dirpath . '&amp;fulldirpath=' . $dir . '&amp;action=addSelect&amp;track_id=' . ($i - 100000) .'\',evaluateAdd);" onMouseOver="return overlib(\'Add all files from this dir\');" onMouseOut="return nd();"><i id = "add_' . ($i - 100000) . '" class="fa fa-plus-circle fa-fw icon-small"></i>Add all files from this dir</a>'; 
+		}
+		?>
+	</div>
+	<div><?php if ($cfg['access_play']) {
+		echo '<a href="javascript:ajaxRequest(\'ajax-random-files.php?dir=' . $dir . '&amp;limit=' . $limit  . '&amp;id=' . $i .'\',evaluateRandom);" onMouseOver="return overlib(\'Play random files from this dir\');" onMouseOut="return nd();"><i id = "randomPlay_' . $i . '" class="fa fa-random fa-fw icon-small"></i>Play random files from this dir</a>'; 
 		}
 		?>
 	</div>
@@ -890,7 +930,7 @@ function onmouseoverAccessInfo($access) {
 		case 'playlist':	$info = 'View playlist';					break;
 		case 'play':		$info = 'Play media';						break;
 		case 'add':			$info = 'Add media to playlist';			break;
-		case 'record':		$info = 'Record album to compact disc';		break;
+		case 'record':		$info = 'Allow access to files outside of music library';		break;
 		case 'statistics':	$info = 'View media statistics';			break;
 		case 'admin':		$info = 'Administrator';					break;
 	}
@@ -1133,5 +1173,133 @@ global $cfg, $db;
 	
 	$query = mysqli_query($db,'SELECT audio_dataformat FROM track WHERE audio_dataformat != "" AND video_dataformat = "" GROUP BY audio_dataformat ORDER BY audio_dataformat');
 }
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Urlencode &, ', "                                                      |
+//  +------------------------------------------------------------------------+
+
+function myUrlencode($str1){
+	
+	$str1 = str_replace('%26','ompd_ampersand_ompd',urlencode($str1));
+	$str1 = str_replace('%22','%5C%22',$str1);
+	$str1 = str_replace('%27','%5C%27',$str1);
+	
+	return $str1;
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Urldecode &, ', "                                                      |
+//  +------------------------------------------------------------------------+
+
+function myUrldecode($str1){
+	
+	$str1 = str_replace('ompd_ampersand_ompd','%26',$str1);
+	$str1 = str_replace('%5C%22','%22',$str1);
+	$str1 = str_replace('%5C%27','%27',$str1);
+	
+	return $str1;
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | mime_content_type replacement by svogal:                               |
+//  | http://php.net/manual/en/function.mime-content-type.php#87856          |
+//  +------------------------------------------------------------------------+
+
+
+function mime_content_type_replacement($filename) {
+
+	$mime_types = array(
+
+		// images
+		'png' => 'image/png',
+		'jpe' => 'image/jpeg',
+		'jpeg' => 'image/jpeg',
+		'jpg' => 'image/jpeg',
+		'gif' => 'image/gif',
+		'bmp' => 'image/bmp',
+		'ico' => 'image/vnd.microsoft.icon',
+		'tiff' => 'image/tiff',
+		'tif' => 'image/tiff',
+		'svg' => 'image/svg+xml',
+		'svgz' => 'image/svg+xml',
+
+		// audio/video
+		'aif' => 'audio/aiff',
+		'mp3' => 'audio/mpeg',
+		'mp2' => 'audio/mpeg',
+		'mpc' => 'audio/mpeg',
+		'ogg' => 'audio/ogg', 
+		'oga' => 'audio/ogg', 
+		'ape' => 'audio/ape', 
+		'dsf' => 'audio/dsf', 
+		'flac' => 'audio/flac', 
+		'wv' => 'audio/wv', 
+		'wav' => 'audio/wav', 
+		'wma' => 'audio/x-ms-wma',
+		'aac' => 'audio/aac',
+		'm4a' => 'audio/m4a',
+		'm4b' => 'audio/m4b'
+	);
+
+	$ext = strtolower(array_pop(explode('.',$filename)));
+	if (array_key_exists($ext, $mime_types)) {
+		return $mime_types[$ext];
+	}
+	/* elseif (function_exists('finfo_open')) {
+		$finfo = finfo_open(FILEINFO_MIME);
+		$mimetype = finfo_file($finfo, $filename);
+		finfo_close($finfo);
+		return $mimetype;
+	} */
+	else {
+		return 'not_allowed';
+	}
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | find_all_files by  kodlee at kodleeshare dot net                       |
+//  | http://php.net/manual/en/function.scandir.php#107117                   |
+//  +------------------------------------------------------------------------+
+
+function find_all_files($dir){
+    global $cfg;
+	$dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir);
+	$root = @scandir($dir);
+    foreach($root as $value)
+    {
+        if($value === '.' || $value === '..' || in_array($value, $cfg['directory_blacklist']) === true) {continue;}
+        if(is_file("$dir/$value")) {
+			$ext = pathinfo($value, PATHINFO_EXTENSION);
+			if (in_array($ext,$cfg['media_extension'])) {
+				$result[] = "$dir/$value";
+			}
+			continue;
+		}
+        foreach(find_all_files("$dir/$value") as $value)
+        {
+            $result[] = $value;
+        }
+    }
+	
+	array_walk(
+		$result,
+		function (&$entry) {
+			$entry = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $entry);
+		}
+	);
+
+    return $result;
+} 
+
+
 
 ?>

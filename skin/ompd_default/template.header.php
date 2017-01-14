@@ -271,7 +271,7 @@ $(document).ready(function () {
 		$(this).find('> i[id^="insertPlay_"]').removeClass('fa-play-circle').addClass('fa-cog fa-spin icon-selected');
 		$(this).find('> i[id^="insert_"]').removeClass('fa-indent').addClass('fa-cog fa-spin icon-selected');
 		$(this).find('> i[id^="playTo_"]').removeClass('fa-share-square-o').addClass('fa-cog fa-spin icon-selected');
-		$(this).find('> i[id^="randomPlay"]').removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
+		$(this).find('> i[id^="randomPlay"]').removeClass('fa-random').addClass('fa-cog fa-spin icon-selected');
 	});
 	
 	$('#playlistSync').click(function(){

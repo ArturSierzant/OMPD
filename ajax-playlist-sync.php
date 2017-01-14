@@ -49,6 +49,7 @@ if (!$source_playlist) {
 	exit();
 }
 
+
 $isDestAlive = mpdSilent('status', $dest_host, $dest_port);
 if (!$isDestAlive) {
 	echo json_encode($data);
@@ -59,6 +60,10 @@ if ($action == 'Sync'){
 	$playlist_len = count($source_playlist);
 	for ($i = 0; $i < $playlist_len; $i++){
 		$action_status = mpdSilent('add "' . $source_playlist[$i] . '"', $dest_host, $dest_port);
+		if ($action_status == 'ACK_ERROR_NO_EXIST'){
+			//file not found in MPD database - add stream
+			add_stream($source_playlist[$i], $i);	
+		}
 	}
 	$source_status = mpdSilent('status', $source_host, $source_port);
 	$song = $source_status['song'];
@@ -71,12 +76,26 @@ elseif ($action == 'Copy') {
 	$playlist_len = count($source_playlist);
 	for ($i = 0; $i < $playlist_len; $i++){
 		$action_status = mpdSilent('add "' . $source_playlist[$i] . '"', $dest_host, $dest_port);
+		if ($action_status == 'ACK_ERROR_NO_EXIST'){
+			//file not found in MPD database - add stream
+			add_stream($source_playlist[$i], $i);	
+		}
 	}
 }
 elseif ($action == 'Add') {
 	$playlist_len = count($source_playlist);
 	for ($i = 0; $i < $playlist_len; $i++){
 		$action_status = mpdSilent('add "' . $source_playlist[$i] . '"', $dest_host, $dest_port);
+		if ($action_status == 'ACK_ERROR_NO_EXIST'){
+			//file not found in MPD database - add stream
+			$dest_playlist = mpdSilent('playlist', $dest_host, $dest_port);
+			if (!$dest_playlist) {
+				echo json_encode($data);
+				exit();
+			}
+			$dest_playlist_len = count($dest_playlist);
+			add_stream($source_playlist[$i], $dest_playlist_len);	
+		}
 	}
 	
 }
@@ -88,4 +107,17 @@ $data['dest_host']			= $dest_host;
 $data['action_status']		= $action_status;
 
 echo json_encode($data);
+
+function add_stream($source_filepath, $i){
+	global $db, $cfg, $dest_host, $dest_port;
+	//$source_filepath = $source_playlist[$i];
+	$query = mysqli_query($db,'SELECT track_id FROM track WHERE relative_file = "' . mysqli_real_escape_string($db,$source_filepath) . '"');
+	$track = mysqli_fetch_assoc($query);
+	if ($track['track_id']){
+		playTo($i, $track['track_id'], '', '', $dest_host, $dest_port);
+	}
+	else {
+		playTo($i, '', $source_filepath, '', $dest_host, $dest_port);
+	}
+}
 ?>
