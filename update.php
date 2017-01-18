@@ -634,41 +634,26 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 		
 		$ThisFileInfo = $getID3->analyze($file_d);
 		getid3_lib::CopyTagsToComments($ThisFileInfo); 
-		if (isset($ThisFileInfo['comments']['albumartist'][0])) $artist = $ThisFileInfo['comments']['albumartist'][0];
-		elseif (isset($ThisFileInfo['comments']['band'][0])) $artist = $ThisFileInfo['comments']['band'][0];
-		//elseif (isset($ThisFileInfo['comments']['albumartist'][0])) $artist = $ThisFileInfo['comments']['albumartist'][0];
+		
+		$artist = parseAlbumArtist($ThisFileInfo);
 		
 		if ($artist == 'Unknown AlbumArtist') {
-			//if (isset($ThisFileInfo['comments']['artist'][1])) $artist = $ThisFileInfo['comments']['artist'][1];
-			if (isset($ThisFileInfo['comments']['artist'][0])) $artist = $ThisFileInfo['comments']['artist'][0];
-			//elseif (isset($ThisFileInfo['id3v2']['comments']['artist'][0])) $artist = $ThisFileInfo['id3v2']['comments']['artist'][0];
-			//elseif (isset($ThisFileInfo['ape']['comments']['artist'][0])) $artist = $ThisFileInfo['ape']['comments']['artist'][0];		
+			
+			$artist = parseTrackArtist($ThisFileInfo);
+			
 		};
 		
 		$artist_alphabetic	= $artist;
 		
-		if (isset($ThisFileInfo['comments']['year'][0])) $year = $ThisFileInfo['comments']['year'][0];
-		elseif (isset($ThisFileInfo['comments']['date'][0])) $year = $ThisFileInfo['comments']['date'][0];
-		elseif (isset($ThisFileInfo['comments']['creation_date'][0])) $year = $ThisFileInfo['comments']['creation_date'][0];
+		$year = parseYear($ThisFileInfo);
+	
+		$album_dr = parseAlbumDynamicRange($ThisFileInfo);
 		
-		if (preg_match('#[1][9][0-9]{2}|[2][0-9]{3}#', $year, $match)) {
-				$year	= $match[0];
-		}
-		
-		if (isset($ThisFileInfo['comments']['album dynamic range'][0])) $album_dr = $ThisFileInfo['comments']['album dynamic range'][0];
-		elseif (isset($ThisFileInfo['tags']['id3v2']['text']['ALBUM DYNAMIC RANGE'])) $album_dr = $ThisFileInfo['tags']['id3v2']['text']['ALBUM DYNAMIC RANGE'];
-		
-		if (isset($ThisFileInfo['comments']['genre'][0])) $aGenre = $ThisFileInfo['comments']['genre'][0];
+		$aGenre = parseGenre($ThisFileInfo);
 		
 		if ((strpos(strtolower($dir), strtolower($cfg['misc_tracks_folder'])) === false) && (strpos(strtolower($dir), strtolower($cfg['misc_tracks_misc_artists_folder'])) === false)) {
 			
-			
-			//if (isset($ThisFileInfo['comments']['album'][1])) $album = $ThisFileInfo['comments']['album'][1];
-			if (isset($ThisFileInfo['comments']['album'][0])) $album = $ThisFileInfo['comments']['album'][0];
-			//elseif (isset($ThisFileInfo['id3v2']['comments']['album'][0])) $album = $ThisFileInfo['id3v2']['comments']['album'][0];
-			//elseif (isset($ThisFileInfo['ape']['comments']['album'][0])) $album = $ThisFileInfo['ape']['comments']['album'][0];
-			else $album = 'Unknown Album Title';
-			
+			$album = parseAlbumTitle($ThisFileInfo);
 			
 		}
 		elseif (strpos(strtolower($dir), strtolower($cfg['misc_tracks_folder'])) !== false) {
@@ -770,38 +755,6 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 					}
 				}	
 				
-			//modified 08-08-2016 (block comment)
-			/* 	if ($cfg['name_source'] == 'tags') {
-					
-					
-					
-					$file_d = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file[$i]);
-					$ThisFileInfo = $getID3->analyze($file_d);
-		
-					getid3_lib::CopyTagsToComments($ThisFileInfo);
-					
-					
-					//$number = $ThisFileInfo['comments']['tracknumber'][0];
-					
-					// if (isset($ThisFileInfo['comments']['tracknumber'][0])) $number = $ThisFileInfo['comments']['tracknumber'][0];
-					// elseif (isset($ThisFileInfo['comments']['track_number'][0])) $number = $ThisFileInfo['comments']['track_number'][0];
-					// elseif (isset($ThisFileInfo['comments']['track'][0])) $number = $ThisFileInfo['comments']['track'][0];
-					// else $number = NULL;
-					
-					//if (isset($ThisFileInfo['comments']['artist'][1])) $track_artist = $ThisFileInfo['comments']['artist'][1];
-					if (isset($ThisFileInfo['comments']['artist'][0])) $track_artist = $ThisFileInfo['comments']['artist'][0];
-					//elseif (isset($ThisFileInfo['id3v2']['comments']['artist'][0])) $track_artist = $ThisFileInfo['id3v2']['comments']['artist'][0];
-					//elseif (isset($ThisFileInfo['ape']['comments']['artist'][0])) $track_artist = $ThisFileInfo['ape']['comments']['artist'][0];
-					else $track_artist = 'Unknown Artist';
-					
-					//if (isset($ThisFileInfo['comments']['title'][1])) $title = $ThisFileInfo['comments']['title'][1];
-					if (isset($ThisFileInfo['comments']['title'][0])) $title = $ThisFileInfo['comments']['title'][0];
-					//elseif (isset($ThisFileInfo['id3v2']['comments']['title'][0])) $title = $ThisFileInfo['id3v2']['comments']['title'][0];
-					//elseif (isset($ThisFileInfo['ape']['comments']['title'][0])) $title = $ThisFileInfo['ape']['comments']['title'][0];
-					else $title = 'Unknown Title';
-					
-					$featuring	= '';
-				} */
 				
 				if (mysqli_affected_rows($db) == 0)
 					mysqli_query($db,'INSERT INTO track (artist, featuring, title, relative_file, disc, number, album_id, updated)
@@ -973,13 +926,13 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 		artist_alphabetic	= "' . $db->real_escape_string($artist_alphabetic) . '",
 		artist				= "' . $db->real_escape_string($artist) . '",
 		album				= "' . $db->real_escape_string($album) . '",
-		year				= ' . ((is_null($year)) ? 'NULL' : (int) $year) . ',
+		year				= ' . ((is_null($year) || $year == 'NULL') ? 'NULL' : (int) $year) . ',
 		month				= ' . ((is_null($month)) ? 'NULL' : (int) $month) . ',
 		discs				= ' . (int) $discs . ',
 		image_id			= "' . $db->real_escape_string($image_id) . '",
 		genre_id				= "' . $db->real_escape_string($aGenre_id) .'",
 		updated				= 1,
-		album_dr			= ' . ((is_null($album_dr)) ? 'NULL' : (int) $album_dr) . '
+		album_dr			= ' . ((is_null($album_dr) || $album_dr == 'NULL') ? 'NULL' : (int) $album_dr) . '
 		WHERE album_id		= "' . $db->real_escape_string($album_id) . '"
 		LIMIT 1');
 	}
@@ -996,7 +949,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 			"' . $db->real_escape_string($artist_alphabetic) . '",
 			"' . $db->real_escape_string($artist) . '",
 			"' . $db->real_escape_string($album) . '",
-			' . ((is_null($year)) ? 'NULL' : (int) $year) . ',
+			' . ((is_null($year) || $year == 'NULL') ? 'NULL' : (int) $year) . ',
 			' . ((is_null($month)) ? 'NULL' : (int) $month) . ',
 			' . (int) $aGenre_id . ',
 			' . (int) $album_add_time . ',
@@ -1004,7 +957,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 			"' . $db->real_escape_string($image_id) . '",
 			"' . $db->real_escape_string($album_id) . '",
 			1,
-			' . ((is_null($album_dr)) ? 'NULL' : (int) $album_dr) . ')');
+			' . ((is_null($album_dr) || $album_dr == 'NULL') ? 'NULL' : (int) $album_dr) . ')');
 	// Close getID3				
 	unset($getID3);
 }

@@ -35,6 +35,13 @@ function parseTrackArtist($data) {
     return 'Unknown TrackArtist';
 }
 
+function parseAlbumTitle($data) {
+    if(isset($data['comments']['album'][0])) {
+        return $data['comments']['album'][0];
+    }
+    return 'Unknown Album Title';
+}
+
 function parseTrackTitle($data) {
     if(isset($data['comments']['title'][0])) {
         return $data['comments']['title'][0];
@@ -86,8 +93,9 @@ function parseYear($data) {
 function postProcessYear($yearString) {
     if (preg_match('#[1][9][0-9]{2}|[2][0-9]{3}#', $yearString, $match)) {
         $yearString = $match[0];
+		return intval($yearString);
     }
-    return intval($yearString);
+	return $yearString;
 }
 
 function parseComment($data) {
@@ -227,6 +235,17 @@ function parseAudioDynamicRange($data) {
     }
     if(isset($data['tags']['id3v2']['text']['DYNAMIC RANGE'])) {
         return intval($data['tags']['id3v2']['text']['DYNAMIC RANGE']);
+    }
+    // TODO: handling NULL-values when building the query. for now return a string
+    return 'NULL';
+}
+
+function parseAlbumDynamicRange($data) {
+    if(isset($data['comments']['album dynamic range'][0])) {
+        return intval($data['comments']['album dynamic range'][0]);
+    }
+    if(isset($data['tags']['id3v2']['text']['ALBUM DYNAMIC RANGE'])) {
+        return intval($data['tags']['id3v2']['text']['ALBUM DYNAMIC RANGE']);
     }
     // TODO: handling NULL-values when building the query. for now return a string
     return 'NULL';
