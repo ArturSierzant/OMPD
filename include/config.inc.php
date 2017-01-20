@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                           |
+//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                      |
+//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -143,6 +143,16 @@ $cfg['directory_blacklist'][]       = 'System Volume Information';
 $cfg['directory_blacklist'][]       = 'RECYCLER';
 $cfg['directory_blacklist'][]       = '$RECYCLE.BIN';
 $cfg['directory_blacklist'][]       = '.@__thumb';
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Timezone Setting                                                       |
+//  +------------------------------------------------------------------------+
+//  | Leave this empty to use PHP's default                                  |
+//  +------------------------------------------------------------------------+
+$cfg['timezone'] = '';
+
 
 
 //  +------------------- END OF NEW IN O!MPD 1.03 ---------------------------+
