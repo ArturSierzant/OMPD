@@ -234,7 +234,7 @@ function config() {
 	?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td class="update"><a href="update.php?action=update&amp;sign=<?php echo $cfg['sign']; ?>"><i class="fa fa-refresh fa-fw icon-small <?php echo $spin ?>"></i>Update</a></td>
+	<td class="update"><a href="config-update-select.php?action=updateSelect"><i class="fa fa-refresh fa-fw icon-small <?php echo $spin ?>"></i>Update</a></td>
 	<td></td>
 	<td>Update media <?php echo $update_info?></td>
 	<td></td>

@@ -30,7 +30,8 @@ $id = $_GET['id'];
 $file = array();
 $file_count = 0;
 
-$dir = str_replace('ompd_ampersand_ompd','&',$dir);
+//$dir = str_replace('ompd_ampersand_ompd','&',$dir);
+$dir = myDecode($dir);
 $dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir);
 
 setcookie('random_limit', $limit, time() + (86400 * 30 * 365), "/"); // 86400 = 1 day

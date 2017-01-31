@@ -104,14 +104,20 @@ function findSmallest($i, $end, $data)
 
 $self = $_SERVER['PHP_SELF'];
 $showSelect = isset($_GET['showSelect']) ? $_GET['showSelect'] : '';
+$showUpdateSelect = isset($_GET['showUpdateSelect']) ? $_GET['showUpdateSelect'] : '';
 $showSelectQS = '';
-$tileSizePHP = isset($_GET['tileSizePHP']) ? ('tileSizePHP=' . $_GET['showSelect'] . '&') : '';
+$tileSizePHP = isset($_GET['tileSizePHP']) ? ('tileSizePHP=' . $_GET['tileSizePHP'] . '&') : '';
 //show 'Select this dir' button
 if ($showSelect == 'true') {
 	$showSelectQS = 'showSelect=true&';
 }
+if ($showUpdateSelect == 'true') {
+	$showSelectQS = 'showUpdateSelect=true&';
+}
 if (isset($_GET['dir'])) {
 	$dir = str_replace('ompd_ampersand_ompd','&',$_GET['dir']);
+	//$dir = myDecode($_GET['dir']);
+	//echo $dir;
 	$allowAccess = false;
 	//restrict acccess to files/folders outside media_dir
 	if (!$cfg['allow_access_to_all_files']) {
@@ -167,7 +173,7 @@ if ($actDir != '/') {
 		else {
 			if ($part != '') $actDirToHref .= '/'. $part;
 		}
-		$actDirToShow .= '<a href="' . $self. '?dir=' . rawurlencode($actDirToHref) . '">' . $part . '</a>/';
+		$actDirToShow .= '<a href="' . $self. '?' . $showSelectQS . 'dir=' . rawurlencode($actDirToHref) . '">' . $part . '</a>/';
 	}
 } 
 else {
@@ -177,7 +183,21 @@ echo '<span class="nav_tree">DIR: ' . $actDirToShow . '</span>';
 if ($showSelect == 'true') {
 	?>
 	<div class="buttons">
-	<span id="selectDir" onclick="window.location.href='index.php?action=viewRandomFile&<?php echo $tileSizePHP; ?>selectedDir=<?php echo str_replace('%26','ompd_ampersand_ompd',urlencode($dir));?>'">Select this directory</span>
+	<span id="selectDir" onclick="window.location.href='index.php?action=viewRandomFile&<?php echo $tileSizePHP; ?>selectedDir=<?php echo str_replace('%26','ompd_ampersand_ompd',rawurlencode($dir));?>'">Select this directory</span>
+	</div>
+	<?php
+}
+
+$inMediaDir = false;
+$pos = strpos($dir,substr($cfg['media_dir'], 0, -1));
+if ($pos !== false) {
+	$inMediaDir = true;
+}
+
+if ($showUpdateSelect == 'true' && $inMediaDir == true) {
+	?>
+	<div class="buttons">
+	<span id="selectDir" onclick="window.location.href='config-update-select.php?action=updateSelect&<?php echo $tileSizePHP; ?>selectedDir=<?php echo str_replace('%26','ompd_ampersand_ompd',rawurlencode($dir));?>'">Select this directory</span>
 	</div>
 	<?php
 }

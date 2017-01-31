@@ -367,12 +367,16 @@ function mpdSilent($command,$player_host="",$player_port="") {
 //  +------------------------------------------------------------------------+
 //  | Music Player Daemon update                                             |
 //  +------------------------------------------------------------------------+
-function mpdUpdate() {
+function mpdUpdate($dir_to_scan = '') {
 	global $cfg, $db;
 	// Store current player settings
 	$temp['player_host'] = $cfg['player_host'];
 	$temp['player_port'] = $cfg['player_port'];
 	$temp['player_pass'] = $cfg['player_pass'];
+	
+	if ($dir_to_scan != '') {
+		$dir_to_scan = '"' . $dir_to_scan . '"';
+	}
 	
 	// Music Player Daemon update
 	$query = mysqli_query($db,'SELECT player_host, player_port, player_pass
@@ -384,7 +388,7 @@ function mpdUpdate() {
 		$cfg['player_host'] = $player['player_host'];
 		$cfg['player_port'] = $player['player_port'];
 		$cfg['player_pass'] = $player['player_pass'];
-		mpdSilent('update');
+		mpdSilent('update ' . $dir_to_scan);
 		//mpd('update');
 	}
 	

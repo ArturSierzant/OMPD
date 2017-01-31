@@ -134,7 +134,7 @@ elseif ($cfg['menu'] == 'config') {
 	$header['menu'] .= "\t" . '<a href="config.php?action=downloadProfile">download profile</a>' . $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="config.php?action=skinProfile">skin profile</a>' . $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="users.php">users</a>' . $header['seperation'];
-	$header['menu'] .= "\t" . '<a href="update.php?action=update&amp;sign=' . $cfg['sign'] . '">update</a>' . "\n";
+	$header['menu'] .= "\t" . '<a href="update.php?action=update&amp;sign=' . $cfg['sign'] . '">update all</a>' . "\n";
 }
 
 elseif ($cfg['menu'] == 'about') {

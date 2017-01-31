@@ -376,8 +376,35 @@ $(document).ready(function () {
 	
 	$('#randomBrowse').click(function(){
 		var t = $('#randomDir').val();
+		t = t.replace(/&/g,'ompd_ampersand_ompd');
+		t = t.replace(/=/g,'%3D');
+		t = t.replace(/\+/g,'%2B');
 		
-		window.location.href = "browser.php?showSelect=true&dir=" + t.replace('&','%26');
+		window.location.href = "browser.php?showSelect=true&dir=" + t;
+	});
+	
+	$('#updateSelectedDir').click(function(){
+		$('#updateSelectedDir > i').removeClass('fa-refresh').addClass('fa-cog fa-spin');
+		var t = $('#updateDir').val() + '/';
+		t = t.replace(/&/g,'ompd_ampersand_ompd');
+		t = t.replace(/=/g,'%3D');
+		t = t.replace(/\+/g,'%2B');
+		
+		window.location.href = "update.php?action=update&sign=<?php echo $cfg['sign'] ;?>&dir_to_update=" + t;
+	});
+	
+	$('#updateAll').click(function(){
+		$('#updateAll > i').removeClass('fa-refresh').addClass('fa-cog fa-spin');
+		window.location.href = "update.php?action=update&sign=<?php echo $cfg['sign'] ;?>";
+	});
+	
+	$('#updateBrowse').click(function(){
+		var t = $('#updateDir').val();
+		t = t.replace(/&/g,'ompd_ampersand_ompd');
+		t = t.replace(/=/g,'%3D');
+		t = t.replace(/\+/g,'%2B');
+		
+		window.location.href = "browser.php?showUpdateSelect=true&dir=" + t;
 	});
 	
 });

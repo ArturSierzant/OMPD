@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | O!MPD, Copyright ï¿½ 2015-2016 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright ï¿½ 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -252,6 +252,13 @@ function dirSubMenu($i, $dir) {
 	} else {
 		$limit = $_COOKIE['random_limit'];
 	}
+	
+	$showUpdate = false;
+	$pos = strpos($dir,$cfg['media_dir']);
+	if ($pos !== false) {
+		$showUpdate = true;
+	}
+	
 	$dirpath = str_ireplace($cfg['media_dir'],'', $dir);
 	//$dirpath = str_replace('%26','ompd_ampersand_ompd',urlencode($dirpath));
 	//$dir = str_replace('%26','ompd_ampersand_ompd',urlencode($dir));
@@ -259,22 +266,22 @@ function dirSubMenu($i, $dir) {
 	$dir = myUrlencode($dir);
 ?>
 <div class="menuSub" id="menu-sub-track<?php echo $i ?>" onclick='//offMenuSub(<?php echo $i ?>);'> 
-	
-	<div><?php if ($cfg['access_play']) {
-		echo '<a href="javascript:ajaxRequest(\'play.php?dirpath=' . $dirpath . '&amp;fulldirpath=' . $dir . '&amp;action=playSelect&amp;id=' . $i .'\',evaluateAdd);" onMouseOver="return overlib(\'Play all files from this dir\');" onMouseOut="return nd();"><i id = "play_' . $i . '" class="fa fa-play-circle-o fa-fw icon-small"></i>Play all files from this dir</a>'; 
+	<?php if ($cfg['access_play']) {
+		echo '<div><a href="javascript:ajaxRequest(\'play.php?dirpath=' . $dirpath . '&amp;fulldirpath=' . $dir . '&amp;action=playSelect&amp;id=' . $i .'\',evaluateAdd);" onMouseOver="return overlib(\'Play all files from this dir\');" onMouseOut="return nd();"><i id = "play_' . $i . '" class="fa fa-play-circle-o fa-fw icon-small"></i>Play all files from this dir</a></div>'; 
 		}
-		?>
-	</div>
-	<div><?php if ($cfg['access_play']) {
-		echo '<a href="javascript:ajaxRequest(\'play.php?dirpath=' . $dirpath . '&amp;fulldirpath=' . $dir . '&amp;action=addSelect&amp;track_id=' . ($i - 100000) .'\',evaluateAdd);" onMouseOver="return overlib(\'Add all files from this dir\');" onMouseOut="return nd();"><i id = "add_' . ($i - 100000) . '" class="fa fa-plus-circle fa-fw icon-small"></i>Add all files from this dir</a>'; 
+		
+		if ($cfg['access_play']) {
+		echo '<div><a href="javascript:ajaxRequest(\'play.php?dirpath=' . $dirpath . '&amp;fulldirpath=' . $dir . '&amp;action=addSelect&amp;track_id=' . ($i - 100000) .'\',evaluateAdd);" onMouseOver="return overlib(\'Add all files from this dir\');" onMouseOut="return nd();"><i id = "add_' . ($i - 100000) . '" class="fa fa-plus-circle fa-fw icon-small"></i>Add all files from this dir</a></div>'; 
 		}
-		?>
-	</div>
-	<div><?php if ($cfg['access_play']) {
-		echo '<a href="javascript:ajaxRequest(\'ajax-random-files.php?dir=' . $dir . '&amp;limit=' . $limit  . '&amp;id=' . $i .'\',evaluateRandom);" onMouseOver="return overlib(\'Play random files from this dir\');" onMouseOut="return nd();"><i id = "randomPlay_' . $i . '" class="fa fa-random fa-fw icon-small"></i>Play random files from this dir</a>'; 
+		
+		if ($cfg['access_play']) {
+		echo '<div><a href="javascript:ajaxRequest(\'ajax-random-files.php?dir=' . $dir . '&amp;limit=' . $limit  . '&amp;id=' . $i .'\',evaluateRandom);" onMouseOver="return overlib(\'Play random files from this dir\');" onMouseOut="return nd();"><i id = "randomPlay_' . $i . '" class="fa fa-random fa-fw icon-small"></i>Play random files from this dir</a></div>'; 
 		}
-		?>
-	</div>
+		
+		if ($cfg['access_admin'] && $showUpdate) {
+		echo '<div><a href="update.php?action=update&amp;dir_to_update=' . $dir . '/&amp;sign=' . $cfg['sign'] . '" onMouseOver="return overlib(\'Import this dir to database and MPD\');" onMouseOut="return nd();"><i id = "update_' . $i . '" class="fa fa-refresh fa-fw icon-small"></i>Update this directory in database and MPD</a></div>'; 
+		}
+	?>
 	
 </div>
 <?php
@@ -1178,19 +1185,36 @@ global $cfg, $db;
 
 
 
+
+//  +------------------------------------------------------------------------+
+//  | HTMLencode &, ', "                                                     |
+//  +------------------------------------------------------------------------+
+
+function myHTMLencode($str1){
+	
+	$str1 = str_replace('ompd_ampersand_ompd','&',$str1);
+	//$str1 = str_replace("'","&apos;",$str1);
+	//$str1 = str_replace('"',"&quot;",$str1);
+	$str1 = htmlentities($str1, ENT_QUOTES);
+	
+	return $str1;
+}
+
+
+
 //  +------------------------------------------------------------------------+
 //  | Urlencode &, ', "                                                      |
 //  +------------------------------------------------------------------------+
 
 function myUrlencode($str1){
 	
+	$str1 = str_replace('+','ompd_plus_ompd',$str1);
 	$str1 = str_replace('%26','ompd_ampersand_ompd',urlencode($str1));
 	$str1 = str_replace('%22','%5C%22',$str1);
 	$str1 = str_replace('%27','%5C%27',$str1);
 	
 	return $str1;
 }
-
 
 
 
@@ -1203,6 +1227,23 @@ function myUrldecode($str1){
 	$str1 = str_replace('ompd_ampersand_ompd','%26',$str1);
 	$str1 = str_replace('%5C%22','%22',$str1);
 	$str1 = str_replace('%5C%27','%27',$str1);
+	
+	return $str1;
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Decode &, ', "                                                         |
+//  +------------------------------------------------------------------------+
+
+function myDecode($str1){
+	
+	$str1 = str_replace('ompd_ampersand_ompd','&',$str1);
+	$str1 = str_replace('\"','"',$str1);
+	$str1 = str_replace("\'","'",$str1);
+	$str1 = str_replace("ompd_plus_ompd","+",$str1);
 	
 	return $str1;
 }

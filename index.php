@@ -2427,9 +2427,15 @@ function viewRandomFile() {
 		$dir = str_replace('ompd_ampersand_ompd','&',$_COOKIE['random_dir']);
 	}
 	
-	$selectedDir = isset($_GET['selectedDir']) ? str_replace('ompd_ampersand_ompd','&',$_GET['selectedDir']) : $dir;
+	/* $selectedDir = isset($_GET['selectedDir']) ? str_replace('ompd_ampersand_ompd','&',$_GET['selectedDir']) : $dir;
+	$selectedDir = str_replace("'","&apos;",$selectedDir);
+	$selectedDir = str_replace('"',"&quot;",$selectedDir); */
+	
+	
+	$selectedDir = isset($_GET['selectedDir']) ? myHTMLencode($_GET['selectedDir']) : $dir;
 
 	require_once('include/header.inc.php');
+	
 ?>
 <table cellspacing="0" cellpadding="0" style="width: 100%;">
 <tr>

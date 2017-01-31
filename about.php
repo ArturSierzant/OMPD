@@ -171,6 +171,7 @@ function about() {
 	<li> added display of other versions of album</li>
 	<li> added list of favorite tracks in artist search results</li>
 	<li> added ability to play any track/folder www server has access to (i.e. files outside of MPD and O!MPD database) on any MPD in network</li>
+	<li> added ability to update selected directory only (no need to do full update when adding single albums)</li>
 	<li> added random play from directory</li>
 	</ul>
 	<br>

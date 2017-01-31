@@ -1598,6 +1598,10 @@ input, select {
 	padding: 4px;
 }
 
+#updateDir, #randomDir {
+	width: 70%;
+}
+
 #comment {
 	margin-top: 1px;
 }

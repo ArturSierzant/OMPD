@@ -44,13 +44,23 @@ ignore_user_abort(true);
 $cfg['menu'] = 'config';
 
 $action = getpost('action');
+$dir_to_update = getpost('dir_to_update');
+if (!isset($dir_to_update)) {
+	$dir_to_update = '';
+}
+else {
+	$dir_to_update = myDecode($dir_to_update);
+	setcookie('update_dir', rtrim($dir_to_update,'/'), time() + (86400 * 30 * 365), "/");
+}
+//$dir_to_update = str_replace('ompd_ampersand_ompd','&',$dir_to_update);
+
 
 $flag	= (int) getpost('flag');
 
 cliLog("Update started");
 
 if		(PHP_SAPI == 'cli')					cliUpdate();
-elseif	($action == 'update')				update();
+elseif	($action == 'update')				update($dir_to_update);
 elseif	($action == 'imageUpdate')			imageUpdate($flag);
 elseif	($action == 'saveImage')			saveImage($flag);
 elseif	($action == 'selectImageUpload')	selectImageUpload($flag);
@@ -65,7 +75,7 @@ exit();
 //  +------------------------------------------------------------------------+
 //  | Update                                                                 |
 //  +------------------------------------------------------------------------+
-function update() {
+function update($dir_to_update = '') {
 
 	global $cfg, $db, $lastGenre_id, $getID3, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $last_update, $file;
 	authenticate('access_admin', false, true);
@@ -233,7 +243,9 @@ function update() {
 		mysqli_query($db,"update update_progress set 
 			structure_image = 'Requesting MPD update...'");
 		
-		mpdUpdate();
+		$rel_file = str_replace($cfg['media_dir'],'',$dir_to_update);
+		$rel_file_mpd = rtrim($rel_file,'/');
+		mpdUpdate($rel_file_mpd);
 		
 		//exit();
 		
@@ -260,10 +272,21 @@ function update() {
 			mysqli_query($db,'UPDATE server SET value = "' . $db->real_escape_string(NJB_IMAGE_QUALITY) . '" WHERE name = "image_quality" LIMIT 1');
 		}
 		
-		mysqli_query($db,'UPDATE album SET updated = 0');
-		mysqli_query($db,'UPDATE track SET updated = 0');
-		mysqli_query($db,'UPDATE bitmap SET updated = 0');
-		mysqli_query($db,'UPDATE album_id SET updated = 0');
+		
+		if ($dir_to_update != '') {
+			mysqli_query($db,'UPDATE album_id SET updated = 0 WHERE path LIKE "' . mysql_real_escape_string($dir_to_update) . '%"');
+			mysqli_query($db,'UPDATE album SET updated = 0 WHERE album_id IN
+			(SELECT album_id FROM album_id WHERE path LIKE "' . mysql_real_escape_string($dir_to_update) . '%" )');
+			mysqli_query($db,'UPDATE bitmap SET updated = 0 WHERE album_id IN
+			(SELECT album_id FROM album_id WHERE path LIKE "' . mysql_real_escape_string($dir_to_update) . '%" )');
+			mysqli_query($db,'UPDATE track SET updated = 0 WHERE relative_file LIKE "' . mysql_real_escape_string($rel_file) . '%"');
+		} 
+		else {
+			mysqli_query($db,'UPDATE album SET updated = 0');
+			mysqli_query($db,'UPDATE track SET updated = 0');
+			mysqli_query($db,'UPDATE bitmap SET updated = 0');
+			mysqli_query($db,'UPDATE album_id SET updated = 0');
+		}
 		//mysqli_query($db,'TRUNCATE album_id');
 		
 		//mysqli_query($db,'UPDATE genre SET updated = 0 WHERE genre <> ""');
@@ -281,7 +304,11 @@ function update() {
 		//recursiveScanCount_add2table($cfg['media_dir']);
 		//recursiveScanCount($cfg['media_dir']);
 		clearstatcache();
-		countDirectories($cfg['media_dir']);
+		$dir_to_scan = $cfg['media_dir'];
+		if ($dir_to_update != '') {
+			$dir_to_scan = $dir_to_update;
+		}
+		countDirectories($dir_to_scan);
 		if ($dirsCounter == 1) $dirsCounter = 0;
 		/* $result = mysqli_query($db,"update update_progress set 
 			update_status = 0,
@@ -290,11 +317,11 @@ function update() {
 			");
 		exit(); */
 		
-		recursiveScan($cfg['media_dir']);
+		recursiveScan($dir_to_scan);
 		
 		//exit();
 		
-		mysqli_query($db,'UPDATE update_progress SET	structure_image = "<div class=\'out\'><div class=\'in\' style=\'width: 200px\'></div></div> 100%"');
+		mysqli_query($db,'UPDATE update_progress SET structure_image = "<div class=\'out\'><div class=\'in\' style=\'width: 200px\'></div></div> 100%"');
 		
 		sleep(1);
 		
@@ -339,8 +366,8 @@ function update() {
 		
 		$cfg['timer'] = 0; // force update
 		
-		
-		fileInfoLoop();
+		cliLog("going into fileInfoLoop: " . $rel_file);
+		fileInfoLoop($rel_file);
 		
 		updateGenre();
 		
@@ -423,8 +450,10 @@ function recursiveScan($dir) {
     else {
         $entries = @scandir($dir) or message(__FILE__, __LINE__, 'error', '[b]Failed to open directory:[/b][br]' . $dir . '[list][*]Check media_dir value in the config.inc.php file[*]Check file permission[/list]');
     }
-
-    foreach ($entries as $entry) {
+	
+	$isIdFromFile = false;
+    
+	foreach ($entries as $entry) {
         if ($entry[0] === '.' || in_array($entry, $cfg['directory_blacklist']) === TRUE) {
             continue;
         }
@@ -443,6 +472,7 @@ function recursiveScan($dir) {
         }
         if ($extension == 'id') {
             $album_id = substr($entry, 0, -3);
+			$isIdFromFile = true;
         }
 	}
 
@@ -454,13 +484,23 @@ function recursiveScan($dir) {
         unset($dir);
         return;
     }
-
-    $db->query("
-        UPDATE album_id
-        SET updated = '1'
-        WHERE path = '" . $db->real_escape_string($dir) . "'
-        LIMIT 1"
-    );
+	
+	if ($isIdFromFile) {
+		$db->query("
+			UPDATE album_id
+			SET updated = '1', path = '" . $db->real_escape_string($dir) . "'
+			WHERE album_id = '" . $db->real_escape_string($album_id) . "'
+			LIMIT 1"
+		);
+	}
+	else {
+		$db->query("
+			UPDATE album_id
+			SET updated = '1'
+			WHERE path = '" . $db->real_escape_string($dir) . "'
+			LIMIT 1"
+		);
+	}
     if ($db->affected_rows == 0) {
         $album_id = ($album_id == '') ? base_convert(uniqid(), 16, 36) : $album_id;
         $album_add_time = time();
@@ -967,14 +1007,24 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 //  +------------------------------------------------------------------------+
 //  | File info loop                                                         |
 //  +------------------------------------------------------------------------+
-function fileInfoLoop() {
+function fileInfoLoop($rel_file = '') {
 	global $cfg, $db, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $prevDirsCounter, $prevFilesCounter;
-
-    $filesCounter = $db->query("
-        SELECT COUNT(track_id) AS totalTracks
-        FROM track
-        WHERE updated;")->fetch_assoc()['totalTracks'];
-
+	
+	cliLog("In fileInfoLoop " . $rel_file);
+	
+	if ($rel_file != '') {
+		$filesCounter = $db->query("
+			SELECT COUNT(track_id) AS totalTracks
+			FROM track
+			WHERE updated
+			AND relative_file LIKE '" . mysql_real_escape_string($rel_file) . "%';")->fetch_assoc()['totalTracks'];
+	}
+	else {
+		$filesCounter = $db->query("
+			SELECT COUNT(track_id) AS totalTracks
+			FROM track
+			WHERE updated;")->fetch_assoc()['totalTracks'];
+	}
     cliLog( "TOTAL FILES TO SCAN: " . $filesCounter);
 
     // Initialize getID3
@@ -994,6 +1044,15 @@ function fileInfoLoop() {
             WHERE updated
             ORDER BY relative_file
             LIMIT " . $curFilesCounter . "," . $batchSize . ";";
+		if ($rel_file != ''){
+			$query = "
+            SELECT relative_file, filesize, filemtime, album_id
+            FROM track
+            WHERE updated
+			AND relative_file LIKE '" . mysql_real_escape_string($rel_file) . "%'
+            ORDER BY relative_file
+            LIMIT " . $curFilesCounter . "," . $batchSize . ";";
+		}
         $result = $db->query($query);
         while($track = $result->fetch_assoc()) {
             $curFilesCounter++;
