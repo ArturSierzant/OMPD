@@ -32,18 +32,39 @@ require_once('include/cache.inc.php');
 $action		= get('action');
 $track_id	= get('track_id');
 $album_id	= get('album_id');
-$mime	= get('mime');
+$mime		= get('mime');
 $filepath	= get('filepath');
-
 
 
 //restrict acccess to files/folders outside media_dir
 if (!$cfg['allow_access_to_all_files']) {
-	$pos = strpos($filepath,$cfg['media_dir']);
-	if ($pos === false ) {
-		message(__FILE__, __LINE__, 'error', '[b]Access forbidden[/b]');
-	exit();
+	
+	$access_allowed = false;
+	
+	if (isset($filepath) && $action == 'downloadFile') {
+		$pos = strpos($filepath,$cfg['media_dir']);
+		if ($pos !== false ) {
+			$access_allowed = true;
+		}
 	}
+	elseif (isset($track_id) && $action == 'downloadTrack'){
+		//check if track_id is in DB => it is also in media dir => allow access
+		$query  = mysqli_query($db,'
+		SELECT track_id 
+		FROM track 
+		WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '" 
+		LIMIT 1
+		');
+		if ($query->num_rows == 1) {
+			$access_allowed = true;
+		}
+	}
+	
+	if ($access_allowed === false ) {
+		message(__FILE__, __LINE__, 'error', '[b]Access forbidden[/b]');
+		exit();
+	}
+	
 }
 if		($action == 'downloadAlbum')		downloadAlbum($album_id);
 elseif	($action == 'downloadTrack')		downloadTrack($track_id);

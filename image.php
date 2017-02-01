@@ -41,12 +41,12 @@ $track_id 	= get('track_id');
 $quality	= get('quality') == 'hq' ? 'hq' : 'lq';
 //$quality	= 'hq';
 $image	 	= get('image');
-$image_path	 	= get('image_path');
+$image_path	= get('image_path');
 $mime	 	= get('mime');
 
 if		(isset($image_id))		image($image_id, $quality, $track_id);
 elseif	(isset($image))			resampleImage($image);
-elseif	(isset($image_path))			streamImage($image_path, $mime);
+elseif	(isset($image_path))	streamImage($image_path, $mime);
 elseif	($cfg['image_share'])	shareImage();
 exit();
 
