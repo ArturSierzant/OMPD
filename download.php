@@ -36,36 +36,7 @@ $mime		= get('mime');
 $filepath	= get('filepath');
 
 
-//restrict acccess to files/folders outside media_dir
-if (!$cfg['allow_access_to_all_files']) {
-	
-	$access_allowed = false;
-	
-	if (isset($filepath) && $action == 'downloadFile') {
-		$pos = strpos($filepath,$cfg['media_dir']);
-		if ($pos !== false ) {
-			$access_allowed = true;
-		}
-	}
-	elseif (isset($track_id) && $action == 'downloadTrack'){
-		//check if track_id is in DB => it is also in media dir => allow access
-		$query  = mysqli_query($db,'
-		SELECT track_id 
-		FROM track 
-		WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '" 
-		LIMIT 1
-		');
-		if ($query->num_rows == 1) {
-			$access_allowed = true;
-		}
-	}
-	
-	if ($access_allowed === false ) {
-		message(__FILE__, __LINE__, 'error', '[b]Access forbidden[/b]');
-		exit();
-	}
-	
-}
+
 if		($action == 'downloadAlbum')		downloadAlbum($album_id);
 elseif	($action == 'downloadTrack')		downloadTrack($track_id);
 elseif	($action == 'downloadFile')			downloadFile($filepath, $mime);
@@ -451,17 +422,33 @@ function downloadFile($filepath, $mime) {
 	global $cfg, $db;
 	authenticate('access_download', true);
 	
-	//$download_id = (int) get('download_id');
-		$filepath = str_replace('ompd_ampersand_ompd','&',$filepath);
-		//$file = $cfg['media_dir'] . $track['relative_file'];
+	//restrict acccess to files/folders outside media_dir
+	if (!$cfg['allow_access_to_all_files']) {
 		
-		$pathinfo	= pathinfo($filepath);
-		$filename	= $pathinfo['basename'];
-		$filename	= downloadFilename($filename);
+		$access_allowed = false;
 		
-		streamFile($filepath, $mime, 'attachment', $filename);
-		return true;
+		if (isset($filepath)) {
+			$pos = strpos($filepath,$cfg['media_dir']);
+			if ($pos !== false ) {
+				$access_allowed = true;
+			}
+		}
+		
+		if ($access_allowed === false ) {
+			message(__FILE__, __LINE__, 'error', '[b]Access forbidden[/b]');
+			exit();
+		}	
 	}
+	
+	$filepath = myDecode($filepath);
+	
+	$pathinfo	= pathinfo($filepath);
+	$filename	= $pathinfo['basename'];
+	$filename	= downloadFilename($filename);
+	
+	streamFile($filepath, $mime, 'attachment', $filename);
+	return true;
+}
 
 
 
