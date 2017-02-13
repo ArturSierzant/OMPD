@@ -507,12 +507,13 @@ function view2() {
 		
 		$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query);
 		
+		/* 
 		$cfg['items_count'] = $album_count = mysqli_num_rows($query);
 		
 		if ($album_count > $max_item_per_page) {
 			$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query .
 			' LIMIT ' . ($page - 1) * $max_item_per_page . ','  . ($max_item_per_page));
-		}
+		} */
 		
 		$url			= 'index.php?action=view2&amp;genre_id=' . rawurlencode($genre_id);
 		$list_url		= 'index.php?action=view2&amp;thumbnail=0&amp;genre_id=' . rawurlencode($genre_id) . '&amp;filter=' . $filter . '&amp;order=' . $order;
@@ -699,12 +700,12 @@ function view2() {
 		
 		$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, album.genre_id, image_id, album_id FROM album, genre ' . $filter_query . ' AND album.genre_id = genre.genre_id ' . $order_query);
 		
-		$cfg['items_count'] = $album_count = mysqli_num_rows($query);
+		/* $cfg['items_count'] = $album_count = mysqli_num_rows($query);
 		//echo $filter_query;
 		if ($album_count > $max_item_per_page) {
 			$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, album.genre_id, image_id, album_id FROM album, genre ' . $filter_query . ' AND album.genre_id = genre.genre_id ' . $order_query .
 			' LIMIT ' . ($page - 1) * $max_item_per_page . ','  . ($max_item_per_page));	
-		}
+		} */
 		
 	}
 	
@@ -718,11 +719,11 @@ function view2() {
 		$sort_album = 'desc';
 		
 		$query = mysqli_query($db, $query_str);
-			$cfg['items_count'] = $album_count = mysqli_num_rows($query);
+			/* $cfg['items_count'] = $album_count = mysqli_num_rows($query);
 			if ($album_count > $max_item_per_page) {
 				$query_str = $query_str . ' LIMIT ' . ($page - 1) * $max_item_per_page . ','  . ($max_item_per_page);
 				$query = mysqli_query($db, $query_str);
-			}
+			} */
 		
 	}
 	
@@ -732,13 +733,13 @@ function view2() {
 		$query_str = ('SELECT album, album.artist, artist_alphabetic, album.year, month, genre_id, image_id, album.album_id FROM album, track WHERE album.album_id=track.album_id AND (' . $cfg['quick_search'][$qsType][1] . ') GROUP BY track.album_id ' . $order_query);		
 		$order_bitmap_artist = '<span class="fa fa-sort-alpha-asc"></span>';
 		$sort_album = 'desc';
-			
-			$query = mysqli_query($db, $query_str);
+		$query = mysqli_query($db, $query_str);
+			/* 
 			$cfg['items_count'] = $album_count = mysqli_num_rows($query);
 			if ($album_count > $max_item_per_page) {
 				$query_str = $query_str . ' LIMIT ' . ($page - 1) * $max_item_per_page . ','  . ($max_item_per_page);
 				$query = mysqli_query($db, $query_str);
-			}	
+			} */	
 		}
 	
 	
@@ -771,7 +772,7 @@ function view2() {
 	if ($rows > 0) {
 		$display_all_tracks = true;
 		$resultsFound = true;
-	
+		$album_multidisc = albumMultidisc($query);
 	?>
 	
 <table cellspacing="0" cellpadding="0" class="border">
@@ -792,7 +793,16 @@ function view2() {
 		<?php };?>
 		</td>
 		<td align="right" class="right">
-			(<span id="album_count"><?php echo ($album_count > 1) ? $album_count . '</span> albums' :  $album_count . '</span> album' ?>)&nbsp;
+			<span id="album_count">
+			<?php 
+			if ($cfg['items_count'] > 1) {
+				echo '(' . $cfg['items_count'] .' albums)';
+			}
+			else {
+				echo '(' . $cfg['items_count'] .' album)';
+			}
+			?>
+			</span>&nbsp;
 		</td>
 	</tr>
 	</table>
@@ -802,54 +812,20 @@ function view2() {
 </table>
 <div class="albums_container">
 <?php
-	$mdTab = array();
-	while ($album = mysqli_fetch_assoc($query)) {		
-			$multidisc_count = 0;
-			if ($album) {
-				if ($order == 'decade') {
-					$yearAct = floor(($album['year'])/10) * 10;
-					if ($yearAct != $yearPrev){
-						echo '<div class="decade">' . $yearAct . '\'s</div>';
-					}
-					else {
-						//echo '<div style="clear: both;">Act: ' . $yearAct . ' Prev: ' . $yearPrev . '</div>';
-					}
-				}
-				
-				if ($cfg['group_multidisc'] == true) {
-					$md_indicator = striposa($album['album'], $cfg['multidisk_indicator']);
-					if ($md_indicator !== false) {
-						$md_ind_pos = stripos($album['album'], $md_indicator);
-						$md_title = substr($album['album'], 0,  $md_ind_pos);
-						$query_md = mysqli_query($db, 'SELECT album, image_id, album_id 
-						FROM album 
-						WHERE album LIKE "' . mysqli_real_escape_string($db, $md_title) . '%" AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '" AND album <> "' . mysqli_real_escape_string($db, $album['album']) . '"
-						ORDER BY album');
-						$multidisc_count = mysqli_num_rows($query_md);
-					}
-				}
-				
-				if ($tileSizePHP) $size = $tileSizePHP;
-				if ($multidisc_count > 0) {
-					if (!in_array($md_title, $mdTab)) {
-						$mdTab[] = $md_title;
-						draw_tile($size,$album,'allDiscs');
-					}
-					else {
-						$album_count--;
-					}
-				}
-				else {
-					draw_tile($size,$album);
-				}
-				$yearPrev = $yearAct;
+	if ($tileSizePHP) $size = $tileSizePHP;
+	foreach (array_slice($album_multidisc,($page - 1) * $max_item_per_page, $max_item_per_page) as $album_m) {	
+		if ($order == 'decade') {
+			$yearAct = floor(($album_m['year'])/10) * 10;
+			if ($yearAct != $yearPrev){
+				echo '<div class="decade">' . $yearAct . '\'s</div>';
 			}
-		} 
+		}
+		draw_tile($size,$album_m,$album_m['allDiscs']);
+		$yearPrev = $yearAct;
+	}
 ?>
 </div>
-<script>
-	$("#album_count").text("<?php echo $album_count; ?>");
-</script>
+
 
 
 <?php
@@ -1329,20 +1305,6 @@ function view3() {
 	$basic = array();
 	$search = array();
 	
-	
-	/* $playerQuery = mysqli_query($db, 'SELECT * FROM player ORDER BY player_name');
-	$playerCount = mysqli_num_rows($playerQuery);
-	if ($playerCount > 1) {
-		$playTo = array();
-		while($player = mysqli_fetch_assoc($playerQuery)){
-			$playTo[] = '<a href="javascript:ajaxRequest(\'stream.php?action=playTo&amp;album_id=' . $album_id . '&amp;stream_id=' . $cfg['stream_id'] . '&amp;player_id=' . $player['player_id'] . '\',evaluatePlayTo)"><i id="playTo_' . $player['player_id'] . '" class="fa fa-fw  fa-share-square-o  icon-small"></i>' . $player['player_name'] . '</a>';
-	
-			//$playTo[] = '<a href="stream.php?action=playTo&amp;album_id=' . $album_id . '&amp;stream_id=' . $cfg['stream_id'] . '&amp;player_host=' . $player['player_host'] . '&amp;player_port=' . $player['player_port'] . '"><i class="fa fa-fw  fa-share-square-o  icon-small"></i>' . $player['player_name'] . '</a>';
-			
-		}
-		$playTo[] = '<a href="javascript:showHide(\'basic\',\'playTo\');"><i class="fa fa-fw  fa-reply  icon-small"></i>Go back</a>';
-	} */
-	
 	if ($cfg['access_play'])
 		$basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;album_id=' . $album_id . '\',evaluateAdd);ajaxRequest(\'play.php?action=updateAddPlay&amp;album_id=' . $album_id . '\',updateAddPlay);"><i id="play_' . $album_id . '" class="fa fa-fw fa-play-circle-o  icon-small"></i>Play album</a>';
 	if ($cfg['access_add']){
@@ -1352,13 +1314,9 @@ function view3() {
 	}
 	if ($cfg['access_add'] && $cfg['access_play'])
 		$basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;album_id=' . $album_id . '&amp;insertType=album\',evaluateAdd);ajaxRequest(\'play.php?action=updateAddPlay&amp;album_id=' . $album_id . '\',updateAddPlay);"><i id="insertPlay_' . $album_id . '" class="fa fa-fw  fa-play-circle icon-small"></i>Insert and play</a>';
-	 if ($cfg['access_stream']){
+	if ($cfg['access_stream']){
 		$basic[] = '<a href="stream.php?action=playlist&amp;album_id=' . $album_id . '&amp;stream_id=' . $cfg['stream_id'] . '"><i class="fa fa-fw  fa-rss  icon-small"></i>Stream album</a>';
-	 }
-	/*	if ($playerCount > 1) {
-			$basic[] = '<a  href="javascript:showHide(\'basic\',\'playTo\');"><i class="fa fa-fw  fa-share-square-o  icon-small"></i>Play to...</a>';
-		}
-	} */
+	}
 	if ($cfg['access_download'] && $cfg['album_download'])
 		$basic[] = '<a href="download.php?action=downloadAlbum&amp;album_id=' . $album_id . '&amp;download_id=' . $cfg['download_id'] . '" ' . onmouseoverDownloadAlbum($album_id) . '><i class="fa fa-fw  fa-download  icon-small"></i>Download album</a>';
 	if ($cfg['access_play']){
@@ -1730,15 +1688,15 @@ Other versions of this album:
 		$query = mysqli_query($db,'SELECT track.track_artist, track.artist, track.title, track.featuring, track.miliseconds, track.track_id, track.number, track.relative_file, f.blacklist_pos as blacklist_pos, f. favorite_pos as favorite_pos
 		FROM track left join 
 			(
-        SELECT favoriteitem.track_id as track_id, b.position as blacklist_pos, f.position as favorite_pos
-				FROM favoriteitem 
-				LEFT JOIN 
-      		(SELECT track_id, position FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") b ON favoriteitem.track_id = b.track_id 
+			SELECT favoriteitem.track_id as track_id, b.position as blacklist_pos, f.position as favorite_pos
+					FROM favoriteitem 
 					LEFT JOIN 
-						(SELECT track_id, position FROM favoriteitem WHERE favorite_id = "' . $cfg['favorite_id'] . '") f ON favoriteitem.track_id = f.track_id
-      ) f
-    ON track.track_id = f.track_id
-		WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" AND disc = ' . (int) $disc . ' 
+				(SELECT track_id, position FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") b ON favoriteitem.track_id = b.track_id 
+						LEFT JOIN 
+							(SELECT track_id, position FROM favoriteitem WHERE favorite_id = "' . $cfg['favorite_id'] . '") f ON favoriteitem.track_id = f.track_id
+		  ) f
+		ON track.track_id = f.track_id
+		WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" AND disc = ' . (int) $disc . ' AND track.error = "" 
 		GROUP BY track.track_id
 		ORDER BY number,relative_file');
 		
@@ -2548,7 +2506,7 @@ function viewYear() {
 	<td class="space left"></td>
 	<td width="80px"><a <?php echo ($order_bitmap_year == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="index.php?action=viewYear&amp;sort=<?php echo $sort_year; ?>">Year&nbsp;<?php echo $order_bitmap_year; ?></a></td>	
 	<td align="left" class="bar">Graph</td>
-	<td align="center" width="130px">Album counts</td>
+	<td align="center" width="130px">Disc counts</td>
 	<td class="right">&nbsp;</td>
 </tr>
 
@@ -2722,8 +2680,9 @@ if ($cfg['show_last_played'] == true) {
 		$query = mysqli_query($db, '
 		SELECT DISTINCT album.album_id, album.image_id, album.album, album.artist_alphabetic
 		FROM album RIGHT JOIN 
-		(SELECT album_id, MAX(time) AS m_time FROM counter GROUP BY album_id ORDER BY m_time DESC) as c
+		(SELECT album_id, MAX(time) AS m_time FROM counter GROUP BY album_id) as c
 		ON c.album_id = album.album_id
+		ORDER BY c.m_time DESC, album.album DESC
 		LIMIT 10
 		' );
 	$rows = mysqli_num_rows($query);
@@ -2751,49 +2710,18 @@ if ($cfg['show_last_played'] == true) {
 
 <div class="albums_container">
 <?php
-	$query = mysqli_query($db, 'SELECT COUNT(*) AS counter
-		FROM album
-		WHERE album_add_time');
-	$items_count = mysqli_fetch_assoc($query);
+	$query = mysqli_query($db, 'SELECT album, album_add_time, album_id, image_id, artist, artist_alphabetic
+			FROM album
+			WHERE album_add_time
+			ORDER BY album
+			');
 	
-	$cfg['items_count'] = $items_count['counter'];
-
-	$query = mysqli_query($db, 'SELECT *
-		FROM album
-		WHERE album_add_time
-		ORDER BY album_add_time DESC, album DESC
-		LIMIT ' . $cfg['max_items_per_page']);
-		
-	while ($album = mysqli_fetch_assoc($query)) {		
-		$multidisc_count = 0;
-		if ($album) {
-			if ($cfg['group_multidisc'] == true) {
-				$md_indicator = striposa($album['album'], $cfg['multidisk_indicator']);
-				if ($md_indicator !== false) {
-					$md_ind_pos = stripos($album['album'], $md_indicator);
-					$md_title = substr($album['album'], 0,  $md_ind_pos);
-					$query_md = mysqli_query($db, 'SELECT album, image_id, album_id 
-					FROM album 
-					WHERE album LIKE "' . mysqli_real_escape_string($db, $md_title) . '%" AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '" AND album <> "' . mysqli_real_escape_string($db, $album['album']) . '"
-					ORDER BY album');
-					$multidisc_count = mysqli_num_rows($query_md);
-				}
-			}
-			if ($tileSizePHP) $size = $tileSizePHP;
-			if ($multidisc_count > 0) {
-				if (!in_array($md_title, $mdTab)) {
-					$mdTab[] = $md_title;
-					draw_tile($size,$album,'allDiscs');
-				}
-				else {
-					$album_count--;
-				}
-			}
-			else {
-				draw_tile($size,$album);
-			}
-		}
-	} 
+	if ($tileSizePHP) $size = $tileSizePHP;
+	$album_multidisc = albumMultidisc($query);
+	krsort($album_multidisc);
+	foreach (array_slice($album_multidisc,0,$cfg['max_items_per_page']) as $album_m) {
+		draw_tile($size,$album_m,$album_m['allDiscs']);
+	}
 ?>
 </div>
 
@@ -2840,21 +2768,11 @@ function viewNew() {
 	$nav['name'][]	= 'New';
 require_once('include/header.inc.php');
 
-	//$size = get('size');
-	//$size = $cfg['thumbnail_size'];
-	$i			= 0;
-	//$colombs	= floor((cookie('netjukebox_width') - 20) / ($size + 10));
+	$i = 0;
+	$page = get('page');
+	$max_item_per_page = $cfg['max_items_per_page'];
 	
-	/*$base		= (cookie('netjukebox_width') - 20) / ($base_size + 10);
-	$colombs	= floor($base);
-	$aval_width = (cookie('netjukebox_width') - 20 - $scroll_bar_correction) - ($colombs - 1) * $spaces;
-	$size = floor($aval_width / $colombs);
-	*/
-	
-	//$sort_url	= $url;
-	//$size_url	= $url . '&amp;order=' . $order . '&amp;sort=' . $sort;
-	
-	$query = mysqli_query($db, 'SELECT COUNT(*) AS counter
+	/* $query = mysqli_query($db, 'SELECT COUNT(*) AS counter
 		FROM album
 		WHERE album_add_time');
 	$items_count = mysqli_fetch_assoc($query);
@@ -2870,7 +2788,15 @@ require_once('include/header.inc.php');
 		ORDER BY album_add_time DESC
 		LIMIT ' . ($page - 1) * $max_item_per_page . ','  . ($max_item_per_page));	
 		//$colombs * 20);
+	 */
+	 
+	 $query = mysqli_query($db, 'SELECT album, album_add_time, album_id, image_id, artist, artist_alphabetic
+		FROM album
+		WHERE album_add_time
+		ORDER BY album
+		');
 	
+		$album_multidisc = albumMultidisc($query);
 ?>
 
 
@@ -2881,13 +2807,8 @@ new albums
 
 <div class="albums_container">
 <?php
+	
 	/* while ($album = mysqli_fetch_assoc($query)) {		
-			if ($album) {
-			if ($tileSizePHP) $size = $tileSizePHP;
-			draw_tile($size,$album);
-			}
-		} */ 
-	while ($album = mysqli_fetch_assoc($query)) {		
 		$multidisc_count = 0;
 		if ($album) {
 			if ($cfg['group_multidisc'] == true) {
@@ -2916,7 +2837,14 @@ new albums
 				draw_tile($size,$album);
 			}
 		}
-	} 
+	}  */
+	
+	if ($tileSizePHP) $size = $tileSizePHP;
+	krsort($album_multidisc);
+	foreach (array_slice($album_multidisc,($page - 1) * $max_item_per_page,$max_item_per_page) as $album_m) {
+		draw_tile($size,$album_m,'allDiscs');
+		
+	}
 ?>
 </div>
 

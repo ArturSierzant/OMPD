@@ -52,8 +52,6 @@ else {
 	$dir_to_update = myDecode($dir_to_update);
 	setcookie('update_dir', rtrim($dir_to_update,'/'), time() + (86400 * 30 * 365), "/");
 }
-//$dir_to_update = str_replace('ompd_ampersand_ompd','&',$dir_to_update);
-
 
 $flag	= (int) getpost('flag');
 
@@ -103,7 +101,6 @@ function update($dir_to_update = '') {
 	$query = mysqli_query($db,'SELECT last_update FROM update_progress');
 	$f = mysqli_fetch_assoc($query);
 	$last_update = strtotime($f['last_update']);
-	
 	
 	/* $objects = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path), RecursiveIteratorIterator::SELF_FIRST);
 	foreach($objects as $name){
@@ -274,12 +271,13 @@ function update($dir_to_update = '') {
 		
 		
 		if ($dir_to_update != '') {
-			mysqli_query($db,'UPDATE album_id SET updated = 0 WHERE path LIKE "' . mysql_real_escape_string($dir_to_update) . '%"');
+			mysqli_query($db,'UPDATE album_id SET updated = 0 WHERE path LIKE "' . mysqli_real_escape_string($db,$dir_to_update) . '%"');
 			mysqli_query($db,'UPDATE album SET updated = 0 WHERE album_id IN
-			(SELECT album_id FROM album_id WHERE path LIKE "' . mysql_real_escape_string($dir_to_update) . '%" )');
+			(SELECT album_id FROM album_id WHERE path LIKE "' . mysqli_real_escape_string($db,$dir_to_update) . '%" )');
 			mysqli_query($db,'UPDATE bitmap SET updated = 0 WHERE album_id IN
-			(SELECT album_id FROM album_id WHERE path LIKE "' . mysql_real_escape_string($dir_to_update) . '%" )');
-			mysqli_query($db,'UPDATE track SET updated = 0 WHERE relative_file LIKE "' . mysql_real_escape_string($rel_file) . '%"');
+			(SELECT album_id FROM album_id WHERE path LIKE "' . mysqli_real_escape_string($db,$dir_to_update) . '%" )');
+			mysqli_query($db,'UPDATE track SET updated = 0 WHERE relative_file LIKE "' . mysqli_real_escape_string($db,$rel_file) . '%"');
+			cliLog('dir_to_update: ' . 	$dir_to_update);
 		} 
 		else {
 			mysqli_query($db,'UPDATE album SET updated = 0');
@@ -287,6 +285,8 @@ function update($dir_to_update = '') {
 			mysqli_query($db,'UPDATE bitmap SET updated = 0');
 			mysqli_query($db,'UPDATE album_id SET updated = 0');
 		}
+		
+		
 		//mysqli_query($db,'TRUNCATE album_id');
 		
 		//mysqli_query($db,'UPDATE genre SET updated = 0 WHERE genre <> ""');
@@ -309,6 +309,7 @@ function update($dir_to_update = '') {
 			$dir_to_scan = $dir_to_update;
 		}
 		countDirectories($dir_to_scan);
+		
 		if ($dirsCounter == 1) $dirsCounter = 0;
 		/* $result = mysqli_query($db,"update update_progress set 
 			update_status = 0,
@@ -441,7 +442,9 @@ function recursiveScan($dir) {
     $album_id = '';
     $file     = array();
     $filename = array();
-
+	
+	$dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir);
+	
     cliLog("recursiveScan: " . $dir);
     // TODO: consider to remove. @see https://github.com/ArturSierzant/OMPD/issues/15
     if ($cfg['ignore_media_dir_access_error']) {
@@ -451,14 +454,17 @@ function recursiveScan($dir) {
         $entries = @scandir($dir) or message(__FILE__, __LINE__, 'error', '[b]Failed to open directory:[/b][br]' . $dir . '[list][*]Check media_dir value in the config.inc.php file[*]Check file permission[/list]');
     }
 	
+	//$dir = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $dir);
+	
 	$isIdFromFile = false;
     
 	foreach ($entries as $entry) {
+		cliLog('entry: ' . $entry);
         if ($entry[0] === '.' || in_array($entry, $cfg['directory_blacklist']) === TRUE) {
             continue;
         }
         if (is_dir($dir . $entry . '/')) {
-            recursiveScan($dir . $entry . '/');
+            recursiveScan (iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $dir . $entry . '/'));
             continue;
         }
 
@@ -466,7 +472,8 @@ function recursiveScan($dir) {
         if (in_array($extension, $cfg['media_extension'])) {
             $entry = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $entry);
             $dir_d = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $dir);
-            $file[]     = $dir_d . $entry;
+            $file[] = $dir_d . $entry;
+            // $file[] = $dir . $entry;
             $filename[] = substr($entry, 0, -strlen($extension) - 1);
             continue;
         }
@@ -484,6 +491,8 @@ function recursiveScan($dir) {
         unset($dir);
         return;
     }
+	
+	$dir = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $dir);
 	
 	if ($isIdFromFile) {
 		$db->query("
@@ -539,6 +548,10 @@ function countDirectories($base_dir) {
 	global $cfg, $db, $dirsCounter, $filesCounter, $isMediaDir;
 	$isMediaDir = 0;
 	//$entries = @scandir($base_dir) or message(__FILE__, __LINE__, 'error', '[b]Failed to open directory:[/b][br]' . $base_dir . '[list][*]Check media_dir value in the config.inc.php file[*]Check file permission[/list]');
+	cliLog('countDirectories for ' . $base_dir);
+	
+	$base_dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $base_dir);
+	
 	if ($cfg['ignore_media_dir_access_error']) {
 		$entries = @scandir($base_dir);
 	}
@@ -553,13 +566,13 @@ function countDirectories($base_dir) {
 		$dir = $base_dir.DIRECTORY_SEPARATOR.$file;
 		if($file == '.' || $file == '..' || (is_dir($dir) === TRUE && in_array($file, $cfg['directory_blacklist']) === TRUE)) continue;
 		if(is_dir($dir)) {
-			$directories []= $dir;
+			$directories []= iconv(NJB_DEFAULT_FILESYSTEM_CHARSET,'UTF-8', $dir);
 			if ($isMediaDir == 1) {
 					$dirsCounter = $dirsCounter + 1;
 				}
 			mysqli_query($db,"UPDATE update_progress SET 
 				structure_image = 'Counting media directories: " . $dirsCounter . "'");
-			$directories = array_merge($directories, countDirectories($dir));
+			$directories = array_merge($directories, countDirectories(iconv(NJB_DEFAULT_FILESYSTEM_CHARSET,'UTF-8', $dir)));
 		}
 	}
 	return $directories;
@@ -854,7 +867,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	
 	cliLog("fileStructure ImageUpdate: " . $file[0]);
 	
-	$dir_d = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir);
+	$dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir);
 	
 	cliLog("fileStructure ImageUpdate d: " . var_export(is_file($dir . $cfg['image_front'] . '.jpg'),true));
 	
@@ -1010,14 +1023,12 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 function fileInfoLoop($rel_file = '') {
 	global $cfg, $db, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $prevDirsCounter, $prevFilesCounter;
 	
-	cliLog("In fileInfoLoop " . $rel_file);
-	
 	if ($rel_file != '') {
 		$filesCounter = $db->query("
 			SELECT COUNT(track_id) AS totalTracks
 			FROM track
 			WHERE updated
-			AND relative_file LIKE '" . mysql_real_escape_string($rel_file) . "%';")->fetch_assoc()['totalTracks'];
+			AND relative_file LIKE '" . mysqli_real_escape_string($db,$rel_file) . "%';")->fetch_assoc()['totalTracks'];
 	}
 	else {
 		$filesCounter = $db->query("
@@ -1049,7 +1060,7 @@ function fileInfoLoop($rel_file = '') {
             SELECT relative_file, filesize, filemtime, album_id
             FROM track
             WHERE updated
-			AND relative_file LIKE '" . mysql_real_escape_string($rel_file) . "%'
+			AND relative_file LIKE '" . mysqli_real_escape_string($db,$rel_file) . "%'
             ORDER BY relative_file
             LIMIT " . $curFilesCounter . "," . $batchSize . ";";
 		}
@@ -1077,7 +1088,7 @@ function fileInfoLoop($rel_file = '') {
 //  | File info for a single file                                            |
 //  +------------------------------------------------------------------------+
 function fileInfo($track, $getID3 = NULL) {
-    global $cfg, $db, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $prevDirsCounter, $prevFilesCounter, $updated;
+    global $cfg, $db, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $prevDirsCounter, $prevFilesCounter, $updated; 
 
     if($getID3 === NULL) {
         $getID3 = new getID3;
@@ -1091,8 +1102,13 @@ function fileInfo($track, $getID3 = NULL) {
 
     // TODO: do not exit the whole import/update procedure in case single files are not processable
     if (is_file($file) == false) {
-        message(__FILE__, __LINE__, 'error', '[b]Failed to read file:[/b][br]' . $file . '[list][*]Update again[*]Check file permission[/list]');
-    }
+        //message(__FILE__, __LINE__, 'error', '[b]Failed to read file:[/b][br]' . $file . '[list][*]Update again[*]Check file permission[/list]');
+		$query = 'UPDATE track SET
+            error = "Failed to read file. Check file permission or file name."
+			WHERE relative_file = BINARY "' . $db->real_escape_string($track['relative_file']) . '";';
+		mysqli_query($db, $query);	
+		return;
+	}
 
     if ($cfg['cli_update'] == false && ((microtime(true) - $cfg['timer']) * 1000) > $cfg['update_refresh_time'] && ($curFilesCounter/$filesCounter > ($prevFilesCounter/$filesCounter + 0.005))) {
         // write import/update progress to database

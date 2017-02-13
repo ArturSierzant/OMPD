@@ -133,7 +133,7 @@ function album_artist() {
 	else {
 				
 		$query = mysqli_query($db,'SELECT * FROM album WHERE artist_alphabetic like "%' . mysqli_real_escape_string($db,$search_string) . '%" ORDER BY year, album');
-		$mdTab = array();
+		/* $mdTab = array();
 		while ($album = mysqli_fetch_assoc($query)) {		
 			$multidisc_count = 0;		
 			if ($cfg['group_multidisc'] == true) {
@@ -160,8 +160,12 @@ function album_artist() {
 					
 					//draw_tile($size,$album);
 					
-			}
-	
+			} */
+		if ($tileSizePHP) $size = $tileSizePHP;
+		$album_multidisc = albumMultidisc($query);
+		foreach (array_slice($album_multidisc,0,$cfg['max_items_per_page']) as $album_m) {
+			draw_tile($size,$album_m,$album_m['allDiscs']);
+		}
 	}
 	?>
 	</div>

@@ -209,9 +209,9 @@ function trackSubMenu($i, $track) {
 
 function fileSubMenu($i, $filepath, $mime) {
 	global $cfg, $db;
+	
 ?>
 <div class="menuSub" id="menu-sub-track<?php echo $i ?>" onclick='//offMenuSub(<?php echo $i ?>);'> 
-	
 	<div><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;filepath=' . $filepath . '&amp;track_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'Play file\');" onMouseOut="return nd();"><i id = "insertPlay_' . $i . '" class="fa fa-play-circle fa-fw icon-small"></i>Insert after currently playing track and play</a>'; ?>
 	</div>
 	
@@ -1307,14 +1307,13 @@ function mime_content_type_replacement($filename) {
 	}
 }
 
-
 //  +------------------------------------------------------------------------+
 //  | find_all_files by  kodlee at kodleeshare dot net                       |
 //  | http://php.net/manual/en/function.scandir.php#107117                   |
 //  +------------------------------------------------------------------------+
 
 function find_all_files($dir){
-    global $cfg;
+  global $cfg;
 	$dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir);
 	$root = @scandir($dir);
     foreach($root as $value)
@@ -1345,4 +1344,57 @@ function find_all_files($dir){
 
 
 
+
+//  +------------------------------------------------------------------------+
+//  | Gropuping of multidisc albums                                          |
+//  +------------------------------------------------------------------------+
+
+function albumMultidisc($query){
+	global $cfg, $db;
+	$album_multidisc = array();
+	while ($album = mysqli_fetch_assoc($query)) {		
+		$multidisc_count = 0;
+		if ($album) {
+			if ($cfg['group_multidisc'] == true) {
+				$md_indicator = striposa($album['album'], $cfg['multidisk_indicator']);
+				if ($md_indicator !== false) {
+					$md_ind_pos = stripos($album['album'], $md_indicator);
+					$md_title = substr($album['album'], 0, $md_ind_pos);
+					$query_md = mysqli_query($db, 'SELECT album, image_id, album_id 
+					FROM album 
+					WHERE album LIKE "' . mysqli_real_escape_string($db, $md_title) . '%" AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '" AND album <> "' . mysqli_real_escape_string($db, $album['album']) . '"
+					ORDER BY album');
+					$multidisc_count = mysqli_num_rows($query_md);
+				}
+			}
+			
+			if ($multidisc_count > 0) {
+				if (!in_array($md_title, $mdTab)) {
+					$mdTab[] = $md_title;
+					$album_multidisc[$album['album_add_time'] . '_' . $album['album_id']] = array(
+					'album_id' => $album['album_id'],
+					'image_id' => $album['image_id'],
+					'album' => $album['album'],
+					'artist_alphabetic' => $album['artist_alphabetic'],
+					'year' => $album['year'],
+					'allDiscs' => 'allDiscs'
+					);
+				}
+			}
+			else {			
+				$album_multidisc[$album['album_add_time'] . '_' . $album['album_id']] = array(
+				'album_id' => $album['album_id'],
+				'image_id' => $album['image_id'],
+				'album' => $album['album'],
+				'artist_alphabetic' => $album['artist_alphabetic'],
+				'year' => $album['year'],
+				'allDiscs' => ''
+				);
+			}
+		}
+	}
+	//krsort($album_multidisc);
+	$cfg['items_count'] = count($album_multidisc);
+	return $album_multidisc;
+}
 ?>

@@ -212,7 +212,13 @@ function mediaStatistics() {
 	
 	$query = mysqli_query($db,'SELECT COUNT(discs) AS albums, SUM(discs) AS discs FROM album');
 	$album = mysqli_fetch_assoc($query);
-		
+	
+	$query = mysqli_query($db, 'SELECT album, album_add_time, album_id, image_id, artist, artist_alphabetic
+			FROM album
+			WHERE album_add_time
+			');
+	$album_multidisc = albumMultidisc($query);
+	
 	$query = mysqli_query($db,'SELECT COUNT(relative_file) AS all_tracks,
 		SUM(miliseconds) AS sum_miliseconds,
 		SUM(filesize) AS sum_size
@@ -292,6 +298,13 @@ function mediaStatistics() {
 	<td></td>
 	<td>Number of albums:</td>
 	<td></td>
+	<td align="right"><?php echo $cfg['items_count']; ?></td>
+	<td colspan="5"></td>
+</tr>
+<tr class="odd mouseover">
+	<td></td>
+	<td>Number of discs:</td>
+	<td></td>
 	<td align="right"><?php echo $album['albums']; ?></td>
 	<td colspan="5"></td>
 </tr>
@@ -342,7 +355,7 @@ for ($i=0; $i<$histogram_count; $i++)
 ?>
 <tr class="header">
 	<td class="space"></td>
-	<td>Increase of albums:</td>
+	<td>Increase of discs:</td>
 	<td class="textspace"></td>
 	<td></td>
 	<td class="textspace"></td>
@@ -857,7 +870,7 @@ function fileError() {
 	<td<?php if ($cfg['access_play'] || $cfg['access_add'] || $cfg['access_stream']) echo' class="space"'; ?>></td>
 	<td>Relative file</td>
 	<td class="textspace"></td>
-	<td>getID3() error message</td>
+	<td>Error message</td>
 	<td class="textspace"></td>
 	<td align="right">Filesize</td>
 	<td<?php if ($cfg['delete_file']) echo' class="space"'; ?>></td>
