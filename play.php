@@ -439,7 +439,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 			FROM track LEFT JOIN album ON track.album_id = album.album_id 
 			WHERE ' . $select_md . ' AND track.track_id NOT IN 
 			(SELECT track_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") 
-			ORDER BY album.album, track.number, track.relative_file';
+			ORDER BY track.disc, track.number, track.relative_file';
 		}
 		if ($cfg['group_multidisc'] == false || $md_indicator == '' || $md != 'allDiscs') {
 			$query_str = 'SELECT relative_file 
@@ -448,10 +448,10 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 			(SELECT track_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") ';
 			$mds_updateCounter[] = $album_id;
 			if ($insertType == 'album' && $insPos > 0) {
-				$query_str = $query_str . ' ORDER BY number DESC, relative_file DESC';
+				$query_str = $query_str . ' ORDER BY disc DESC, number DESC, relative_file DESC';
 			}
 			else {
-				$query_str = $query_str . ' ORDER BY number, relative_file';
+				$query_str = $query_str . ' ORDER BY disc, number, relative_file';
 			}
 		}
 			

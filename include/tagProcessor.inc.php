@@ -76,6 +76,23 @@ function postProcessTrackNumber($numberString) {
     return $numbers[0];
 }
 
+function parseDiscNumber($data) {
+    if (isset($data['comments']['part_of_a_set'][0])) {
+        return postProcessDiscNumber($data['comments']['part_of_a_set'][0]);
+    }
+		if (isset($data['comments']['discnumber'][0])) {
+        return postProcessDiscNumber($data['comments']['discnumber'][0]);
+    }
+    
+    return '1';
+}
+
+function postProcessDiscNumber($numberString) {
+    //support for part_of_a_set in form: 01/02
+    $numbers = explode("/", $numberString);
+    return $numbers[0];
+}
+
 function parseYear($data) {
     if (isset($data['comments']['year'][0])) {
         return postProcessYear($data['comments']['year'][0]);

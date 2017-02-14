@@ -469,10 +469,10 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 	}
 	elseif ($album_id) {
 		if ($insPos) {
-			$orderBy = 'number DESC, relative_file DESC';
+			$orderBy = 'disc DESC, number DESC, relative_file DESC';
 		}
 		else {
-			$orderBy = 'number, relative_file';
+			$orderBy = 'disc, number, relative_file';
 		}
 		$query = mysqli_query($db,'SELECT artist, title, relative_file, miliseconds, audio_bitrate, track_id FROM track WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '" ORDER BY ' . $orderBy);
 	}

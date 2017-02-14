@@ -1667,24 +1667,22 @@ Other versions of this album:
 	<td class="space right"><div class="space"></div></td>
 </tr>
 <?php
-	$query = mysqli_query($db, 'SELECT discs FROM album WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');
+	//$query = mysqli_query($db, 'SELECT discs FROM album WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');
+	$discs = 1;
+	$query = mysqli_query($db, 'SELECT disc FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" GROUP BY disc');
+	$discs = mysqli_num_rows($query);
+	
+	$query = mysqli_query($db, 'SELECT max(disc) as discs FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');
 	$album = mysqli_fetch_assoc($query);
 	for ($disc = 1; $disc <= $album['discs']; $disc++) {
-		/* $query = mysqli_query($db, '
-		SELECT track.track_artist, track.artist, track.title, track.featuring, track.miliseconds, track.track_id, track.number, favoriteitem.favorite_id
-		FROM track LEFT JOIN favoriteitem ON track.track_id = favoriteitem.track_id
-		WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" AND disc = ' . (int) $disc . ' 
-		GROUP BY track.track_id
-		ORDER BY relative_file');
-		 */
-		/* $query = mysqli_query($db, '
-		SELECT track.track_artist, track.artist, track.title, track.featuring, track.miliseconds, track.track_id, track.number, track.relative_file
-		FROM track 
-		WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" AND disc = ' . (int) $disc . ' 
-		
-		ORDER BY number,relative_file'); */
-		
-		
+		if ($discs > 1) {
+		?>
+			<tr class="header">
+			<td class="icon"></td><!-- track menu -->
+			<td colspan="9">Disc #<?php echo $disc;?></td>
+			</tr>
+		<?php
+		}
 		$query = mysqli_query($db,'SELECT track.track_artist, track.artist, track.title, track.featuring, track.miliseconds, track.track_id, track.number, track.relative_file, f.blacklist_pos as blacklist_pos, f. favorite_pos as favorite_pos
 		FROM track left join 
 			(

@@ -1154,6 +1154,7 @@ function fileInfo($track, $getID3 = NULL) {
             video_framerate         = ' . (int) parseVideoFrameRate($metaData) . ',
             error                   = "' . $db->real_escape_string( parseError($metaData)) . '",
             track_id                = "' . $db->real_escape_string( $track['album_id'] . '_' . fileId($file)) . '",
+            disc                    = "' . (int)( parseDiscNumber($metaData)) . '",
             number                  = "' . $db->real_escape_string( parseTrackNumber($metaData)) . '",
             genre                   = "' . $db->real_escape_string( parseGenre($metaData)) . '",
             title                   = "' . $db->real_escape_string( parseTrackTitle($metaData)) . '",
@@ -1194,7 +1195,7 @@ function fileId($file) {
 		$filehandle	= @fopen($file, 'rb') or message(__FILE__, __LINE__, 'error', '[b]Failed to open file:[/b][br]' . $file . '[list][*]Check file permission[/list]');
 		fseek($filehandle, round(0.5 * $filesize - 2560 - 1));
 		$data = fread($filehandle, 5120);
-		$data .= $filesize;
+		$data .= ($filesize + (microtime(true) * mt_rand(1,1000)));
 		fclose($filehandle);
 	}
 	else
