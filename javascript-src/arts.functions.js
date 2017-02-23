@@ -138,6 +138,7 @@ function evaluateAdd(data) {
 	if (data.favorite_id) {data.album_id = data.favorite_id};
 	if (data.file_id) {data.album_id = data.file_id};
 	if (data.random) {data.album_id = 'random'};
+	if (data.disc) {data.album_id = data.album_id + '_' + data.disc};
 	if (data.album_id) { 
 		if (data.addResult == 'add_OK') {
 			$('[id="add_' + data.album_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-check-square icon-ok');

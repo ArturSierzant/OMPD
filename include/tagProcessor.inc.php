@@ -50,10 +50,66 @@ function parseTrackTitle($data) {
 }
 
 function parseGenre($data) {
-    if (isset($data['comments']['genre'][0])) {
+		$genre = '';
+		$genre_separator = 'ompd_genre_ompd';
+    if (isset($data['tags']['id3v2']['genre'][0])) {
+				$genre_array = $data['tags']['id3v2']['genre'];
+        foreach($genre_array as $g){
+					if ($genre == '') {
+						$genre = $g;
+					}
+					else{
+						$genre = $genre . $genre_separator . $g;		
+					}
+				}
+				return $genre;
+    }
+    if (isset($data['tags']['vorbiscomment']['genre'][0])) {
+				$genre_array = $data['tags']['vorbiscomment']['genre'];
+        foreach($genre_array as $g){
+					if ($genre == '') {
+						$genre = $g;
+					}
+					else{
+						$genre = $genre . $genre_separator . $g;		
+					}
+				}
+				return $genre;
+    }
+		if (isset($data['comments']['genre'][0])) {
         return $data['comments']['genre'][0];
     }
     return 'Unknown Genre';
+}
+
+function parseMultiGenreId($genre_id){
+	global $db;
+	$album_genres = array();
+	$genres = explode(';',$genre_id);
+	$where = '';
+	foreach ($genres as $g){
+		$where = ($where == '') ? ' genre_id LIKE "' . $g . '"' : $where . ' OR genre_id LIKE "' . $g . '"';
+	}
+	$query = mysqli_query($db,'SELECT genre, genre_id FROM genre WHERE ' . $where);
+	while ($genre = mysqli_fetch_assoc($query)){
+		$album_genres[$genre['genre_id']] = $genre['genre'];
+	}
+	return $album_genres;
+}
+
+function parseMultiGenre($genre){
+	global $db;
+	$album_genres = array();
+	$genres = explode('ompd_genre_ompd',$genre);
+	$where = '';
+	foreach ($genres as $g){
+		$where = ($where == '') ? ' genre LIKE "' . $g . '"' : $where . ' OR genre LIKE "' . $g . '"';
+	}
+	$query = mysqli_query($db,'SELECT genre, genre_id FROM genre WHERE ' . $where);
+	while ($genre = mysqli_fetch_assoc($query)){
+		$album_genres[$genre['genre_id']] = $genre['genre'];
+	}
+	return $album_genres;
 }
 
 function parseTrackNumber($data) {
@@ -77,6 +133,11 @@ function postProcessTrackNumber($numberString) {
 }
 
 function parseDiscNumber($data) {
+		//support for discnumber in tracknumber, i.e. 101 -> CD#1, 201 -> CD#2
+		if (strlen(parseTrackNumber($data)) > 2) {
+				return substr(parseTrackNumber($data), 0, strlen(parseTrackNumber($data)) - 2);
+				//return parseTrackNumber($data);
+		}
     if (isset($data['comments']['part_of_a_set'][0])) {
         return postProcessDiscNumber($data['comments']['part_of_a_set'][0]);
     }
@@ -88,7 +149,7 @@ function parseDiscNumber($data) {
 }
 
 function postProcessDiscNumber($numberString) {
-    //support for part_of_a_set in form: 01/02
+    //support for part_of_a_set/discnumber in form: 01/02
     $numbers = explode("/", $numberString);
     return $numbers[0];
 }

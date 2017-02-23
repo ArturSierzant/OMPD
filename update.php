@@ -1,7 +1,7 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
-//  | http://www.ompd.pl                                             		 |
+//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                           |
+//  | http://www.ompd.pl                                             		     |
 //  |                                                                        |
 //  |                                                                        |
 //  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
@@ -42,6 +42,7 @@ ignore_user_abort(true);
 //exit();
 
 $cfg['menu'] = 'config';
+$cfg['force_filename_update'] = false;
 
 $action = getpost('action');
 $dir_to_update = getpost('dir_to_update');
@@ -51,6 +52,7 @@ if (!isset($dir_to_update)) {
 else {
 	$dir_to_update = myDecode($dir_to_update);
 	setcookie('update_dir', rtrim($dir_to_update,'/'), time() + (86400 * 30 * 365), "/");
+	$cfg['force_filename_update'] = true;
 }
 
 $flag	= (int) getpost('flag');
@@ -257,9 +259,9 @@ function update($dir_to_update = '') {
 		//sleep(1);
 		
 		$cfg['new_escape_char_hash']	= hmacmd5(print_r($cfg['escape_char'], true), file_get_contents(NJB_HOME_DIR . 'update.php'));
-		$cfg['force_filename_update']	= ($cfg['new_escape_char_hash'] != $cfg['escape_char_hash']) ? true : false;
+		//$cfg['force_filename_update']	= ($cfg['new_escape_char_hash'] != $cfg['escape_char_hash']) ? true : false;
 
-		$cfg['force_filename_update'] = false;
+		//$cfg['force_filename_update'] = false;
 		
 		
 		
@@ -1122,9 +1124,9 @@ function fileInfo($track, $getID3 = NULL) {
     $metaData = array();
     $filesize = filesize($file);
     $filemtime = filemtime($file);
-    $force_filename_update = false;
+    //$force_filename_update = false;
 
-    if ($filesize != $track['filesize'] || filemtimeCompare($filemtime, $track['filemtime']) == false || $force_filename_update) {
+    if ($filesize != $track['filesize'] || filemtimeCompare($filemtime, $track['filemtime']) == false || $cfg['force_filename_update']) {
         // TODO: does cli_update still exist? would be great but obviously this is old netjukebox code
         //if ($cfg['cli_update'] && $cfg['cli_silent_update'] == false)
         //    echo $file . "\n";
@@ -1934,23 +1936,51 @@ function updateGenre() {
 	global $cfg, $db;
 	$i = 1;
 	mysqli_query($db,'TRUNCATE genre');
-	$query = mysqli_query($db,'SELECT genre FROM track WHERE genre<>"" GROUP BY genre');
+	$query = mysqli_query($db,'SELECT genre FROM track WHERE genre<>"" GROUP BY genre ORDER BY genre');
 	$genre_count = mysqli_num_rows($query);
 	if ($genre_count > 0) {
 		while ($track = mysqli_fetch_assoc($query)) {
-			mysqli_query($db,'INSERT INTO genre (genre_id, genre, updated)
-								VALUES ("' . $i . '",
-										"' . $db->real_escape_string($track['genre']) . '",
-										1)');
-			++$i;
+			$genres = explode('ompd_genre_ompd',$track['genre']);
+			foreach ($genres as $g){
+				$q = mysqli_query($db,'SELECT genre_id FROM genre WHERE genre="' . $g . '"');
+				if (mysqli_num_rows($q) == 0) {
+					mysqli_query($db,'INSERT INTO genre (genre_id, genre, updated)
+										VALUES ("' . $i . '",
+												"' . $db->real_escape_string($g) . '",
+												1)');
+					++$i;
+				}
+			}
 		}
 	}
-	$query = mysqli_query($db,'SELECT genre.genre_id as g_id, t.album_id as a_id FROM genre LEFT JOIN (SELECT genre, album_id FROM track GROUP BY genre, album_id) t ON genre.genre = t.genre ');
-	while ($album = mysqli_fetch_assoc($query)) {
-		$res = mysqli_query($db,"UPDATE album SET 
-							genre_id = " . $album['g_id'] . "
-							WHERE album_id = '". $album['a_id'] ."';"); 
-		//echo $album['a_id'] . " " . $album['g_id'] . " " . $res . '<br>';
+	$res = mysqli_query($db,"UPDATE album SET genre_id = ';'"); 
+	
+	$query = mysqli_query($db,'SELECT DISTINCT genre, album_id FROM track');
+	while ($album = mysqli_fetch_assoc($query)) { 
+			$genres = explode('ompd_genre_ompd',$album['genre']);
+			foreach ($genres as $g){
+				//get genre_id for actual genre from multigenre
+				$q1 = mysqli_query($db,'SELECT genre_id FROM genre WHERE genre = "' . $g . '"');
+				$a1 = mysqli_fetch_assoc($q1);
+				
+				//get all genre_ids from album
+				$q2 = mysqli_query($db,'SELECT genre_id FROM album WHERE album_id = "' . $album['album_id'] . '"');
+				$a2 = mysqli_fetch_assoc($q2);
+				$album_genre_ids = $a2['genre_id'];
+				
+				//check if genre_id is already added to album
+				if ($album_genre_ids == ';') { //no genre_id yet -> add first now
+					$album_genre_ids = ';' . $a1['genre_id'] . ';';
+				}
+				elseif (strpos($album_genre_ids,';' . $a1['genre_id'] . ';') === false) {
+						//genre_id not added to album yet -> add it now
+						$album_genre_ids = $album_genre_ids . $a1['genre_id'] . ';';
+				}
+				
+				$res = mysqli_query($db,"UPDATE album SET 
+							genre_id = '" . $db->real_escape_string($album_genre_ids) . "'
+							WHERE album_id = '". $album['album_id'] ."';"); 
+			}
 	}	
 }
 ?>

@@ -227,7 +227,21 @@ for ($i=0; $i < $listlength; $i++) {
 	$playtime[] = (int) $table_track['miliseconds'];
 	$playlistTT = $playlistTT + (int) $table_track['miliseconds'];
 	$track_id[] = (string) $table_track['track_id'];
-	$genre_id[] = (string) $table_track['genre_id'];
+	
+	$album_genres = parseMultiGenreId($table_track['genre_id']);
+	
+	/* $genres = explode(';',$table_track['genre_id']);
+	$where = '';
+	foreach ($genres as $g){
+		$where = ($where == '') ? ' genre_id LIKE "' . $g . '"' : $where . ' OR genre_id LIKE "' . $g . '"';
+	}
+	$query = mysqli_query($db,'SELECT genre, genre_id FROM genre WHERE ' . $where);
+	while ($genre = mysqli_fetch_assoc($query)){
+		$album_genres[$genre['genre_id']] = $genre['genre'];
+		//$album['album_genre'] = $album['album_genre'] . '; ' . $genre['genre'];
+	} */
+	
+	//$genre_id[] = (string) $table_track['genre_id'];
 	$number[] = (string) $table_track['number'];
 	
 	$is_file_stream = false;
@@ -342,7 +356,15 @@ for ($i=0; $i < $listlength; $i++) {
 	</td>
 
 	<td class="time pl-genre">
-	<a href="index.php?action=view2&order=artist&sort=asc&genre_id=<?php echo $table_track['genre_id'] ?>"><?php echo $table_track['genre'] ?></a>
+	
+	<?php if (count($album_genres) > 0) { 
+		foreach($album_genres as $g_id => $ag) {
+	?>
+		<a href="index.php?action=view2&order=artist&sort=asc&genre_id=<?php echo $g_id; ?>"><?php echo $ag; ?></a><br>
+	<?php 
+		}
+	}
+	?>
 	</td>
 	
 
@@ -819,8 +841,23 @@ function evaluateTrack(data) {
 	if (data.year) document.getElementById('year1').innerHTML = document.getElementById('year').innerHTML = '<a href="index.php?action=view2&order=artist&sort=asc&year=' + data.year + '">' + data.year + '</a>';
 	else document.getElementById('year1').innerHTML = document.getElementById('year').innerHTML = '&nbsp;';
 	
-	if (data.genre && data.genre_id != '-1') document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = '<a href="index.php?action=view2&order=artist&sort=asc&&genre_id=' + data.genre_id + '">' + data.genre + '</a>';
+	/* if (data.genre && data.genre_id != '-1') document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = '<a href="index.php?action=view2&order=artist&sort=asc&&genre_id=' + data.genre_id + '">' + data.genre + '</a>';
 	else if(data.genre) document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = data.genre;
+	else document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = '&nbsp;';
+	 */
+	if (data.genres) {
+		var inner_html = '';
+		$.each(data.genres, function(key, value){
+			if (inner_html == ''){
+				inner_html = '<a href="index.php?action=view2&order=artist&sort=asc&&genre_id=' + key + '">' + value + '</a>'
+			}
+			else {
+				inner_html = inner_html + ', <a href="index.php?action=view2&order=artist&sort=asc&&genre_id=' + key + '">' + value + '</a>'
+			}
+		});
+		document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = inner_html;
+	}
+	else if(data.genre_id == '-1') document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = data.genre;
 	else document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = '&nbsp;';
 	
 	//var rel_file = encodeURIComponent(data.relative_file);

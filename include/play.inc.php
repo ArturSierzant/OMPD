@@ -408,15 +408,16 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 	global $cfg, $db;
 	
 	$data = array();
-	$stream_id			= -1;
+	$stream_id		= -1;
 	$track_id			= get('track_id') ? get('track_id') : $track_id;
 	$album_id			= get('album_id');
-	$favorite_id		= get('favorite_id');
+	$disc					= get('disc');
+	$favorite_id	= get('favorite_id');
 	$random				= get('random');
-	$sid				= get('sid');
-	$player_id			= get('player_id');
+	$sid					= get('sid');
+	$player_id		= get('player_id');
 	$filepath			= get('filepath') ? get('filepath') : $filepath;
-	$in_media_dir		= get('in_media_dir');
+	$in_media_dir	= get('in_media_dir');
 	$dirpath			= get('dirpath') ? get('dirpath') : $dirpath;
 	
 	$data['playToResult'] = "playTo_Error";
@@ -474,7 +475,11 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 		else {
 			$orderBy = 'disc, number, relative_file';
 		}
-		$query = mysqli_query($db,'SELECT artist, title, relative_file, miliseconds, audio_bitrate, track_id FROM track WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '" ORDER BY ' . $orderBy);
+		$part_of_set = '';
+		if ($disc) {
+			$part_of_set = ' AND disc = ' . $disc . ' ';
+		}
+		$query = mysqli_query($db,'SELECT artist, title, relative_file, miliseconds, audio_bitrate, track_id FROM track WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '"' . $part_of_set . ' ORDER BY ' . $orderBy);
 	}
 	elseif ($favorite_id) {
 		$query = mysqli_query($db,'SELECT stream

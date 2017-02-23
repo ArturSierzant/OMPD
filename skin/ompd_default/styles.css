@@ -1124,6 +1124,10 @@ tr.header {
 	font-size: 0.9em;
 }
 
+tr.multidisc_header {
+	background-color: #ECECEC;
+}
+
 tr.header_bigger {
 	font-size: 1em !important;
 }

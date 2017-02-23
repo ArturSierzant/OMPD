@@ -382,18 +382,16 @@ function view1() {
 function view2() {
 	global $cfg, $db;
 	authenticate('access_media');
-	$isGenreRequired = get('genre_id');
-	if ($isGenreRequired)
-		genreNavigator($isGenreRequired);
+	$genre_id = get('genre_id');
+	if ($genre_id)
+		genreNavigator($genre_id);
 
 	
 	$title	 	= get('title');
 	$artist	 	= get('artist');
-	$genre_id 	= get('genre_id');
 	$tag		= get('tag');
 	$year		= (get('year') == 'Unknown' ? get('year'): (int) get('year'));
 	$filter  	= get('filter')				or $filter = 'whole';
-	//$thumbnail	= get('thumbnail')			? 1 : 0;
 	$thumbnail	= 1;
 	$order	 	= get('order')				or $order = ($year ? 'artist' : (in_array(strtolower($artist), $cfg['no_album_artist']) ? 'album' : 'year'));
 	$sort	 	= get('sort') == 'desc'		? 'desc' : 'asc';
@@ -429,13 +427,9 @@ function view2() {
 	
 	
 	if ($genre_id || $title) {
-		if ($genre_id) {
-		//genreNavigator($genre_id);
-		
-		//if (substr($genre_id, -1) == '~')	$filter_query = 'WHERE genre_id = "' .  mysqli_real_escape_string($db,substr($genre_id, 0, -1)) . '"';
-		//else								
-		$filter_query = 'WHERE genre_id LIKE "' . mysqli_real_escape_like($genre_id) . '"';}
-		
+		if ($genre_id) {							
+			$filter_query = 'WHERE genre_id LIKE "%;' . mysqli_real_escape_like($genre_id) . ';%"';
+		}
 		else if ($title) {
 			genreNavigator('');
 			$filter_query = 'WHERE album LIKE "%' . mysqli_real_escape_like($title) . '%"';
@@ -506,15 +500,7 @@ function view2() {
 			message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]order');
 		
 		$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query);
-		
-		/* 
-		$cfg['items_count'] = $album_count = mysqli_num_rows($query);
-		
-		if ($album_count > $max_item_per_page) {
-			$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query .
-			' LIMIT ' . ($page - 1) * $max_item_per_page . ','  . ($max_item_per_page));
-		} */
-		
+	
 		$url			= 'index.php?action=view2&amp;genre_id=' . rawurlencode($genre_id);
 		$list_url		= 'index.php?action=view2&amp;thumbnail=0&amp;genre_id=' . rawurlencode($genre_id) . '&amp;filter=' . $filter . '&amp;order=' . $order;
 		$thumbnail_url	= 'index.php?action=view2&amp;thumbnail=1&amp;genre_id=' . rawurlencode($genre_id) . '&amp;filter=' . $filter . '&amp;order=' . $order;
@@ -566,31 +552,20 @@ function view2() {
 		elseif ($tag) 	$nav['name'][]	= $tag;
 		else 	$nav['name'][]	= 'Artist: ' . $artist;
 		
-		
-		
 		require_once('include/header.inc.php');
-		
-		
-		
+
 		if ($filter == 'all')			$filter_query = 'WHERE 1';
 		elseif ($filter == 'exact')		$filter_query = 'WHERE (artist_alphabetic = "' .  mysqli_real_escape_string($db,$artist) . '" OR artist = "' .  mysqli_real_escape_string($db,$artist) . '")';
 		elseif ($filter == 'like')		$filter_query = 'WHERE (artist_alphabetic LIKE "%' .  mysqli_real_escape_string($db,$artist) . '%" OR artist LIKE "%' .  mysqli_real_escape_string($db,$artist) . '%")';
 		elseif ($filter == 'smart')		$filter_query = 'WHERE (artist_alphabetic  LIKE "%' . mysqli_real_escape_like($artist) . '%" OR artist LIKE "%' . mysqli_real_escape_like($artist) . '%" OR artist SOUNDS LIKE "' .  mysqli_real_escape_string($db,$artist) . '")';
 		elseif ($filter == 'start')		$filter_query = 'WHERE (artist_alphabetic  LIKE "' . mysqli_real_escape_like($artist) . '%")';
 		elseif ($filter == 'symbol')	$filter_query = 'WHERE (artist_alphabetic  NOT BETWEEN "a" AND "zzzzzz")';
-		//elseif ($filter == 'symbol')	$filter_query = '';
 		elseif ($filter == 'whole') {
 			$art =  mysqli_real_escape_string($db,$artist);
 			$as = $cfg['artist_separator'];
 			$count = count($as);
 			$i=0;
 			$search_str = '';
-			
-			/* for($i=0; $i<$count; $i++) {
-			$search_str .= ' OR artist REGEXP "^(' . $art . ')[[.space.]]*[[.' . $as[$i] . '.]]" 
-			OR artist REGEXP "[[.' . $as[$i] . '.]][[.space.]]*(' . $art . ')$" 
-			OR artist REGEXP "[[.' . $as[$i] . '.]][[.space.]]*(' . $art . ')[[.space.]]*[[.' . $as[$i] . '.]]"';
-			} */
 			
 			for($i=0; $i<$count; $i++) {
 			$search_str .= ' OR artist LIKE "' . $art . '' . $as[$i] . '%" 
@@ -604,21 +579,6 @@ function view2() {
 			
 			$filter_query = 'WHERE (
 			artist = "' .  mysqli_real_escape_string($db,$artist) . '"' . $search_str . ')';
-			//echo $filter_query;
-			/* 
-			OR artist LIKE "%' . $as .  mysqli_real_escape_string($db,$artist) . '" 
-			OR artist LIKE "%' . $as . ' ' .  mysqli_real_escape_string($db,$artist) . '" 
-			OR artist LIKE "' .  mysqli_real_escape_string($db,$artist) . $as . '%"
-			OR artist LIKE "' .  mysqli_real_escape_string($db,$artist) . ' ' . $as . '%"
-			
-			OR artist LIKE "% ' .  mysqli_real_escape_string($db,$artist) . '" 
-			OR artist LIKE "' .  mysqli_real_escape_string($db,$artist) . ' %" 
-			OR artist LIKE "' .  mysqli_real_escape_string($db,$artist) . ';%"
-			OR artist LIKE "' .  mysqli_real_escape_string($db,$artist) . ',%"
-			OR artist LIKE "% ' .  mysqli_real_escape_string($db,$artist) . ';%"
-			OR artist LIKE "% ' .  mysqli_real_escape_string($db,$artist) . ',%"
-			OR artist LIKE "% ' .  mysqli_real_escape_string($db,$artist) . ' %"
-			 */
 		}
 		else							message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]filter');
 		
@@ -627,16 +587,13 @@ function view2() {
 		$thumbnail_url	= 'index.php?action=view2&amp;thumbnail=1&amp;artist=' . rawurlencode($artist) . '&amp;filter=' . $filter . '&amp;order=' . $order . '&amp;sort=' . $sort;
 	}
 	if (($artist || $year)) {
-	
 		if ($order == 'year' && $sort == 'asc') {
 			$order_query = 'ORDER BY year, month, artist_alphabetic, album';
-			//$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query);
 			$order_bitmap_year = '<span class="fa fa-sort-numeric-asc"></span>';
 			$sort_year = 'desc';
 		}
 		elseif ($order == 'year' && $sort == 'desc') {
 			$order_query = 'ORDER BY year DESC, month DESC, artist_alphabetic DESC, album DESC';
-			//$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query);
 			$order_bitmap_year = '<span class="fa fa-sort-numeric-desc"></span>';
 			$sort_year = 'asc';
 		}
@@ -662,69 +619,49 @@ function view2() {
 		}
 		elseif ($order == 'album' && $sort == 'asc') {
 			$order_query = 'ORDER BY album, artist_alphabetic, year, month';
-			//$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query);
 			$order_bitmap_album = '<span class="fa fa-sort-alpha-asc"></span>';
 			$sort_album = 'desc';
 		}
 		elseif ($order == 'album' && $sort == 'desc') {
 			$order_query = 'ORDER BY album DESC, artist_alphabetic DESC, year DESC, month DESC';
-			//$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query);
 			$order_bitmap_album = '<span class="fa fa-sort-alpha-desc"></span>';
 			$sort_album = 'asc';
 		}
 		elseif ($order == 'artist' && $sort == 'asc') {
 			$order_query = 'ORDER BY artist_alphabetic, year, month, album';
-			//$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query);
 			$order_bitmap_artist = '<span class="fa fa-sort-alpha-asc"></span>';
 			$sort_artist = 'desc';
 		}
 		elseif ($order == 'artist' && $sort == 'desc') {
 			$order_query = 'ORDER BY artist_alphabetic DESC, year DESC, month DESC, album DESC';
-			//$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query);
 			$order_bitmap_artist = '<span class="fa fa-sort-alpha-desc"></span>';
 			$sort_artist = 'asc';
 		}
 		elseif ($order == 'genre' && $sort == 'asc') {
-			$order_query = 'ORDER BY genre, artist_alphabetic, year, month';
-			//$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, album.genre_id, image_id, album_id FROM album, genre ' . $filter_query . ' AND album.genre_id = genre.genre_id ' . $order_query);
+			$order_query = 'ORDER BY genre_id, artist_alphabetic, year, month';
 			$order_bitmap_genre = '<span class="fa fa-sort-alpha-asc"></span>';
 			$sort_genre = 'desc';
 		}
 		elseif ($order == 'genre' && $sort == 'desc') {
-			$order_query = 'ORDER BY genre DESC, artist_alphabetic DESC , year DESC, month DESC';
-			//$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, album.genre_id, image_id, album_id FROM album, genre ' . $filter_query . ' AND album.genre_id = genre.genre_id ' . $order_query);
+			$order_query = 'ORDER BY genre_id DESC, artist_alphabetic DESC , year DESC, month DESC';
 			$order_bitmap_genre = '<span class="fa fa-sort-alpha-desc"></span>';
 			$sort_genre = 'asc';
 		}
 		else message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]order or sort');
 		
-		$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, album.genre_id, image_id, album_id FROM album, genre ' . $filter_query . ' AND album.genre_id = genre.genre_id ' . $order_query);
-		
-		/* $cfg['items_count'] = $album_count = mysqli_num_rows($query);
-		//echo $filter_query;
-		if ($album_count > $max_item_per_page) {
-			$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, album.genre_id, image_id, album_id FROM album, genre ' . $filter_query . ' AND album.genre_id = genre.genre_id ' . $order_query .
-			' LIMIT ' . ($page - 1) * $max_item_per_page . ','  . ($max_item_per_page));	
-		} */
-		
+		$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query);
+		//message(__FILE__, __LINE__, 'error', 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query);
 	}
 	
 	if ($tag) {
 		$order_query = 'ORDER BY album.artist, year, album';
 		//ONLY_FULL_GROUP_BY
 		$query_str = ('SELECT album, album.artist, artist_alphabetic, album.year, month, genre_id, image_id, album.album_id, comment FROM album, track WHERE album.album_id=track.album_id AND comment like "%' . $tag . '%" GROUP BY track.album_id ' . $order_query);		
-		//$query_str = ('SELECT album, album.artist, artist_alphabetic, album.year, month, genre_id, image_id, album.album_id, comment FROM album, track WHERE album.album_id=track.album_id AND comment like "%' . $tag . '%" GROUP BY track.album_id, album, album.artist, artist_alphabetic, album.year, month, genre_id, image_id, album.album_id, comment ' . $order_query);		
-		//$query_str = ('SELECT album, album.artist, artist_alphabetic, album.year, month, genre_id, image_id, album.album_id, comment FROM album LEFT JOIN track ON album.album_id=track.album_id WHERE comment like "%' . $tag . '%" ' . $order_query);		
+		
 		$order_bitmap_artist = '<span class="fa fa-sort-alpha-asc"></span>';
 		$sort_album = 'desc';
 		
 		$query = mysqli_query($db, $query_str);
-			/* $cfg['items_count'] = $album_count = mysqli_num_rows($query);
-			if ($album_count > $max_item_per_page) {
-				$query_str = $query_str . ' LIMIT ' . ($page - 1) * $max_item_per_page . ','  . ($max_item_per_page);
-				$query = mysqli_query($db, $query_str);
-			} */
-		
 	}
 	
 	if ($qsType) {
@@ -733,14 +670,8 @@ function view2() {
 		$query_str = ('SELECT album, album.artist, artist_alphabetic, album.year, month, genre_id, image_id, album.album_id FROM album, track WHERE album.album_id=track.album_id AND (' . $cfg['quick_search'][$qsType][1] . ') GROUP BY track.album_id ' . $order_query);		
 		$order_bitmap_artist = '<span class="fa fa-sort-alpha-asc"></span>';
 		$sort_album = 'desc';
-		$query = mysqli_query($db, $query_str);
-			/* 
-			$cfg['items_count'] = $album_count = mysqli_num_rows($query);
-			if ($album_count > $max_item_per_page) {
-				$query_str = $query_str . ' LIMIT ' . ($page - 1) * $max_item_per_page . ','  . ($max_item_per_page);
-				$query = mysqli_query($db, $query_str);
-			} */	
-		}
+		$query = mysqli_query($db, $query_str);	
+	}
 	
 	
 	
@@ -756,15 +687,9 @@ function view2() {
 	$display_all_tracks = false;
 	$i			= 0;
 	
-	//$colombs	= floor((cookie('netjukebox_width') - 20) / ($size + 10));
 	$sort_url	= $url;
 	$size_url	= $url . '&amp;order=' . $order . '&amp;sort=' . $sort;
 	
-	/* $base		= (cookie('netjukebox_width') - 20) / ($base_size + 10);
-	$colombs	= floor($base);
-	$aval_width = (cookie('netjukebox_width') - 20 - $scroll_bar_correction) - ($colombs - 1) * $spaces;
-	$size = floor($aval_width / $colombs);
-	 */
 	$rows = mysqli_num_rows($query);
 	
 	$resultsFound = false;
@@ -847,8 +772,6 @@ if ($filter == 'whole' && !$genre_id && !$year) {
 	AND (album.artist NOT LIKE "%' .  mysqli_real_escape_string($db,get('artist')) . '%")
 	GROUP BY track.artist');
 	
-	
-	//WHERE track.artist LIKE "%' .  mysqli_real_escape_string($db,$search_string) . '%"
 	$rows = mysqli_num_rows($queryTA);
 	
 	if ($rows > 0) {
@@ -880,13 +803,6 @@ if ($filter == 'whole' && !$genre_id && !$year) {
 
 <?php
 	$i=0;
-	/* $queryTA = mysqli_query($db, 'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.relative_file, track.number, album.image_id, album.album, album.artist
-	FROM track
-	INNER JOIN album ON track.album_id = album.album_id '
-	. $filter_queryTA .
-	' AND (track.artist <> album.artist)
-	AND (album.artist NOT LIKE "%' .  mysqli_real_escape_string($db,get('artist')) . '%")
-	ORDER BY track.artist, album.album'); */
 	
 	$search_string = get('artist');
 	
@@ -993,9 +909,6 @@ if ($filter == 'whole' && !$genre_id && !$year) {
 	if ($fav_rows > 0) {
 		$favorites = mysqli_fetch_assoc($queryFav);
 		$favId = $favorites['favorite_id'];
-		
-	
-		//$filter_queryTA = str_replace('artist ','track.artist ',$filter_query);
 		
 		$queryFav = mysqli_query($db, 'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number
 		FROM track
@@ -1165,7 +1078,7 @@ if ($resultsFound == false && $group_found == 'none') echo 'No results found.';
 //  +------------------------------------------------------------------------+
 function view3() {
 	global $cfg, $db;
-
+	
 	$album_id = get('album_id');
 	
 	if ($album_id == '') {
@@ -1200,15 +1113,16 @@ function view3() {
 	
 	authenticate('access_media');
 	
-	$query = mysqli_query($db, 'SELECT artist_alphabetic, artist, album, year, month, image_id, album_add_time, genre.genre as album_genre, album.genre_id
-		FROM album, genre
-		WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"
-		AND genre.genre_id=album.genre_id');
+	$query = mysqli_query($db, 'SELECT artist_alphabetic, artist, album, year, month, image_id, album_add_time, album.genre_id
+		FROM album
+		WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');
 	$album = mysqli_fetch_assoc($query);
 	$image_id = $album['image_id'];
 	
 	if ($album == false)
 		message(__FILE__, __LINE__, 'error', '[b]Error[/b][br]' . $album_id . ' not found in database');
+
+	$album_genres = parseMultiGenreId($album['genre_id']);		
 	
 	if ($cfg['show_multidisc'] == true) {
 		$md_indicator = striposa($album['album'], $cfg['multidisk_indicator']);
@@ -1236,7 +1150,6 @@ function view3() {
 				FROM album 
 				WHERE album LIKE "' . mysqli_real_escape_string($db, $md_title) . '%" AND artist = "' . mysqli_real_escape_string($db,$album['artist']) . '" AND album <> "' . mysqli_real_escape_string($db, $album['album']) . '"
 				ORDER BY album) ';
-				//$multidisc_count = mysqli_num_rows($query_md);
 			}
 			
 			$av_ind_pos = stripos($album['album'], $av_indicator);
@@ -1283,6 +1196,9 @@ function view3() {
 	$max_played = mysqli_fetch_assoc($query);
 	$rows_max_played = mysqli_num_rows($query);
 	
+	$query = mysqli_query($db, 'SELECT SUM(miliseconds) AS sum_miliseconds FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');
+	$total_time = mysqli_fetch_assoc($query); 
+	
 	// formattedNavigator
 	$nav			= array();
 
@@ -1308,7 +1224,6 @@ function view3() {
 	if ($cfg['access_play'])
 		$basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;album_id=' . $album_id . '\',evaluateAdd);ajaxRequest(\'play.php?action=updateAddPlay&amp;album_id=' . $album_id . '\',updateAddPlay);"><i id="play_' . $album_id . '" class="fa fa-fw fa-play-circle-o  icon-small"></i>Play album</a>';
 	if ($cfg['access_add']){
-		//ajaxRequest(\'play.php?action=addSelect&amp;album_id=' . $album_id . '\');
 		$basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&album_id=' . $album_id . '\',evaluateAdd);ajaxRequest(\'play.php?action=updateAddPlay&album_id=' . $album_id . '\',updateAddPlay);"><i id="add_' . $album_id . '" class="fa fa-fw  fa-plus-circle  icon-small"></i>Add to playlist</a>';
 		$basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;album_id=' . $album_id . '&amp;insertType=album\',evaluateAdd);ajaxRequest(\'play.php?action=updateAddPlay&amp;album_id=' . $album_id . '\',updateAddPlay);"><i id="insert_' . $album_id . '" class="fa fa-fw fa-indent icon-small"></i>Insert into playlist</a>';
 	}
@@ -1354,7 +1269,7 @@ function view3() {
 	}	
 	elseif (strpos(strtolower($rel_file['relative_file']), strtolower($cfg['misc_tracks_misc_artists_folder'])) !== false) {
 		$album['year'] = '';
-		$album['album_genre'] = '';
+		//$album['album_genre'] = '';
 		$album_info['audio_bits_per_sample'] = '';
 		$album_info['audio_sample_rate'] = '';
 		$album_info['audio_dataformat'] = '';
@@ -1420,10 +1335,25 @@ else
 </div>
 
 <div id="additional-info">
-	<?php if ($album['album_genre'] != '') { ?>
+	<?php /* if ($album['album_genre'] != '') { ?>
 	<div class="line">
 		<div class="add-info-left">Genre:</div>
 		<div class="add-info-right"><a href="<?php echo 'index.php?action=view2&order=artist&sort=asc&&genre_id=' . $album['genre_id'];?>"><?php echo trim($album['album_genre']);?></a></div>
+	</div>
+	<?php }; */ ?>
+	
+	<?php if (count($album_genres) > 0) { ?>
+	<div class="line">
+		<div class="add-info-left">Genre:</div>
+		<div class="add-info-right">
+		<?php 
+		foreach($album_genres as $g_id => $ag) {
+		?>
+		
+		<a href="<?php echo 'index.php?action=view2&order=artist&sort=asc&genre_id=' . $g_id;?>"><?php echo trim($ag);?></a><br>
+		
+		<?php } ?>
+		</div>
 	</div>
 	<?php }; ?>
 	
@@ -1431,6 +1361,13 @@ else
 	<div class="line">
 		<div class="add-info-left">Year:</div>
 		<div class="add-info-right"><a href="<?php echo 'index.php?action=view2&order=artist&sort=asc&year=' . $album['year'];?>"><?php echo trim($album['year']);?></a></div>
+	</div>
+	<?php }; ?>
+	
+	<?php if ($album['year'] != '') { ?>
+	<div class="line">
+		<div class="add-info-left">Total time:</div>
+		<div class="add-info-right"><?php echo formattedTime($total_time['sum_miliseconds']);?></div>
 	</div>
 	<?php }; ?>
 	
@@ -1513,12 +1450,10 @@ else
 				$tags = array_filter(explode($sep,$album_info['comment']));
 				foreach ($tags as $value) { 
 					echo '<span><a href="index.php?action=view2&order=artist&sort=asc&&tag=' . trim($value) . '">' . trim($value) . '</a></span>' ;
-					//echo '<span>' . ($value) . '</span>' ;
 				}
 			}
 			else {
 				echo '<span><a href="index.php?action=view2&order=artist&sort=asc&&tag=' . $album_info['comment'] . '">' . $album_info['comment'] . '</a></span>' ;
-				//echo '<span>' . ($album_info['comment']) . '</span>';
 			}
 		?>
 		</div>
@@ -1551,19 +1486,6 @@ else
 <?php
 	} ?>
 </table>
-
-<!--
-<table cellspacing="0" cellpadding="0" id="playTo" style="display: none;" class="fullscreen">
-<?php
-	for ($i = 0; $i < 10; $i=$i+2) { ?>
-<tr class="<?php echo ($i & 1) ? 'even_info' : 'odd_info'; ?> nowrap" style="height: 35px;">
-	<td class="halfscreen"><?php echo (isset($playTo[$i])) ? $playTo[$i] : '&nbsp;'; ?></td>
-	<td class="halfscreen"><?php echo (isset($playTo[$i+1])) ? $playTo[$i+1] : '&nbsp;'; ?></td>
-</tr>
-<?php
-	} ?>
-</table>
--->
 
 <table cellspacing="0" cellpadding="0" id="advanced" style="display: none;">
 <?php
@@ -1653,19 +1575,8 @@ Other versions of this album:
 
 <div id="playlist">
 <span  class="playlist-title">Tracklist</span>
-<table cellspacing="0" cellpadding="0" class="border">
-<tr class="header">
-	<td class="icon"></td><!-- track menu -->
-	<td class="icon"></td>
-	<td class="trackNumber">#</td>
-	<td>Title</td>
-	<td class="track-list-artist">Artist</td>
-	<td class="textspace track-list-artist"></td>
-	<td><?php if ($featuring) echo'Featuring'; ?></td><!-- optional featuring -->
-	<td ></td>
-	<td align="right" class="time">Time</td>
-	<td class="space right"><div class="space"></div></td>
-</tr>
+
+
 <?php
 	//$query = mysqli_query($db, 'SELECT discs FROM album WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');
 	$discs = 1;
@@ -1675,14 +1586,42 @@ Other versions of this album:
 	$query = mysqli_query($db, 'SELECT max(disc) as discs FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');
 	$album = mysqli_fetch_assoc($query);
 	for ($disc = 1; $disc <= $album['discs']; $disc++) {
+		?>
+		<?php
 		if ($discs > 1) {
 		?>
+		<div>
+			<table cellspacing="0" cellpadding="0">
+				<tr class="multidisc_header">
+					<td class="small_cover_md"><a><img src="image.php?image_id=<?php echo $image_id; ?>" width="100%"></a></td>
+					<td class="icon">
+					<a href="javascript:ajaxRequest('play.php?action=playSelect&amp;album_id=<?php echo $album_id; ?>&amp;disc=<?php echo $disc; ?>',evaluateAdd);"><i id="play_<?php echo $album_id . '_' . $disc; ?>" class="fa fa-fw fa-play-circle-o  icon-small"></i></a>
+					</td>
+					<td class="icon">
+					<a href="javascript:ajaxRequest('play.php?action=addSelect&amp;album_id=<?php echo $album_id; ?>&amp;disc=<?php echo $disc; ?>',evaluateAdd);"><i id="add_<?php echo $album_id . '_' . $disc; ?>" class="fa fa-fw  fa-plus-circle  icon-small"></i></a>
+					</td> 
+					<td class="small_cover_md">Disc #<?php echo $disc;?></td>
+					<td></td>
+				</tr>
+				<tr class="line"><td colspan="5"></td></tr>
+			</table>
+		</div>
+		<?php } ?>
+		<table cellspacing="0" cellpadding="0" class="border">
 			<tr class="header">
-			<td class="icon"></td><!-- track menu -->
-			<td colspan="9">Disc #<?php echo $disc;?></td>
+				<td class="icon"></td><!-- track menu -->
+				<td class="icon"></td>
+				<td class="trackNumber">#</td>
+				<td>Title</td>
+				<td class="track-list-artist">Artist</td>
+				<td class="textspace track-list-artist"></td>
+				<td><?php if ($featuring) echo'Featuring'; ?></td><!-- optional featuring -->
+				<td ></td>
+				<td align="right" class="time">Time</td>
+				<td class="space right"><div class="space"></div></td>
 			</tr>
 		<?php
-		}
+		
 		$query = mysqli_query($db,'SELECT track.track_artist, track.artist, track.title, track.featuring, track.miliseconds, track.track_id, track.number, track.relative_file, f.blacklist_pos as blacklist_pos, f. favorite_pos as favorite_pos
 		FROM track left join 
 			(
@@ -1703,9 +1642,9 @@ Other versions of this album:
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 	
 	<td class="icon">
-	<span id="menu-track<?php echo $i ?>">
-	<div onclick='toggleMenuSub(<?php echo $i ?>);'>
-		<i id="menu-icon<?php echo $i ?>" class="fa fa-bars icon-small"></i>
+	<span id="menu-track<?php echo $i + $disc * 100 ?>">
+	<div onclick='toggleMenuSub(<?php echo $i + $disc * 100 ?>);'>
+		<i id="menu-icon<?php echo $i + $disc * 100 ?>" class="fa fa-bars icon-small"></i>
 	</div>
 	</span>
 	</td>
@@ -1755,7 +1694,7 @@ Other versions of this album:
 	?>
 	
 	
-	<td onclick="toggleStarSub(<?php echo $i ?>,'<?php echo $tid ?>');" class="pl-favorites">
+	<td onclick="toggleStarSub(<?php echo $i + $disc * 100 ?>,'<?php echo $tid ?>');" class="pl-favorites">
 		<span id="blacklist-star-bg<?php echo $tid ?>" class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
 		<i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
 		</span>
@@ -1771,18 +1710,19 @@ Other versions of this album:
 
 <tr>
 <td colspan="10">
-<?php starSubMenu($i, $isFavorite, $isBlacklist, $tid);?>
+<?php starSubMenu($i + $disc * 100, $isFavorite, $isBlacklist, $tid);?>
 </td>
 </tr>
 
 <tr>
 <td colspan="10">
-<?php trackSubMenu($i, $track);?>
+<?php trackSubMenu($i + $disc * 100, $track);?>
 </td>
 </tr>
 <?php
 		}
 		$query = mysqli_query($db, 'SELECT SUM(miliseconds) AS sum_miliseconds FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" AND disc = ' . (int) $disc);
+		//$query = mysqli_query($db, 'SELECT SUM(miliseconds) AS sum_miliseconds FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');
 		$track = mysqli_fetch_assoc($query); ?>
 
 <!--
@@ -1796,12 +1736,16 @@ Other versions of this album:
 </tr>
 -->
 
-<?php if ($disc < $album['discs']) echo '<tr class="line"><td colspan="15"></td></tr>' . "\n";
-	}
+<?php //if ($disc < $album['discs']) echo '<tr class="line"><td colspan="15"></td></tr>' . "\n";
 	echo '</table>';
-?>
-<div><h1><div class="total-time">Total: <?php echo formattedTime($track['sum_miliseconds']); ?></div></h1>
+	?>
+	<div><h1><div class="total-time">Total: <?php echo formattedTime($track['sum_miliseconds']); ?></div></h1>
 </div>
+<br>
+	<?php
+	}
+?>
+
 <script type="text/javascript">
 
 $(".sign-play").click(function(){
@@ -2199,10 +2143,18 @@ function viewRandomAlbum() {
 <div class="albums_container">
 <?php
 	$blacklist = explode(',', $cfg['random_blacklist']);
-	$blacklist = '"' . implode('","', $blacklist) . '"';
+	$filter = '';
+	foreach ($blacklist as $bl){
+		if ($filter == '') {
+				$filter = "genre_id NOT LIKE '%;" . $bl . ";%'";
+		}
+		else {
+			$filter = $filter . " AND genre_id NOT LIKE '%;" . $bl . ";%'";
+		}
+	}
 	$query = mysqli_query($db, 'SELECT artist_alphabetic, album, genre_id, year, month, image_id, album_id
 		FROM album
-		WHERE genre_id = "" OR genre_id NOT IN (' . $blacklist . ')
+		WHERE ' . $filter . '
 		ORDER BY RAND()
 		LIMIT ' . (int) $colombs * 2);
 	while ($album = mysqli_fetch_assoc($query)) {		
@@ -2313,11 +2265,21 @@ function viewRandomTrack() {
 	mysqli_query($db, 'DELETE FROM random WHERE sid = "' .  mysqli_real_escape_string($db,$cfg['sid']) . '"');
 	
 	$i = 0;
+	
 	$blacklist = explode(',', $cfg['random_blacklist']);
-	$blacklist = '"' . implode('","', $blacklist) . '"';
+	$filter = '';
+	foreach ($blacklist as $bl){
+		if ($filter == '') {
+				$filter = "genre_id NOT LIKE '%;" . $bl . ";%'";
+		}
+		else {
+			$filter = $filter . " AND genre_id NOT LIKE '%;" . $bl . ";%'";
+		}
+	}
+	
 	$query = mysqli_query($db, 'SELECT track.artist, title, track_id
 		FROM track, album
-		WHERE (genre_id = "" OR genre_id NOT IN (' . $blacklist . ')) AND
+		WHERE (' . $filter . ') AND
 		audio_dataformat != "" AND
 		video_dataformat = "" AND
 		track.album_id = album.album_id

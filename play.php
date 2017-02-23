@@ -220,6 +220,7 @@ function playSelect() {
 	$track_id = get('track_id');
 	$favorite_id	= get('favorite_id');
 	$random	= get('random');
+	$disc	= get('disc');
 	$data = array();
 	$playResult = 'play_error';
 	
@@ -244,6 +245,7 @@ function playSelect() {
 	$data['track_id'] = $track_id;
 	$data['favorite_id'] = $favorite_id;
 	$data['random'] = $random;
+	$data['disc'] = $disc;
 	ob_start();
 	echo safe_json_encode($data);
 	header('Connection: close');
@@ -268,6 +270,7 @@ function addSelect() {
 	require_once('include/play.inc.php');
 	$album_id = get('album_id');
 	$track_id = get('track_id');
+	$disc = get('disc');
 	//$file_id = get('file_id');
 	$favorite_id = get('favorite_id');
 	$random	= get('random');
@@ -295,6 +298,7 @@ function addSelect() {
 		$data['album_id'] = $album_id;
 	$data['track_id'] = $track_id;
 	//$data['file_id'] = $file_id;
+	$data['disc'] = $disc;
 	$data['favorite_id'] = $favorite_id;
 	$data['random'] = $random;
 	ob_start();
@@ -396,16 +400,17 @@ function insertSelect() {
 function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 	global $cfg, $db;
 	
-	$track_id		= get('track_id');
-	$album_id		= get('album_id');
-	$filepath		= get('filepath');
-	$dirpath		= get('dirpath');
+	$track_id			= get('track_id');
+	$album_id			= get('album_id');
+	$disc					= get('disc');
+	$filepath			= get('filepath');
+	$dirpath			= get('dirpath');
 	$fulldirpath	= get('fulldirpath');
 	$favorite_id	= get('favorite_id');
-	$random			= get('random');
+	$random				= get('random');
 	$insertType		= get('insertType');
-	//$md				= isset(get('md')) ? get('md') : '';
-	$md				= get('md');
+	//$md					= isset(get('md')) ? get('md') : '';
+	$md						= get('md');
 	
 	
 	if ($track_id) {
@@ -442,9 +447,15 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 			ORDER BY track.disc, track.number, track.relative_file';
 		}
 		if ($cfg['group_multidisc'] == false || $md_indicator == '' || $md != 'allDiscs') {
+			$part_of_set = '';
+			if ($disc) {
+				$part_of_set = ' AND disc = ' . $disc . ' ';
+			}
 			$query_str = 'SELECT relative_file 
 			FROM track 
-			WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '" AND track_id NOT IN 
+			WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '"'
+			. $part_of_set . 
+			'AND track_id NOT IN 
 			(SELECT track_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") ';
 			$mds_updateCounter[] = $album_id;
 			if ($insertType == 'album' && $insPos > 0) {
@@ -1457,11 +1468,12 @@ function playlistTrack() {
 		$data['image_id']	= (string) $track['image_id'];
 		$data['album_id']	= (string) $track['album_id'];
 		$data['year']	= ((is_null($track['year'])) ? (string) $track['trackYear'] : (string) $track['year']);
-		$data['genre']	= (string) $track['genre'];
+		$data['genres'] = parseMultiGenre($track['genre']);
+		/* $data['genre']	= (string) $track['genre'];
+		$data['genre_id']	= (string) $track['genre_id']; */
 		$data['audio_dataformat']	= (string) strtoupper($track['audio_dataformat']);
 		$data['audio_bits_per_sample']	= (string) $track['audio_bits_per_sample'];
 		$data['audio_sample_rate']	= (string) $track['audio_sample_rate'];
-		$data['genre_id']	= (string) $track['genre_id'];
 		if ($track['audio_profile'] == 'Lossless compression')
 			$data['audio_profile']	= (string) (floor($track['audio_bitrate']/1000)) . ' kbps';
 		else
@@ -1541,15 +1553,22 @@ function playlistTrack() {
 		$data['by']			= (string) '';
 		$data['image_id']	= (string) '';
 		$data['album_id']	= (string) '';
-		$data['year']	= ($currentsong['Date']);
-		$data['genre']	= (string) ($currentsong['Genre']);
+		$data['year']	= postProcessYear($currentsong['Date']);
+		$data['genre']	= (string) trim($currentsong['Genre']);
+		$query = mysqli_query($db,'SELECT genre, genre_id FROM genre WHERE genre = "' . $data['genre'] . '" LIMIT 1');
+		if (mysqli_num_rows($query) > 0) {
+			$genre = mysqli_fetch_assoc($query);
+			$data['genres'] = parseMultiGenreId($genre['genre_id']);
+		}
+		else {
+			$data['genre_id']	= (string) '-1';	
+		}
 		if ($data['isStream'] == 'true')
 			$data['audio_dataformat']	= (string) 'Stream';
 		else
 			$data['audio_dataformat']	= (string) strtoupper(pathinfo($currentsong['file'], PATHINFO_EXTENSION));
 		$data['audio_bits_per_sample']	= (string) $audio[1];
 		$data['audio_sample_rate']	= (string) $audio[0];
-		$data['genre_id']	= (string) '-1';
 		$data['audio_profile']	= (string) $status['bitrate'] . ' kbps';
 		$data['number']	= (string) ($currentsong['Pos'] + 1 . '. ');
 		$times = explode(":",$status['time']);
