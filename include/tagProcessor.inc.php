@@ -133,17 +133,17 @@ function postProcessTrackNumber($numberString) {
 }
 
 function parseDiscNumber($data) {
-		//support for discnumber in tracknumber, i.e. 101 -> CD#1, 201 -> CD#2
-		if (strlen(parseTrackNumber($data)) > 2) {
-				return substr(parseTrackNumber($data), 0, strlen(parseTrackNumber($data)) - 2);
-				//return parseTrackNumber($data);
-		}
     if (isset($data['comments']['part_of_a_set'][0])) {
         return postProcessDiscNumber($data['comments']['part_of_a_set'][0]);
     }
 		if (isset($data['comments']['discnumber'][0])) {
         return postProcessDiscNumber($data['comments']['discnumber'][0]);
     }
+		//support for discnumber in tracknumber, i.e. 101 -> CD#1, 201 -> CD#2
+		if (strlen(parseTrackNumber($data)) > 2) {
+				return substr(parseTrackNumber($data), 0, strlen(parseTrackNumber($data)) - 2);
+				//return parseTrackNumber($data);
+		}
     
     return '1';
 }
