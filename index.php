@@ -35,6 +35,7 @@
 
 
 require_once('include/initialize.inc.php');
+require_once('include/library.inc.php');
 
 
 
@@ -1583,9 +1584,15 @@ Other versions of this album:
 	$query = mysqli_query($db, 'SELECT disc FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" GROUP BY disc');
 	$discs = mysqli_num_rows($query);
 	
-	$query = mysqli_query($db, 'SELECT max(disc) as discs FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');
+	$query = mysqli_query($db, 'SELECT max(disc) as max_disc FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');
 	$album = mysqli_fetch_assoc($query);
-	for ($disc = 1; $disc <= $album['discs']; $disc++) {
+	$max_disc = $album['max_disc'];
+	
+	$query = mysqli_query($db, 'SELECT min(disc) as min_disc FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');
+	$album = mysqli_fetch_assoc($query);
+	$disc = $album['min_disc'];
+	
+	for ($disc; $disc <= $max_disc; $disc++) {
 		?>
 		<?php
 		if ($discs > 1) {
@@ -2577,8 +2584,31 @@ function viewNewStartPage() {
 	$query = mysqli_query($db, 'SELECT SUM(discs) AS discs FROM album');
 	$album = mysqli_fetch_assoc($query);
 	
+	$query = mysqli_query($db, 'SELECT genre_id FROM album WHERE genre_id LIKE "%;%"');
+	
 	
 	if ($album['discs'] >= 1) {
+		if (mysqli_num_rows($query) == 0) {
+			?>
+			<script type="text/javascript">
+			hideSpinner();
+			</script>
+			<h1 id="dbUpdate">
+			Please wait, preparing database for use with multi-genre.<br>
+			This can take a while.
+			</h1>
+			<?php 
+			@ob_flush();
+			flush();
+			updateGenre();	
+			?>
+			<script type="text/javascript">
+			$('#dbUpdate').hide();
+			</script>
+			<?php 
+			@ob_flush();
+	flush();
+		}
 		if (!isset($cfg['show_suggested'])) $cfg['show_suggested'] = true;
 		if ($cfg['show_suggested'] == true) {
 ?>
@@ -2686,7 +2716,7 @@ if ($cfg['show_last_played'] == true) {
 </div>
 
 <?php
-} //albums > 0
+	} //albums > 0
 else {
 ?>
 <div>

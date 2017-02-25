@@ -163,6 +163,7 @@ function about() {
 	<td></td>
 	<td>
 	<ul style="padding-left: 1em;">
+	<li> added multi-genre support</li>
 	<li> added artist list in library</li>
 	<li> added sort by 'Add time'</li>
 	<li> added file browser</li>

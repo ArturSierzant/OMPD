@@ -1156,7 +1156,7 @@ function fileInfo($track, $getID3 = NULL) {
             video_framerate         = ' . (int) parseVideoFrameRate($metaData) . ',
             error                   = "' . $db->real_escape_string( parseError($metaData)) . '",
             track_id                = "' . $db->real_escape_string( $track['album_id'] . '_' . fileId($file)) . '",
-            disc                    = "' . (int)( parseDiscNumber($metaData)) . '",
+            disc                    = ' . (int)( parseDiscNumber($metaData)) . ',
             number                  = "' . $db->real_escape_string( parseTrackNumber($metaData)) . '",
             genre                   = "' . $db->real_escape_string( parseGenre($metaData)) . '",
             title                   = "' . $db->real_escape_string( parseTrackTitle($metaData)) . '",
@@ -1927,60 +1927,4 @@ function logImageError() {
 	$flag = 10; // image error
 }
 
-
-
-//  +------------------------------------------------------------------------+
-//  | Update genre table and genre in album table                            |
-//  +------------------------------------------------------------------------+
-function updateGenre() {
-	global $cfg, $db;
-	$i = 1;
-	mysqli_query($db,'TRUNCATE genre');
-	$query = mysqli_query($db,'SELECT genre FROM track WHERE genre<>"" GROUP BY genre ORDER BY genre');
-	$genre_count = mysqli_num_rows($query);
-	if ($genre_count > 0) {
-		while ($track = mysqli_fetch_assoc($query)) {
-			$genres = explode('ompd_genre_ompd',$track['genre']);
-			foreach ($genres as $g){
-				$q = mysqli_query($db,'SELECT genre_id FROM genre WHERE genre="' . $g . '"');
-				if (mysqli_num_rows($q) == 0) {
-					mysqli_query($db,'INSERT INTO genre (genre_id, genre, updated)
-										VALUES ("' . $i . '",
-												"' . $db->real_escape_string($g) . '",
-												1)');
-					++$i;
-				}
-			}
-		}
-	}
-	$res = mysqli_query($db,"UPDATE album SET genre_id = ';'"); 
-	
-	$query = mysqli_query($db,'SELECT DISTINCT genre, album_id FROM track');
-	while ($album = mysqli_fetch_assoc($query)) { 
-			$genres = explode('ompd_genre_ompd',$album['genre']);
-			foreach ($genres as $g){
-				//get genre_id for actual genre from multigenre
-				$q1 = mysqli_query($db,'SELECT genre_id FROM genre WHERE genre = "' . $g . '"');
-				$a1 = mysqli_fetch_assoc($q1);
-				
-				//get all genre_ids from album
-				$q2 = mysqli_query($db,'SELECT genre_id FROM album WHERE album_id = "' . $album['album_id'] . '"');
-				$a2 = mysqli_fetch_assoc($q2);
-				$album_genre_ids = $a2['genre_id'];
-				
-				//check if genre_id is already added to album
-				if ($album_genre_ids == ';') { //no genre_id yet -> add first now
-					$album_genre_ids = ';' . $a1['genre_id'] . ';';
-				}
-				elseif (strpos($album_genre_ids,';' . $a1['genre_id'] . ';') === false) {
-						//genre_id not added to album yet -> add it now
-						$album_genre_ids = $album_genre_ids . $a1['genre_id'] . ';';
-				}
-				
-				$res = mysqli_query($db,"UPDATE album SET 
-							genre_id = '" . $db->real_escape_string($album_genre_ids) . "'
-							WHERE album_id = '". $album['album_id'] ."';"); 
-			}
-	}	
-}
 ?>

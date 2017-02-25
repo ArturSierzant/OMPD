@@ -228,7 +228,7 @@ for ($i=0; $i < $listlength; $i++) {
 	$playlistTT = $playlistTT + (int) $table_track['miliseconds'];
 	$track_id[] = (string) $table_track['track_id'];
 	
-	$album_genres = parseMultiGenreId($table_track['genre_id']);
+	$album_genres = parseMultiGenre($table_track['genre']);
 	
 	/* $genres = explode(';',$table_track['genre_id']);
 	$where = '';
