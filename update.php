@@ -372,9 +372,13 @@ function update($dir_to_update = '') {
 		cliLog("going into fileInfoLoop: " . $rel_file);
 		fileInfoLoop($rel_file);
 		
-		updateGenre();
-		
 		mysqli_query($db,'UPDATE update_progress SET	file_info = "<div class=\'out\'><div class=\'in\' style=\'width: 200px\'></div></div> 100%"');
+		
+		sleep(1);
+		
+		mysqli_query($db,'UPDATE update_progress SET	file_info = "<i class=\"fa fa-cog larger icon-selected fa-spin\"></i> Updating genre list..."');
+		
+		updateGenre();
 		
 		sleep(1);
 		

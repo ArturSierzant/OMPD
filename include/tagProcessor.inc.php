@@ -140,9 +140,9 @@ function parseDiscNumber($data) {
         return postProcessDiscNumber($data['comments']['discnumber'][0]);
     }
 		//support for discnumber in tracknumber, i.e. 101 -> CD#1, 201 -> CD#2
-		if (strlen(parseTrackNumber($data)) > 2) {
+		$track_number = parseTrackNumber($data);
+		if (strlen($track_number) > 2 && $track_number != 'NULL' ) {
 				return substr(parseTrackNumber($data), 0, strlen(parseTrackNumber($data)) - 2);
-				//return parseTrackNumber($data);
 		}
     
     return '1';

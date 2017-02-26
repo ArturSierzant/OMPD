@@ -212,6 +212,7 @@ function track_artist() {
 		<td class="track-list-artist">Track artist&nbsp;</td>
 		<td>Title&nbsp;</td>
 		<td>Album&nbsp;</td>
+		<td class="time pl-genre">Genre&nbsp;</td>
 		<td></td>
 		<td align="right" class="time">Time</td>
 		<td class="space right"></td>
@@ -230,7 +231,7 @@ function track_artist() {
 	ORDER BY track.artist, album.album, track.title');
 	 */
 	$query = mysqli_query($db,'SELECT * FROM
-	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, album.image_id, album.album, album.artist
+	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, album.image_id, album.album, album.artist
 	FROM track
 	INNER JOIN album ON track.album_id = album.album_id
 	WHERE track.artist LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
@@ -288,6 +289,18 @@ function track_artist() {
 	if ($track['blacklist_id']) $isBlacklist = true;
 	$tid = $track['tid'];
 	?>
+	
+	<td class="time pl-genre"><?php 
+		$album_genres = parseMultiGenre($track['genre']);
+		if (count($album_genres) > 0) { 
+			foreach($album_genres as $g_id => $ag) {
+		?>
+			<a href="index.php?action=view2&order=artist&sort=asc&genre_id=<?php echo $g_id; ?>"><?php echo $ag; ?></a><br>
+		<?php 
+			}
+		}
+	?>
+	</td>
 	
 	<td onclick="toggleStarSub(<?php echo $i ?>,'<?php echo $tid ?>');" class="pl-favorites">
 		<span id="blacklist-star-bg<?php echo $tid ?>" class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
@@ -415,6 +428,7 @@ function track_title() {
 	<td class="track-list-artist">Track artist&nbsp;</td>
 	<td>Title&nbsp;</td>
 	<td>Album&nbsp;</td>
+	<td class="time pl-genre">Genre&nbsp;</td>
 	<td></td>
 	<td align="right" class="time">Time</td>
 	<td class="space right"></td>
@@ -434,7 +448,7 @@ function track_title() {
 	 */
 	 
 	 $query = mysqli_query($db,'SELECT * FROM 
-	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, album.image_id, album.album, album.artist 
+	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, album.image_id, album.album, album.artist 
 	FROM track
 	INNER JOIN album ON track.album_id = album.album_id
 	WHERE track.title LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%") as a
@@ -478,6 +492,18 @@ function track_title() {
 	if ($track['blacklist_id']) $isBlacklist = true;
 	$tid = $track['tid'];
 	?>
+	
+	<td class="time pl-genre"><?php 
+		$album_genres = parseMultiGenre($track['genre']);
+		if (count($album_genres) > 0) { 
+			foreach($album_genres as $g_id => $ag) {
+		?>
+			<a href="index.php?action=view2&order=artist&sort=asc&genre_id=<?php echo $g_id; ?>"><?php echo $ag; ?></a><br>
+		<?php 
+			}
+		}
+	?>
+	</td>
 	
 	<td onclick="toggleStarSub(<?php echo $i ?>,'<?php echo $tid ?>');" class="pl-favorites">
 		<span id="blacklist-star-bg<?php echo $tid ?>" class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
