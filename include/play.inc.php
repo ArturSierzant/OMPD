@@ -479,6 +479,7 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 		if ($disc) {
 			$part_of_set = ' AND disc = ' . $disc . ' ';
 		}
+		
 		$query = mysqli_query($db,'SELECT artist, title, relative_file, miliseconds, audio_bitrate, track_id FROM track WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '"' . $part_of_set . ' ORDER BY ' . $orderBy);
 	}
 	elseif ($favorite_id) {
@@ -530,7 +531,7 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 			}
 		}
 		
-		mpd('addid "' . $url . '" ' . $insPos, $player_host, $player_port);
+		mpd('addid "' . mpdEscapeChar($url) . '" ' . $insPos, $player_host, $player_port);
 		return;
 	}
 	elseif ($dirpath) {
@@ -566,7 +567,7 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 		
 		$url = NJB_HOME_URL . 'stream.php?action=streamTo&stream_id=' . $stream_id . '&track_id=' . $track['track_id'] . '&ext=.' . $stream_extension;
 		
-		mpd('addid "' . $url . '" ' . $insPos, $player_host, $player_port);
+		mpd('addid "' . mpdEscapeChar($url) . '" ' . $insPos, $player_host, $player_port);
 		
 	}
 	

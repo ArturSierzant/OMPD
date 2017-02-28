@@ -440,22 +440,33 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 					$select_md = ' track.album_id IN (' . $mds . ') ';
 				}
 			}
-			$query_str = 'SELECT relative_file 
+			//check if multidiscs have different values for 'disc' to keep wright track order in playlist (prior update procedure always put '1' as 'disc', no mater what value of 'part_of_set'/'discnumber' tag was)
+			$query = mysqli_query($db,'SELECT disc 
+			FROM track LEFT JOIN album ON track.album_id = album.album_id 
+			WHERE ' . $select_md . ' GROUP BY disc');
+			$multidiscs_count = mysqli_num_rows($query);
+			
+			$order_by = 'track.relative_file, track.disc, track.number';
+			if ($multidiscs_count > 1) {
+				$order_by = 'track.disc, track.number, track.relative_file';
+			}
+			
+			$query_str = 'SELECT relative_file, track_id 
 			FROM track LEFT JOIN album ON track.album_id = album.album_id 
 			WHERE ' . $select_md . ' AND track.track_id NOT IN 
 			(SELECT track_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") 
-			ORDER BY track.disc, track.number, track.relative_file';
+			ORDER BY ' . $order_by;
 		}
 		if ($cfg['group_multidisc'] == false || $md_indicator == '' || $md != 'allDiscs') {
 			$part_of_set = '';
 			if ($disc) {
 				$part_of_set = ' AND disc = ' . $disc . ' ';
 			}
-			$query_str = 'SELECT relative_file 
+			$query_str = 'SELECT relative_file, track_id 
 			FROM track 
 			WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '"'
 			. $part_of_set . 
-			'AND track_id NOT IN 
+			' AND track_id NOT IN 
 			(SELECT track_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") ';
 			$mds_updateCounter[] = $album_id;
 			if ($insertType == 'album' && $insPos > 0) {
@@ -465,7 +476,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 				$query_str = $query_str . ' ORDER BY disc, number, relative_file';
 			}
 		}
-			
+
 		$query = mysqli_query($db,$query_str);
 	}
 	elseif ($favorite_id) {
@@ -523,7 +534,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 	if ($filepath){
 		$filepath = str_replace('ompd_ampersand_ompd','&',$filepath);
 		//$filepath = str_replace('"','\"',$filepath);
-		$mpdCommand = mpd('addid "' . ($filepath) . '" ' . $insPos);
+		$mpdCommand = mpd('addid "' . mpdEscapeChar($filepath) . '" ' . $insPos);
 		if ($mpdCommand == 'ACK_ERROR_NO_EXIST') {
 			//file not found in MPD database - add stream
 			playTo($insPos);
@@ -538,7 +549,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 	}
 	elseif ($dirpath){
 		$dirpath = str_replace('ompd_ampersand_ompd','&',$dirpath);
-		$mpdCommand = mpd('add "' . $dirpath . '"');
+		$mpdCommand = mpd('add "' . mpdEscapeChar($dirpath) . '"');
 		if ($mpdCommand == 'ACK_ERROR_NO_EXIST') {
 			//dir not found in MPD database - add stream
 			$fulldirpath = str_replace('ompd_ampersand_ompd','&',$fulldirpath);
@@ -555,35 +566,19 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 	}
 	else {
 		while ($track = mysqli_fetch_assoc($query)) {
-			if ($cfg['player_type'] == NJB_HTTPQ) {
-				$file = $cfg['media_share'] . $track['relative_file'];
-				$file = str_replace('/', '\\', $file);
-				httpq('playfile', 'file=' . rawurlencode($file));
-				if ($first && $mode == 'play') {
-					httpq('setplaylistpos', 'index=' . $index);
-					httpq('play');
-				}
-			}
-			elseif ($cfg['player_type'] == NJB_VLC) {
-				$file = $cfg['media_share'] . $track['relative_file'];
-				$file = addslashes($file);
-				$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
-				vlc('in_enqueue&input=' . rawurlencode($file));
-				if ($first && $mode == 'play')
-					vlc('pl_play');
-			}
-			elseif ($cfg['player_type'] == NJB_MPD) {
+			
 				$file = $track['relative_file'];
 				$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
-				$mpdCommand = mpd('addid "' . $file . '" ' . $insPos);
+				$mpdCommand = mpd('addid "' . mpdEscapeChar($file) . '" ' . $insPos);
 				//mpd('addid "' . $file . '" ' . $insPos);
 				if ($mpdCommand == 'ACK_ERROR_NO_EXIST') {
 					//file not found in MPD database - add stream
-					playTo($insPos);
-					if ($playAfterInsert) {mpd('play ' . $insPos);}
+					playTo($insPos, $track['track_id']);
+					
+					/* if ($playAfterInsert) {mpd('play ' . $insPos);}
 					if ($first && $mode == 'play')
 						mpd('play ' . $index);
-					break;
+					break; */
 				}
 				if ($playAfterInsert) {mpd('play ' . $insPos);}
 				if ($first && $mode == 'play')
@@ -591,7 +586,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 			}
 			$n++;
 			$first = false;
-		}
+		
 	}
 	
 	if ($cfg['play_queue'] && $mode == 'play' && $n > $cfg['play_queue_limit']) {		
@@ -671,7 +666,7 @@ function addUrl($mode = 'play') {
 	
 	for ($i = 0; $i < count($file); $i++) {
 		$file[$i] = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file[$i]);
-		mpd('add "' . $file[$i] . '"');
+		mpd('add "' . mpdEscapeChar($file[$i]) . '"');
 	}
 	
 	/* 
@@ -730,7 +725,7 @@ function playStream($favorite_id) {
 		elseif ($cfg['player_type'] == NJB_MPD) {
 			
 			$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
-			mpd('add ' . $favoriteitem['stream_url']);
+			mpd('add ' . mpdEscapeChar($favoriteitem['stream_url']));
 			if ($first)
 				mpd('play');
 		}
@@ -762,7 +757,7 @@ function playStreamDirect() {
 	
 	$favoriteitem = mysqli_fetch_assoc($query);
 	//mpd('add ' . $favoriteitem['stream_url']);
-	mpd('addid "' . $favoriteitem['stream_url'] . '" ' . $insPos);
+	mpd('addid "' . mpdEscapeChar($favoriteitem['stream_url']) . '" ' . $insPos);
 	mpd('play ' . $insPos);
 	
 	$data['album_id'] = $position;
@@ -790,7 +785,7 @@ function addStreamDirect() {
 	$query = mysqli_query($db,'SELECT stream_url FROM favoriteitem WHERE favorite_id = ' . (int) $favorite_id . ' AND position = ' . (int) $position . ' LIMIT 1');
 	
 	$favoriteitem = mysqli_fetch_assoc($query);
-	mpd('add ' . $favoriteitem['stream_url']);
+	mpd('add ' . mpdEscapeChar($favoriteitem['stream_url']));
 	
 	$data['album_id'] = $position;
 	$data['addResult'] = 'add_OK'; 

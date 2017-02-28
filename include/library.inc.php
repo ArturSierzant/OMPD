@@ -1208,6 +1208,7 @@ function myHTMLencode($str1){
 
 function myUrlencode($str1){
 	
+	$str1 = str_replace('\\','\\\\',$str1);
 	$str1 = str_replace('+','ompd_plus_ompd',$str1);
 	$str1 = str_replace('%26','ompd_ampersand_ompd',urlencode($str1));
 	$str1 = str_replace('%22','%5C%22',$str1);
@@ -1245,6 +1246,21 @@ function myDecode($str1){
 	$str1 = str_replace('\"','"',$str1);
 	$str1 = str_replace("\'","'",$str1);
 	$str1 = str_replace("ompd_plus_ompd","+",$str1);
+	
+	return $str1;
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Escape ", \ for use in MPD command                                     |
+//  +------------------------------------------------------------------------+
+
+function mpdEscapeChar($str1){
+	
+	$str1 = str_replace('\\','\\\\',$str1);
+	$str1 = str_replace('"','\"',$str1);
 	
 	return $str1;
 }
