@@ -34,8 +34,8 @@ error_reporting(E_ALL ^ E_NOTICE);
 
 define('NJB_START_TIME', microtime(true));
 
-define('NJB_VERSION', '1.02');
-define('NJB_DATABASE_VERSION', 41);
+define('NJB_VERSION', '1.03');
+define('NJB_DATABASE_VERSION', 42);
 define('NJB_IMAGE_SIZE', 300);
 define('NJB_IMAGE_QUALITY', 85);
 define('NJB_WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');

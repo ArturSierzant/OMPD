@@ -1,7 +1,7 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
-//  | http://www.ompd.pl                                             		 |
+//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                           |
+//  | http://www.ompd.pl                                             		     |
 //  |                                                                        |
 //  |                                                                        |
 //  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
@@ -207,6 +207,7 @@ function mediaStatistics() {
 	authenticate('access_statistics');
 	@ob_flush();
 	flush();
+	
 	$query = mysqli_query($db,'SELECT artist FROM album GROUP BY artist');
 	$artists = mysqli_affected_rows($db);
 	
@@ -651,6 +652,7 @@ for ($i=0; $i<$histogram_count; $i++)
 	} ?>
 </table>
 <?php
+	$cfg['items_count'] = 0; //to avoid pagination on statistic page
 	require_once('include/footer.inc.php');
 }
 

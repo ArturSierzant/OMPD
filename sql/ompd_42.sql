@@ -26,21 +26,21 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 
 CREATE TABLE IF NOT EXISTS `album` (
-  `artist` varchar(255) NOT NULL DEFAULT '',
-  `artist_alphabetic` varchar(255) NOT NULL DEFAULT '',
-  `album` varchar(255) NOT NULL DEFAULT '',
+  `artist` varchar(333) NOT NULL DEFAULT '',
+  `artist_alphabetic` varchar(333) NOT NULL DEFAULT '',
+  `album` varchar(333) NOT NULL DEFAULT '',
   `year` smallint(4) unsigned DEFAULT NULL,
   `month` tinyint(2) unsigned DEFAULT NULL,
-  `genre_id` varchar(10) NOT NULL DEFAULT '',
+  `genre_id` varchar(255) NOT NULL DEFAULT '',
   `album_add_time` int(10) unsigned NOT NULL DEFAULT '0',
   `discs` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `image_id` varchar(30) NOT NULL DEFAULT '',
   `album_id` varchar(11) NOT NULL DEFAULT '',
   `updated` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `album_dr` tinyint(3) unsigned  DEFAULT NULL,
-  KEY `artist` (`artist`),
-  KEY `artist_alphabetic` (`artist_alphabetic`),
-  KEY `album` (`album`),
+  KEY `artist` (`artist`(333)),
+  KEY `artist_alphabetic` (`artist_alphabetic`(333)),
+  KEY `album` (`album`(333)),
   KEY `year` (`year`,`month`),
   KEY `genre_id` (`genre_id`),
   KEY `album_add_time` (`album_add_time`),
@@ -296,8 +296,8 @@ CREATE TABLE IF NOT EXISTS `share_stream` (
 --
 
 CREATE TABLE IF NOT EXISTS `track` (
-  `artist` varchar(255) NOT NULL DEFAULT '',
-  `title` varchar(255) NOT NULL DEFAULT '',
+  `artist` varchar(333) NOT NULL DEFAULT '',
+  `title` varchar(333) NOT NULL DEFAULT '',
   `featuring` varchar(255) NOT NULL DEFAULT '',
   `relative_file` text NOT NULL DEFAULT '',
   `mime_type` varchar(64) NOT NULL DEFAULT '',
@@ -326,12 +326,12 @@ CREATE TABLE IF NOT EXISTS `track` (
   `transcoded` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `updated` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `genre` text NULL,
-  `track_artist` varchar(255) NULL,
+  `track_artist` varchar(333) NULL,
   `comment` text NULL,
   `year` smallint(4) unsigned DEFAULT NULL,
   `dr` tinyint(3) unsigned  DEFAULT NULL,
-  KEY `artist` (`artist`),
-  KEY `title` (`title`),
+  KEY `artist` (`artist`(333)),
+  KEY `title` (`title`(333)),
   KEY `relative_file` (`relative_file`(255)),
   KEY `audio_dataformat` (`audio_dataformat`),
   KEY `video_dataformat` (`video_dataformat`),
@@ -668,7 +668,7 @@ INSERT INTO `user` VALUES ('anonymous', 'adf8efe68157cf37503f86d602bec6d593750c3
 -- Default server
 --
 
-INSERT INTO `server` VALUES ('database_version', '41');
+INSERT INTO `server` VALUES ('database_version', '42');
 INSERT INTO `server` VALUES ('escape_char_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('getid3_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('image_quality', '0');

@@ -1,7 +1,7 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
-//  | http://www.ompd.pl                                             		 |
+//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                           |
+//  | http://www.ompd.pl                                             		     |
 //  |                                                                        |
 //  |                                                                        |
 //  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
@@ -149,6 +149,11 @@ function importDatabase() {
 function updateDatabase() {
 	global $cfg, $db;
 	
+	echo ('Updating database. Please wait - this can take up to several minutes...');
+	
+	@ob_flush();
+	flush();
+	
 	$query = @mysqli_query($db, 'SHOW TABLES') or message(__FILE__, __LINE__, 'error', '[b]Failed to SHOW TABLES[/b]');
 	if (mysqli_fetch_row($query) == false) {
 		importDatabase();
@@ -165,7 +170,7 @@ function updateDatabase() {
 		
 		loadServerSettings();
 		message(__FILE__, __LINE__, 'ok', '[b]Incremental database upgrade successfuly on ' . $cfg['mysqli_db'] . '@' . $cfg['mysqli_host'] . '[/b][br]'
-			. 'It is advisable to update de database now.'
+			. 'It is advisable to update the database now.'
 			. '[list][*]Login with admin rights[*]Than select menu Config > Update[/list]');
 	}
 }

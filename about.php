@@ -84,7 +84,7 @@ function about() {
 <tr class="header header_bigger">
 	<td class="space"></td>
 	<td colspan="3" style="white-space: normal;">
-	O!MPD&nbsp;<?php echo html(NJB_VERSION); ?>,&nbsp;Copyright&nbsp;&copy;&nbsp;2015-2016&nbsp;Artur&nbsp;Sier&#380;ant<br>
+	O!MPD&nbsp;<?php echo html(NJB_VERSION); ?>,&nbsp;Copyright&nbsp;&copy;&nbsp;2015-2017&nbsp;Artur&nbsp;Sier&#380;ant<br>
 	
 	</td>
 	<td class="space"></td>

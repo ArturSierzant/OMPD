@@ -1063,7 +1063,7 @@ function fileInfoLoop($rel_file = '') {
             LIMIT " . $curFilesCounter . "," . $batchSize . ";";
 		if ($rel_file != ''){
 			$query = "
-            SELECT relative_file, filesize, filemtime, album_id
+            SELECT relative_file, filesize, filemtime, album_id, track_id
             FROM track
             WHERE updated
 			AND relative_file LIKE '" . mysqli_real_escape_string($db,$rel_file) . "%'
@@ -1137,7 +1137,15 @@ function fileInfo($track, $getID3 = NULL) {
 
         $metaData = $getID3->analyze($file);
         getid3_lib::CopyTagsToComments($metaData);
-
+				
+				//prevent changing track_id if already set to avoid deleting from favorites
+				if (strpos($track['track_id'],'_') === false) {
+					$track_id = $db->real_escape_string($track['album_id'] . '_' . fileId($file));
+				}
+				else {
+					$track_id = $track['track_id'];
+				}
+				
         // TODO: does it make sense to populate artist and track_artist with the same value?
         $query = 'UPDATE track SET
             mime_type               = "' . $db->real_escape_string( parseMimeType($metaData)) . '",
@@ -1159,7 +1167,7 @@ function fileInfo($track, $getID3 = NULL) {
             video_resolution_y      = ' . (int) parseVideoResolutionY($metaData) . ',
             video_framerate         = ' . (int) parseVideoFrameRate($metaData) . ',
             error                   = "' . $db->real_escape_string(parseError($metaData)) . '",
-            track_id                = "' . $db->real_escape_string($track['album_id'] . '_' . fileId($file)) . '",
+            track_id                = "' . $track_id . '",
             disc                    = ' . (int)(parseDiscNumber($metaData)) . ',
             number                  = ' . $db->real_escape_string(parseTrackNumber($metaData)) . ',
             genre                   = "' . $db->real_escape_string(parseGenre($metaData)) . '",
