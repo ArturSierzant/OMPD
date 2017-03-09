@@ -588,6 +588,13 @@ td.menu_top_netjukebox			{width: 112px; letter-spacing: 1px; font-size: 1.154em;
 table.menu_middle a:link		{color: white; text-decoration: none;}
 table.menu_middle a:visited		{color: white; text-decoration: none;}
 table.menu_middle a:hover		{color: white; text-decoration: none;}
+
+table.menu_middle p span {
+	display: inline-block;
+	line-height: 1.1em;
+}
+
+
 table.menu_middle {
 	width: 100%;
 	color: white;
