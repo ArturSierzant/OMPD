@@ -603,9 +603,11 @@ table.menu_middle {
 	background-color: #88b131;
 	height: 1.923em;
 	/* padding-top: 3.846em; */
+}
 
-
-
+table.menu_middle p span {
+	display: inline-block;
+	line-height: 1.1em;
 }
 
 
