@@ -588,6 +588,18 @@ td.menu_top_netjukebox			{width: 112px; letter-spacing: 1px; font-size: 1.154em;
 table.menu_middle a:link		{color: white; text-decoration: none;}
 table.menu_middle a:visited		{color: white; text-decoration: none;}
 table.menu_middle a:hover		{color: white; text-decoration: none;}
+table.menu_middle p {
+	/* Create a hanging indent. If -moz-padding-(start/end) or
+	 * -webkit-padding-(start/end) is supported, this should work with LTR
+	 * or RTL text. If neither is supported, this will work for LTR, but not
+	 * for RTL. */
+	padding-left: 1.5em;
+	-moz-padding-start: 1.5em;
+	-moz-padding-end: 0;
+	-webkit-padding-start: 1.5em;
+	-webkit-padding-end: 0;
+	text-indent: -1.5em;
+}
 table.menu_middle {
 	width: 100%;
 	color: white;
