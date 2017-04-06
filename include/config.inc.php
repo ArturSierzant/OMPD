@@ -623,12 +623,16 @@ $cfg['album_copy']                  = true; //available when $cfg['external_stor
 //  | $cfg['image_share_mode'] = 'mode';                                     |
 //  | new: New added album.                                                  |
 //  | played: Recently played or streamed album.                             |
+//  |                                                                        |
+//  | $cfg['image_front']                                                    |
+//  | Semicolon seperated list of picture file names (jpg or png) that       |
+//  | will be used for cover                                                 |
 //  +------------------------------------------------------------------------+
 
 $cfg['image_read_embedded']         = true;
 $cfg['image_share']                 = true;
 $cfg['image_share_mode']            = 'played';
-$cfg['image_front']                 = 'folder'; // .jpg and .png
+$cfg['image_front']                 = 'folder;cover;front;Folder;Cover;Front'; // .jpg and .png
 $cfg['image_back']                  = 'cd_back';  // .jpg and .png
 $cfg['image_front_cover_treshold']  = 90000;      // 300 * 300
 

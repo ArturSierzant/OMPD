@@ -875,16 +875,31 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	
 	$dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir);
 	
-	cliLog("fileStructure ImageUpdate d: " . var_export(is_file($dir . $cfg['image_front'] . '.jpg'),true));
+	$image_front_arr = explode(";", $cfg['image_front']);
+	$relative_dir = substr($dir, strlen($cfg['media_dir']));
+	$is_image_set = false;
 	
-	if		(is_file($dir . $cfg['image_front'] . '.jpg')) { $image = $dir . $cfg['image_front'] . '.jpg'; $flag = 3;} // Stored image
-	elseif	(is_file($dir . $cfg['image_front'] . '.png')) { $image = $dir . $cfg['image_front'] . '.png'; $flag = 3; } // Stored image
-	elseif ((strpos(strtolower($dir), strtolower($cfg['misc_tracks_folder'])) !== false) || (strpos(strtolower($dir), strtolower($cfg['misc_tracks_misc_artists_folder'])) !== false)){
+	foreach ($image_front_arr as $img)  {
+		if (is_file($dir . $img . '.jpg')) { 
+			$image = $dir . $img . '.jpg'; 
+			$image_front = $relative_dir . $img . '.jpg';
+			$is_image_set = true;
+			$flag = 3;
+		} // Stored image
+		elseif (is_file($dir . $img . '.png')) { 
+			$image = $dir . $img . '.png'; 
+			$image_front = $relative_dir . $img . '.png';
+			$is_image_set = true;
+			$flag = 3; 
+		} // Stored image
+	}
+	
+	if (((strpos(strtolower($dir), strtolower($cfg['misc_tracks_folder'])) !== false) || (strpos(strtolower($dir), strtolower($cfg['misc_tracks_misc_artists_folder'])) !== false)) && $flag == 0){
 		$image = NJB_HOME_DIR . 'image/misc_image.jpg';
 		$flag = 3; // Stored image
 		$misc_tracks = true;
 	}
-	elseif	($cfg['image_read_embedded']) {
+	elseif	($cfg['image_read_embedded'] && $flag == 0) {
 		
 		cliLog("fileStructure ImageUpdateEmbeded: " . $file[0]);
 		$file_d = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file[0]);
@@ -894,8 +909,8 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 			isset($ThisFileInfo['comments']['picture'][0]['image_mime']) &&
 			isset($ThisFileInfo['comments']['picture'][0]['data']) &&
 			($ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/jpeg' || $ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/png')) {
-				if ($ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/jpeg')	$image = NJB_HOME_DIR . 'tmp/' . $cfg['image_front'] . '.jpg';
-				if ($ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/png')	$image = NJB_HOME_DIR . 'tmp/' . $cfg['image_front'] . '.png';
+				if ($ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/jpeg')	$image = NJB_HOME_DIR . 'tmp/' . $image_front_arr[0] . '.jpg';
+				if ($ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/png')	$image = NJB_HOME_DIR . 'tmp/' . $image_front_arr[0] . '.png';
 				if (file_put_contents($image, $ThisFileInfo['comments']['picture'][0]['data']) === false) 
 					message(__FILE__, __LINE__, 'error', '[b]Failed to write image to:[/b][br]' . $image .'[br] file: ' . $file[0] .'[br] data: [br]Check write permissions.');
 				$flag = 0; // No image
@@ -905,20 +920,19 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 		unset($getID3);
 		unset($ThisFileInfo);
 	}
-	$relative_dir = substr($dir, strlen($cfg['media_dir']));
 	
-	if		(is_file($dir . $cfg['image_front'] . '.jpg')) 	{
-		$image_front = $relative_dir . $cfg['image_front'] . '.jpg';
+	if (!$is_image_set) {
+		if ($misc_tracks){
+			$image_front = $image;
+		}
+		else {
+			$image_front = '';
+		}	
 	}
-	elseif	(is_file($dir . $cfg['image_front'] . '.png'))	{
-		$image_front = $relative_dir . $cfg['image_front'] . '.png';
-	}
-	elseif ($misc_tracks){
-		$image_front = $image;
-	}
-	else {
-		$image_front = '';
-	}
+	
+	cliLog("fileStructure ImageUpdate image: " . $image);
+	cliLog("fileStructure ImageUpdate image_front: " . $image_front);
+	
 	
 	if		(is_file($dir . $cfg['image_back'] . '.jpg'))	$image_back = $relative_dir . $cfg['image_back'] . '.jpg';
 	elseif	(is_file($dir . $cfg['image_back'] . '.png'))	$image_back = $relative_dir . $cfg['image_back'] . '.png';
