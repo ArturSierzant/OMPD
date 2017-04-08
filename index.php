@@ -1252,6 +1252,10 @@ function view3() {
 		$dir_path = rawurlencode(dirname($cfg['media_dir'] . $rel_file['relative_file']));
 		$basic[] = '<a href="browser.php?dir=' . $dir_path . '"><i class="fa fa-fw  fa-folder-open  icon-small"></i>Browse...</a>';
 	}
+	if ($cfg['access_admin']){
+		$dir_path = rawurlencode(dirname($cfg['media_dir'] . $rel_file['relative_file']));
+		$basic[] = '<a href="update.php?action=update&amp;dir_to_update=' . $dir_path . '/&amp;sign=' . $cfg['sign'] . '"><i class="fa fa-fw fa-refresh fa-fw icon-small"></i>Update album</a>';
+	}
 	if ($cfg['access_admin'] && $cfg['album_share_stream'])
 		$basic[] = '<a href="stream.php?action=shareAlbum&amp;album_id='. $album_id . '&amp;sign=' . $cfg['sign'] . '"><i class="fa fa-fw  fa-share-square-o  icon-small"></i>Share stream</a>';
 	if ($cfg['access_admin'] && $cfg['album_share_download'])

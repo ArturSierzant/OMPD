@@ -496,7 +496,7 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 			AND favorite_id = "' . mysqli_real_escape_string($db,$favorite_id) . '"
 			ORDER BY position');
 	}
-	elseif ($random == 'database') {
+	/* elseif ($random == 'database') {
 		$query = mysqli_query($db,'SELECT artist, title, relative_file, miliseconds, audio_bitrate, track.track_id
 			FROM track, random
 			WHERE random.sid	= "' . mysqli_real_escape_string($db,$cfg['sid']) . '" AND
@@ -504,6 +504,7 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 			ORDER BY position');
 	}
 	elseif ($random == 'new') {
+		//$query = mysqli_query($db,'SELECT artist, title, relative_file, miliseconds, audio_bitrate, track_id FROM track WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
 		$blacklist = explode(',', $cfg['random_blacklist']);
 		$blacklist = '"' . implode('","', $blacklist) . '"';
 		$query = mysqli_query($db,'SELECT track.artist, title, relative_file, miliseconds, audio_bitrate, track_id
@@ -513,8 +514,8 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 			video_dataformat = "" AND
 			track.album_id = album.album_id
 			ORDER BY RAND()
-			LIMIT 30');
-	}
+			LIMIT 1');
+	} */
 	
 	elseif ($filepath) {
 		$filepath = str_replace('ompd_ampersand_ompd','&',$filepath);

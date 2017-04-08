@@ -440,7 +440,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 					$select_md = ' track.album_id IN (' . $mds . ') ';
 				}
 			}
-			//check if multidiscs have different values for 'disc' to keep wright track order in playlist (prior update procedure always put '1' as 'disc', no mater what value of 'part_of_set'/'discnumber' tag was)
+			//check if multidiscs have different values for 'disc' to keep right track order in playlist (prior update procedure always put '1' as 'disc', no mater what value of 'part_of_set'/'discnumber' tag was)
 			$query = mysqli_query($db,'SELECT disc 
 			FROM track LEFT JOIN album ON track.album_id = album.album_id 
 			WHERE ' . $select_md . ' GROUP BY disc');
@@ -485,7 +485,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 			playStream($favorite_id);
 		}
 		
-		$query	= mysqli_query($db,'SELECT relative_file
+		$query	= mysqli_query($db,'SELECT relative_file, track.track_id
 			FROM track, favoriteitem
 			WHERE favoriteitem.track_id = track.track_id 
 			AND favorite_id = "' . mysqli_real_escape_string($db,$favorite_id) . '"
@@ -501,7 +501,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 	elseif ($random == 'new') {
 		$blacklist = explode(',', $cfg['random_blacklist']);
 		$blacklist = '"' . implode('","', $blacklist) . '"';
-		$query = mysqli_query($db,'SELECT relative_file
+		$query = mysqli_query($db,'SELECT relative_file, track_id
 			FROM track, album
 			WHERE (genre_id = "" OR genre_id NOT IN (' . $blacklist . ')) AND
 			audio_dataformat != "" AND
