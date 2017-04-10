@@ -49,8 +49,47 @@ function parseTrackTitle($data) {
     return 'Unknown Title';
 }
 
+function parseStyle($data, $genre) {
+		global $cfg;
+		$style = $genre;
+		$genre_separator = 'ompd_genre_ompd';
+    if (isset($data['tags']['id3v2']['style'][0])) {
+				$style_array = $data['tags']['id3v2']['style'];
+        foreach($style_array as $g){
+					if ($style == '') {
+						$style = $g;
+					}
+					else{
+						$style = $style . $genre_separator . $g;		
+					}
+				}
+				$style = str_replace($cfg['multigenre_separator'],$genre_separator,$style);
+				return preg_replace('/' . $genre_separator . '$/', '', $style);
+    }
+    if (isset($data['tags']['vorbiscomment']['style'][0])) {
+				$style_array = $data['tags']['vorbiscomment']['style'];
+        foreach($style_array as $g){
+					if ($style == '') {
+						$style = $g;
+					}
+					else{
+						$style = $style . $genre_separator . $g;		
+					}
+				}
+				$style = str_replace($cfg['multigenre_separator'],$genre_separator,$style);
+				return preg_replace('/' . $genre_separator . '$/', '', $style);
+    }
+		if (isset($data['comments']['style'][0])) {
+				$style = str_replace($cfg['multigenre_separator'],$genre_separator,$data['comments']['style'][0]);
+				return preg_replace('/' . $genre_separator . '$/', '', $style);
+    }
+    return $genre;
+}
+
 function parseGenre($data) {
+		global $cfg;
 		$genre = '';
+		$style = '';
 		$genre_separator = 'ompd_genre_ompd';
     if (isset($data['tags']['id3v2']['genre'][0])) {
 				$genre_array = $data['tags']['id3v2']['genre'];
@@ -61,6 +100,11 @@ function parseGenre($data) {
 					else{
 						$genre = $genre . $genre_separator . $g;		
 					}
+				}
+				$genre = str_replace($cfg['multigenre_separator'],$genre_separator,$genre);
+				$genre = preg_replace('/' . $genre_separator . '$/', '', $genre);
+				if ($cfg['style_enable']) {
+					$genre = parseStyle($data, $genre);
 				}
 				return $genre;
     }
@@ -74,12 +118,24 @@ function parseGenre($data) {
 						$genre = $genre . $genre_separator . $g;		
 					}
 				}
+				$genre = str_replace($cfg['multigenre_separator'],$genre_separator,$genre);
+				$genre = preg_replace('/' . $genre_separator . '$/', '', $genre);
+				if ($cfg['style_enable']) {
+					$genre = parseStyle($data, $genre);
+				}
 				return $genre;
     }
 		if (isset($data['comments']['genre'][0])) {
-        return $data['comments']['genre'][0];
+				$genre = str_replace($cfg['multigenre_separator'],$genre_separator,$data['comments']['genre'][0]);
+				$genre = preg_replace('/' . $genre_separator . '$/', '', $genre);
+				if ($cfg['style_enable']) {
+					$genre = parseStyle($data, $genre);
+				}
+				return $genre;
     }
-    return 'Unknown Genre';
+		
+		return 'Unknown Genre';
+ 
 }
 
 function parseMultiGenreId($genre_id){
@@ -90,7 +146,7 @@ function parseMultiGenreId($genre_id){
 	foreach ($genres as $g){
 		$where = ($where == '') ? ' genre_id LIKE "' . $g . '"' : $where . ' OR genre_id LIKE "' . $g . '"';
 	}
-	$query = mysqli_query($db,'SELECT genre, genre_id FROM genre WHERE ' . $where);
+	$query = mysqli_query($db,'SELECT genre, genre_id FROM genre WHERE ' . $where . ' ORDER BY genre');
 	while ($genre = mysqli_fetch_assoc($query)){
 		$album_genres[$genre['genre_id']] = $genre['genre'];
 	}
@@ -105,7 +161,7 @@ function parseMultiGenre($genre){
 	foreach ($genres as $g){
 		$where = ($where == '') ? ' genre LIKE "' . $g . '"' : $where . ' OR genre LIKE "' . $g . '"';
 	}
-	$query = mysqli_query($db,'SELECT genre, genre_id FROM genre WHERE ' . $where);
+	$query = mysqli_query($db,'SELECT genre, genre_id FROM genre WHERE ' . $where . ' ORDER BY genre');
 	while ($genre = mysqli_fetch_assoc($query)){
 		$album_genres[$genre['genre_id']] = $genre['genre'];
 	}

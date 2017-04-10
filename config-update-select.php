@@ -1,7 +1,7 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
-//  | http://www.ompd.pl                                             		 |
+//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                           |
+//  | http://www.ompd.pl                                             		     |
 //  |                                                                        |
 //  |                                                                        |
 //  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
@@ -117,6 +117,12 @@ function updateSelect() {
 </tr>
 <tr>
 	<td>&nbsp;</td>
+	<td>&nbsp;</td>
+	<td></td>
+	<td>(This is force update of ALL files)</td>
+</tr>
+<tr>
+	<td>&nbsp;</td>
 	<td></td>
 	<td>&nbsp;</td>
 	<td></td>
@@ -142,6 +148,12 @@ function updateSelect() {
 		</div>
 		<div id="errorMessage"></div>	
 	</td>
+</tr>
+<tr>
+	<td>&nbsp;</td>
+	<td>&nbsp;</td>
+	<td></td>
+	<td>(This updates only new and changed files)</td>
 </tr>
 </table>
 

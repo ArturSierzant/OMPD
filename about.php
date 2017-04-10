@@ -163,16 +163,19 @@ function about() {
 	<td></td>
 	<td>
 	<ul style="padding-left: 1em;">
+	<li> added ability to play any track/folder www server has access to (i.e. files outside of MPD and O!MPD database) on any MPD in network</li>
 	<li> added multi-genre support</li>
-	<li> added artist list in library</li>
-	<li> added sort by 'Add time'</li>
+	<li> added STYLE tag support</li>
 	<li> added file browser</li>
+	<li> added ability to update selected directory only (no need to do full update when adding single albums)</li>
+	<li> added ability to update album directly from Album view</li>
+	<li> added artist list in library</li>
+	<li> added sort by 'Add time' in search results</li>
 	<li> added display of multi-disc in album view</li>
 	<li> added grouping of multi-disc albums in album search results</li>
 	<li> added display of other versions of album</li>
 	<li> added list of favorite tracks in artist search results</li>
-	<li> added ability to play any track/folder www server has access to (i.e. files outside of MPD and O!MPD database) on any MPD in network</li>
-	<li> added ability to update selected directory only (no need to do full update when adding single albums)</li>
+	<li> added possibility to use more than one file name for album cover</li>
 	<li> added random play from directory</li>
 	</ul>
 	<br>

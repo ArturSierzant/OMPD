@@ -185,8 +185,10 @@ function beginOfTrack() {
 	global $cfg, $db;
 	authenticate('access_play');
 	require_once('include/play.inc.php');
-	
-	mpd('seekcur 0');
+	$currentsong	= mpd('currentsong');
+	$pos = $currentsong['Pos'];
+	//mpd('seekcur 0');
+	mpd('seek ' . $pos . ' 0');
 }
 
 
@@ -829,14 +831,22 @@ function seekImageMap() {
 	}
 	elseif ($cfg['player_type'] == NJB_MPD) {
 		$currentsong	= mpd('currentsong');
-			
-		$query = mysqli_query($db,'SELECT miliseconds FROM track WHERE relative_file = "' . mysqli_real_escape_string($db,$currentsong['file']) . '"');
+		$status	= mpd('status');
+		
+		$parts = parse_url($currentsong['file']);
+		parse_str($parts['query'], $url_query);
+		$track_id = $url_query['track_id'];
+		
+		$query = mysqli_query($db,'SELECT miliseconds FROM track WHERE relative_file = "' . mysqli_real_escape_string($db,$currentsong['file']) . '" OR track_id = "' .$track_id . '"');
+		
 		$track = mysqli_fetch_assoc($query);
 		if ($track)
 			$track_ms = $track['miliseconds'];
-		else
-			$track_ms = $currentsong['Time'] * 1000;
-		
+		else {
+			//$track_ms = $currentsong['Time'] * 1000;
+			$times = explode(":",$status['time']);
+			$track_ms	= $times[1] * 1000;
+		}
 		$miliseconds = round($track_ms * $x / ($dx-1));
 		mpd('seek ' . $currentsong['Pos'] .  ' ' . (round($miliseconds / 1000))); //seek in seconds
 		
@@ -1387,10 +1397,12 @@ function playlistStatus() {
 function playlistTrack() {
 	global $cfg, $db;
 	authenticate('access_playlist', false, false, true);
+	require_once('include/play.inc.php');
 	
 	$track_id = get('track_id');
 	$data = array();
 	$title = '';
+	$currentsong	= mpd('currentsong');
 	
 	if ($track_id !='') {
  	
@@ -1406,37 +1418,6 @@ function playlistTrack() {
 		$other_track_version = false;
 		$title = $track['title'];
 		
-		/* $title = $track['title'];
-		
-		$title = findCoreTrackTitle($title);
-		$title = mysqli_real_escape_like($title);
-
-		
-		$separator = $cfg['separator'];
-		$count = count($separator);
-		
-		$query_string = '';
-		$i=0;
-		for ($i=0; $i<$count; $i++) {
-			$query_string = $query_string . ' OR LOWER(title) LIKE "' . $title . $separator[$i] . '%"'; 
-		}
-		
-		
-		//LOWER(REPLACE(REPLACE(REPLACE(title,",",""),".",""),";",""))
-		$filter_query = 'WHERE (LOWER(title) = "' . ($title) . '" ' . $query_string . ')';
-		
-		//$query = mysqli_query($db,'SELECT title FROM track ' . $filter_query);
-		
-		if (strlen($title) > 0) {
-			$num_rows = mysqli_num_rows($query);
-			if ($num_rows > 1) {
-				$other_track_version = true;
-			}
-		}
-		else {
-			$other_track_version = false;
-		} */
-		
 		$exploded = multiexplode($cfg['artist_separator'],$track['track_artist']);
 		
 		$inFavorite = false;
@@ -1451,6 +1432,8 @@ function playlistTrack() {
 			if (mysqli_num_rows($query) > 0) $onBlacklist = true;
 		}
 		
+		$isStream = false;
+		if (strpos($currentsong['file'],"://") !== false) $isStream = true;
 		
 		$data['album_artist'] = (string) ($track['album_artist'] == "Various Artists") ? rawurlencode($track['track_artist']) : rawurlencode($track['album_artist']);
 		$data['track_artist']	= $exploded;
@@ -1467,6 +1450,9 @@ function playlistTrack() {
 		/* $data['genre']	= (string) $track['genre'];
 		$data['genre_id']	= (string) $track['genre_id']; */
 		$data['audio_dataformat']	= (string) strtoupper($track['audio_dataformat']);
+		if ($isStream) {
+			$data['audio_dataformat'] = $data['audio_dataformat'] . " (stream)";
+		}
 		$data['audio_bits_per_sample']	= (string) $track['audio_bits_per_sample'];
 		$data['audio_sample_rate']	= (string) $track['audio_sample_rate'];
 		if ($track['audio_profile'] == 'Lossless compression')
@@ -1487,7 +1473,7 @@ function playlistTrack() {
 		$data['title_core'] = $title;
 	}
 	else { //track not found in OMPD DB - read info from MPD
-		require_once('include/play.inc.php');
+		//require_once('include/play.inc.php');
 	
 		$status 		= mpd('status');
 		if ($status['time'] == '0:0') {
@@ -1496,7 +1482,7 @@ function playlistTrack() {
 			$status = mpd('status');
 		}
 		
-		$currentsong	= mpd('currentsong');
+		//$currentsong	= mpd('currentsong');
 		
 		$audio = array();
 		$audio = explode(':',$status['audio']);
