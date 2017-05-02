@@ -49,6 +49,11 @@
 //  +------------------------------------------------------------------------+
 require_once('include/initialize.inc.php');
 $cfg['menu'] = 'Library';
+
+// formattedNavigator
+$nav			= array();
+$nav['name'][]	= 'Browser';
+
 authenticate('access_playlist');
 require_once('include/header.inc.php');
 require_once('include/library.inc.php');

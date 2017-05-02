@@ -171,7 +171,7 @@ function updateDatabase() {
 		loadServerSettings();
 		message(__FILE__, __LINE__, 'ok', '[b]Incremental database upgrade successfuly on ' . $cfg['mysqli_db'] . '@' . $cfg['mysqli_host'] . '[/b][br]'
 			. 'It is advisable to update the database now.'
-			. '[list][*]Login with admin rights[*]Than select menu Config > Update[/list]');
+			. '[list][*]Login with admin rights[*]Then select Config > Update all[/list]');
 	}
 }
 

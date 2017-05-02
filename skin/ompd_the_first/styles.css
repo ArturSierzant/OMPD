@@ -1250,6 +1250,16 @@ tr.even {
 	transition: all 300ms linear;
 }
 
+tr.artist_list {
+	height: 2.5em;
+	background-color: white;
+}
+
+tr.artist_list td {
+	border-bottom: dotted 1px #E3E3E3;
+}
+
+
 tr.year {
 	height: 2em;
 	background-color: white;
@@ -2196,10 +2206,10 @@ iframe.full {
 			width: 100%;
 			overflow: hidden;
 			position: relative;
-			padding: 0 0 0 2.95em;
-			border: 1px solid #dedede;
-
-
+			padding: 0 0 0 2.8em;
+			border-left: 5px solid #e74c3c;
+			border-bottom: 1px solid #dedede;
+			border-right: 1px solid #dedede;
 			border-top: 0px;
 		}	
 

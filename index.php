@@ -2404,8 +2404,8 @@ function viewRandomFile() {
 	$selectedDir = str_replace('"',"&quot;",$selectedDir); */
 	
 	
-	$selectedDir = isset($_GET['selectedDir']) ? myHTMLencode($_GET['selectedDir']) : $dir;
-
+	$selectedDir = isset($_GET['selectedDir']) ? myHTMLencode($_GET['selectedDir']) : myHTMLencode($dir);
+	
 	require_once('include/header.inc.php');
 	
 ?>

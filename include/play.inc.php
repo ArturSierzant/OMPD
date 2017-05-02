@@ -519,6 +519,7 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 	
 	elseif ($filepath) {
 		$filepath = str_replace('ompd_ampersand_ompd','&',$filepath);
+		$filepath = str_replace('ompd_plus_ompd','+',$filepath);
 		$url = NJB_HOME_URL . 'stream.php?action=streamTo&stream_id=-1&filepath=' . urlencode($filepath);
 		$pos = strpos($filepath,$cfg['media_dir']);
 		if ($pos !== false) {

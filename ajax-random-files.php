@@ -54,7 +54,7 @@ $file = get_random_elements($file,$limit);
 
 mpd('clear', $player1_host, $player1_port);
 foreach ($file as $f) {
-	$mpdCommand = mpd ('add "' . str_ireplace($cfg['media_dir'], '', $f) . '"', $player1_host, $player1_port);
+	$mpdCommand = mpd ('add "' . mpdEscapeChar(str_ireplace($cfg['media_dir'], '', $f)) . '"', $player1_host, $player1_port);
 	if ($mpdCommand == 'ACK_ERROR_NO_EXIST') {
 			//file not found in MPD database - add stream
 			playTo(0,'',$f,'',$player1_host, $player1_port);	

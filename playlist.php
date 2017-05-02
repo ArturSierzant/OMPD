@@ -543,11 +543,11 @@ function evaluateStatus(data) {
 		$("#trackOptions").hide();
 		$('#saveCurrentPlaylist i').removeClass("fa-circle-o fa-check-circle-o").addClass("fa-check-circle-o");
 		$('#saveCurrentTrack i').removeClass("fa-check-circle-o fa-circle-o").addClass("fa-circle-o");
-		if (data.isStream == 'true') {
+		/* if (data.isStream == 'true') {
 			$('#lyrics').html('&nbsp;');
 			$('#lyrics1').html('&nbsp;');
 			$('#fileInfoForDbTracks').css('visibility', 'hidden');
-		}
+		} */
 	}
 	else {
 		$("#saveCurrentTrack").show();
@@ -799,7 +799,12 @@ function evaluateTrack(data) {
 		previous_track_id = data.track_id;
 	} 
 	
-	
+	if (data.isStream == 'true' && (!data.genre || !data.year)) {
+			$('#lyrics').html('&nbsp;');
+			$('#lyrics1').html('&nbsp;');
+			$('#fileInfoForDbTracks').css('visibility', 'hidden');
+	}
+		
 	$("#cover-spinner").show();
 	var s = Math.floor(data.miliseconds / 1000);  
 	var m = Math.floor(s / 60);  
@@ -831,6 +836,11 @@ function evaluateTrack(data) {
 	document.getElementById('title1').innerHTML = document.getElementById('title').innerHTML =  data.title;
 	if (data.album_id) {
 		var albumLink = '<a href="index.php?action=view3&album_id=' + data.album_id + '">' + data.album + '</a>';
+		document.getElementById('album1').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : 'from ' + albumLink; 
+		document.getElementById('album').innerHTML = albumLink;
+	}
+	else if (data.relative_file) {
+		var albumLink = '<a href="browser.php?dir=' + data.relative_file + '">' + data.album + '</a>';
 		document.getElementById('album1').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : 'from ' + albumLink; 
 		document.getElementById('album').innerHTML = albumLink;
 	}

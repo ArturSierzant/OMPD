@@ -122,7 +122,7 @@ elseif ($action == 'not_played') {
 	}
 }
 elseif ($action == 'noImageFront') {
-	$title = 'No ' . $cfg['image_front'] . '.jpg/png file';
+	$title = 'No image_front file';
 	//$onmouseoverImage = false;
 	$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id
 		FROM album, bitmap
@@ -131,7 +131,7 @@ elseif ($action == 'noImageFront') {
 		ORDER BY album.artist_alphabetic, album.album');
 }
 elseif ($action == 'imageError') {
-	$title = '' . $cfg['image_front'] . '.jpg/png error';
+	$title = 'image_front file error';
 	//$onmouseoverImage = false;
 	$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id
 		FROM album, bitmap
@@ -140,7 +140,7 @@ elseif ($action == 'imageError') {
 		ORDER BY album.artist_alphabetic, album.album');
 }
 elseif ($action == 'noImageFrontCover') {
-	$title = $cfg['image_front'] . '.jpg/png file has less then ' . $cfg['image_front_cover_treshold'] . 'px';
+	$title = 'image_front file has less then ' . $cfg['image_front_cover_treshold'] . 'px';
 	//$onmouseoverImage = false;
 	$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id, album.image_id
 		FROM album, bitmap
@@ -585,7 +585,7 @@ for ($i=0; $i<$histogram_count; $i++)
 		if ($no_image_front > 0) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 	<td></td>
-	<td><a href="statistics.php?action=noImageFront"><?php echo $cfg['image_front']; ?>:</a></td>
+	<td><a href="statistics.php?action=noImageFront">No <b>image_front</b> file:</a></td>
 	<td></td>
 	<td align="right"><?php echo $no_image_front; ?></td>
 	<td colspan="5"></td>
@@ -595,7 +595,7 @@ for ($i=0; $i<$histogram_count; $i++)
 		if ($no_image_front_cover > 0) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 	<td></td>
-	<td><a href="statistics.php?action=noImageFrontCover"><?php echo $cfg['image_front']; ?> for cover:</a></td>
+	<td><a href="statistics.php?action=noImageFrontCover"><b>image_front</b> file has less then <?php echo $cfg['image_front_cover_treshold']; ?> px:</a></td>
 	<td></td>
 	<td align="right"><?php echo $no_image_front_cover; ?></td>
 	<td colspan="5"></td>

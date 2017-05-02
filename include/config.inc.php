@@ -69,6 +69,7 @@ $cfg['group_multidisc'] = true;
 
 
 
+
 //  +------------------------------------------------------------------------+
 //  | Multi-disc indicators                                                  |
 //  +------------------------------------------------------------------------+
@@ -85,24 +86,6 @@ $cfg['multidisk_indicator'][] = " CD";
 $cfg['multidisk_indicator'][] = " Vol.";
 
 
-//  +------------------------------------------------------------------------+
-//  | Multi-genre separator                                                  |
-//  +------------------------------------------------------------------------+
-//  | String separating genres and styles in GENRE and STYLE tags            |
-//  +------------------------------------------------------------------------+
-
-$cfg['multigenre_separator'] = ";";
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Use STYLE tag                                                          |
-//  +------------------------------------------------------------------------+
-//  | Add values from STYLE tag to genres                                    |
-//  +------------------------------------------------------------------------+
-
-$cfg['style_enable'] = false;
-
 
 
 //  +------------------------------------------------------------------------+
@@ -112,21 +95,6 @@ $cfg['style_enable'] = false;
 //  +------------------------------------------------------------------------+
 
 $cfg['show_album_versions'] = true;
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Allow access to all files                                              |
-//  +------------------------------------------------------------------------+
-//  | When set to true, it allows to access to files outside of media        |
-//  | directory in file browser and for download.                            |
-//  | WARNING! Can be dangerous - it allows to access all files your web     |
-//  | server has access to - including files with passwords                  |
-//  | USE WITH CARE!                                                         |
-//  +------------------------------------------------------------------------+
-
-$cfg['allow_access_to_all_files'] = false;
 
 
 
@@ -149,6 +117,43 @@ $cfg['album_versions_indicator'][] = ", ";
 
 
 //  +------------------------------------------------------------------------+
+//  | Multi-genre separator                                                  |
+//  +------------------------------------------------------------------------+
+//  | String separating genres and styles in GENRE and STYLE tags            |
+//  +------------------------------------------------------------------------+
+
+$cfg['multigenre_separator'] = "; ";
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Use STYLE tag                                                          |
+//  +------------------------------------------------------------------------+
+//  | Add values from STYLE tag to genres                                    |
+//  +------------------------------------------------------------------------+
+
+$cfg['style_enable'] = false;
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Allow access to all files                                              |
+//  +------------------------------------------------------------------------+
+//  | When set to true, it allows to access to files outside of media        |
+//  | directory in file browser and for download.                            |
+//  | WARNING! Can be dangerous - it allows to access all files your web     |
+//  | server has access to - including files with passwords                  |
+//  | USE WITH CARE!                                                         |
+//  +------------------------------------------------------------------------+
+
+$cfg['allow_access_to_all_files'] = false;
+
+
+
+
+//  +------------------------------------------------------------------------+
 //  | Directory Blacklist (those dirnames will not be scanned)               |
 //  +------------------------------------------------------------------------+
 unset($cfg['directory_blacklist']);
@@ -163,6 +168,7 @@ $cfg['directory_blacklist'][]       = '.@__thumb';
 
 
 
+
 //  +------------------------------------------------------------------------+
 //  | Timezone Setting                                                       |
 //  +------------------------------------------------------------------------+
@@ -172,17 +178,7 @@ $cfg['directory_blacklist'][]       = '.@__thumb';
 $cfg['timezone'] = '';
 
 
-
 //  +------------------- END OF NEW IN O!MPD 1.03 ---------------------------+
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Use COMMENT as tags and display it in album view                       |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_comments_as_tags']		= true;
 
 
 
@@ -324,6 +320,15 @@ $cfg['separator'][] = 	" VII";
 $cfg['separator'][] = 	" VIII";
 $cfg['separator'][] = 	" IX";
 $cfg['separator'][] = 	" aka ";
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Use COMMENT as tags and display it in album view                       |
+//  +------------------------------------------------------------------------+
+
+$cfg['show_comments_as_tags']		= true;
 
 
 
@@ -948,12 +953,7 @@ $cfg['admin_login_message']         = '';
 $cfg['offline']                     = false;
 $cfg['offline_message']             = '[b]This site is temporarily unavailable.[/b][br]We apologize for the inconvenience.';
 
-//  +------------------------------------------------------------------------+
-//  | Timezone Setting                                                       |
-//  +------------------------------------------------------------------------+
-//  | Comment out this line to use PHP's default                             |
-//  +------------------------------------------------------------------------+
-$cfg['timezone'] = 'Europe/Warsaw';
+
 
 //  +------------------------------------------------------------------------+
 //  | Debug                                                                  |

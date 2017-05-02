@@ -136,7 +136,7 @@ function about() {
 	<td></td>
 	<td>Current version:</td>
 	<td></td>
-	<td style="color: <?php echo (versionCheck($ttl)) ? 'Green' : 'Red'; ?>"><?php echo html(NJB_VERSION); ?></td>
+	<td style="color: <?php echo (versionCheck($ttl)) ? 'Green' : 'Red'; ?>"><?php echo '&nbsp;' . html(NJB_VERSION); ?></td>
 	<td></td>
 </tr>
 <tr class="even">
@@ -159,7 +159,7 @@ function about() {
 <tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
-	<td style="vertical-align: top;">v1.03 <br>????</td>
+	<td style="vertical-align: top;">v1.03 <br>2017.05.02</td>
 	<td></td>
 	<td>
 	<ul style="padding-left: 1em;">
@@ -177,6 +177,7 @@ function about() {
 	<li> added list of favorite tracks in artist search results</li>
 	<li> added possibility to use more than one file name for album cover</li>
 	<li> added random play from directory</li>
+	<li> fixed bugs</li>
 	</ul>
 	<br>
 	</td>
@@ -318,6 +319,13 @@ function about() {
 	<td>TouchSwipe</td>
 	<td></td>
 	<td><a href="http://labs.rampinteractive.co.uk/touchSwipe/" target="_new">http://labs.rampinteractive.co.uk/touchSwipe/</a></td>
+	<td></td>
+</tr>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
+	<td>Browser</td>
+	<td></td>
+	<td><a href="http://tomicki.net/" target="_new">http://tomicki.net/</a></td>
 	<td></td>
 </tr>
 

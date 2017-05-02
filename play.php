@@ -535,6 +535,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 	$first = true;
 	if ($filepath){
 		$filepath = str_replace('ompd_ampersand_ompd','&',$filepath);
+		$filepath = str_replace('ompd_plus_ompd','+',$filepath);
 		//$filepath = str_replace('"','\"',$filepath);
 		$mpdCommand = mpd('addid "' . mpdEscapeChar($filepath) . '" ' . $insPos);
 		if ($mpdCommand == 'ACK_ERROR_NO_EXIST') {
@@ -551,10 +552,12 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 	}
 	elseif ($dirpath){
 		$dirpath = str_replace('ompd_ampersand_ompd','&',$dirpath);
+		$dirpath = str_replace('ompd_plus_ompd','+',$dirpath);
 		$mpdCommand = mpd('add "' . mpdEscapeChar($dirpath) . '"');
 		if ($mpdCommand == 'ACK_ERROR_NO_EXIST') {
 			//dir not found in MPD database - add stream
 			$fulldirpath = str_replace('ompd_ampersand_ompd','&',$fulldirpath);
+			$fulldirpath = str_replace('ompd_plus_ompd','+',$fulldirpath);
 			$mediafiles = find_all_files($fulldirpath);
 			foreach($mediafiles as $val) {
 				playTo($insPos,'',$val);
@@ -1488,13 +1491,22 @@ function playlistTrack() {
 		$audio = explode(':',$status['audio']);
 		
 		$data['isStream'] = 'false';
-		if (strpos($currentsong['file'],"://") !== false) $data['isStream'] = (string) 'true';
-
+		if (strpos($currentsong['file'],"://") !== false) {
+			$data['isStream'] = (string) 'true';
+			if (strpos($currentsong['file'],'filepath=') !== false){
+				$pos = strpos($currentsong['file'],'filepath=');
+				$filepath = substr($currentsong['file'],$pos + 9, strlen($currentsong['file']) - $pos);
+				$filepath = urldecode($filepath);
+				$relative_file = urlencode(dirname($filepath));
+			}
+		}
+		
 		/* if (isset($currentsong['Artist'])) 
 			$artist	= $currentsong['Artist'];
 		else 
 			$$artist	= $currentsong['file'];
 		 */
+	
 		if (isset($currentsong['Name'])) {
 			$album	= $currentsong['Name'];
 		}
@@ -1502,9 +1514,7 @@ function playlistTrack() {
 			$album	= $currentsong['Album'];
 		}
 		elseif (strpos($currentsong['file'],'filepath=') !== false){
-			$pos = strpos($currentsong['file'],'filepath=');
-			$filepath = substr($currentsong['file'],$pos + 9, strlen($currentsong['file']) - $pos);
-			$filepath = urldecode($filepath);
+			
 			$title = basename($filepath);
 			$pos = strpos($filepath, $title);
 			$album = substr($filepath, 0, $pos);
@@ -1558,7 +1568,7 @@ function playlistTrack() {
 		$data['other_track_version']	= (boolean) false;
 		$data['comment']	= (string) '';
 		$data['track_id']	= (string) '';
-		$data['relative_file']	= (string) '';
+		$data['relative_file']	= (string) $relative_file;
 		$data['inFavorite'] = (boolean) '';
 		$data['onBlacklist'] = (boolean) '';
 		$data['dr']	= (string) '';
