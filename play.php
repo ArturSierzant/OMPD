@@ -657,7 +657,37 @@ function addUrl($mode = 'play') {
 	else {
 		$file[] = $url;
 	}
-	
+	if (count($file) == 1) {
+		$yt = striposa($url, $cfg['youtube_indicator']);
+		if ($yt !== false) {
+			
+			$cmd = trim($cfg['python_path'] . ' ' . $cfg['youtube-dl_path'] . ' ' . $cfg['youtube-dl_options'] . ' ' . ($url));
+			exec($cmd, $output, $ret);
+			if ($ret == 0) {
+				$js = json_decode($output[0],true);
+				$f = $cfg['youtube_audio_format_name'];
+				$format = array_find_deep($js, $f);
+				$yt_url = $js[$format[0]][$format[1]]['url'];
+				$is_yt_url_query = strpos($yt_url,'?');
+				if ($is_yt_url_query === false) {
+					$yt_url = $yt_url . '?';
+				}
+				$file[0] = $yt_url . '&ompd_title=' . urlencode($js['title']) . '&ompd_duration=' . urlencode($js['duration']) . '&ompd_thumbnail=' . urlencode($js['thumbnail']) . '&ompd_webpage=' . urlencode($js['webpage_url']);
+				/* echo $ret . "\n";
+				echo $url . "\n";
+				echo $cmd . "\n";
+				echo var_dump($format);
+				echo var_dump($js) . "\n";
+				echo $file1 . "\n"; */
+				//echo $file[0] . "\n";
+				//exit();
+			}
+			else {
+				$addURLresult = 'add_error';
+				return $addURLresult;
+			}
+		}
+	}
 	if ($cfg['play_queue'] == false)
 		$index = 0;
 	elseif ($cfg['player_type'] == NJB_MPD) {
@@ -1306,27 +1336,35 @@ function playlistStatus() {
 		$data['volume']			= (int) $status['volume'];
 		$data['repeat']			= (int) $status['repeat'];
 		$data['shuffle']		= (int) $status['random'];
-		if (isset($currentsong['Name'])) {
-			$data['name'] = $currentsong['Name'];
+		
+		if (strpos($currentsong['file'],'ompd_title=') !== false){
+			//stream from Youtube
+			$parts = parse_url($currentsong['file']);
+			parse_str($parts['query'], $query);
+			$data['title'] = urldecode($query['ompd_title']);
 		}
 		else {
-			$data['name'] = '';
-		}
-		
-		if (isset($currentsong['Title'])) {
-			$data['title']	= $currentsong['Title'];
-		}
-		elseif (strpos($currentsong['file'],'filepath=') !== false){
-			$pos = strpos($currentsong['file'],'filepath=');
-			$filepath = substr($currentsong['file'],$pos + 9, strlen($currentsong['file']) - $pos);
-			$filepath = urldecode($filepath);
-			$data['title'] = basename($filepath);
-		}
+			if (isset($currentsong['Name'])) {
+				$data['name'] = $currentsong['Name'];
+			}
+			else {
+				$data['name'] = '';
+			}
+			
+			if (isset($currentsong['Title'])) {
+				$data['title']	= $currentsong['Title'];
+			}
+			elseif (strpos($currentsong['file'],'filepath=') !== false){
+				$pos = strpos($currentsong['file'],'filepath=');
+				$filepath = substr($currentsong['file'],$pos + 9, strlen($currentsong['file']) - $pos);
+				$filepath = urldecode($filepath);
+				$data['title'] = basename($filepath);
+			}
 
-		else {
-			$data['title']	= basename($currentsong['file']);
+			else {
+				$data['title']	= basename($currentsong['file']);
+			}
 		}
-		
 		$data['track_artist']	= $currentsong['Artist'];
 		$data['relative_file'] = $currentsong['file'];
 		
@@ -1363,6 +1401,7 @@ function playlistStatus() {
 			}
 			$audio = array();
 			$audio = explode(':',$status['audio']);
+			if ($audio[1] == 'f') $audio[1] = '16';
 			$data['audio_bits_per_sample']	= (string) $audio[1];
 			$data['audio_sample_rate']	= (string) $audio[0];
 			$data['audio_profile']	= (string) $status['bitrate'] . ' kbps';
@@ -1477,18 +1516,19 @@ function playlistTrack() {
 	}
 	else { //track not found in OMPD DB - read info from MPD
 		//require_once('include/play.inc.php');
-	
 		$status 		= mpd('status');
 		if ($status['time'] == '0:0') {
 			//wait 1s to mpd reads info from stream
 			sleep(1);
 			$status = mpd('status');
 		}
+		$times = explode(":",$status['time']);
 		
 		//$currentsong	= mpd('currentsong');
 		
 		$audio = array();
 		$audio = explode(':',$status['audio']);
+		if ($audio[1] == 'f') $audio[1] = '16';
 		
 		$data['isStream'] = 'false';
 		if (strpos($currentsong['file'],"://") !== false) {
@@ -1506,27 +1546,39 @@ function playlistTrack() {
 		else 
 			$$artist	= $currentsong['file'];
 		 */
-	
-		if (isset($currentsong['Name'])) {
-			$album	= $currentsong['Name'];
-		}
-		elseif (isset($currentsong['Album'])) {
-			$album	= $currentsong['Album'];
-		}
-		elseif (strpos($currentsong['file'],'filepath=') !== false){
-			
-			$title = basename($filepath);
-			$pos = strpos($filepath, $title);
-			$album = substr($filepath, 0, $pos);
+		 
+		if (strpos($currentsong['file'],'ompd_title=') !== false){
+			//stream from Youtube
+			$parts = parse_url($currentsong['file']);
+			parse_str($parts['query'], $query);
+			$title = urldecode($query['ompd_title']);
+			$album = urldecode($query['ompd_webpage']);
+			$times[1] = (int)urldecode($query['ompd_duration']);
+			$data['thumbnail'] = urldecode($query['ompd_thumbnail']);
+			$currentsong['Genre'] = '&nbsp;';
 		}
 		else {
-			$album = '&nbsp;';
-		}
-		if (isset($currentsong['Title'])) {
-			$title	= $currentsong['Title'];
-		}
-		elseif ($title == '') {
-			$title	= basename($currentsong['file']);
+			if (isset($currentsong['Name'])) {
+				$album	= $currentsong['Name'];
+			}
+			elseif (isset($currentsong['Album'])) {
+				$album	= $currentsong['Album'];
+			}
+			elseif (strpos($currentsong['file'],'filepath=') !== false){
+				
+				$title = basename($filepath);
+				$pos = strpos($filepath, $title);
+				$album = substr($filepath, 0, $pos);
+			}
+			else {
+				$album = '&nbsp;';
+			}
+			if (isset($currentsong['Title'])) {
+				$title	= $currentsong['Title'];
+			}
+			elseif ($title == '') {
+				$title	= basename($currentsong['file']);
+			}
 		}
 		/* else
 			$table_track['title']	= $currentsong['file']; */
@@ -1562,7 +1614,7 @@ function playlistTrack() {
 		$data['audio_sample_rate']	= (string) $audio[0];
 		$data['audio_profile']	= (string) $status['bitrate'] . ' kbps';
 		$data['number']	= (string) ($currentsong['Pos'] + 1 . '. ');
-		$times = explode(":",$status['time']);
+		//$times = explode(":",$status['time']);
 		$data['miliseconds']	= $times[1] * 1000;
 		//$data['miliseconds']	= ($currentsong['Time'] * 1000);
 		$data['other_track_version']	= (boolean) false;

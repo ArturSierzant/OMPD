@@ -251,23 +251,34 @@ for ($i=0; $i < $listlength; $i++) {
 	}
 	//track not found in OMPD DB - take info from MPD, unless this is a stream of file
 	if (!isset($table_track['artist']) && !$is_file_stream) {
+		
 		$playlistinfo = mpd('playlistinfo ' . $i);
-		if (isset($playlistinfo['Artist'])) 
-			$table_track['track_artist']	= $playlistinfo['Artist'];
-		/* else 
-			$table_track['track_artist']	= basename($playlistinfo['file']); */
-		
-		if (isset($playlistinfo['Name'])) 
-			$table_track['title']	= $playlistinfo['Name'];
-		else if (isset($playlistinfo['Title']))
-			$table_track['title']	= $playlistinfo['Title'];
-		else
-			$table_track['title']	= basename($playlistinfo['file']);
-		
-		if (isset($playlistinfo['Album']))
-			$table_track['album']	= $playlistinfo['Album'];
-		else 
-			$table_track['album']	= $playlistinfo['file'];
+		if (strpos($playlistinfo['file'],'ompd_title=') !== false){
+			//stream from Youtube
+			$parts = parse_url($playlistinfo['file']);
+			parse_str($parts['query'], $query);
+			$table_track['title'] = urldecode($query['ompd_title']);
+			$table_track['album'] = urldecode($query['ompd_webpage']);
+			$playlistinfo['Time'] = (int)urldecode($query['ompd_duration']);
+		}
+		else {
+			if (isset($playlistinfo['Artist'])) 
+				$table_track['track_artist']	= $playlistinfo['Artist'];
+			/* else 
+				$table_track['track_artist']	= basename($playlistinfo['file']); */
+			
+			if (isset($playlistinfo['Name'])) 
+				$table_track['title']	= $playlistinfo['Name'];
+			else if (isset($playlistinfo['Title']))
+				$table_track['title']	= $playlistinfo['Title'];
+			else
+				$table_track['title']	= basename($playlistinfo['file']);
+			
+			if (isset($playlistinfo['Album']))
+				$table_track['album']	= $playlistinfo['Album'];
+			else 
+				$table_track['album']	= $playlistinfo['file'];
+		}
 		
 		$table_track['number'] = $playlistinfo['Pos'] + 1;
 		$table_track['trackYear'] = $playlistinfo['Date'];
@@ -534,7 +545,11 @@ function evaluateStatus(data) {
 		var params = data.audio_dataformat + '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + 'bit - ' + data.audio_sample_rate/1000 + 'kHz&nbsp;&bull;&nbsp;' + data.audio_profile;
 		document.getElementById('parameters').innerHTML = params;
 		
-		document.getElementById('lyrics1').innerHTML = document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(data.track_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>';
+		var query_artist = '';
+		if (data.track_artist) {
+			query_artist = data.track_artist;
+		}
+		document.getElementById('lyrics1').innerHTML = document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>';
 		
 		$('#favorites').html('&nbsp;');
 		$('#favorites1').html('&nbsp;');
@@ -804,7 +819,13 @@ function evaluateTrack(data) {
 			$('#lyrics1').html('&nbsp;');
 			$('#fileInfoForDbTracks').css('visibility', 'hidden');
 	}
-		
+	
+	//stream from Youtube
+	var yt_album = data.album;
+	if (yt_album.indexOf('www.youtube') != -1) {
+			$('#fileInfoForDbTracks').css('visibility', 'visible');
+	}
+	
 	$("#cover-spinner").show();
 	var s = Math.floor(data.miliseconds / 1000);  
 	var m = Math.floor(s / 60);  
@@ -834,8 +855,15 @@ function evaluateTrack(data) {
 	document.getElementById('artist').innerHTML = artist; 
 	document.getElementById('track_number1').innerHTML = document.getElementById('track_number').innerHTML = data.number;
 	document.getElementById('title1').innerHTML = document.getElementById('title').innerHTML =  data.title;
+	var al = data.album;
 	if (data.album_id) {
 		var albumLink = '<a href="index.php?action=view3&album_id=' + data.album_id + '">' + data.album + '</a>';
+		document.getElementById('album1').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : 'from ' + albumLink; 
+		document.getElementById('album').innerHTML = albumLink;
+	}
+	else if (al.indexOf("://") > 0) {
+		//e.g. stream from youtube 
+		var albumLink = '<a href="' + data.album + '" target="_new">' + data.album + '</a>';
 		document.getElementById('album1').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : 'from ' + albumLink; 
 		document.getElementById('album').innerHTML = albumLink;
 	}
@@ -874,12 +902,15 @@ function evaluateTrack(data) {
 	var rel_file = encodeURIComponent(data.relative_file);
 	//console.log ("rel_file=" + rel_file);
 	var params = data.audio_dataformat + '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + 'bit - ' + data.audio_sample_rate/1000 + 'kHz&nbsp;&bull;&nbsp;' + data.audio_profile;
-	//if (data.dr) params = params + '&nbsp;&bull;&nbsp;DR=' + data.dr;
+	if (data.dr) params = params + '&nbsp;&bull;&nbsp;DR=' + data.dr;
 	params = params + '&nbsp;&bull;<a href="getid3/demos/demo.browse.php?filename=<?php echo $cfg['media_dir']; ?>' + rel_file + '">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;file details</a>';
 	
 	document.getElementById('parameters').innerHTML = params;
-	
-	document.getElementById('lyrics1').innerHTML = document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + data.track_artist + '+' + data.title_core + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>'; 
+	var query_artist = '';
+	if (data.track_artist) {
+		query_artist = data.track_artist;
+	}
+	document.getElementById('lyrics1').innerHTML = document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + query_artist + '+' + data.title_core + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>'; 
 	
 	if (data.inFavorite) {
 		document.getElementById('favorites').innerHTML  = '<i id="favorite_star" class="fa fa-star fa-fw"></i>'; 
@@ -949,6 +980,12 @@ function evaluateTrack(data) {
 		$("#image_in").attr("src","image.php?image_id=" + data.image_id + "&quality=hq&track_id=" + data.track_id);
 		$("#image a").attr("href","index.php?action=view3&album_id=" + data.album_id);
 		
+	}
+	else if (data.thumbnail) {
+		//thumbnail e.g. from Youtube
+		$("#image_in").attr("src","image_crop.php?thumbnail=" + encodeURIComponent(data.thumbnail));
+		//$("#image_in").attr("src",data.thumbnail);
+		$("#image a").attr("href",data.thumbnail);
 	}
 	else document.getElementById('image').innerHTML = '<a href="#"><img id="image_in" src="<?php echo 'image/'; ?>large_file_not_found.png" alt=""></a>';
 	$("#cover-spinner").hide();

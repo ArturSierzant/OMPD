@@ -3,5 +3,5 @@
   "name": "O!MPD 
   Surf Your Music Collection",
   "start_url": "index.php",
-  "display": "fullscreen"
+  "display": "standalone"
 }

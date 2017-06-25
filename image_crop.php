@@ -19,39 +19,18 @@
 //  +------------------------------------------------------------------------+
 
 
-global $cfg, $db;
-require_once('include/initialize.inc.php');
-require_once('include/play.inc.php');
+$thumbnail = $_GET['thumbnail'];
 
-if ($cfg['player_type'] == NJB_MPD) {
-	$data = array();
-	
-	$query1=mysqli_query($db,'SELECT player.player_name as pl, player_host, player_port, player_pass FROM player, session WHERE (sid = BINARY "' . cookie('netjukebox_sid') . '") and player.player_id=session.player_id');
-	$session1 = mysqli_fetch_assoc($query1);
-	$data['player'] = $session1['pl'];
-	//$data['host'] = $session1['player_host'];
-	$cfg['player_host'] = $data['host'] = $session1['player_host'];
-	$cfg['player_port'] = $session1['player_port'];
-	$cfg['player_pass'] = $session1['player_pass'];
-	$status 	= mpdSilent('status');
-	
-	if ($status != false) {
-		$data['volume']	= (int) $status['volume'];
+$img = imagecreatefromjpeg($thumbnail);
+if ($img) {
+	//$size = min(imagesx($img), imagesy($img));
+	$size = imagesy($img);
+	$imgCrop = imagecrop($img, ['x' => (imagesx($img) - $size)/2, 'y' => 0, 'width' => $size, 'height' => $size]);
+	if ($imgCrop !== FALSE) {
+		return imagejpeg($imgCrop);
 	}
-	else {
-		$data['volume']	= -1;
-	}
-	
-	// get mute volume
-	if ($data['volume'] == 0) {
-		$query	= mysqli_query($db,'SELECT mute_volume FROM player WHERE player_id = ' . (int) $cfg['player_id']);
-		$temp	= mysqli_fetch_assoc($query);
-		$data['volume'] = -$temp['mute_volume'];
-	}
-	
-	echo safe_json_encode($data);	
 }
+header("Content-type: image/png");
+imagepng(imageCreateFromPng('image/large_file_not_found.png'));
 
-	
 ?>
-	

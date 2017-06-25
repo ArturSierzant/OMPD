@@ -159,6 +159,18 @@ function about() {
 <tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
+	<td style="vertical-align: top;">v1.04 <br>201?.??.??</td>
+	<td></td>
+	<td>
+	<ul style="padding-left: 1em;">
+	<li> added ability to play audio streams from Youtube movies (requires <a href="https://github.com/rg3/youtube-dl" target="_new">youtube-dl</a>)</li>
+	</ul>
+	<br>
+	</td>
+	<td></td>
+</tr><tr class="line"><td colspan="5"></td></tr>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td>&nbsp;</td>
 	<td style="vertical-align: top;">v1.03 <br>2017.05.02</td>
 	<td></td>
 	<td>

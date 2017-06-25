@@ -54,7 +54,33 @@ $cfg['media_dir']                   = '/share/HDA_DATA/ompd/';
 
 
 
-//  +------------------- NEW IN O!MPD 1.03 ----------------------------------+
+//  +------------------- NEW IN O!MPD 1.04 ----------------------------------+
+
+
+//  +------------------------------------------------------------------------+
+//  | Play audio from Youtube                                                |
+//  +------------------------------------------------------------------------+
+//  | You can listen to YT movie audio stream by inserting address of YT     |
+//  | movie into Now Playing -> Add -> File/stream                           |
+//  |                                                                        |
+//  | It requires youtube-dl (https://github.com/rg3/youtube-dl)             |
+//  |                                                                        |
+//  | In general it should work with:                                        |
+//  | $cfg['python_path'] = '' and  $cfg['youtube-dl_path'] = 'youtube-dl'   |
+//  | but in my case I have to define full path to python and youtube-dl     |
+//  +------------------------------------------------------------------------+
+
+$cfg['python_path'] = '/share/HDA_DATA/.qpkg/Python3/src/bin/python3';
+$cfg['youtube-dl_path'] = '/share/HDA_DATA/Download/youtube-dl/__main__.py';
+$cfg['youtube-dl_options'] = '-j --no-check-certificate --prefer-insecure';
+$cfg['youtube_audio_format_name'] = '140 - audio only (DASH audio)';
+$cfg['youtube_indicator'][] = 'www.youtube.';
+$cfg['youtube_indicator'][] = 'youtu.be/';
+$cfg['youtube_indicator'][] = 'm.youtube.';
+
+
+
+//  +------------------- END OF NEW IN O!MPD 1.04 ---------------------------+
 
 
 //  +------------------------------------------------------------------------+
@@ -176,9 +202,6 @@ $cfg['directory_blacklist'][]       = '.@__thumb';
 //  +------------------------------------------------------------------------+
 
 $cfg['timezone'] = '';
-
-
-//  +------------------- END OF NEW IN O!MPD 1.03 ---------------------------+
 
 
 
@@ -727,6 +750,23 @@ $cfg['search_charset'][]            = 'UTF-8';
 $cfg['search_name'][]               = 'Rate your music';
 $cfg['search_url_artist'][]         = 'http://rateyourmusic.com/search?type=a&searchterm=%artist';
 $cfg['search_url_album'][]          = 'http://rateyourmusic.com/search?type=l&searchterm=%album';
+$cfg['search_url_combined'][]       = '';
+$cfg['search_method'][]             = 'get';
+$cfg['search_charset'][]            = 'UTF-8';
+ 
+ 
+$cfg['search_name'][]               = 'MusicBrainz';
+$cfg['search_url_artist'][]         = 'https://musicbrainz.org/search?query=%artist&type=artist&method=indexed';
+$cfg['search_url_album'][]          = 'https://musicbrainz.org/search?query=%album&type=release_group&method=indexed
+';
+$cfg['search_url_combined'][]       = '';
+$cfg['search_method'][]             = 'get';
+$cfg['search_charset'][]            = 'UTF-8';
+
+
+$cfg['search_name'][]               = 'Youtube';
+$cfg['search_url_artist'][]         = 'https://www.youtube.com/results?search_query=%artist';
+$cfg['search_url_album'][]          = 'https://www.youtube.com/results?search_query=%album';
 $cfg['search_url_combined'][]       = '';
 $cfg['search_method'][]             = 'get';
 $cfg['search_charset'][]            = 'UTF-8';
