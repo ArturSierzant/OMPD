@@ -70,8 +70,8 @@ $cfg['media_dir']                   = '/share/HDA_DATA/ompd/';
 //  | but in my case I have to define full path to python and youtube-dl     |
 //  +------------------------------------------------------------------------+
 
-$cfg['python_path'] = '/share/HDA_DATA/.qpkg/Python3/src/bin/python3';
-$cfg['youtube-dl_path'] = '/share/HDA_DATA/Download/youtube-dl/__main__.py';
+$cfg['python_path'] = '';
+$cfg['youtube-dl_path'] = 'youtube-dl';
 $cfg['youtube-dl_options'] = '-j --no-check-certificate --prefer-insecure';
 $cfg['youtube_audio_format_name'] = '140 - audio only (DASH audio)';
 $cfg['youtube_indicator'][] = 'www.youtube.';
