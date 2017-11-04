@@ -1,7 +1,7 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
-//  | http://www.ompd.pl                                             		 |
+//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
 //  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
@@ -64,6 +64,7 @@ elseif 	($action == 'cacheDeleteProfile')		{cacheDeleteProfile();			batchTransco
 
 elseif	($action == 'externalStorage')			externalStorage();
 elseif	($action == 'deleteExternalStorage')	{deleteExternalStorage();		externalStorage();}
+elseif	($action == 'editSettings')			editSettings();
 
 else	message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]action');
 
@@ -93,7 +94,7 @@ function config() {
 <tr class="header">
 	<td class="space"></td>
 	<td>Session profile</td>
-	<td class="textspace"></td>
+	<td class="space"></td>
 	<td>Comment</td>
 	<td class="space"></td>
 </tr>
@@ -102,7 +103,7 @@ function config() {
 	if ($cfg['access_playlist'] || $cfg['access_play'] || $cfg['access_add'] || $cfg['access_admin']) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td><a href="config.php?action=playerProfile"><i class="fa fa-music fa-fw icon-small"></i>Player&nbsp;profile</a></td>
+	<td class="nowrap"><a href="config.php?action=playerProfile"><i class="fa fa-music fa-fw icon-small"></i>Player&nbsp;profile</a></td>
 	<td></td>
 	<td><?php echo html($cfg['player_name']); ?></td>
 	<td></td>
@@ -112,7 +113,7 @@ function config() {
 	if ($cfg['access_stream'] || $cfg['access_admin']) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td><a href="config.php?action=streamProfile"><i class="fa fa-rss fa-fw icon-small"></i>Stream&nbsp;profile</a></td>
+	<td class="nowrap"><a href="config.php?action=streamProfile"><i class="fa fa-rss fa-fw icon-small"></i>Stream&nbsp;profile</a></td>
 	<td></td>
 	<td><?php echo html($stream); ?></td>
 	<td></td>
@@ -122,7 +123,7 @@ function config() {
 	if ($cfg['access_download'] || $cfg['access_admin']) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td><a href="config.php?action=downloadProfile"><i class="fa fa-download fa-fw icon-small"></i>Download&nbsp;profile</a></td>
+	<td class="nowrap"><a href="config.php?action=downloadProfile"><i class="fa fa-download fa-fw icon-small"></i>Download&nbsp;profile</a></td>
 	<td></td>
 	<td><?php echo html($download); ?></td>
 	<td></td>
@@ -132,7 +133,7 @@ function config() {
 ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td><a href="config.php?action=skinProfile"><i class="fa fa-eye fa-fw icon-small"></i>Skin&nbsp;profile</a></td>
+	<td class="nowrap"><a href="config.php?action=skinProfile"><i class="fa fa-eye fa-fw icon-small"></i>Skin&nbsp;profile</a></td>
 	<td></td>
 	<td><?php echo html($cfg['skin']); ?></td>
 	<td></td>
@@ -141,7 +142,7 @@ function config() {
 <tr class="header">
 	<td class="space"></td>
 	<td>Configuration</td>
-	<td class="textspace"></td>
+	<td class="space"></td>
 	<td>Comment</td>
 	<td class="space"></td>
 </tr>
@@ -151,7 +152,7 @@ function config() {
 	if ($cfg['access_admin'] == false) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td><a href="users.php?action=accessRight"><i class="fa fa-user fa-fw icon-small"></i>Access&nbsp;right</a></td>
+	<td class="nowrap"><a href="users.php?action=accessRight"><i class="fa fa-user fa-fw icon-small"></i>Access&nbsp;right</a></td>
 	<td></td>
 	<td><?php echo html($cfg['username']); ?></td>
 	<td></td>
@@ -161,7 +162,17 @@ function config() {
 	if ($cfg['access_admin']) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td><a href="users.php"><i class="fa fa-users fa-fw icon-small"></i>Users</a></td>
+	<td class="nowrap"><a href="config.php?action=editSettings"><i class="fa fa-cogs fa-fw icon-small"></i>Settings</a></td>
+	<td></td>
+	<td>Edit configuration file (<?php echo choose_config_file(); ?>)</td>
+	<td></td>
+</tr>
+<?php
+	}
+	if ($cfg['access_admin']) { ?>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
+	<td class="nowrap"><a href="users.php"><i class="fa fa-users fa-fw icon-small"></i>Users</a></td>
 	<td></td>
 	<td>Users access rights</td>
 	<td></td>
@@ -171,7 +182,7 @@ function config() {
 	if ($cfg['access_admin']) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td><a href="users.php?action=online">
+	<td class="nowrap"><a href="users.php?action=online">
   <i class="fa fa-bolt fa-fw icon-small"></i>Online</a></td>
 	<td></td>
 	<td>Online in the last 24 hours</td>
@@ -182,7 +193,7 @@ function config() {
 	if ($cfg['access_admin']) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td><a href="users.php?action=userStatistics&amp;period=overall"><i class="fa fa-bar-chart fa-fw icon-small"></i>User statistics</a></td>
+	<td class="nowrap"><a href="users.php?action=userStatistics&amp;period=overall"><i class="fa fa-bar-chart fa-fw icon-small"></i>User&nbsp;statistics</a></td>
 	<td></td>
 	<td>Show user statistics</td>
 	<td></td>
@@ -192,7 +203,7 @@ function config() {
 	if ($cfg['access_statistics']) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td><a href="statistics.php" onclick="showSpinner();"><i class="fa fa-line-chart fa-fw icon-small"></i>Media&nbsp;statistics</a></td>
+	<td class="nowrap"><a href="statistics.php" onclick="showSpinner();"><i class="fa fa-line-chart fa-fw icon-small"></i>Media&nbsp;statistics</a></td>
 	<td></td>
 	<td>Show media statistics</td>
 	<td></td>
@@ -301,7 +312,7 @@ function config() {
 	if ($cfg['access_admin'] && $cfg['php_info']) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td><a href="phpinfo.php"><i class="fa fa-info-circle fa-fw icon-small"></i>PHP information</a></td>
+	<td class="nowrap"><a href="phpinfo.php"><i class="fa fa-info-circle fa-fw icon-small"></i>PHP&nbsp;information</a></td>
 	<td></td>
 	<td>Enabled in the configuration file</td>
 	<td></td>
@@ -1271,4 +1282,25 @@ function deleteExternalStorage() {
 		else						@unlink($entry) or message(__FILE__, __LINE__, 'error', '[b]Failed to delete file:[/b][br]' . $entry);
 	}
 }
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Edit settings                                                          |
+//  +------------------------------------------------------------------------+
+function editSettings() {
+	global $cfg, $db;
+	authenticate('access_admin');
+	
+	// formattedNavigator
+	$nav			= array();
+	$nav['name'][]	= 'Configuration';
+	$nav['url'][]	= 'config.php';
+	$nav['name'][]	= 'Settings (' . choose_config_file() . ')';
+	
+	require_once('include/header.inc.php');
+	require_once('include/settings.inc.php');
+	require_once('include/footer.inc.php');
+}
+
 ?>

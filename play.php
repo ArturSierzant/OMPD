@@ -53,6 +53,7 @@ elseif	($action == 'deleteIndex')		deleteIndex();
 elseif	($action == 'deleteIndexAjax')	deleteIndexAjax();
 elseif	($action == 'deletePlayed')		deletePlayed();
 elseif	($action == 'crop')				crop();
+elseif	($action == 'consume')				consume();
 elseif	($action == 'moveTrack')		moveTrack();
 elseif	($action == 'volumeImageMap')	volumeImageMap();
 elseif	($action == 'toggleMute')		toggleMute();
@@ -1029,7 +1030,7 @@ function deletePlayed() {
 
 
 //  +------------------------------------------------------------------------+
-//  | Crop			                                                         |
+//  | Crop			                                                             |
 //  +------------------------------------------------------------------------+
 function crop() {
 	global $cfg, $db;
@@ -1059,7 +1060,31 @@ function crop() {
 
 
 //  +------------------------------------------------------------------------+
-//  | Move track	                                                         |
+//  | Consume		                                                             |
+//  +------------------------------------------------------------------------+
+function consume() {
+	global $cfg, $db;
+	authenticate('access_play');
+	require_once('include/play.inc.php');
+	
+	$consume = get('consume');
+	if ($consume == '1' || $consume == '0') {
+		mpd('consume ' . $consume);
+	}
+
+	$status = mpd('status');
+	$consume = $status['consume'];
+	$data = array();
+	$data['consume'] =  $consume;
+	
+	echo safe_json_encode($data);
+	
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Move track                                                             |
 //  +------------------------------------------------------------------------+
 function moveTrack() {
 	global $cfg, $db;
@@ -1067,14 +1092,35 @@ function moveTrack() {
 	require_once('include/play.inc.php');
 	
 	$fromPosition		= (int) get('fromPosition');
+	$toPosition  = get('toPosition') == 'playNext' ? 'playNext' : (int) get('toPosition');
+	$isMoveToTop		= get('isMoveToTop');
+	
+	
+	if ($toPosition === 'playNext') {
+		$status = mpd('status');
+		$curPos = (int) $status['song'];
+		if ($curPos > $fromPosition) $toPosition = $curPos;
+		if ($curPos < $fromPosition) $toPosition = $curPos + 1;
+		if ($curPos == $fromPosition) return;
+	}
+	else {
+		if ($fromPosition > $toPosition && $isMoveToTop == 'false') ++$toPosition; //only when moving up but not to top
+	}
+	
+	$comm = 'move ' . $fromPosition . ' ' . $toPosition;
+	mpd($comm);
+	
+
+	
+	/* $fromPosition		= (int) get('fromPosition');
 	$toPosition			= (int) get('toPosition');
 	$isMoveToTop		= get('isMoveToTop');
 	
 	//$status = mpd('status');
 	if ($fromPosition > $toPosition && $isMoveToTop == 'false') ++$toPosition; //only when moving up but not to top
 	$comm = 'move ' . $fromPosition . ' ' . $toPosition;
-	mpd($comm);
-
+	mpd($comm); */
+	
 }
 
 
@@ -1336,6 +1382,7 @@ function playlistStatus() {
 		$data['volume']			= (int) $status['volume'];
 		$data['repeat']			= (int) $status['repeat'];
 		$data['shuffle']		= (int) $status['random'];
+		$data['consume']		= $status['consume'];
 		
 		if (strpos($currentsong['file'],'ompd_title=') !== false){
 			//stream from Youtube

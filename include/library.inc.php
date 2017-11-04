@@ -300,12 +300,14 @@ global $cfg, $db;
 		<div class="menuSubRight" id="menu-sub-track<?php echo $i ?>" onclick='offMenuSub(<?php echo $i ?>);'> 
 		<div class="icon-anchor" id="track<?php echo $i; ?>_delete" <?php if ($cfg['access_play']) 
 		echo 'onclick="javascript:showSpinner();ajaxRequest(\'play.php?action=deleteIndex&amp;index=' . $i . '&amp;menu=playlist\',evaluateListpos);"'; ?>>Remove <i class="fa fa-times-circle fa-fw icon-small"></i></div>
+		<div class="icon-anchor" id="track<?php echo $i; ?>_play_next" <?php if ($cfg['access_play']) 
+		echo 'onclick="javascript:moveTrack(\'playNext\',' . $i . ',false);"'; ?>>Play next <i class="fa fa-caret-square-o-right fa-fw icon-small"></i></div>
 		<div class="icon-anchor" id="track<?php echo $i; ?>_move_top" <?php if ($cfg['access_play']) 
-		echo 'onclick="javascript:moveTrack(0,' . $i . ',true);"'; ?>>Move to top<i class="fa fa-long-arrow-up fa-fw icon-small"></i></div>
+		echo 'onclick="javascript:moveTrack(0,' . $i . ',true);"'; ?>>Move to top <i class="fa fa-long-arrow-up fa-fw icon-small"></i></div>
 		<div class="icon-anchor" id="track<?php echo $i; ?>_move" <?php if ($cfg['access_play']) 
 		echo 'onclick="javascript:toggleInsert(\'on\',' . $i . ')"'; ?>>Move <i class="fa fa-arrows-v fa-fw icon-small"></i></div>
 		<div class="icon-anchor" id="track<?php echo $i; ?>_move_bottom" <?php if ($cfg['access_play']) 
-		echo 'onclick="javascript:moveTrack(' . $bottom . ',' . $i . ',false);"'; ?>>Move to bottom<i class="fa fa-long-arrow-down fa-fw icon-small"></i></div>
+		echo 'onclick="javascript:moveTrack(' . $bottom . ',' . $i . ',false);"'; ?>>Move to bottom <i class="fa fa-long-arrow-down fa-fw icon-small"></i></div>
 		</div>
 		
 	</td>
@@ -1492,5 +1494,67 @@ function array_find_deep($array, $search, $keys = array())
     }
 
     return array();
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Choose right config file to edit                                       |
+//  +------------------------------------------------------------------------+
+
+function choose_config_file()
+{
+    if (file_exists('include/config.local.inc.php')) {
+			return 'include/config.local.inc.php';
+		}
+		
+		if (file_exists('include/config.inc.php')) {
+			return 'include/config.inc.php';
+		}
+
+    return 'not_found';
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Check if jpg image is correct                                          |
+//  | by  willertan1980 at yahoo dot com                                     |
+//  +------------------------------------------------------------------------+
+
+function is_jpg($f){
+# check for jpg file header and footer
+    if ( false !== (@$fd = fopen($f, 'r' )) ){
+			if ( fread($fd,2)==chr(255).chr(216) ){
+				fseek ( $fd, -2, SEEK_END );
+				if ( fread($fd,2)==chr(255).chr(217) ){
+					fclose($fd);
+					return true;
+				}
+				else {
+					fclose($fd);
+					return false;
+				}
+			}
+			else {
+				fclose($fd); 
+				return false;
+			}
+    }
+		else {
+			return false;
+    }
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Check if file is png image                                             |
+//  +------------------------------------------------------------------------+
+
+function is_png($filename){
+	if ((list($width, $height, $type, $attr) = getimagesize($filename)) !== false ) {
+		if ($type == 3) {
+			return true;
+		}
+	}
+	return false;
 }
 ?>

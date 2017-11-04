@@ -1617,6 +1617,9 @@ input, select {
 	margin-top: 1px;
 }
 
+#formSettings {
+	text-align: left;
+}
 
 input.button {
 	cursor: pointer;
@@ -1732,6 +1735,7 @@ span.nav_tree {
 	line-height: 3em;
 	text-transform: uppercase;
 	padding-left: 2px;
+	text-align: left;
 }
 
 
@@ -2296,6 +2300,15 @@ iframe.full {
 }
 
 .pointer 	{cursor: pointer;}
+
+.noselect {
+  -webkit-touch-callout: none;
+    -webkit-user-select: none;
+     -khtml-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; 
+}
 
 .decade	{	color: #e74c3c;
 			padding: 0.5em;

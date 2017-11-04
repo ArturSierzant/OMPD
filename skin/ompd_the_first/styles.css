@@ -1559,6 +1559,9 @@ input, select {
 	margin-top: 1px;
 }
 
+#formSettings {
+	text-align: left;
+}
 
 input.button {
 	cursor: pointer;
@@ -1673,6 +1676,7 @@ span.nav_tree {
 	display: inline-block;
 	line-height: 3em;
 	padding-left: 2px;
+	text-align: left;
 }
 
 
@@ -2257,6 +2261,15 @@ iframe.full {
 }
 .pointer 	{cursor: pointer;}
 
+.noselect {
+  -webkit-touch-callout: none;
+    -webkit-user-select: none;
+     -khtml-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; 
+}
+
 .decade	{	color: #FE5C00;
 			padding: 0.5em;
 			background-color: #EDEDED;
@@ -2429,5 +2442,7 @@ h1 {
     80% { opacity: 0.1; }
     100% { opacity: 1.0; }
 }
+
+
 
 /* other fonts are set by the table, tr or td classes */

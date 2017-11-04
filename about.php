@@ -164,6 +164,11 @@ function about() {
 	<td>
 	<ul style="padding-left: 1em;">
 	<li> added ability to play audio streams from Youtube movies (requires <a href="https://github.com/rg3/youtube-dl" target="_new">youtube-dl</a>)</li>
+	<li> added 'Play next' to track menu in 'Now Playing'</li>
+	<li> added config file editor</li>
+	<li> added consume mode on/off (long press on 'Delete played')</li>
+	<li> added stop function in 'Now Playing' (long press on play/pause button)</li>
+	<li> fixed bugs</li>
 	</ul>
 	<br>
 	</td>
@@ -338,6 +343,20 @@ function about() {
 	<td>Browser</td>
 	<td></td>
 	<td><a href="http://tomicki.net/" target="_new">http://tomicki.net/</a></td>
+	<td></td>
+</tr>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
+	<td>CodeMirror</td>
+	<td></td>
+	<td><a href="http://codemirror.net/" target="_new">http://codemirror.net/</a></td>
+	<td></td>
+</tr>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
+	<td>Longpress</td>
+	<td></td>
+	<td><a href="http://github.com/vaidik/jquery-longpress/" target="_new">http://github.com/vaidik/jquery-longpress/</a></td>
 	<td></td>
 </tr>
 

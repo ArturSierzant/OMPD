@@ -58,7 +58,7 @@ function changeTileSizeInfo() {
 }
 
 function calcTileSize() {
-    var $containerWidth = $(window).width();
+  var $containerWidth = $(window).width();
 	if ($containerWidth > 1280) $containerWidth = 1280;
 	
     if ($containerWidth <= 639) {
@@ -300,6 +300,13 @@ function resizeUsersTab($tileSize,$containerWidth) {
 	$('#usersTab').css('width', function() { 
 	return ($tileCount * $tileSize + (($tileCount - 1) * 2) + 'px'); 
 	});
+}
+
+function resizeFormSettings(containerWidth, myCodeMirror) {
+		if (containerWidth > 1280) {containerWidth = 1280};
+		winH = $(window).height() - $('#menu').height() - 200;
+		if (winH < 200) {winH = 180};
+		myCodeMirror.setSize(containerWidth, winH);
 }
 
 function resizeImgContainer() {
@@ -683,23 +690,30 @@ function toggleInsert(state,i) {
 
 function moveTrack(toPosition,i,isMoveToTop){
 	if (i >= 0) fromPosition = i;
-	if (fromPosition - toPosition == 1) toggleInsert('off',toPosition+1);
-	else toggleInsert('off');
-	console.log('fromPosition: ' + fromPosition + ' toPosition: ' + toPosition);
-	if (fromPosition != toPosition) {
-		if (isMoveToTop) { //move to top
-			$('#track' + fromPosition).insertBefore('#track' + toPosition);
-			$('#track-line' + fromPosition).insertAfter('#track' + fromPosition);
-			$('#track-menu' + fromPosition).insertAfter('#track-line' + fromPosition);
-			showSpinner();
-			ajaxRequest('play.php?action=moveTrack&fromPosition=' + fromPosition + '&toPosition=' + toPosition + '&isMoveToTop=' + isMoveToTop + '&menu=playlist',evaluateListpos);
-		}
-		else if (fromPosition - toPosition != 1){
-			$('#track' + fromPosition).insertAfter('#track-menu' + toPosition);
-			$('#track-line' + fromPosition).insertAfter('#track' + fromPosition);
-			$('#track-menu' + fromPosition).insertAfter('#track-line' + fromPosition);
-			showSpinner();
-			ajaxRequest('play.php?action=moveTrack&fromPosition=' + fromPosition + '&toPosition=' + toPosition + '&isMoveToTop=' + isMoveToTop + '&menu=playlist',evaluateListpos);
+	
+	if (toPosition == 'playNext') {
+		showSpinner();
+		ajaxRequest('play.php?action=moveTrack&fromPosition=' + fromPosition + '&toPosition=' + toPosition + '&isMoveToTop=' + isMoveToTop + '&menu=playlist',evaluateListpos);
+	}
+	else {	
+		if (fromPosition - toPosition == 1) toggleInsert('off',toPosition+1);
+		else toggleInsert('off');
+		console.log('fromPosition: ' + fromPosition + ' toPosition: ' + toPosition);
+		if (fromPosition != toPosition) {
+			if (isMoveToTop) { //move to top
+				/* $('#track' + fromPosition).insertBefore('#track' + toPosition);
+				$('#track-line' + fromPosition).insertAfter('#track' + fromPosition);
+				$('#track-menu' + fromPosition).insertAfter('#track-line' + fromPosition); */
+				showSpinner();
+				ajaxRequest('play.php?action=moveTrack&fromPosition=' + fromPosition + '&toPosition=' + toPosition + '&isMoveToTop=' + isMoveToTop + '&menu=playlist',evaluateListpos);
+			}
+			else if (fromPosition - toPosition != 1){
+				/* $('#track' + fromPosition).insertAfter('#track-menu' + toPosition);
+				$('#track-line' + fromPosition).insertAfter('#track' + fromPosition);
+				$('#track-menu' + fromPosition).insertAfter('#track-line' + fromPosition); */
+				showSpinner();
+				ajaxRequest('play.php?action=moveTrack&fromPosition=' + fromPosition + '&toPosition=' + toPosition + '&isMoveToTop=' + isMoveToTop + '&menu=playlist',evaluateListpos);
+			}
 		}
 	}
 }

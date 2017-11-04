@@ -4,6 +4,9 @@
 //  +------------------------------------------------------------------------+
 if (isset($header) == false)
 	exit();
+
+require_once('include/play.inc.php');
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -13,9 +16,10 @@ if (isset($header) == false)
 <link rel="icon" type="image/png" sizes="196x196" href="image/favicon.png?v=2">
 
 
-<script src="jquery/jquery-1.11.3.min.js"></script>
-<script src="javascript-src/spin.min.js"></script>
-<script src="javascript-src/arts.functions.js"></script>
+<script type="text/javascript" src="jquery/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="javascript-src/spin.min.js"></script>
+<script type="text/javascript" src="javascript-src/arts.functions.js"></script>
+<script type="text/javascript" src="javascript-src/jquery.longpress.js"></script>
  
 <?php
 $query1=mysqli_query($db,'SELECT player.player_name as pl, player.player_host as host, player.player_port as port FROM player, session WHERE (sid = BINARY "' . cookie('netjukebox_sid') . '") and player.player_id=session.player_id');
@@ -217,16 +221,24 @@ $(document).ready(function () {
 	changeTileSizeInfo();
 	resizeImgContainer();
 	addFavSubmenuActions();
+	//edit settings on config page
+	if (typeof myCodeMirror !== 'undefined') {
+		resizeFormSettings($tileSizeArr[1], myCodeMirror);
+	};
 	//hideAddressBar();
 	
 	
 	$(window).resize(function() {
 		setMaxWidth();
-        $tileSizeArr = calcTileSize();
+    $tileSizeArr = calcTileSize();
 		resizeTile($tileSizeArr[0],$tileSizeArr[1]);
 		changeTileSizeInfo();
 		//hideAddressBar();
 		resizeImgContainer();
+		//edit settings on config page
+		if (typeof myCodeMirror !== 'undefined') {
+			resizeFormSettings($tileSizeArr[1], myCodeMirror);
+		};
 		//resizeSuggested($tileSize,$containerWidth);
     });
 	
@@ -407,8 +419,31 @@ $(document).ready(function () {
 		window.location.href = "browser.php?showUpdateSelect=true&dir=" + t;
 	});
 	
+	$('#deletePlayed').longpress(function(e) {
+		
+		ajaxRequest('play.php?action=consume',evaluateConsume);
+		if ($('#deletePlayed').text() == "delete played [Auto]") {
+			ajaxRequest('play.php?action=consume&consume=0',evaluateConsume);
+		}
+		else {
+			ajaxRequest('play.php?action=consume&consume=1',evaluateConsume);
+		}
+	}, function(e) {
+			ajaxRequest('play.php?action=deletePlayed&menu=playlist');
+	});
+	
+	
 });
 
+
+function evaluateConsume(data){
+	if (data.consume == '1') {
+		$('#deletePlayed').text("delete played [Auto]");
+	}
+	else {
+		$('#deletePlayed').text("delete played");
+	}
+}
 
 function evaluateVolume(data) {
 	if (typeof data.player != 'undefined') {
@@ -713,8 +748,19 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 	else if ($cfg['menu'] == 'playlist') {
 	?>
 	<span id="menuMiddleMedia">
+	<a id="deletePlayed" class="pointer noselect">delete played</a>
+	<!-- <a id="deletePlayed" href="javascript:ajaxRequest('play.php?action=deletePlayed&amp;menu=playlist');">delete played</a> --> 
+<?php
+	/* $status = mpd('status');
+	$consume = isset($status['consume']) ? $status['consume'] : '0';
+	if ($consume == '0') {
+			echo '<a id="deletePlayed" class="pointer noselect">delete played</a>';
+	}
+	else if ($consume == '1') {
+			echo '<a id="deletePlayed" class="pointer noselect">delete played [Auto]</a>';
+	} */
+?>
 	
-	<a href="javascript:ajaxRequest('play.php?action=deletePlayed&amp;menu=playlist');">delete played</a>
 	<?php echo $header['seperation']; ?>
 	<a href="javascript:ajaxRequest('play.php?action=crop&amp;menu=playlist');">crop</a>
 	<?php echo $header['seperation']; ?>

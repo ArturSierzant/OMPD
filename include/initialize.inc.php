@@ -167,6 +167,10 @@ if (function_exists('mysqli_connect') == false)
 	message(__FILE__, __LINE__, 'error', '[b]MYSQLi not loaded[/b][list][*]Compile PHP with MYSQL support.[*]Or use a loadable module in the php.ini[/list]');
 if (function_exists('iconv') == false)
 	message(__FILE__, __LINE__, 'error', '[b]ICONV not loaded[/b][list][*]Compile PHP with ICONV support.[*]Or use a loadable module in the php.ini[/list]');
+if (function_exists('json_encode') == false)
+	message(__FILE__, __LINE__, 'error', '[b]JSON not loaded[/b][list][*]Compile PHP with JSON support.[*]Or use a loadable module in the php.ini[/list]');
+if (function_exists('ctype_alnum') == false)
+	message(__FILE__, __LINE__, 'error', '[b]CTYPE not loaded[/b][list][*]Compile PHP with CTYPE support.[*]Or use a loadable module in the php.ini[/list]');
 
 
 

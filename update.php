@@ -938,9 +938,12 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	elseif	(is_file($dir . $cfg['image_back'] . '.png'))	$image_back = $relative_dir . $cfg['image_back'] . '.png';
 	else													$image_back = '';
 
-	
+	cliLog("fileStructure ImageUpdate image_front filesize:");
 	$filesize	= filesize($image);
+	cliLog($filesize);
+	cliLog("fileStructure ImageUpdate image_front filemtime:");
 	$filemtime	= filemtime($image);
+	cliLog($filemtime);
 	
 	$query	= mysqli_query($db,'SELECT filesize, filemtime, image_id, flag FROM bitmap WHERE album_id = "' . $db->real_escape_string($album_id) . '"');
 	$bitmap	= mysqli_fetch_assoc($query);
@@ -957,7 +960,10 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	}
 	else {
 		//$imagesize = @getimagesize($image) or message(__FILE__, __LINE__, 'error', '[b]Failed to read image information from:[/b][br]' . $image);
+		cliLog("fileStructure ImageUpdate image_front getimagesize:");
 		$imagesize = @getimagesize($image) or logImageError();
+		cliLog("w: " . $imagesize[0] . " h: " . $imagesize[1]);
+		cliLog("fileStructure ImageUpdate image_front imagesize flag: " . $flag);
 		$image_id = (($flag == 3) ? $album_id : 'no_image');
 		$image_id .= '_' . base_convert(NJB_IMAGE_SIZE * 100 + NJB_IMAGE_QUALITY, 10, 36) . base_convert($filemtime, 10, 36) . base_convert($filesize, 10, 36);
 		
@@ -1874,25 +1880,35 @@ function resampleImage($image, $size = NJB_IMAGE_SIZE) {
 	if		($extension == 'jpg')	$src_image = @imageCreateFromJpeg($image)	or message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]' . $image);
 	elseif	($extension == 'png')	$src_image = @imageCreateFromPng($image)	or message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]' . $image);
 	 */
-	if ($extension == 'jpg') {
+	 
+	 
+	/* if ($extension == 'jpg') {
+		cliLog("resampleImage jpg");
 		$src_image = @imageCreateFromJpeg($image);
 	}
 	elseif ($extension == 'png') {
+		cliLog("resampleImage png");
 		$src_image = @imageCreateFromPng($image);	
 	}
 	else {
+		cliLog("resampleImage wrong extension");
 		message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]Unsupported extension.');
-	}
+	} */
 	
-	if ($src_image == false) {
+	$src_image = imageCreateFromAny($image);
+	
+	if (!$src_image) {
+		cliLog("resampleImage error");
 		logImageError();
 		return @file_get_contents(NJB_HOME_DIR . 'image/no_image.png');
 	}
 	
-	if ($extension == 'jpg' && imageSX($src_image) == $size && imageSY($src_image) == $size) {
+	if (is_jpg($image) && imageSX($src_image) == $size && imageSY($src_image) == $size) {
+		cliLog("resampleImage data");
 		$data = @file_get_contents($image) or message(__FILE__, __LINE__, 'error', '[b]Failed to open file:[/b][br]' . $image);
 	}
 	elseif (imageSY($src_image) / imageSX($src_image) <= 1) {
+		cliLog("resampleImage crop 1");
 		// Crops from left and right to get a squire image.
 		$sourceWidth		= imageSY($src_image);
 		$sourceHeight		= imageSY($src_image);
@@ -1900,6 +1916,7 @@ function resampleImage($image, $size = NJB_IMAGE_SIZE) {
 		$sourceY			= 0;
 	}
 	else {
+		cliLog("resampleImage crop 2");
 		// Crops from top and bottom to get a squire image.
 		$sourceWidth		= imageSX($src_image);
 		$sourceHeight		= imageSX($src_image);
@@ -1907,41 +1924,73 @@ function resampleImage($image, $size = NJB_IMAGE_SIZE) {
 		$sourceY			= round((imageSY($src_image) - imageSX($src_image)) / 2);
 	}
 	if (isset($sourceWidth)) {
+		cliLog("resampleImage imageCreateTrueColor");
 		$dst_image = ImageCreateTrueColor($size, $size);
+		cliLog("resampleImage imageCopyResampled");
 		imageCopyResampled($dst_image, $src_image, 0, 0, $sourceX, $sourceY, $size, $size, $sourceWidth, $sourceHeight);
 		ob_start();
+		cliLog("resampleImage imageJpeg");
 		imageJpeg($dst_image, NULL, NJB_IMAGE_QUALITY); 
 		$data = ob_get_contents();
 		ob_end_clean();
+		cliLog("resampleImage imageDestroy 1");
 		imageDestroy($dst_image);
 	}
-	
+	cliLog("resampleImage imageDestroy 2");
 	imageDestroy($src_image);
-	
+	cliLog("resampleImage done");
 	//cliLog("image data: " . $data);
 	
 	return $data;
 }
 
-
-/*
 //  +------------------------------------------------------------------------+
-//  | Resample image   (OBVIOUSLY UNUSED)                                    |
+//  | Create image from any file type by                                     |
+//  | matt dot squirrell dot php at hsmx dot com                             |
 //  +------------------------------------------------------------------------+
-Function noResampleImage($image, $size = NJB_IMAGE_SIZE) {
-
-    // TODO: check what this shitty piece of code should do.
-    // currently the only effect of the variable $src_image is to fuck our memory, right?
-    // lets comment next 4 lines...
-    //$extension = strtolower(substr(strrchr($image, '.'), 1));
-	//if		($extension == 'jpg')	$src_image = @imageCreateFromJpeg($image)	or message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]' . $image);
-	//elseif	($extension == 'png')	$src_image = @imageCreateFromPng($image)	or message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]' . $image);
-	//else																		message(__FILE__, __LINE__, 'error', '[b]Failed to resample image:[/b][br]Unsupported extension.');
-	
-	return @file_get_contents($image) or message(__FILE__, __LINE__, 'error', '[b]Failed to open file:[/b][br]' . $image);
-}
-*/
-
+function imageCreateFromAny($filepath) {
+		//cliLog("imageCreateFromAny exif_imagetype");
+		
+    /* $type = exif_imagetype($filepath); // [] if you don't have exif you could use getImageSize()
+    $allowedTypes = array(
+        // 1,  // [] gif
+        2,  // [] jpg
+        3  // [] png
+        //6   // [] bmp
+    );
+    if (!in_array($type, $allowedTypes)) {
+        return false;
+    } */
+		
+		cliLog("imageCreateFromAny check file");
+		if (is_jpg($filepath)) {
+			$type = 2; //jpg file
+		}
+		else if (is_png($filepath)) {
+			$type = 3; //png file
+		}
+		else {
+			return false;
+		}
+		
+    switch ($type) {
+        case 1 :
+            $im = imageCreateFromGif($filepath);
+        break;
+        case 2 :
+						cliLog("imageCreateFromAny exif_imagetype JPG");
+            $im = imageCreateFromJpeg($filepath);
+        break;
+        case 3 :
+						cliLog("imageCreateFromAny exif_imagetype PNG");
+            $im = imageCreateFromPng($filepath);
+        break;
+        case 6 :
+            $im = imageCreateFromBmp($filepath);
+        break;
+    }   
+    return $im; 
+} 
 
 //  +------------------------------------------------------------------------+
 //  | Mark images with error                                                 |
