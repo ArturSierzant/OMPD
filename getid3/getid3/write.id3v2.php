@@ -38,7 +38,7 @@ class getid3_write_id3v2
 		// File MUST be writeable - CHMOD(646) at least. It's best if the
 		// directory is also writeable, because that method is both faster and less susceptible to errors.
 
-		if (!empty($this->filename) && (is_writeable($this->filename) || (!file_exists($this->filename) && is_writeable(dirname($this->filename))))) {
+		if (!empty($this->filename) && (getID3::is_writable($this->filename) || (!file_exists($this->filename) && getID3::is_writable(dirname($this->filename))))) {
 			// Initialize getID3 engine
 			$getID3 = new getID3;
 			$OldThisFileInfo = $getID3->analyze($this->filename);
@@ -57,12 +57,12 @@ class getid3_write_id3v2
 
 			if ($NewID3v2Tag = $this->GenerateID3v2Tag()) {
 
-				if (file_exists($this->filename) && is_writeable($this->filename) && isset($OldThisFileInfo['id3v2']['headerlength']) && ($OldThisFileInfo['id3v2']['headerlength'] == strlen($NewID3v2Tag))) {
+				if (file_exists($this->filename) && getID3::is_writable($this->filename) && isset($OldThisFileInfo['id3v2']['headerlength']) && ($OldThisFileInfo['id3v2']['headerlength'] == strlen($NewID3v2Tag))) {
 
 					// best and fastest method - insert-overwrite existing tag (padded to length of old tag if neccesary)
 					if (file_exists($this->filename)) {
 
-						if (is_readable($this->filename) && is_writable($this->filename) && is_file($this->filename) && ($fp = fopen($this->filename, 'r+b'))) {
+						if (is_readable($this->filename) && getID3::is_writable($this->filename) && is_file($this->filename) && ($fp = fopen($this->filename, 'r+b'))) {
 							rewind($fp);
 							fwrite($fp, $NewID3v2Tag, strlen($NewID3v2Tag));
 							fclose($fp);
@@ -72,7 +72,7 @@ class getid3_write_id3v2
 
 					} else {
 
-						if (is_writable($this->filename) && is_file($this->filename) && ($fp = fopen($this->filename, 'wb'))) {
+						if (getID3::is_writable($this->filename) && is_file($this->filename) && ($fp = fopen($this->filename, 'wb'))) {
 							rewind($fp);
 							fwrite($fp, $NewID3v2Tag, strlen($NewID3v2Tag));
 							fclose($fp);
@@ -86,7 +86,7 @@ class getid3_write_id3v2
 
 					if ($tempfilename = tempnam(GETID3_TEMP_DIR, 'getID3')) {
 						if (is_readable($this->filename) && is_file($this->filename) && ($fp_source = fopen($this->filename, 'rb'))) {
-							if (is_writable($tempfilename) && is_file($tempfilename) && ($fp_temp = fopen($tempfilename, 'wb'))) {
+							if (getID3::is_writable($tempfilename) && is_file($tempfilename) && ($fp_temp = fopen($tempfilename, 'wb'))) {
 
 								fwrite($fp_temp, $NewID3v2Tag, strlen($NewID3v2Tag));
 
@@ -137,7 +137,7 @@ class getid3_write_id3v2
 	public function RemoveID3v2() {
 		// File MUST be writeable - CHMOD(646) at least. It's best if the
 		// directory is also writeable, because that method is both faster and less susceptible to errors.
-		if (is_writeable(dirname($this->filename))) {
+		if (getID3::is_writable(dirname($this->filename))) {
 
 			// preferred method - only one copying operation, minimal chance of corrupting
 			// original file if script is interrupted, but required directory to be writeable
@@ -155,7 +155,7 @@ class getid3_write_id3v2
 				if ($OldThisFileInfo['avdataoffset'] !== false) {
 					fseek($fp_source, $OldThisFileInfo['avdataoffset']);
 				}
-				if (is_writable($this->filename) && is_file($this->filename) && ($fp_temp = fopen($this->filename.'getid3tmp', 'w+b'))) {
+				if (getID3::is_writable($this->filename) && is_file($this->filename) && ($fp_temp = fopen($this->filename.'getid3tmp', 'w+b'))) {
 					while ($buffer = fread($fp_source, $this->fread_buffer_size)) {
 						fwrite($fp_temp, $buffer, strlen($buffer));
 					}
@@ -172,7 +172,7 @@ class getid3_write_id3v2
 			}
 			rename($this->filename.'getid3tmp', $this->filename);
 
-		} elseif (is_writable($this->filename)) {
+		} elseif (getID3::is_writable($this->filename)) {
 
 			// less desirable alternate method - double-copies the file, overwrites original file
 			// and could corrupt source file if the script is interrupted or an error occurs.
@@ -195,7 +195,7 @@ class getid3_write_id3v2
 						fwrite($fp_temp, $buffer, strlen($buffer));
 					}
 					fclose($fp_source);
-					if (is_writable($this->filename) && is_file($this->filename) && ($fp_source = fopen($this->filename, 'wb'))) {
+					if (getID3::is_writable($this->filename) && is_file($this->filename) && ($fp_source = fopen($this->filename, 'wb'))) {
 						rewind($fp_temp);
 						while ($buffer = fread($fp_temp, $this->fread_buffer_size)) {
 							fwrite($fp_source, $buffer, strlen($buffer));
@@ -1979,7 +1979,7 @@ class getid3_write_id3v2
 			$ID3v2ShortFrameNameLookup[2]['text']                              = 'TXX';
 			$ID3v2ShortFrameNameLookup[2]['year']                              = 'TYE';
 			$ID3v2ShortFrameNameLookup[2]['unique_file_identifier']            = 'UFI';
-			$ID3v2ShortFrameNameLookup[2]['unsychronised_lyric']               = 'ULT';
+			$ID3v2ShortFrameNameLookup[2]['unsynchronised_lyric']              = 'ULT';
 			$ID3v2ShortFrameNameLookup[2]['url_file']                          = 'WAF';
 			$ID3v2ShortFrameNameLookup[2]['url_artist']                        = 'WAR';
 			$ID3v2ShortFrameNameLookup[2]['url_source']                        = 'WAS';
@@ -2054,7 +2054,7 @@ class getid3_write_id3v2
 			$ID3v2ShortFrameNameLookup[3]['text']                              = 'TXXX';
 			$ID3v2ShortFrameNameLookup[3]['unique_file_identifier']            = 'UFID';
 			$ID3v2ShortFrameNameLookup[3]['terms_of_use']                      = 'USER';
-			$ID3v2ShortFrameNameLookup[3]['unsychronised_lyric']               = 'USLT';
+			$ID3v2ShortFrameNameLookup[3]['unsynchronised_lyric']              = 'USLT';
 			$ID3v2ShortFrameNameLookup[3]['commercial_information']            = 'WCOM';
 			$ID3v2ShortFrameNameLookup[3]['copyright']                         = 'WCOP';
 			$ID3v2ShortFrameNameLookup[3]['url_file']                          = 'WOAF';

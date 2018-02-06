@@ -34,6 +34,18 @@ require_once('include/cache.inc.php');
 $cfg['menu'] = 'config';
 @ob_flush();
 flush();
+
+authenticate('access_statistics');
+
+// formattedNavigator
+$nav			= array();
+$nav['name'][]	= 'Configuration';
+$nav['url'][]	= 'config.php';
+$nav['name'][]	= 'Media statistics';
+$nav['url'][]	= 'statistics.php';
+$nav['name'][]	= $title;
+require_once('include/header.inc.php');
+
 $action	 			= get('action');
 $audio_dataformat 	= get('audio_dataformat');
 $video_dataformat	= get('video_dataformat');
@@ -164,17 +176,6 @@ elseif 	($action == 'fileError')				fileError();
 elseif 	($action == 'deleteFile')				deleteFile();
 elseif	($action == '')							mediaStatistics();
 else											message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]action');
-
-authenticate('access_statistics');
-
-// formattedNavigator
-$nav			= array();
-$nav['name'][]	= 'Configuration';
-$nav['url'][]	= 'config.php';
-$nav['name'][]	= 'Media statistics';
-$nav['url'][]	= 'statistics.php';
-$nav['name'][]	= $title;
-require_once('include/header.inc.php');
 
 ?>
 

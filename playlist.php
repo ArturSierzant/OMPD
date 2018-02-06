@@ -356,7 +356,10 @@ for ($i=0; $i < $listlength; $i++) {
 		if ($l > 1) {
 			for ($j=0; $j<$l; $j++) {
 				$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$j]) . '">' . html($exploded[$j]) . '</a>';
-				if ($j != $l - 1) $artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($table_track['track_artist']) . '&amp;order=year"><span class="artist_all">&</span></a>';
+				if ($j != $l - 1) {
+					$delimiter = getInbetweenStrings($exploded[$j],$exploded[$j + 1], $table_track['track_artist']);
+					$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($table_track['track_artist']) . '&amp;order=year"><span class="artist_all">' . $delimiter[0] . '</span></a>';
+				}
 			}
 			echo $artist;
 		}
@@ -459,7 +462,9 @@ var fromPosition			= -1
 $("#time").click(function(){
 	$.ajax({url: "play.php?action=beginOfTrack&menu=playlist"});
 });
-
+<?php 
+if ($cfg['testing'] == 'on') echo "var testing = 'on';";
+?>
 
 function hidePL() {
 	window.scrollTo(0,0);
@@ -842,7 +847,11 @@ function evaluateTrack(data) {
 		for (i=0; i<l; i++) {
 			artist = artist + '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[i]) + '">' + data.track_artist[i] + '</a>';
 			if (i!=l-1) {
-			artist = artist + '<a href="index.php?action=view2&order=artist&sort=asc&artist=' + data.track_artist_url_all + '"><span class="artist_all">&</span></a>'
+				var delimiter = data.track_artist_all.match(data.track_artist_url[i] + "(.*)" + data.track_artist_url[i+1]);
+				if (testing == 'on') {
+					delimiter[1] = delimiter[1].replace(';','&');
+				}
+				artist = artist + '<a href="index.php?action=view2&order=artist&sort=asc&artist=' + data.track_artist_url_all + '"><span class="artist_all">' + delimiter[1] + '</span></a>';
 			}
 		}
 	} 

@@ -11,8 +11,9 @@ require_once('include/play.inc.php');
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale: 1, minimal-ui">
-<meta name="mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale: 1, minimal-ui" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#2c3e50" />
 <link rel="icon" type="image/png" sizes="196x196" href="image/favicon.png?v=2">
 
 

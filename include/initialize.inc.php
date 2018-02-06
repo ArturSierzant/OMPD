@@ -165,6 +165,8 @@ if (function_exists('imagecreatetruecolor') == false)
 	message(__FILE__, __LINE__, 'error', '[b]GD2 not loaded[/b][list][*]Compile PHP with GD2 support.[*]Or use a loadable module in the php.ini[/list]');
 if (function_exists('mysqli_connect') == false)
 	message(__FILE__, __LINE__, 'error', '[b]MYSQLi not loaded[/b][list][*]Compile PHP with MYSQL support.[*]Or use a loadable module in the php.ini[/list]');
+if (function_exists('mb_convert_encoding') == false)
+	message(__FILE__, __LINE__, 'error', '[b]MBSTRING not loaded[/b][list][*]Compile PHP with MBSTRING support.[*]Or use a loadable module in the php.ini[/list]');
 if (function_exists('iconv') == false)
 	message(__FILE__, __LINE__, 'error', '[b]ICONV not loaded[/b][list][*]Compile PHP with ICONV support.[*]Or use a loadable module in the php.ini[/list]');
 if (function_exists('json_encode') == false)

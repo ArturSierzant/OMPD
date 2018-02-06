@@ -352,7 +352,10 @@ function view1() {
 		if ($l > 1) {
 			for ($j=0; $j<$l; $j++) {
 				$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$j]) . '">' . html($exploded[$j]) . '</a>';
-				if ($j != $l - 1) $artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($album['artist']) . '&amp;order=year"><span class="artist_all">&</span></a>';
+				if ($j != $l - 1){
+					$delimiter = getInbetweenStrings($exploded[$j],$exploded[$j + 1], $album['artist']);
+					$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($album['artist']) . '&amp;order=year"><span class="artist_all">' . $delimiter[0] . '</span></a>';
+				}
 			}
 			echo $artist;
 		}
@@ -841,8 +844,30 @@ if ($filter == 'whole' && !$genre_id && !$year) {
 	<?php if ($cfg['access_add'])  echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;track_id=' . $track['tid'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . $track['number'] . '\');" onMouseOut="return nd();"><i id="add_' . $track['tid'] . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';?>
 	</span>
 	</td>
-		
+	<!--	
 	<td class="track-list-artist"><?php if (mysqli_num_rows(mysqli_query($db, 'SELECT track_id FROM track WHERE track.artist="' .  mysqli_real_escape_string($db,$track['track_artist']) . '"')) > 1) echo '<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['track_artist']) . '&amp;order=year">' . html($track['track_artist']) . '</a>'; else echo html($track['track_artist']); ?></td>
+	-->
+	
+	<td class="track-list-artist">
+	<?php 
+	$artist = '';
+	$exploded = multiexplode($cfg['artist_separator'],$track['track_artist']);
+	$l = count($exploded);
+	if ($l > 1) {
+		for ($i=0; $i<$l; $i++) {
+			$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$i]) . '">' . html($exploded[$i]) . '</a>';
+			if ($i != $l - 1) {
+				$delimiter = getInbetweenStrings($exploded[$i],$exploded[$i + 1], $track['track_artist']);
+				$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['track_artist']) . '&amp;order=year"><span 	class="artist_all">' . $delimiter[0] . '</span></a>';
+			}
+		}
+		echo $artist;
+	}
+	else {
+		echo '<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['track_artist']) . '&amp;order=year">' . html($track['track_artist']) . '</a>';
+	} 
+	?>
+	</td>
 	
 	<td><?php if ($cfg['access_play']) 		echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id=' . $track['tid'] . '\');" onMouseOver="return overlib(\'Play track ' . $track['number'] . '\');" onMouseOut="return nd();">' . html($track['title']) . '</a>';
 			elseif ($cfg['access_add'])		echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;track_id=' . $track['tid'] . '\');" onMouseOver="return overlib(\'Add track\');" onMouseOut="return nd();">' . html($track['title']) . '</a>';
@@ -924,7 +949,7 @@ if ($filter == 'whole' && !$genre_id && !$year) {
 		$favorites = mysqli_fetch_assoc($queryFav);
 		$favId = $favorites['favorite_id'];
 		
-		$queryFav = mysqli_query($db, 'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number
+		$queryFav = mysqli_query($db, 'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id,  track.miliseconds, track.number
 		FROM track
 		INNER JOIN favoriteitem ON track.track_id = favoriteitem.track_id '
 		. $filter_query . 
@@ -963,7 +988,7 @@ if ($filter == 'whole' && !$genre_id && !$year) {
 	
 	$search_string = get('artist');
 	$filter_query = str_replace('artist ','track.artist ',$filter_query);
-	$queryFav = mysqli_query($db, 'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, favoriteitem.favorite_id, album.album
+	$queryFav = mysqli_query($db, 'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.relative_file, track.miliseconds, track.number, favoriteitem.favorite_id, album.album
 		FROM track
 		INNER JOIN favoriteitem ON track.track_id = favoriteitem.track_id 
 		LEFT JOIN album ON track.album_id = album.album_id '
@@ -1056,6 +1081,7 @@ if ($resultsFound == false && $group_found == 'none') echo 'No results found.';
 <tr style="display:none" class="smallspace"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
 <tr style="display:none" class="line"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
 <?php
+	$filter_query = str_replace('track.artist ','artist ',$filter_query);
 	$query = mysqli_query($db, 'SELECT artist FROM album ' . $filter_query . ' GROUP BY artist');
 	if ((mysqli_num_rows($query) < 2) && $display_all_tracks) {
 		$album = mysqli_fetch_assoc($query);
@@ -1065,7 +1091,8 @@ if ($resultsFound == false && $group_found == 'none') echo 'No results found.';
 ?>
 
 <tr class="footer">
-	<td colspan="<?php echo $colombs; ?>">&nbsp;<a href="index.php?action=view3all&amp;artist=<?php echo rawurlencode($album['artist']); ?>&amp;order=title">View all tracks from <?php echo html($album['artist']); ?> 
+	<td colspan="<?php echo $colombs; ?>">&nbsp;
+	<a href="index.php?action=view3all&amp;artist=<?php echo rawurlencode($album['artist']); ?>&amp;order=title">View all tracks from <?php echo html($album['artist']); ?> 
 	<!-- <?php echo ($tracks + $rowsTA) . ((($tracks + $rowsTA) == 1) ? ' track from ' : ' tracks from ') . html($album['artist']); ?> -->
 	</a></td>
 	<td></td>
@@ -1328,7 +1355,10 @@ function view3() {
 		if ($l > 1) {
 			for ($i=0; $i<$l; $i++) {
 				$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$i]) . '">' . html($exploded[$i]) . '</a>';
-				if ($i != $l - 1) $artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($album['artist']) . '&amp;order=year"><span class="artist_all">&</span></a>';
+				if ($i != $l - 1) {
+					$delimiter = getInbetweenStrings($exploded[$i],$exploded[$i + 1], $album['artist']);
+					$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($album['artist']) . '&amp;order=year"><span 	class="artist_all">' . $delimiter[0] . '</span></a>';
+				}
 			}
 			echo $artist;
 		}
@@ -1711,7 +1741,10 @@ Other versions of this album:
 						if ($l > 1) {
 							for ($j=0; $j<$l; $j++) {
 								$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$j]) . '">' . html($exploded[$j]) . '</a>';
-								if ($j != $l - 1) $artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['track_artist']) . '&amp;order=year"><span class="artist_all">&</span></a>';
+								if ($j != $l - 1) {
+									$delimiter = getInbetweenStrings($exploded[$j],$exploded[$j + 1], $track['track_artist']);
+									$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['track_artist']) . '&amp;order=year"><span class="artist_all">' . $delimiter[0] . '</span></a>';
+								}
 							}
 							echo $artist;
 						}

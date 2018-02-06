@@ -19,7 +19,7 @@
 //  +------------------------------------------------------------------------+
 
 
-$thumbnail = $_GET['thumbnail'];
+$thumbnail = str_replace('https://','http://',$_GET['thumbnail']);
 
 $img = imagecreatefromjpeg($thumbnail);
 if ($img) {

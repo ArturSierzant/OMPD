@@ -57,18 +57,20 @@ $cfg['media_dir']                   = '/share/HDA_DATA/ompd/';
 //  +------------------- NEW IN O!MPD 1.04 ----------------------------------+
 
 
-//  +------------------------------------------------------------------------+
-//  | Play audio from Youtube                                                |
-//  +------------------------------------------------------------------------+
-//  | You can listen to YT movie audio stream by inserting address of YT     |
-//  | movie into Now Playing -> Add -> File/stream                           |
-//  |                                                                        |
-//  | It requires youtube-dl (https://github.com/rg3/youtube-dl)             |
-//  |                                                                        |
-//  | In general it should work with:                                        |
-//  | $cfg['python_path'] = '' and  $cfg['youtube-dl_path'] = 'youtube-dl'   |
-//  | but in my case I have to define full path to python and youtube-dl     |
-//  +------------------------------------------------------------------------+
+//  +------------------------------------------------------------------------------+
+//  | Play audio from Youtube                                                      |
+//  +------------------------------------------------------------------------------+
+//  | You can listen to YT movie audio stream by inserting address of YT           |
+//  | movie into Now Playing -> Add -> File/stream                                 |
+//  |                                                                              |
+//  | It requires youtube-dl (https://github.com/rg3/youtube-dl)                   |
+//  |                                                                              |
+//  | In general it should work with:                                              |
+//  | $cfg['python_path'] = '' and  $cfg['youtube-dl_path'] = 'youtube-dl'         |
+//  | but in my case I have to define full path to python and youtube-dl:          |
+//  | $cfg['python_path'] = '/share/HDA_DATA/.qpkg/Python3/src/bin/python3';       |
+//  | $cfg['youtube-dl_path'] = '/share/HDA_DATA/Download/youtube-dl/__main__.py'; |
+//  +------------------------------------------------------------------------------+
 
 $cfg['python_path'] = '';
 $cfg['youtube-dl_path'] = 'youtube-dl';

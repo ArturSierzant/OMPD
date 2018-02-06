@@ -586,11 +586,12 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 						mpd('play ' . $index);
 					break; */
 				}
-				if ($playAfterInsert) {mpd('play ' . $insPos);}
-				if ($first && $mode == 'play')
-					mpd('play ' . $index);
 			}
 			$n++;
+			if ($playAfterInsert) {mpd('play ' . $insPos);}
+			if ($first && $mode == 'play') {
+				mpd('play ' . $index);
+			}
 			$first = false;
 		
 	}
@@ -1526,6 +1527,7 @@ function playlistTrack() {
 		
 		$data['album_artist'] = (string) ($track['album_artist'] == "Various Artists") ? rawurlencode($track['track_artist']) : rawurlencode($track['album_artist']);
 		$data['track_artist']	= $exploded;
+		$data['track_artist_all']	= $track['track_artist'];
 		$data['track_artist_url']	= $exploded;
 		$data['track_artist_url_all']	= (string) rawurlencode($track['track_artist']);
 		$data['title']		= (string) $track['title'];

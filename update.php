@@ -500,10 +500,19 @@ function recursiveScan($dir) {
 	
 	$dir = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $dir);
 	
+	//change full dir to relative dir to allow moving O!MPD from one
+	//server to another with different media dirs
+	if ($cfg['testing']=='on') {
+		$rel_dir = str_replace($cfg['media_dir'],'',$dir);
+	}
+	else {
+		$rel_dir = $dir;
+	}
+	
 	if ($isIdFromFile) {
 		$db->query("
 			UPDATE album_id
-			SET updated = '1', path = '" . $db->real_escape_string($dir) . "'
+			SET updated = '1', path = '" . $db->real_escape_string($rel_dir) . "'
 			WHERE album_id = '" . $db->real_escape_string($album_id) . "'
 			LIMIT 1"
 		);
@@ -512,11 +521,18 @@ function recursiveScan($dir) {
 		$db->query("
 			UPDATE album_id
 			SET updated = '1'
-			WHERE path = '" . $db->real_escape_string($dir) . "'
+			WHERE path = '" . $db->real_escape_string($rel_dir) . "'
 			LIMIT 1"
 		);
 	}
-    if ($db->affected_rows == 0) {
+	cliLog('update results: ' . 	$db->info);
+	// Parse the digits from the info string that has the following format:
+	// Rows matched: 0 Changed: 0 Warnings: 0
+	preg_match_all('!\d+!', $db->info, $m);
+	// use 'Rows matched' because in some cases $db->affected_rows returned 0 
+	// if record was found but didn't need to be updated
+    //if ($db->affected_rows == 0) {
+    if ((int)$m[0][0] == 0) {
         $album_id = ($album_id == '') ? base_convert(uniqid(), 16, 36) : $album_id;
         $album_add_time = time();
         $db->query("
@@ -524,14 +540,14 @@ function recursiveScan($dir) {
                 (album_id, path, album_add_time, updated)
             VALUES
                 ('" . $album_id . "',
-                '" . $db->real_escape_string($dir) . "',
+                '" . $db->real_escape_string($rel_dir) . "',
                 '" . $album_add_time . "','1')"
         );
     } else {
         $result = $db->query("
            SELECT album_id, album_add_time
            FROM album_id
-           WHERE path = '" . $db->real_escape_string($dir) . "'
+           WHERE path = '" . $db->real_escape_string($rel_dir) . "'
            LIMIT 1"
         );
         $row = $result->fetch_assoc();
@@ -688,11 +704,13 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	
 	if ($isUpdateRequired) {
 		cliLog("fileStructure file[0]: " . $file[0]);
-
+	
 		$file_d = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file[0]);
 		
 		$ThisFileInfo = $getID3->analyze($file_d);
 		getid3_lib::CopyTagsToComments($ThisFileInfo); 
+		
+		cliLog('getid3 ok');
 		
 		$artist = parseAlbumArtist($ThisFileInfo);
 		
@@ -780,7 +798,9 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 				WHERE album_id		= "' . $db->real_escape_string($album_id) . '"
 				AND relative_file	= BINARY "' . $db->real_escape_string($relative_file) . '"
 				LIMIT 1');
-			if ($cfg['force_filename_update'] || mysqli_affected_rows($db) == 0)
+			preg_match_all('!\d+!', $db->info, $m);	
+			//if ($cfg['force_filename_update'] || mysqli_affected_rows($db) == 0)
+			if ($cfg['force_filename_update'] || (int)$m[0][0] == 0)
 				{
 				$temp = decodeEscapeChar($filename[$i]);
 				if ($cfg['name_source'] != 'tags') {
@@ -815,7 +835,8 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 				}	
 				
 				
-				if (mysqli_affected_rows($db) == 0)
+				//if (mysqli_affected_rows($db) == 0)
+				if ((int)$m[0][0] == 0)
 					mysqli_query($db,'INSERT INTO track (artist, featuring, title, relative_file, disc, number, album_id, updated)
 						VALUES ("' . $db->real_escape_string($track_artist) . '",
 						"' . $db->real_escape_string($featuring) . '",
@@ -1022,8 +1043,10 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 		WHERE album_id		= "' . $db->real_escape_string($album_id) . '"
 		LIMIT 1');
 	}
-	if (mysqli_affected_rows($db) == 0)
-		mysqli_query($db,'INSERT INTO album (artist_alphabetic, artist, album, year, month, genre_id, album_add_time, discs, image_id, album_id, updated, album_dr)
+	preg_match_all('!\d+!', $db->info, $m);
+	//if (mysqli_affected_rows($db) == 0)
+	if ((int)$m[0][0] == 0)
+	mysqli_query($db,'INSERT INTO album (artist_alphabetic, artist, album, year, month, genre_id, album_add_time, discs, image_id, album_id, updated, album_dr)
 			VALUES (
 			"' . $db->real_escape_string($artist_alphabetic) . '",
 			"' . $db->real_escape_string($artist) . '",

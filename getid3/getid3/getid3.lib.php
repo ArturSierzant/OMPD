@@ -293,6 +293,9 @@ class getid3_lib
 		return self::BigEndian2Int(strrev($byteword), false, $signed);
 	}
 
+	public static function LittleEndian2Bin($byteword) {
+		return self::BigEndian2Bin(strrev($byteword));
+	}
 
 	public static function BigEndian2Bin($byteword) {
 		$binvalue = '';
@@ -1416,6 +1419,31 @@ class getid3_lib
 			}
 		}
 		return $filesize;
+	}
+
+	public static function truepath($filename) {
+// 2017-11-08: this could use some improvement, patches welcome
+		if (preg_match('#^(\\\\\\\\|//)[a-z0-9]#i', $filename, $matches)) {
+			// PHP's built-in realpath function does not work on UNC Windows shares
+			$goodpath = array();
+			foreach (explode('/', str_replace('\\', '/', $filename)) as $part) {
+				if ($part == '.') {
+					continue;
+				}
+				if ($part == '..') {
+					if (count($goodpath)) {
+						array_pop($goodpath);
+					} else {
+						// cannot step above this level, already at top level
+						return false;
+					}
+				} else {
+					$goodpath[] = $part;
+				}
+			}
+			return implode(DIRECTORY_SEPARATOR, $goodpath);
+		}
+		return realpath($filename);
 	}
 
 

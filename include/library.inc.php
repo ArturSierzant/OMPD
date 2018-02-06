@@ -51,15 +51,30 @@ function draw_tile($size,$album,$multidisc = '') {
 
 
 //  +---------------------------------------------------------------------------+
+//  | getInbetweenStrings by https://stackoverflow.com/users/520896/ravi-verma  |
+//  +---------------------------------------------------------------------------+
+
+function getInbetweenStrings($start, $end, $str){
+		global $cfg;
+    $matches = array();
+    $regex = "/$start(.*?)$end/";
+    preg_match_all($regex, $str, $matches);
+		if ($cfg['testing'] == 'on') $matches[1] = str_replace(";","&",$matches[1]);
+    return $matches[1];
+}
+
+
+//  +---------------------------------------------------------------------------+
 //  | multiexplode by php at metehanarslan dot com                              |
 //  +---------------------------------------------------------------------------+
 
 function multiexplode ($delimiters,$string) {
     if (empty($delimiters)) {
-        return array($string);
+        return ($string);
     }
     $ready = str_ireplace($delimiters, $delimiters[0], $string);
     $launch = explode($delimiters[0], $ready);
+		
     return  $launch;
 }		
 		
@@ -1371,6 +1386,7 @@ function find_all_files($dir){
 function albumMultidisc($query){
 	global $cfg, $db;
 	$album_multidisc = array();
+	$mdTab = array();
 	while ($album = mysqli_fetch_assoc($query)) {		
 		$multidisc_count = 0;
 		if ($album) {

@@ -26,7 +26,7 @@ While netjukebox also supports VideoLAN and Winamp/httpQ, O!MPD supports O!nly M
 
 ## O!MPD requirements
 
-- PHP 5.2.0 or later with extension: GD2, ICONV and MySQLi  
+- PHP 5.2.0 or later with extension: GD2, ICONV, MBSTRING, MYSQLi, JSON and CTYPE  
 - MySQL 4.1.0 or later
 - Music Player Daemon (MPD)
 
