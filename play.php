@@ -871,8 +871,10 @@ function seekImageMap() {
 		$parts = parse_url($currentsong['file']);
 		parse_str($parts['query'], $url_query);
 		$track_id = $url_query['track_id'];
-		
-		$query = mysqli_query($db,'SELECT miliseconds FROM track WHERE relative_file = "' . mysqli_real_escape_string($db,$currentsong['file']) . '" OR track_id = "' .$track_id . '"');
+		if ($track_id) 
+			$query = mysqli_query($db,'SELECT miliseconds FROM track WHERE relative_file = "' . mysqli_real_escape_string($db,$currentsong['file']) . '" OR track_id = "' .$track_id . '"');
+		else
+			$query = mysqli_query($db,'SELECT miliseconds FROM track WHERE relative_file = "' . mysqli_real_escape_string($db,$currentsong['file']) . '"');
 		
 		$track = mysqli_fetch_assoc($query);
 		if ($track)

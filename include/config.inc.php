@@ -71,6 +71,7 @@ $cfg['media_dir']                   = '/share/HDA_DATA/ompd/';
 //  | $cfg['python_path'] = '/share/HDA_DATA/.qpkg/Python3/src/bin/python3';       |
 //  | $cfg['youtube-dl_path'] = '/share/HDA_DATA/Download/youtube-dl/__main__.py'; |
 //  +------------------------------------------------------------------------------+
+unset($cfg['youtube_indicator']);
 
 $cfg['python_path'] = '';
 $cfg['youtube-dl_path'] = 'youtube-dl';

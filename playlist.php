@@ -462,9 +462,9 @@ var fromPosition			= -1
 $("#time").click(function(){
 	$.ajax({url: "play.php?action=beginOfTrack&menu=playlist"});
 });
-<?php 
-if ($cfg['testing'] == 'on') echo "var testing = 'on';";
-?>
+ 
+var testing = '<?php echo $cfg['testing']; ?>';
+
 
 function hidePL() {
 	window.scrollTo(0,0);
@@ -842,25 +842,27 @@ function evaluateTrack(data) {
 	
 	document.getElementById('tracktime').innerHTML = m + ':' + s;
 	artist = '';
-	l = data.track_artist.length;
-	if (l>1) {
-		for (i=0; i<l; i++) {
-			artist = artist + '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[i]) + '">' + data.track_artist[i] + '</a>';
-			if (i!=l-1) {
-				var delimiter = data.track_artist_all.match(data.track_artist_url[i] + "(.*)" + data.track_artist_url[i+1]);
-				if (testing == 'on') {
-					delimiter[1] = delimiter[1].replace(';','&');
+	if ($.isArray(data.track_artist)) {
+		l = data.track_artist.length;
+		if (l>1) {
+			for (i=0; i<l; i++) {
+				artist = artist + '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[i]) + '">' + data.track_artist[i] + '</a>';
+				if (i!=l-1) {
+					var delimiter = data.track_artist_all.match(data.track_artist_url[i] + "(.*)" + data.track_artist_url[i+1]);
+					if (testing == 'on') {
+						delimiter[1] = delimiter[1].replace(';','&');
+					}
+					artist = artist + '<a href="index.php?action=view2&order=artist&sort=asc&artist=' + data.track_artist_url_all + '"><span class="artist_all">' + delimiter[1] + '</span></a>';
 				}
-				artist = artist + '<a href="index.php?action=view2&order=artist&sort=asc&artist=' + data.track_artist_url_all + '"><span class="artist_all">' + delimiter[1] + '</span></a>';
 			}
+		} 
+		else if (l>0) {
+			artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[0]) + '">' + data.track_artist[0] + '</a>';
 		}
-	} 
-	else if (l>0) {
-		artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[0]) + '">' + data.track_artist[0] + '</a>';
 	}
-	/* else {
-		artist = '&nbsp;';
-	} */
+	else {
+		artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + data.track_artist_url_all + '">' + data.track_artist + '</a>';
+	}
 	
 	document.getElementById('artist1').innerHTML = (data.track_artist[0] == '&nbsp;') ? '&nbsp;' : 'by ' + artist;
 	document.getElementById('artist').innerHTML = artist; 
