@@ -46,6 +46,7 @@ elseif	($action == 'next')				next_();
 elseif	($action == 'playSelect')		playSelect();
 elseif	($action == 'addSelect')		addSelect();
 elseif	($action == 'addSelectUrl')		addSelectUrl();
+elseif	($action == 'addMultitrack')		addMultitrack();
 elseif	($action == 'insertSelect')		insertSelect();
 elseif	($action == 'seekImageMap')		seekImageMap();
 elseif	($action == 'playIndex')		playIndex();
@@ -317,6 +318,52 @@ function addSelect() {
 	//return 'add_OK';
 }
 
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Add multitrack                                                         |
+//  +------------------------------------------------------------------------+
+function addMultitrack() {
+	global $cfg, $db;
+	authenticate('access_add');
+	require_once('include/play.inc.php');
+	
+	$track_ids = explode(';', get('track_ids'));
+	$addType = get('addType');
+	$data = array();
+	$addResult = 'add_error';
+	
+	
+	$status = mpd('status');
+	if ($cfg['add_autoplay'] && $status['playlistlength'] == 0)	{
+		$addResult = addTracks('play', '', '', $track_ids[0]);
+		if (count($track_ids) > 1) {
+			foreach($track_ids as $key => $value) {
+				if ($key > 0) {
+					$addResult = addTracks('add', '', '', $value);	
+				}
+			}
+		}
+	}
+	else {
+		foreach($track_ids as $value) {
+			$addResult = addTracks('add', '', '', $value);	
+		}
+	}
+	
+	$data['addResult'] = $addResult; 
+	$data['addType'] = $addType; 
+	
+	ob_start();
+	echo safe_json_encode($data);
+	header('Connection: close');
+	header('Content-Length: ' . ob_get_length());
+	ob_end_flush();
+	ob_flush();
+	flush();
+}
+
 //  +------------------------------------------------------------------------+
 //  | Add select url                                                         |
 //  +------------------------------------------------------------------------+
@@ -400,10 +447,10 @@ function insertSelect() {
 //  +------------------------------------------------------------------------+
 //  | Add tracks                                                             |
 //  +------------------------------------------------------------------------+
-function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
+function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_id = '') {
 	global $cfg, $db;
 	
-	$track_id			= get('track_id');
+	$track_id			= ($track_id == '' ? get('track_id') : $track_id);
 	$album_id			= get('album_id');
 	$disc					= get('disc');
 	$filepath			= get('filepath');
@@ -417,7 +464,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '') {
 	
 	
 	if ($track_id) {
-		$query = mysqli_query($db,'SELECT relative_file FROM track WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
+		$query = mysqli_query($db,'SELECT relative_file, track_id FROM track WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
 	}
 	elseif ($album_id) {
 		$select_md = ''; 
@@ -1642,6 +1689,7 @@ function playlistTrack() {
 		$data['track_artist']	= $exploded;
 		$data['track_artist_url']	= $exploded;
 		$data['track_artist_url_all']	= (string) rawurlencode($currentsong['Artist']);
+		$data['track_artist_all']	= (string) ($currentsong['Artist']);
 		$data['title'] = (string) $title;
 		$data['album']		= (string) $album;
 		$data['by']			= (string) '';

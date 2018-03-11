@@ -192,11 +192,7 @@ function playlistAction(action) {
 		});
 };
 
-function addClick(){
-	$('[id^="add_"]').click(function(){
-		$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
-	});
-};
+
 
 $(document).ready(function () {
 	<?php 
@@ -260,11 +256,14 @@ $(document).ready(function () {
         return false;
     })
 	
-	
-	
 	$('[id^="add_"]').click(function(){
-		addClick();
+		$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
 	});
+	
+	$('[id^="play_"]').click(function(){
+		$(this).removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
+	});
+	
 	
 	$('[id^="saveCurrent"]').click(function(){
 		resetSaveCurrentOptions();

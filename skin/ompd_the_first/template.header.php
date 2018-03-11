@@ -11,8 +11,9 @@ require_once('include/play.inc.php');
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale: 1, minimal-ui">
-<meta name="mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale: 1, minimal-ui" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#2c3e50" />
 <link rel="icon" type="image/png" sizes="196x196" href="image/favicon.png?v=2">
 
 
@@ -191,11 +192,7 @@ function playlistAction(action) {
 		});
 };
 
-function addClick(){
-	$('[id^="add_"]').click(function(){
-		$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
-	});
-};
+
 
 $(document).ready(function () {
 	<?php 
@@ -259,11 +256,14 @@ $(document).ready(function () {
         return false;
     })
 	
-	
-	
 	$('[id^="add_"]').click(function(){
-		addClick();
+		$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
 	});
+	
+	$('[id^="play_"]').click(function(){
+		$(this).removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
+	});
+	
 	
 	$('[id^="saveCurrent"]').click(function(){
 		resetSaveCurrentOptions();

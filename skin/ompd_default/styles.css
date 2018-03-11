@@ -1139,6 +1139,9 @@ tr.header_bigger {
 	font-size: 1em !important;
 }
 
+tr.header td.icon  span i {
+	font-size: 2em;
+}
 
 tr.footer a:link				{color: #2c3e50;}
 tr.footer a:visited				{color: #2c3e50;}
@@ -2020,7 +2023,6 @@ td.icon {
 	width: 3em;
 	max-width: 3em;
 	}
-
 
 td.iconDel {
 	padding-left: 5px;

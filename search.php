@@ -1,4 +1,4 @@
-<?php
+ <?php
 //  +------------------------------------------------------------------------+
 //  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
@@ -208,7 +208,11 @@ function track_artist() {
 	<table cellspacing="0" cellpadding="0" class="border">
 	<tr class="header">
 		<td class="icon"></td><!-- track menu -->
-		<td class="icon"></td><!-- add track -->
+		<td class="icon">
+			<span onMouseOver="return overlib('Add all tracks');" onMouseOut="return nd();">
+			<?php if ($cfg['access_add'])  echo '<i id="add_all_TA" class="fa fa-plus-circle fa-fw icon-small pointer"></i>';?>
+			</span>
+		</td><!-- add track -->
 		<td class="track-list-artist">Track artist&nbsp;</td>
 		<td>Title&nbsp;</td>
 		<td>Album&nbsp;</td>
@@ -220,6 +224,7 @@ function track_artist() {
 
 	<?php
 	$i=0;
+	$TA_ids = '';
 	
 	/* 
 	$query = mysqli_query($db,'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, album.image_id, album.album, album.artist
@@ -245,7 +250,9 @@ function track_artist() {
 	ORDER BY a.track_artist
 	');
 	
-	while ($track = mysqli_fetch_assoc($query)) { ?>
+	while ($track = mysqli_fetch_assoc($query)) { 
+		$TA_ids = ($TA_ids == '' ? $track['tid'] : $TA_ids . ';' . $track['tid']);
+	?>
 	<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 		<td class="icon">
 		<span id="menu-track<?php echo $i ?>">
@@ -271,10 +278,10 @@ function track_artist() {
 		$exploded = multiexplode($cfg['artist_separator'],$track['track_artist']);
 		$l = count($exploded);
 		if ($l > 1) {
-			for ($i=0; $i<$l; $i++) {
-				$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$i]) . '">' . html($exploded[$i]) . '</a>';
-				if ($i != $l - 1) {
-					$delimiter = getInbetweenStrings($exploded[$i],$exploded[$i + 1], $track['track_artist']);
+			for ($j=0; $j<$l; $j++) {
+				$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$j]) . '">' . html($exploded[$j]) . '</a>';
+				if ($j != $l - 1) {
+					$delimiter = getInbetweenStrings($exploded[$j],$exploded[$j + 1], $track['track_artist']);
 					$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['track_artist']) . '&amp;order=year"><span 	class="artist_all">' . $delimiter[0] . '</span></a>';
 				}
 			}
@@ -356,6 +363,29 @@ function track_artist() {
 		}
 		echo "</table>";
 		echo "</div>";
+	
+	
+	?>
+	<script>
+		$("#add_all_TA").click(function(){
+			
+			$.ajax({
+				type: "GET",
+				url: "play.php",
+				data: { 'action': 'addMultitrack', 'track_ids': '<?php echo $TA_ids; ?>', 'addType':'all_TA' },
+				dataType : 'json',
+				success : function(json) {
+					evaluateAdd(json);
+				},
+				error : function() {
+					$("#add_all_TA").removeClass('fa-cog fa-spin icon-selected').addClass('fa-plus-circle');
+				}	
+			});	
+			
+			
+		});
+	</script>
+	<?php
 	}
 };
 
@@ -432,7 +462,7 @@ function track_title() {
 	
 	if ($rows > 0) {
 		$match_found = true;
-		if ($group_found == 'none') $group_found = 'TT';
+		if ($group_found == 'none')	$group_found = 'TT';
 ?>
 <h1 onclick='toggleSearchResults("TT");' class="pointer"><i id="iconSearchResultsTT" class="fa fa-chevron-circle-down icon-anchor"></i> Track title (<?php if ($rows > 1) {
 			echo $rows . " matches found";
@@ -447,7 +477,11 @@ function track_title() {
 <table cellspacing="0" cellpadding="0" class="border">
 <tr class="header">
 	<td class="icon"></td><!-- track menu -->
-	<td class="icon"></td><!-- add track -->
+	<td class="icon">
+		<span onMouseOver="return overlib('Add all tracks');" onMouseOut="return nd();">
+			<?php if ($cfg['access_add'])  echo '<i id="add_all_TT" class="fa fa-plus-circle fa-fw icon-small pointer"></i>';?>
+		</span>
+	</td><!-- add track -->
 	<td class="track-list-artist">Track artist&nbsp;</td>
 	<td>Title&nbsp;</td>
 	<td>Album&nbsp;</td>
@@ -459,7 +493,7 @@ function track_title() {
 
 <?php
 	$i=10000;
-	 
+	$TT_ids = ''; 
 	/* $query = mysqli_query($db,'SELECT * FROM 
 	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, album.image_id, album.album, album.artist
 	FROM track
@@ -482,7 +516,9 @@ function track_title() {
 	
 	ORDER BY a.title, a.artist, a.album');
 	
-	while ($track = mysqli_fetch_assoc($query)) { ?>
+	while ($track = mysqli_fetch_assoc($query)) { 
+		$TT_ids = ($TT_ids == '' ? $track['tid'] : $TT_ids . ';' . $track['tid']);
+	?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 	<td class="icon">
 	<span id="menu-track<?php echo ($i)?>">
@@ -508,10 +544,10 @@ function track_title() {
 	$exploded = multiexplode($cfg['artist_separator'],$track['track_artist']);
 	$l = count($exploded);
 	if ($l > 1) {
-		for ($i=0; $i<$l; $i++) {
-			$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$i]) . '">' . html($exploded[$i]) . '</a>';
-			if ($i != $l - 1) {
-				$delimiter = getInbetweenStrings($exploded[$i],$exploded[$i + 1], $track['track_artist']);
+		for ($j=0; $j<$l; $j++) {
+			$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$j]) . '">' . html($exploded[$j]) . '</a>';
+			if ($j != $l - 1) {
+				$delimiter = getInbetweenStrings($exploded[$j],$exploded[$j + 1], $track['track_artist']);
 				$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['track_artist']) . '&amp;order=year"><span 	class="artist_all">' . $delimiter[0] . '</span></a>';
 			}
 		}
@@ -581,6 +617,24 @@ function track_title() {
 	}
 	echo "</table>";
 	echo "</div>";
+?>
+		<script>
+			$("#add_all_TT").click(function(){
+				$.ajax({
+					type: "GET",
+					url: "play.php",
+					data: { 'action': 'addMultitrack', 'track_ids': '<?php echo $TT_ids; ?>', 'addType':'all_TT' },
+					dataType : 'json',
+					success : function(json) {
+						evaluateAdd(json);
+					},
+					error : function() {
+						$("#add_all_TT").removeClass('fa-cog fa-spin icon-selected').addClass('fa-plus-circle');
+					}	
+				});	
+			});
+		</script>
+<?php
 	}
 }
 //End of Track title	

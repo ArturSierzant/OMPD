@@ -1,7 +1,7 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
-//  | http://www.ompd.pl           		                                     |
+//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
 //  | This program is free software: you can redistribute it and/or modify   |
@@ -53,7 +53,7 @@ $filter_query = 'WHERE (LOWER(track.title) = "' . $title . '" ' . $query_string 
 
 $order_query = 'ORDER BY title, artist, album';
 
-$query = mysqli_query($db, 'SELECT track.artist, track.title, track.number, track.featuring, track.album_id, track.track_id, track.miliseconds, track.relative_file, album.image_id, album.album FROM track, album ' . $filter_query . ' ' . $order_query);
+//$query = mysqli_query($db, 'SELECT track.artist, track.title, track.number, track.featuring, track.album_id, track.track_id, track.miliseconds, track.relative_file, album.image_id, album.album FROM track, album ' . $filter_query . ' ' . $order_query);
 
 
 $q = 'SELECT * FROM
