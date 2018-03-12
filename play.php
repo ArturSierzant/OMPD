@@ -51,6 +51,7 @@ elseif	($action == 'insertSelect')		insertSelect();
 elseif	($action == 'seekImageMap')		seekImageMap();
 elseif	($action == 'playIndex')		playIndex();
 elseif	($action == 'deleteIndex')		deleteIndex();
+elseif	($action == 'deleteBelowIndex')		deleteBelowIndex();
 elseif	($action == 'deleteIndexAjax')	deleteIndexAjax();
 elseif	($action == 'deletePlayed')		deletePlayed();
 elseif	($action == 'crop')				crop();
@@ -1034,6 +1035,29 @@ function deleteIndex() {
 	}
 	else
 		message(__FILE__, __LINE__, 'error', '[b]Command not supported for this player[/b]');
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Delete all below index                                                 |
+//  +------------------------------------------------------------------------+
+function deleteBelowIndex() {
+	global $cfg, $db;
+	authenticate('access_play');
+	require_once('include/play.inc.php');
+	
+	$index = (int) get('index');
+	$status = mpd('status');
+		
+	mpd('delete ' . ($index + 1) . ':' . $status['playlistlength']);
+	if (get('menu') == 'playlist') {
+		$data = array();
+		$data['index'] = (string) $index;
+		echo safe_json_encode($data);
+	}		
+
 }
 
 

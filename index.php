@@ -2162,7 +2162,11 @@ function view3all() {
 <table cellspacing="0" cellpadding="0" class="border">
 <tr class="header">
 	<td class="icon">&nbsp;</td><!-- track menu -->
-	<td class="icon">&nbsp;</td><!-- add track -->
+	<td class="icon">
+	<span onMouseOver="return overlib('Add all tracks');" onMouseOut="return nd();">
+	<?php if ($cfg['access_add'])  echo '<i id="add_all_VER" class="fa fa-plus-circle fa-fw icon-small pointer"></i>';?>
+	</span>
+	</td><!-- add track -->
 	<td class="track-list-artist"><a <?php echo ($order_bitmap_artist == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $url; ?>&amp;order=artist&amp;sort=<?php echo $sort_artist; ?>">Artist&nbsp;<?php echo $order_bitmap_artist; ?></a></td>
 	<td><a <?php echo ($order_bitmap_title == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $url; ?>&amp;order=title&amp;sort=<?php echo $sort_title; ?>">Title&nbsp;<?php echo $order_bitmap_title; ?></a></td>
 	<td><a <?php echo ($order_bitmap_album == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $url; ?>&amp;order=album&amp;sort=<?php echo $sort_album; ?>">Album&nbsp;<?php echo $order_bitmap_album; ?></a></td>
@@ -2174,6 +2178,7 @@ function view3all() {
 
 <?php
 	$i=0;
+	$VER_ids = '';
 	//$query = mysqli_query($db, 'SELECT track.artist, track.title, track.number, track.featuring, track.album_id, track.track_id, track.miliseconds, track.relative_file, album.image_id, album.album FROM track, album ' . $filter_query . ' ' . $order_query);
 	
 	$q = 'SELECT * FROM
@@ -2194,7 +2199,9 @@ function view3all() {
 	
 	//$query = mysqli_query($db, 'SELECT track.artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds  FROM track ' . $filter_query . ' ' . $order_query);
 
-	while ($track = mysqli_fetch_assoc($query)) { ?>
+	while ($track = mysqli_fetch_assoc($query)) { 
+		$VER_ids = ($VER_ids == '' ? $track['tid'] : $VER_ids . ';' . $track['tid']);
+	?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 	<td class="icon">
 	<span id="menu-track<?php echo $i ?>">
@@ -2290,7 +2297,27 @@ function view3all() {
 
 <?php
 	}
-	echo '</table>' . "\n";
+	?>
+	</table>
+	<script>
+		$("#add_all_VER").click(function(){
+			
+			$.ajax({
+				type: "GET",
+				url: "play.php",
+				data: { 'action': 'addMultitrack', 'track_ids': '<?php echo $VER_ids; ?>', 'addType':'all_VER'},
+				dataType : 'json',
+				success : function(json) {	
+					evaluateAdd(json);
+				},
+				error : function() {
+					$("#add_all_VER").removeClass('fa-cog fa-spin icon-selected').addClass('fa-plus-circle');
+				}	
+			});	
+		});
+	</script>
+<?php	
+	//echo '</table>' . "\n";
 	require_once('include/footer.inc.php');
 }
 

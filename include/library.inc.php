@@ -315,6 +315,8 @@ global $cfg, $db;
 		<div class="menuSubRight" id="menu-sub-track<?php echo $i ?>" onclick='offMenuSub(<?php echo $i ?>);'> 
 		<div class="icon-anchor" id="track<?php echo $i; ?>_delete" <?php if ($cfg['access_play']) 
 		echo 'onclick="javascript:showSpinner();ajaxRequest(\'play.php?action=deleteIndex&amp;index=' . $i . '&amp;menu=playlist\',evaluateListpos);"'; ?>>Remove <i class="fa fa-times-circle fa-fw icon-small"></i></div>
+		<div class="icon-anchor" id="track<?php echo $i; ?>_delete_below" <?php if ($cfg['access_play']) 
+		echo 'onclick="javascript:showSpinner();ajaxRequest(\'play.php?action=deleteBelowIndex&amp;index=' . $i . '&amp;menu=playlist\',evaluateListpos);"'; ?>>Remove all below<i class="fa fa-times-circle-o fa-fw icon-small"></i></div>
 		<div class="icon-anchor" id="track<?php echo $i; ?>_play_next" <?php if ($cfg['access_play']) 
 		echo 'onclick="javascript:moveTrack(\'playNext\',' . $i . ',false);"'; ?>>Play next <i class="fa fa-caret-square-o-right fa-fw icon-small"></i></div>
 		<div class="icon-anchor" id="track<?php echo $i; ?>_move_top" <?php if ($cfg['access_play']) 
