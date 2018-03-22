@@ -661,6 +661,10 @@ function evaluateVolume_old(volume) {
 
 function evaluateIsplaying(isplaying, idx) {
 	if (previous_isplaying != isplaying) {
+		if (isplaying.state){
+			idx = isplaying.idx;
+			isplaying = isplaying.state;
+		}
 		if (isplaying == 0) {
 			// stop
 			$("#time").removeClass();
@@ -669,7 +673,8 @@ function evaluateIsplaying(isplaying, idx) {
 			$("#play").addClass("playlist_status_off");
 			$("#play").html('<i class="fa fa-play sign-ctrl"></i>');
 			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=play&menu=playlist', evaluateIsplaying);");
-			$('#track' + idx + '_play').hide();
+			//$('#track' + idx + '_play').hide();
+			document.getElementById('track' + idx + '_play').style.visibility = 'hidden';
 			document.getElementById('time').innerHTML = formattedTime(0);
 			document.getElementById('timebar').style.width = 0;
 			previous_miliseconds = 0;
@@ -683,7 +688,8 @@ function evaluateIsplaying(isplaying, idx) {
 			//$("#play").addClass("playlist_status_on");
 			$("#play").addClass("playlist_status_off");
 			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=pause&menu=playlist', evaluateIsplaying);");
-			$('#track' + idx + '_play').show();
+			//$('#track' + idx + '_play').show();
+			document.getElementById('track' + idx + '_play').style.visibility = 'visible';		
 		}
 		else if (isplaying == 3) {
 			// pause
@@ -694,9 +700,11 @@ function evaluateIsplaying(isplaying, idx) {
 			//$("#play").addClass("blink_me playlist_status_on");
 			$("#play").addClass("playlist_status_off");
 			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=play&menu=playlist', evaluateIsplaying);");
-			$('#track' + idx + '_play').hide();
+			//$('#track' + idx + '_play').hide();
+			document.getElementById('track' + idx + '_play').style.visibility = 'hidden';
 		}
-		previous_isplaying = isplaying
+		previous_isplaying = isplaying;
+		console.log('isplaying:' + isplaying + '; idx: ' + idx);
 	}
 }
 

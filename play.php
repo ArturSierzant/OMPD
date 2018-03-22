@@ -80,6 +80,32 @@ function play() {
 	authenticate('access_play');
 	require_once('include/play.inc.php');
 	
+	$data = array();
+	
+	$status = mpd('status');
+	if ($status['state'] == 'stop') {
+		$current_song = $status['song'];
+		mpd('play ' . $current_song);
+	}
+	else {
+		mpd('play');
+	}
+	
+	if (get('menu') == 'playlist') {
+		$status = mpd('status');
+		if ($status['state'] == 'stop')		$data['state'] = '0'; // stop
+		if ($status['state'] == 'play')		$data['state'] = '1'; // play
+		if ($status['state'] == 'pause')	$data['state'] = '3'; // pause
+		$data['idx'] = $status['song'];
+		echo safe_json_encode($data);
+	}
+}
+
+function play_old() {
+	global $cfg, $db;
+	authenticate('access_play');
+	require_once('include/play.inc.php');
+	
 	if ($cfg['player_type'] == NJB_HTTPQ) {
 		httpq('play');
 		if (get('menu') == 'playlist') {
@@ -112,6 +138,25 @@ function play() {
 //  | Pause                                                                  |
 //  +------------------------------------------------------------------------+
 function pause() {
+	global $cfg, $db;
+	authenticate('access_play');
+	require_once('include/play.inc.php');
+	
+	$data = array();
+	
+	mpd('pause');
+	if (get('menu') == 'playlist') {
+		$status = mpd('status');
+		if ($status['state'] == 'stop')		$data['state'] = '0'; // stop
+		if ($status['state'] == 'play')		$data['state'] = '1'; // play
+		if ($status['state'] == 'pause')	$data['state'] = '3'; // pause
+		$data['idx'] = $status['song'];
+		echo safe_json_encode($data);
+	}
+}
+
+
+function pause_old() {
 	global $cfg, $db;
 	authenticate('access_play');
 	require_once('include/play.inc.php');
@@ -149,6 +194,24 @@ function stop() {
 	authenticate('access_play');
 	require_once('include/play.inc.php');
 	
+	$data = array();
+	
+	mpd('stop');
+	if (get('menu') == 'playlist') {
+		$status = mpd('status');
+		if ($status['state'] == 'stop')		$data['state'] = '0'; // stop
+		if ($status['state'] == 'play')		$data['state'] = '1'; // play
+		if ($status['state'] == 'pause')	$data['state'] = '3'; // pause
+		$data['idx'] = $status['song'];
+		echo safe_json_encode($data);
+	}
+}
+
+function stop_old() {
+	global $cfg, $db;
+	authenticate('access_play');
+	require_once('include/play.inc.php');
+	
 	if ($cfg['player_type'] == NJB_HTTPQ) {
 		httpq('stop');
 		if (get('menu') == 'playlist')
@@ -174,9 +237,17 @@ function prev_() {
 	authenticate('access_play');
 	require_once('include/play.inc.php');
 	
-	if ($cfg['player_type'] == NJB_HTTPQ)		httpq('prev');
-	elseif ($cfg['player_type'] == NJB_VLC)		vlc('pl_previous');
-	elseif ($cfg['player_type'] == NJB_MPD)		mpd('previous');
+	$data = array();
+	
+	mpd('previous');
+	if (get('menu') == 'playlist') {
+		$status = mpd('status');
+		if ($status['state'] == 'stop')		$data['state'] = '0'; // stop
+		if ($status['state'] == 'play')		$data['state'] = '1'; // play
+		if ($status['state'] == 'pause')	$data['state'] = '3'; // pause
+		$data['idx'] = $status['song'];
+		echo safe_json_encode($data);
+	}
 }
 
 
@@ -205,9 +276,17 @@ function next_() {
 	authenticate('access_play');
 	require_once('include/play.inc.php');
 	
-	if ($cfg['player_type'] == NJB_HTTPQ)		httpq('next');
-	elseif ($cfg['player_type'] == NJB_VLC)		vlc('pl_next');
-	elseif ($cfg['player_type'] == NJB_MPD)		mpd('next');
+	$data = array();
+	
+	mpd('next');
+	if (get('menu') == 'playlist') {
+		$status = mpd('status');
+		if ($status['state'] == 'stop')		$data['state'] = '0'; // stop
+		if ($status['state'] == 'play')		$data['state'] = '1'; // play
+		if ($status['state'] == 'pause')	$data['state'] = '3'; // pause
+		$data['idx'] = $status['song'];
+		echo safe_json_encode($data);
+	}
 }
 
 
