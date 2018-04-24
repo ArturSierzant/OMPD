@@ -1,0 +1,3 @@
+﻿Dark Red O!MPD skin by eoli3n.[br]
+Used some colours from [url=http://ethanschoonover.com/solarized]http://ethanschoonover.com/solarized[/url]
+And from [url=https://github.com/horst3180/vertex-theme]https://github.com/horst3180/vertex-theme[/url]

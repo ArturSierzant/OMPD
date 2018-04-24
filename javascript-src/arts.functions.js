@@ -580,18 +580,18 @@ function toggleSearchResults($id) {
 };
 
 function toggleSearch() {
-	$('#iconPlayerToggler').removeClass("icon-selected");
-	$('#iconVolumeToggler').removeClass("icon-selected");
+	$('#iconPlayerToggler').removeClass("icon-selected-main-menu");
+	$('#iconVolumeToggler').removeClass("icon-selected-main-menu");
 	$('#playerList').slideUp( "slow", function() {});
 	$('#volumeArea').slideUp( "slow", function() { });
 	if ($('#searchFormAll').css("display")=="none"){
 		$('#searchFormAll').slideDown( "slow", function() {});
-		$('#iconSearchToggler').addClass("icon-selected");
+		$('#iconSearchToggler').addClass("icon-selected-main-menu");
 		$('#search_string').focus();
 	}
 	else {
 		$('#searchFormAll').slideUp( "slow", function() { });
-		$('#iconSearchToggler').removeClass("icon-selected");
+		$('#iconSearchToggler').removeClass("icon-selected-main-menu");
 		$('#iconSearchToggler').focus();
 		}
 };
@@ -602,33 +602,33 @@ function goSearch () {
 
 function toggleChangePlayer() {
 	ajaxRequest('ajax-evaluate-status.php', evaluateVolume);
-	$('#iconSearchToggler').removeClass("icon-selected");
-	$('#iconVolumeToggler').removeClass("icon-selected");
+	$('#iconSearchToggler').removeClass("icon-selected-main-menu");
+	$('#iconVolumeToggler').removeClass("icon-selected-main-menu");
 	$('#searchFormAll').slideUp( "slow", function() {});
 	$('#volumeArea').slideUp( "slow", function() { });
 	if ($('#playerList').css("display")=="none"){
 		$('#playerList').slideDown( "slow", function() {});
-		$('#iconPlayerToggler').addClass("icon-selected");
+		$('#iconPlayerToggler').addClass("icon-selected-main-menu");
 	}
 	else {
 		$('#playerList').slideUp( "slow", function() { });
-		$('#iconPlayerToggler').removeClass("icon-selected");
+		$('#iconPlayerToggler').removeClass("icon-selected-main-menu");
 		}
 };
 
 function toggleVolume() {
 	ajaxRequest('ajax-evaluate-status.php', evaluateVolume);
-	$('#iconSearchToggler').removeClass("icon-selected");
-	$('#iconPlayerToggler').removeClass("icon-selected");
+	$('#iconSearchToggler').removeClass("icon-selected-main-menu");
+	$('#iconPlayerToggler').removeClass("icon-selected-main-menu");
 	$('#searchFormAll').slideUp( "slow", function() {});
 	$('#playerList').slideUp( "slow", function() {});
 	if ($('#volumeArea').css("display")=="none"){
 		$('#volumeArea').slideDown( "slow", function() {});
-		$('#iconVolumeToggler').addClass("icon-selected");
+		$('#iconVolumeToggler').addClass("icon-selected-main-menu");
 	}
 	else {
 		$('#volumeArea').slideUp( "slow", function() { });
-		$('#iconVolumeToggler').removeClass("icon-selected");
+		$('#iconVolumeToggler').removeClass("icon-selected-main-menu");
 		}
 };
 

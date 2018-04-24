@@ -24,9 +24,9 @@ body {
   margin: 0 auto;
   border: 0;
   padding: 0;
-  background: #faf9f9;
+  background: #111111;
   /* color: #383838; */
-  color: #2c3e50;
+  color: #333537;
   font-family: "Roboto", "sans-serif";
   width: 100%;
   height: 100%;
@@ -47,7 +47,7 @@ p {
   margin: 0;
 }
 i:active {
-  color: #e74c3c;
+  color: #b53d00;
 }
 @media all and (max-width: 320px) {
   html {
@@ -178,7 +178,7 @@ i:active {
     width: 100%;
     /*margin-top: 3px;*/
     padding: 3px 2px;
-    background-color: #2c3e50;
+    background-color: #333537;
     display: none;
     z-index: 20;
     margin: 5px 0 0;
@@ -396,7 +396,7 @@ i:active {
 }
 #menu {
   /*height: 5.385em;*/
-  background: #2c3e50;
+  background: #333537;
   /* position: fixed; */
   position: relative;
   display: block;
@@ -413,7 +413,7 @@ i:active {
   font-weight: normal;
 }
 #logo2 {
-  color: #ffffff;
+  color: #fdf6e3;
   font-weight: normal;
 }
 #image_in {
@@ -447,15 +447,15 @@ i:active {
   margin: 5px auto;
   text-align: center;
   font-size: 0.8em;
-  color: #2c3e50;
+  color: #bdbdbd;
 }
 #info_area {
-  background-color: #ececec;
+  background-color: #2b2b2c;
 }
 #album-info-area {
   /* margin: 0 2px; */
   overflow: hidden;
-  background-color: #ececec;
+  background-color: #2b2b2c;
   /* background-color: (@bg-playlist); */
   /* background-color: #EDEDED;
 	opacity: 0.5; */
@@ -492,15 +492,15 @@ i:active {
 }
 a:link,
 a:visited {
-  color: #3498db;
+  color: #fdf6e3;
   text-decoration: none;
 }
 a:active {
   opacity: 0.8;
-  color: #e74c3c !important;
+  color: #b53d00 !important;
 }
 a:hover {
-  color: #3498db;
+  color: #fdf6e3;
   text-decoration: none;
 }
 a.tile {
@@ -519,7 +519,7 @@ table {
 }
 table.fullscreen {
   width: 100%;
-  color: #2c3e50;
+  color: #bdbdbd;
 }
 .halfscreen {
   width: 50%;
@@ -530,8 +530,8 @@ table.border {
 tr.line,
 td.line {
   height: 1px;
-  background-color: #ececec;
-  border-bottom: 1px #ececec solid;
+  background-color: #2b2b2c;
+  border-bottom: 1px #2b2b2c solid;
   transform: scaleY(0.5);
 }
 td.fullscreen {
@@ -558,13 +558,13 @@ tr.select :nth-child(3) {
   padding-left: 0px;
 }
 tr.select td:nth-child(1) {
-  background-color: #e74c3c;
+  background-color: #b53d00;
 }
 tr.select #trackNumber,
 tr.select .trackNumber {
   /* line-height: 3.29em; */
   color: #fdf6e3;
-  background-color: #e74c3c;
+  background-color: #b53d00;
 }
 tr.even td,
 tr.odd td,
@@ -576,7 +576,7 @@ tr.select td {
     +------------------------------------------------------------------------+ */
 table.menu_top {
   width: 100%;
-  background-color: #2c3e50;
+  background-color: #333537;
   height: 3.846em;
 }
 td.menu_top_left {
@@ -586,12 +586,12 @@ td.menu_top_left {
   color: #2b2b2c;
 }
 td.menu_top {
-  color: #bbbbbb;
+  color: #bdbdbd;
   text-align: center;
   /* font-weight: normal; */
   /*letter-spacing: 0.5px; */
   font-size: 0.9em;
-  border-top: 0.3em solid #2c3e50;
+  border-top: 0.3em solid #333537;
   width: 9em;
   vertical-align: middle;
   cursor: pointer;
@@ -617,8 +617,8 @@ td.menu_top:active {
 						*/
 }
 td.menu_top_selected {
-  color: #ffffff;
-  border-top: 4px solid #e74c3c;
+  color: #fdf6e3;
+  border-top: 4px solid #b53d00;
 }
 td.menu_top_netjukebox {
   width: 112px;
@@ -628,15 +628,15 @@ td.menu_top_netjukebox {
 }
 /* right */
 table.menu_middle a:link {
-  color: #ffffff;
+  color: #fdf6e3;
   text-decoration: none;
 }
 table.menu_middle a:visited {
-  color: #ffffff;
+  color: #fdf6e3;
   text-decoration: none;
 }
 table.menu_middle a:hover {
-  color: #ffffff;
+  color: #fdf6e3;
   text-decoration: none;
 }
 table.menu_middle p span {
@@ -645,9 +645,9 @@ table.menu_middle p span {
 }
 table.menu_middle {
   width: 100%;
-  color: #ffffff;
+  color: #fdf6e3;
   /* background-color: #27ae60; */
-  background-color: #16a085;
+  background-color: #4e6819;
   height: 2em;
   /* padding-top: 3.846em; */
   text-transform: uppercase;
@@ -722,10 +722,10 @@ td.menu_bottom_right {
   overflow-x: hidden;
 }
 #selectPlayer {
-  background-color: #2c3e50;
+  background-color: #333537;
 }
 #playlistAction {
-  background-color: #3c4e60;
+  background-color: #3f4244;
 }
 #playlistAction,
 #selectPlayer {
@@ -776,7 +776,7 @@ td.menu_bottom_right {
   /* background-color: #F6F6F6; */
   width: 100%;
   /* ArtS edit */
-  color: #ffffff;
+  color: #fdf6e3;
   /* ArtS edit end */
   padding: 5px;
   /* font-size: 1.2em; */
@@ -798,10 +798,10 @@ td.menu_bottom_right {
 .paginator-nav a {
   /* color: #3498db; */
   /* color: #34495e; */
-  color: #ffffff;
+  color: #fdf6e3;
 }
 #menuSubMiddleMediaAlpha {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(253, 246, 227, 0.8);
 }
 /* ArtS edit */
 #menuSubMiddleMediaAlpha span,
@@ -827,7 +827,7 @@ td.menu_bottom_right {
 /* #menuSubMiddleMediaAlpha span ,  */
 .paginator-nav span,
 .buttons span {
-  background-color: #16a085;
+  background-color: #67891e;
 }
 [id^=playlistAddTo],
 [id^=playlistSaveAs],
@@ -885,15 +885,15 @@ td.menu_bottom_right {
 #menuSubMiddleMediaSavePlaylist,
 #menuSubMiddleMediaAddUrl {
   line-height: 4em;
-  color: #ffffff;
+  color: #fdf6e3;
   font-size: 1.2em;
   padding: 0;
 }
 #menuSubMiddleMediaSavePlaylist div:nth-child(2),
 #menuSubMiddleMediaSavePlaylist div:nth-child(3),
 #menuSubMiddleMediaSavePlaylist div:nth-child(4) {
-  background-color: #36c0a5;
-  border-bottom: solid 1px #16a085;
+  background-color: #57741c;
+  border-bottom: solid 1px #4e6819;
 }
 .listDivider {
   background-color: #2b2b2c;
@@ -902,7 +902,7 @@ td.menu_bottom_right {
 }
 .paginator-nav span a,
 .buttons span a {
-  color: #ffffff;
+  color: #fdf6e3;
   white-space: normal !important;
 }
 .artist_all {
@@ -961,8 +961,8 @@ table.playlist {
 	border-bottom: 1px solid #e3e3e3;
 	border-top: 1px solid #e3e3e3; */
   padding-top: 0.231em;
-  background-color: #fafafa;
-  color: #2c3e50;
+  background-color: #2b2b2c;
+  color: #333537;
 }
 td.playlist_text {
   width: 5.3846em;
@@ -974,7 +974,7 @@ td.playlist_display {
   text-align: center;
 }
 div.playlist_title {
-  color: #e74c3c;
+  color: #fdf6e3;
   font-size: 1.077em;
   text-align: left;
 }
@@ -1016,11 +1016,11 @@ td.playlist_back_space {
 }
 #playlist {
   /* border: solid 1px #e3e3e3; */
-  background-color: #ffffff;
+  background-color: #1c1c1c;
   padding: 0em;
   padding-top: 1.5em;
   clear: both;
-  color: #2c3e50;
+  color: #bdbdbd;
   /* margin-top: 10px; */
   /* opacity: 0.9; */
   /*
@@ -1045,7 +1045,7 @@ td.playlist_back_space {
   letter-spacing: 1px;
   text-transform: uppercase;
   margin-right: 5px;
-  color: #2c3e50;
+  color: #bdbdbd;
 }
 div.playlist_button_border {
   padding: auto;
@@ -1067,7 +1067,7 @@ div.playlist_button_ {
   cursor: pointer;
   -webkit-border-radius: 0.231em;
   border-radius: 0.231em;
-  background-color: #fafafa;
+  background-color: #2b2b2c;
   /* WARNING : dont know what it change */
   text-shadow: #cccccc 1px 1px 0;
   /* WARNING : dont know what it change */
@@ -1085,10 +1085,10 @@ div.playlist_button {
   cursor: pointer;
   /* text-shadow: #fefefe 1px 1px 0; */
   /* line-height: 0; */
-  background-color: #9f9f9f;
-  border: solid 1px #ececec;
+  background-color: #2b2b2c;
+  border: solid 1px #2b2b2c;
   /* text-shadow: -1px 0 @font-active, 0 1px @font-active, 1px 0 @font-active, 0 -1px @font-active; */
-  color: #ececec;
+  color: #2b2b2c;
 }
 div.playlist_button_play {
   width: 6.1538em;
@@ -1098,18 +1098,18 @@ div.playlist_indicator {
   padding-top: 0.5em;
   vertical-align: middle;
   text-align: center;
-  color: #2c3e50;
+  color: #bdbdbd;
 }
 div.playlist_status_off {
-  color: #f0f0f0;
+  color: #bdbdbd;
 }
 /* WARNING : dont know what it change */
 div.playlist_status_on {
-  color: #e74c3c;
+  color: #b53d00;
 }
 /* WARNING : dont know what it change */
 div.playlist_status_on_border {
-  border: solid 1px #2c3e50;
+  border: solid 1px #bdbdbd;
 }
 /* span.gain {font-size: 0.923em; display: block; line-height:90%;}*/
 .sign {
@@ -1133,7 +1133,7 @@ div.playlist_status_on_border {
   /* font-style: italic; */
   /* WARNING : dont know what it change */
   box-shadow: 0 0px #cccccc;
-  color: #2c3e50;
+  color: #bdbdbd;
   margin-top: 1px;
 }
 #title_wait_indicator {
@@ -1145,7 +1145,7 @@ div.playlist_status_on_border {
 }
 .pl-track-title {
   font-size: 1.3em;
-  color: #2c3e50;
+  color: #bdbdbd;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -1161,14 +1161,14 @@ div.playlist_status_on_border {
 .pl-track-favorites {
   font-size: 1.4em;
   padding-top: 0.769em;
-  color: #3498db;
+  color: #fdf6e3;
   /* cursor: pointer; */
 }
 .pl-favorites {
   /* ArtS edit 
 	Changed due to correct fav star color*/
   /* color: (@buttons); */
-  color: #3498db;
+  color: #fdf6e3;
   /* ArtS edit end */
   cursor: pointer;
   font-size: 1.5em;
@@ -1187,18 +1187,18 @@ div.playlist_status_on_border {
     | Table header & footer                                                  |
     +------------------------------------------------------------------------+ */
 tr.header a:link {
-  color: #2c3e50;
+  color: #bdbdbd;
 }
 tr.header a:visited {
-  color: #2c3e50;
+  color: #bdbdbd;
 }
 tr.header a:hover {
-  color: #3498db;
+  color: #fdf6e3;
   text-decoration: none;
 }
 /* WARNING : dont know what it change */
 tr.header a.sort_selected {
-  color: #e74c3c;
+  color: #b53d00;
 }
 tr.header td {
   /* border-top: 1px solid #e3e3e3;
@@ -1208,7 +1208,7 @@ tr.header td {
   vertical-align: middle;
   line-height: 3.5em;
   text-transform: uppercase;
-  color: #2c3e50;
+  color: #bdbdbd;
 }
 tr.header :nth-child(1),
 tr.header :nth-child(2),
@@ -1216,13 +1216,13 @@ tr.header :nth-child(3) {
   padding-left: 0px;
 }
 tr.header {
-  background-color: #ececec;
-  color: #2c3e50;
+  background-color: #2b2b2c;
+  color: #333537;
   font-weight: normal;
   font-size: 0.9em;
 }
 tr.multidisc_header {
-  background-color: #ececec;
+  background-color: #2b2b2c;
 }
 tr.header_bigger {
   font-size: 1em !important;
@@ -1231,20 +1231,20 @@ tr.header td.icon span i {
   font-size: 2em;
 }
 tr.footer a:link {
-  color: #2c3e50;
+  color: #bdbdbd;
 }
 tr.footer a:visited {
-  color: #2c3e50;
+  color: #bdbdbd;
 }
 tr.footer a:hover {
-  color: #2c3e50;
+  color: #333537;
   text-decoration: none;
 }
 tr.footer {
   line-height: 3.5em;
   font-size: 1em;
-  background-color: #ececec;
-  color: #777777;
+  background-color: #2b2b2c;
+  color: #bdbdbd;
 }
 tr.footer td {
   /* border-bottom: 1px solid #e3e3e3; */
@@ -1258,29 +1258,29 @@ table.tab {
 td.tab_on {
   height: 2.3077em;
   width: 7.6923em;
-  border-left: 1px solid #e67e22;
-  border-top: 1px solid #e67e22;
-  border-right: 1px solid #e67e22;
-  border-bottom: 0.3077em solid #e67e22;
-  background-color: #e67e22;
-  color: #ffffff;
+  border-left: 1px solid #b53d00;
+  border-top: 1px solid #b53d00;
+  border-right: 1px solid #b53d00;
+  border-bottom: 0.3077em solid #b53d00;
+  background-color: #b53d00;
+  color: #fdf6e3;
   text-align: center;
   cursor: pointer;
 }
 td.tab_off {
   height: 2.3077em;
   width: 7.6923em;
-  border-left: 1px solid #ececec;
-  border-top: 1px solid #ececec;
-  border-right: 1px solid #ececec;
-  border-bottom: 0.3077em solid #e67e22;
-  background-color: #ececec;
+  border-left: 1px solid #2f3439;
+  border-top: 1px solid #2f3439;
+  border-right: 1px solid #2f3439;
+  border-bottom: 0.3077em solid #b53d00;
+  background-color: #2f3439;
   text-align: center;
   cursor: pointer;
   color: #cccccc;
 }
 td.tab_none {
-  border-bottom: 0.3077em solid #e67e22;
+  border-bottom: 0.3077em solid #b53d00;
 }
 /* WARNING : dont know what it change */
 tr.tab_header a:link {
@@ -1297,8 +1297,8 @@ tr.tab_header td {
   white-space: nowrap;
 }
 tr.tab_header {
-  background-color: #ececec;
-  color: #777777;
+  background-color: #2b2b2c;
+  color: #bdbdbd;
   font-weight: normal;
   font-size: 0.9em;
   line-height: 3.5em;
@@ -1308,13 +1308,13 @@ tr.tab_header {
   width: 15em;
 }
 table.tab_border {
-  border-left: 1px solid #ececec;
-  border-right: 1px solid #ececec;
-  border-bottom: 1px solid #ececec;
+  border-left: 1px solid #2b2b2c;
+  border-right: 1px solid #2b2b2c;
+  border-bottom: 1px solid #2b2b2c;
   /* ArtS edit 
 	Table header in e.g. config->user statistics or library->popular
 	*/
-  background-color: #ececec;
+  background-color: #2b2b2c;
   /* ArtS edit end */
   width: 100%;
 }
@@ -1392,7 +1392,7 @@ td.bar_space {
 tr.odd {
   height: 4em;
   /*background-color: #F7F7F9; */
-  background-color: #ffffff;
+  background-color: #1c1c1c;
   /*border-bottom: 1px solid #e3e3e3;*/
   -webkit-transition: all 300ms linear;
   -moz-transition: all 300ms linear;
@@ -1401,7 +1401,7 @@ tr.odd {
 }
 tr.even {
   height: 4em;
-  background-color: #ffffff;
+  background-color: #1c1c1c;
   /*border-bottom: 1px solid #e3e3e3;*/
   -webkit-transition: all 300ms linear;
   -moz-transition: all 300ms linear;
@@ -1411,18 +1411,18 @@ tr.even {
 /* ArtS edit*/
 tr.artist_list {
   height: 2.5em;
-  background-color: #ffffff;
+  background-color: #1c1c1c;
 }
 tr.artist_list td {
-  border-bottom: dotted 1px #ececec;
+  border-bottom: dotted 1px #2b2b2c;
 }
 /*ArtS end edit*/
 tr.year {
   height: 2.5em;
-  background-color: #ffffff;
+  background-color: #1c1c1c;
 }
 tr.year td {
-  border-bottom: dotted 1px #ececec;
+  border-bottom: dotted 1px #2b2b2c;
 }
 tr.odd_ok {
   height: 3.0769em;
@@ -1453,7 +1453,7 @@ tr.select i {
 }
 tr.select {
   height: 4em;
-  background-color: #f5f5f5;
+  background-color: #3a3a3a;
   /* background-color: #E3EAF5; */
   -webkit-transition: all 300ms linear;
   -moz-transition: all 300ms linear;
@@ -1593,9 +1593,9 @@ img.medium {
   font: inherit;
   font-weight: 300;
   font-size: 16px;
-  background-color: #ececec;
+  background-color: #2b2b2c;
   border: none;
-  color: #2c3e50;
+  color: #bdbdbd;
   padding: 0 5px;
   border-radius: 3px 0 0 3px;
 }
@@ -1603,7 +1603,7 @@ img.medium {
 #searchFormAllMiddle > div {
   display: table;
   width: 100%;
-  background-color: #16a085;
+  background-color: #67891e;
   font-weight: normal;
   border-radius: 3px;
   /* border: 1px solid #2980b9; */
@@ -1614,7 +1614,7 @@ img.medium {
   width: 3em;
   text-align: center;
   vertical-align: middle;
-  color: #ffffff;
+  color: #fdf6e3;
   cursor: pointer;
 }
 #searchFormAllMiddle {
@@ -1707,22 +1707,22 @@ These are styles for tooltips e.g. album view->any track action or 'Download alb
 .ol_background {background-color: (@ddd-things);}
 */
 .ol_foreground {
-  background-color: #bbbbbb;
+  background-color: #bdbdbd;
 }
 .ol_background {
-  background-color: #2c3e50;
+  background-color: #333537;
 }
 .ol_caption {
   font-family: Roboto, Verdana, Arial, Helvetica, sans-serif;
   font-size: 0.769em;
   font-weight: bold;
-  color: #bbbbbb;
+  color: #bdbdbd;
 }
 /* ArtS edit end */
 .ol_text {
   font-family: Roboto, Verdana, Arial, Helvetica, sans-serif;
   font-size: 0.769em;
-  color: #2c3e50;
+  color: #333537;
 }
 div.ol_line {
   border-top: 1px solid #2b2b2c;
@@ -1753,7 +1753,7 @@ span.nav_tree {
   text-transform: uppercase;
   padding-left: 2px;
   text-align: left;
-  color: #2c3e50;
+  color: #bdbdbd;
 }
 span.nav_genre {
   font-size: 0.923em;
@@ -1764,7 +1764,7 @@ span.nav_seperation {
   font-size: 0.923em;
   font-weight: bold;
   /* WARNING : dont know what it change */
-  color: #e74c3c;
+  color: #b53d00;
 }
 span.seperation {
   font-size: 0.923em;
@@ -1801,11 +1801,11 @@ div.screen_footer {
   /*font-family: "Carrois Gothic SC", "Marcellus SC", "Segoe UI", "Open Sans", tahoma;*/
   font-size: 0.769em;
   /* WARNING : dont know what it change */
-  border-top: 0.3em solid #2c3e50;
+  border-top: 0.3em solid #333537;
   padding-top: 1.4em;
   text-align: center;
-  background-color: #2c3e50;
-  color: #bbbbbb;
+  background-color: #333537;
+  color: #bdbdbd;
   width: 100%;
   height: 100%;
 }
@@ -1821,14 +1821,14 @@ div.genre {
 }
 div.area {
   color: #222222;
-  background-color: #fafafa;
+  background-color: #2b2b2c;
 }
 div.out {
   width: 200px;
   height: 6px;
   min-height: 4px;
   /* border: 1px solid #e3e3e3; */
-  background-color: #e3e3e3;
+  background-color: #3a3a3a;
   vertical-align: middle;
   display: inline-block;
   overflow: hidden;
@@ -1839,7 +1839,7 @@ div.out-statistics {
   height: 6px;
   min-height: 4px;
   /* border: 1px solid #e3e3e3; */
-  background-color: #e3e3e3;
+  background-color: #3a3a3a;
   vertical-align: middle;
   display: inline-block;
 }
@@ -1848,17 +1848,17 @@ div.in {
   height: 100%;
   -webkit-transition: width 1s;
   transition: width 1s;
-  background: -webkit-linear-gradient(left, #e74c3c, #e74c3c);
-  background: -moz-linear-gradient(left, #e74c3c, #e74c3c);
-  background: -o-linear-gradient(left, #e74c3c, #e74c3c);
-  background: -ms-linear-gradient(left, #e74c3c, #e74c3c);
-  background-color: #e74c3c;
+  background: -webkit-linear-gradient(left, #b53d00, #b53d00);
+  background: -moz-linear-gradient(left, #b53d00, #b53d00);
+  background: -o-linear-gradient(left, #b53d00, #b53d00);
+  background: -ms-linear-gradient(left, #b53d00, #b53d00);
+  background-color: #b53d00;
 }
 #bar-indicator {
   position: absolute;
   /* WARNING : dont know what it change */
-  background-color: #e74c3c;
-  border: 0px solid #e74c3c;
+  background-color: #b53d00;
+  border: 0px solid #b53d00;
   border-radius: 50%;
   width: 9px;
   height: 9px;
@@ -1965,7 +1965,7 @@ div.tile:active {
   color: #ffffff;
 }
 .tile_band {
-  color: #bbbbbb;
+  color: rgba(255, 255, 255, 0.7);
 }
 div.tile_space {
   margin-bottom: 0.3846em;
@@ -1973,17 +1973,17 @@ div.tile_space {
   white-space: nowrap;
 }
 td.tile {
-  background-color: #fafafa;
+  background-color: #2b2b2c;
 }
 div.trackNumber {
   font-size: 1.3077em;
-  color: #2c3e50;
+  color: #bdbdbd;
   text-align: center;
   overflow: hidden;
 }
 div.footer_line {
   width: 100%;
-  border-top: 0.2em solid #e74c3c;
+  border-top: 0.2em solid #b53d00;
   /* //margin-top: 0.7em; */
 }
 td.icon {
@@ -2012,16 +2012,16 @@ td.iconDel {
 }
 .icon-small-selected {
   font-size: 1.8em;
-  color: #e74c3c;
+  color: #b53d00;
   vertical-align: middle;
   /* margin: 0.2em 0.5em 0.2em 0; */
   /* text-shadow: (@button-sub-shadow) 1px 1px 0; */
 }
 .icon-selected {
-  color: #e74c3c;
+  color: #b53d00;
 }
 .icon-selected-main-menu {
-  color: #e74c3c;
+  color: #b53d00;
 }
 .icon-ok {
   color: #67891e;
@@ -2034,7 +2034,7 @@ td.iconDel {
   color: #cccccc;
 }
 .icon-anchor {
-  color: #3498db;
+  color: #fdf6e3;
   cursor: pointer;
 }
 .icon-right {
@@ -2101,7 +2101,7 @@ iframe.full {
   border-radius: 3px;
 }
 .blackstar-selected {
-  background-color: #2c3e50;
+  background-color: #333537;
 }
 #trackOptions {
   display: none;
@@ -2139,7 +2139,7 @@ iframe.full {
 }
 .sign-play {
   font-size: 4em;
-  color: #3498db;
+  color: #fdf6e3;
   display: table-cell;
   vertical-align: middle;
 }
@@ -2150,7 +2150,7 @@ iframe.full {
   bottom: 0;
   opacity: 0.2;
   padding: 0.02em 0.1em;
-  color: #ffffff;
+  color: #fdf6e3;
 }
 #track-progress {
   position: relative;
@@ -2160,7 +2160,7 @@ iframe.full {
   font-size: 1.2em;
   margin-bottom: 0.3em;
   padding: 0;
-  color: #2c3e50;
+  color: #bdbdbd;
   /* text-overflow:ellipsis;
 					overflow: hidden;
 					white-space: nowrap;
@@ -2198,14 +2198,14 @@ iframe.full {
   /* vertical-align: baseline; */
   text-transform: uppercase;
   font-size: 0.9em;
-  color: #2c3e50;
+  color: #bdbdbd;
 }
 .add-info-right {
   width: 70%;
   /*font-weight: bold;*/
   display: inline-block;
   clear: right;
-  color: #2c3e50;
+  color: #bdbdbd;
 }
 [id^=menu-track] {
   position: relative;
@@ -2215,37 +2215,37 @@ iframe.full {
 .menuSub {
   display: none;
   visibility: visible;
-  background-color: #fafafa;
+  background-color: #141414;
   cursor: pointer;
   width: 100%;
   overflow: hidden;
   position: relative;
   padding: 0 0 0 2.8em;
   /* border: 1px solid #dedede; */
-  border-left: 5px solid #e74c3c;
-  border-bottom: 1px solid #ececec;
+  border-left: 5px solid #b53d00;
+  border-bottom: 1px solid #2b2b2c;
   /* border-top: 0px; */
 }
 .menuSubRight {
   display: none;
   visibility: visible;
-  background-color: #fafafa;
+  background-color: #141414;
   cursor: pointer;
   width: 100%;
   overflow: hidden;
   position: relative;
   padding: 0 5px 0 0;
   /* border: 1px solid #dedede; */
-  border-right: 5px solid #e74c3c;
-  border-bottom: 1px solid #ececec;
+  border-right: 5px solid #b53d00;
+  border-bottom: 1px solid #2b2b2c;
   text-align: right;
   /* border-top: 0px; */
 }
 .menuSubStarSave {
   /* background-color: (@bg-sub); */
   padding: 0.2em;
-  border-top: solid 1px #ffffff;
-  border-bottom: solid 1px #ffffff;
+  border-top: solid 1px #1c1c1c;
+  border-bottom: solid 1px #1c1c1c;
 }
 .menuSubStarAdd {
   /* background-color: (@bg-playlist); */
@@ -2275,7 +2275,7 @@ iframe.full {
 }
 /* WARNING : dont know what it change */
 .decade {
-  color: #e74c3c;
+  color: #b53d00;
   padding: 0.5em;
   /* background-color: #EDEDED; */
   margin: 0.5em 1px;
@@ -2290,8 +2290,8 @@ h1 {
   line-height: 3.5em;
   /* border-bottom: 1px solid #E3E3E3;
     border-top: 1px solid #E3E3E3; */
-  background-color: #ececec;
-  color: #2c3e50;
+  background-color: #2b2b2c;
+  color: #bdbdbd;
   font-weight: normal;
   font-size: 0.9em;
   vertical-align: middle;
@@ -2316,7 +2316,7 @@ h1 {
 .search_artist {
   line-height: 1px;
   padding: 3px 0px;
-  background-color: #ffffff;
+  background-color: #1c1c1c;
 }
 .search_artist p {
   padding-left: 4px;
@@ -2332,7 +2332,7 @@ h1 {
   height: 3.2em;
   width: 3.2em;
   text-decoration: none;
-  color: #3498db;
+  color: #fdf6e3;
   background-color: rgba(246, 246, 246, 0.3);
   font-size: 1em;
   /*padding: 0.55em 1em;*/
@@ -2372,7 +2372,7 @@ h1 {
   left: -9999px;
 }
 .update_info {
-  color: rgba(44, 62, 80, 0.5);
+  color: rgba(189, 189, 189, 0.5);
   font-size: 0.9em;
 }
 .lh3 {
@@ -2450,8 +2450,8 @@ h1 {
 }
 /* Main background */
 /* Sub background */
-/* Categories background */
-/* Background color of tracklist */
+/* Categories background (headers, footers, album/now playing) */
+/* Background color of track in tracklist/playlist */
 /* Background playlist current track */
 /* Background of track submenu */
 /* Main banner background */
@@ -2462,10 +2462,15 @@ h1 {
 /* Background of forms */
 /* Separators in subbanner */
 /* fonts */
-/* need to search for font-artist-title-library */
 /* tabs */
 /* buttons */
+/* buttons in add/save playlist menu and submenus */
+/* buttons in select player, paginator, favorites, etc.*/
+/* buttons in Now Playing: ff, play/pause, etc. */
+/* @button-playlist: #3a3a3a;
+@button-playlist-off: #bdbdbd;
+@button-playlist-on: #b53d00; */
 /* logo */
 /* playing bars */
-/* Active click color */
+/* Active color */
 /* MISC / temp colors */

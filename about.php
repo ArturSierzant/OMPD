@@ -84,7 +84,7 @@ function about() {
 <tr class="header header_bigger">
 	<td class="space"></td>
 	<td colspan="3" style="white-space: normal;">
-	O!MPD&nbsp;<?php echo html(NJB_VERSION); ?>,&nbsp;Copyright&nbsp;&copy;&nbsp;2015-2017&nbsp;Artur&nbsp;Sier&#380;ant<br>
+	O!MPD&nbsp;<?php echo html(NJB_VERSION); ?>,&nbsp;Copyright&nbsp;&copy;&nbsp;2015-2018&nbsp;Artur&nbsp;Sier&#380;ant<br>
 	
 	</td>
 	<td class="space"></td>
@@ -164,6 +164,9 @@ function about() {
 	<td>
 	<ul style="padding-left: 1em;">
 	<li> added ability to play audio streams from Youtube movies (requires <a href="https://github.com/rg3/youtube-dl" target="_new">youtube-dl</a>)</li>
+	<li> added new skins</li>
+	<li> added view for Album Dynamic Range</li>
+	<li> added search action for album cover in album view</li>
 	<li> added 'Play next' to track menu in 'Now Playing'</li>
 	<li> added config file editor</li>
 	<li> added consume mode on/off (long press on 'Delete played')</li>
@@ -185,7 +188,7 @@ function about() {
 	<li> added STYLE tag support</li>
 	<li> added file browser</li>
 	<li> added ability to update selected directory only (no need to do full update when adding single albums)</li>
-	<li> added ability to update album directly from Album view</li>
+	<li> added ability to update album directly from album view</li>
 	<li> added artist list in library</li>
 	<li> added sort by 'Add time' in search results</li>
 	<li> added display of multi-disc in album view</li>

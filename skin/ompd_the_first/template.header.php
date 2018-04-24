@@ -13,7 +13,7 @@ require_once('include/play.inc.php');
 <head>
 <meta name="viewport" content="width=device-width, initial-scale: 1, minimal-ui" />
 <meta name="mobile-web-app-capable" content="yes" />
-<meta name="theme-color" content="#2c3e50" />
+<meta name="theme-color" content="#1f2429" />
 <link rel="icon" type="image/png" sizes="196x196" href="image/favicon.png?v=2">
 
 
@@ -669,7 +669,8 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 	$header['menu'] .= "\t" . '<a href="index.php?action=viewPopular&amp;period=overall">popular</a>' . $header['seperation'];
 	//$header['menu'] .= "\t" . $header['seperation'];
 	$header['menu'] .= '<a href="index.php?action=viewRandomAlbum&amp;order=artist">random</a>' . $header['seperation'];
-	$header['menu'] .= '<a href="browser.php">files</a>';
+	$header['menu'] .= '<a href="browser.php">files</a>' . $header['seperation'];
+	$header['menu'] .= '<a href="index.php?action=viewDR">DR</a>';
 	echo $header['menu'];
 ?>
 

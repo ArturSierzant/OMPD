@@ -125,21 +125,25 @@ elseif ($cfg['menu'] == 'playlist')	{
 }
 
 elseif ($cfg['menu'] == 'favorite')	{
-	$header['menu'] = "\t" . '<a href="favorite.php">favorites</a>' . "\n";
+	$header['menu'] = "\t" . '<span id="menu_middle_items"><a href="favorite.php">favorites</a></span>' . "\n";
 }
 
 elseif ($cfg['menu'] == 'config') {
-	$header['menu'] = "\t" . '<a href="config.php?action=playerProfile">player profile</a>' . $header['seperation'];
+	$header['menu'] = "\t" . '<span id="menu_middle_items">';
+	$header['menu'] .= "\t" . '<a href="config.php?action=playerProfile">player profile</a>' . $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="config.php?action=streamProfile">stream profile</a>' . $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="config.php?action=downloadProfile">download profile</a>' . $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="config.php?action=skinProfile">skin profile</a>' . $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="users.php">users</a>' . $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="update.php?action=update&amp;sign=' . $cfg['sign'] . '">update all</a>' . "\n";
+	$header['menu'] .= "\t" . '</span>' . "\n";
 }
 
 elseif ($cfg['menu'] == 'about') {
-	$header['menu'] = "\t" . '<a href="about.php">about O!MPD</a>' . $header['seperation'];
+	$header['menu'] = "\t" . '<span id="menu_middle_items">';
+	$header['menu'] .= "\t" . '<a href="about.php">about O!MPD</a>' . $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="about.php?action=license">license</a>' . $header['seperation'];
+	$header['menu'] .= "\t" . '</span>';
 }
 
 

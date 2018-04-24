@@ -58,6 +58,7 @@ elseif	($action == 'viewRandomAlbum')	viewRandomAlbum();
 elseif	($action == 'viewRandomTrack')	viewRandomTrack();
 elseif	($action == 'viewRandomFile')	viewRandomFile();
 elseif	($action == 'viewYear')			viewYear();
+elseif	($action == 'viewDR')			viewDR();
 elseif	($action == 'viewNew')			viewNew();
 elseif	($action == 'viewPopular')		viewPopular();
 else	message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]action');
@@ -395,9 +396,10 @@ function view2() {
 	$artist	 	= get('artist');
 	$tag		= get('tag');
 	$year		= (get('year') == 'Unknown' ? get('year'): (int) get('year'));
+	$dr		= (get('dr') == 'Unknown' ? get('dr'): (int) get('dr'));
 	$filter  	= get('filter')				or $filter = 'whole';
 	$thumbnail	= 1;
-	$order	 	= get('order')				or $order = ($year ? 'artist' : (in_array(strtolower($artist), $cfg['no_album_artist']) ? 'album' : 'year'));
+	$order	 	= get('order')				or $order = ($year || $dr ? 'artist' : (in_array(strtolower($artist), $cfg['no_album_artist']) ? 'album' : 'year'));
 	$sort	 	= get('sort') == 'desc'		? 'desc' : 'asc';
 	$qsType 	= (int) get('qsType')				or $qsType = false;
 	
@@ -542,6 +544,41 @@ function view2() {
 		$list_url		= 'index.php?action=view2&amp;thumbnail=0&amp;year=' . $year . '&amp;order=' . $order . '&amp;sort=' . $sort;
 		$thumbnail_url	= 'index.php?action=view2&amp;thumbnail=1&amp;year=' . $year . '&amp;order=' . $order . '&amp;sort=' . $sort;
 	}
+	elseif ($dr) {
+		// formattedNavigator
+		$queryDR = mysqli_query($db, "SELECT MIN(album_dr) as maxDR from album WHERE album_dr > '" . $dr . "'");
+		$rst = mysqli_fetch_assoc($queryDR);
+		$maxDR = $rst['maxDR'];
+		
+		$queryDR = mysqli_query($db, "SELECT MAX(album_dr) as minDR from album WHERE album_dr < '" . $dr . "'");
+		$rst = mysqli_fetch_assoc($queryDR);
+		$minDR = $rst['minDR'];
+		
+		
+		
+		$nav = array();
+		$nav['name'][]	= 'Library';
+		$nav['url'][]	= 'index.php';
+		$nav['name'][]	= 'Album Dynamic Range (DR)';
+		$nav['url'][]	= 'index.php?action=viewDR';
+		if (is_numeric($minDR)) {
+			$nav['name'][]	= $minDR;
+			$nav['url'][]	= 'index.php?action=view2&dr=' . ($minDR);
+		}
+		$nav['name'][] 	= $dr;
+		$nav['url'][]	= "";
+		if (is_numeric($maxDR)) {
+			$nav['name'][]	= $maxDR;
+			$nav['url'][]	= 'index.php?action=view2&dr=' . ($maxDR);
+		}
+		require_once('include/header.inc.php');
+		
+		if ($dr == 'Unknown') $filter_query = 'WHERE album_dr is null ';
+		else $filter_query = 'WHERE album_dr = ' . (int) $dr;
+		$url			= 'index.php?action=view2&amp;dr=' . $dr;
+		$list_url		= 'index.php?action=view2&amp;thumbnail=0&amp;dr=' . $dr . '&amp;order=' . $order . '&amp;sort=' . $sort;
+		$thumbnail_url	= 'index.php?action=view2&amp;thumbnail=1&amp;dr=' . $dr . '&amp;order=' . $order . '&amp;sort=' . $sort;
+	}
 	else {
 		if ($filter == 'all' || $artist == '') {
 			$artist = 'All albums';
@@ -590,7 +627,7 @@ function view2() {
 		$list_url		= 'index.php?action=view2&amp;thumbnail=0&amp;artist=' . rawurlencode($artist) . '&amp;filter=' . $filter . '&amp;order=' . $order . '&amp;sort=' . $sort;
 		$thumbnail_url	= 'index.php?action=view2&amp;thumbnail=1&amp;artist=' . rawurlencode($artist) . '&amp;filter=' . $filter . '&amp;order=' . $order . '&amp;sort=' . $sort;
 	}
-	if (($artist || $year)) {
+	if (($artist || $year || $dr)) {
 		if ($order == 'year' && $sort == 'asc') {
 			$order_query = 'ORDER BY year, month, artist_alphabetic, album';
 			$order_bitmap_year = '<span class="fa fa-sort-numeric-asc"></span>';
@@ -653,7 +690,7 @@ function view2() {
 		}
 		else message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]order or sort');
 		
-		$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query);
+		$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id, album_dr FROM album ' . $filter_query . ' ' . $order_query);
 		//message(__FILE__, __LINE__, 'error', 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query);
 	}
 	
@@ -1244,7 +1281,7 @@ function view3() {
 	
 	authenticate('access_media');
 	
-	$query = mysqli_query($db, 'SELECT artist_alphabetic, artist, album, year, month, image_id, album_add_time, album.genre_id
+	$query = mysqli_query($db, 'SELECT artist_alphabetic, artist, album, year, month, image_id, album_add_time, album.genre_id, album_dr
 		FROM album
 		WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');
 	$album = mysqli_fetch_assoc($query);
@@ -1414,6 +1451,8 @@ function view3() {
 		
 	}
 	
+	$idx = array_search($cfg['default_search_name'], $cfg['search_name']);
+	
 ?>
 
 
@@ -1423,7 +1462,9 @@ function view3() {
 		<img src="image/loader.gif" alt="">
 	</div>
 	<span id="image">
+		<a href="ridirect.php?search_id=<?php echo $idx; ?>&amp;album_id=<?php echo $album_id; ?>" target="_blank">
 		<img id="image_in" src="image/transparent.gif" alt="">
+		</a>
 	</span>
 </div>
 
@@ -1461,7 +1502,7 @@ function view3() {
 	</div>
 </div>
 <div class="line">
-<div class="add-info-left">Popularity:</div>
+<div class="add-info-left"><a href="index.php?action=viewPopular&period=overall">Popularity:</a></div>
 <div id="bar-popularity-out" class="out"><div id="bar_popularity" class="in"></div></div>
 &nbsp;
 <?php 
@@ -1499,7 +1540,7 @@ else
 	
 	<?php if ($album['year'] != '') { ?>
 	<div class="line">
-		<div class="add-info-left">Year:</div>
+		<div class="add-info-left"><a href="index.php?action=viewYear">Year:</a></div>
 		<div class="add-info-right"><a href="<?php echo 'index.php?action=view2&order=artist&sort=asc&year=' . $album['year'];?>"><?php echo trim($album['year']);?></a></div>
 	</div>
 	<?php }; ?>
@@ -1526,13 +1567,11 @@ else
 	
 	<?php if (($album_info['album_dr'] != '')) { ?>
 	<div class="line">
-		<div class="add-info-left">Album DR:
+		<div class="add-info-left">
+		<a href="index.php?action=viewDR">Album DR:</a>
 		</div>
 		<div class="add-info-right">
-		<?php 
-		echo   
-		 '' . $album_info['album_dr']; 
-		 ?>
+		<a href="<?php echo 'index.php?action=view2&sort=asc&dr=' . $album['album_dr'];?>"><?php echo $album['album_dr'];?></a>
 		</div>
 	</div>
 	<?php }; ?>
@@ -1919,7 +1958,7 @@ Other versions of this album:
 			?>
 			<div><h1><div class="total-time">Total: <?php echo formattedTime($track['sum_miliseconds']); ?></div></h1>
 		</div>
-		<br>
+		
 		<?php
 		}
 	}
@@ -2363,21 +2402,7 @@ function viewRandomAlbum() {
 	
 </tr>
 </table>
-<table width="100%" cellspacing="0" cellpadding="0" class="tab_border">
-<tr>
-	<td colspan="<?php echo $colombs + 2; ?>">
-	<!-- begin table header -->
-	
-	<!-- end table header -->
-	</td>
-</tr>
-<tr class="line"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
 
-<tr class="odd smallspace"><td></td></tr>
-
-
-
-</table>
 <div class="albums_container">
 <?php
 	$blacklist = explode(',', $cfg['random_blacklist']);
@@ -2404,10 +2429,6 @@ function viewRandomAlbum() {
 ?>
 </div>
 
-<table width="100%" cellspacing="0" cellpadding="0" class="tab_border">
-
-<tr class="<?php echo $class; ?> smallspace"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
-</table>
 <!--  -->
 	</td>
 </tr>
@@ -2611,7 +2632,7 @@ function viewRandomFile() {
 <table width="100%" cellspacing="0" cellpadding="0" class="tab_border">
 <?php
 	if ($cfg['access_play'] || $cfg['access_add'] || $cfg['access_stream']) { ?>
-<tr class="tab_header">
+<tr>
 	<td>&nbsp;</td>
 	<td></td>
 	<td>&nbsp;</td>
@@ -2773,6 +2794,124 @@ function viewYear() {
 	//echo floor($album['counter'] / $max_played['counter'] * 100) . ' * 1/100 * $(\'#bar-popularity-out\').width() + \'px\';' . "\n";
 		
 		echo 'document.getElementById(\'y' . $album['year'] .'\').style.width="' . round($album['counter'] / $max * 200) . 'px";' . "\n";
+		//echo '$(\'#y'. $album['year'] .'\').transition({ width: \'' . round($album['counter'] / $max * 200) .  'px\', duration: 2000 });' . "\n";
+		}
+	echo '}' . "\n";
+	echo 'window.onload = function () {' . "\n";
+    echo 'setYearBar();' . "\n";
+	echo '};' . "\n";
+	echo '</script>' . "\n";
+	
+	require_once('include/footer.inc.php');
+}
+
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | View DR                                                                |
+//  +------------------------------------------------------------------------+
+function viewDR() {
+	global $cfg, $db;
+	
+	authenticate('access_media');
+	
+	$sort = get('sort') == 'asc' ? 'asc' : 'desc';
+	
+	if ($sort == 'asc') {
+		$order_query = 'ORDER BY album_dr';
+		$order_bitmap_dr = '<span class="fa fa-sort-numeric-asc"></span>';
+		$sort_dr = 'desc';
+	}
+	else {
+		// desc
+		$order_query = 'ORDER BY album_dr DESC';
+		$order_bitmap_dr = '<span class="fa fa-sort-numeric-desc"></span>';
+		$sort_dr = 'asc';
+	}
+	
+	// formattedNavigator
+	$nav			= array();
+	$nav['name'][]	= 'Library';
+	$nav['url'][]	= 'index.php';
+	$nav['name'][]	= 'Album Dynamic Range (DR)';
+	require_once('include/header.inc.php');
+?>
+<table cellspacing="0" cellpadding="0" class="border">
+<tr class="header">
+	<td class="space left"></td>
+	<td width="80px"><a <?php echo ($order_bitmap_dr == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="index.php?action=viewDR&amp;sort=<?php echo $sort_dr; ?>">DR&nbsp;<?php echo $order_bitmap_dr; ?></a></td>	
+	<td align="left" class="bar">Graph</td>
+	<td align="center" width="130px">Disc counts</td>
+	<td class="right">&nbsp;</td>
+</tr>
+
+<?php
+	$query = mysqli_query($db, 'SELECT COUNT(*) AS counter
+		FROM album
+		WHERE album_dr
+		GROUP BY album_dr
+		ORDER BY counter DESC');
+	$album = mysqli_fetch_assoc($query);
+	$max = $album['counter'];
+	
+	$query = mysqli_query($db, 'SELECT COUNT(discs) AS albums, SUM(discs) AS discs FROM album');
+	$album = mysqli_fetch_assoc($query);
+	$all = $album['albums'];
+	
+	$i=0;
+	$query = mysqli_query($db, 'SELECT album,
+		COUNT(*) AS counter
+		FROM album
+		WHERE album_dr is null');
+	$album = mysqli_fetch_assoc($query);
+	$drNULL = $album['counter'];
+	if ($drNULL > 0) {
+?>
+<tr class="<?php echo ($i++ & 1) ? 'year' : 'year'; ?> mouseover">
+	<td></td>
+	<td><a href="index.php?action=view2&amp;dr=Unknown">Unknown</a></td>
+	<td class="bar" style="cursor: pointer;" onClick="window.location.href='<?php echo NJB_HOME_URL ?>index.php?action=view2&amp;dr=Unknown';"><div class="out"><div id="drNULL" style="width: 0px;" class="in"></div></div></td>
+	<td align="center"><?php echo $album['counter']; ?> (<?php echo  round($album['counter'] / $all * 100, 1); ?>%)</td>
+	<td> </td>
+	
+</tr>
+<?php	
+	}
+	$i=1;
+	$query = mysqli_query($db, 'SELECT album_dr,
+		COUNT(*) AS counter
+		FROM album
+		WHERE album_dr
+		GROUP BY album_dr ' . $order_query);
+	while ($max && $album = mysqli_fetch_assoc($query)) {
+?>
+<tr class="<?php echo ($i++ & 1) ? 'year' : 'year'; ?> mouseover">
+	<td></td>
+	<td><a href="index.php?action=view2&amp;dr=<?php echo $album['album_dr']; ?>"><?php echo $album['album_dr']; ?></a></td>
+	<td class="bar" style="cursor: pointer;" onClick="window.location.href='<?php echo NJB_HOME_URL ?>index.php?action=view2&amp;dr=<?php echo $album['album_dr']; ?>';"><div class="out"><div id="dr<?php echo $album['album_dr']; ?>" style="width: 0px;" class="in"></div></div></td>
+	<td align="center"><?php echo $album['counter']; ?> (<?php echo  round($album['counter'] / $all * 100, 1); ?>%)</td>
+	<td> </td>
+	
+</tr>
+<?php
+	}
+	$query = mysqli_query($db, 'SELECT album_dr,
+		COUNT(*) AS counter
+		FROM album
+		WHERE album_dr
+		GROUP BY album_dr ' . $order_query);
+		
+	echo '</table>' . "\n";
+	echo '<script type="text/javascript">' . "\n";
+	echo 'function setYearBar() {' . "\n";
+	if ($drNULL>0) {
+	echo 'document.getElementById(\'drNULL\').style.width="' . round($drNULL / $max * 200) . 'px";' . "\n";}
+	while ($max && $album = mysqli_fetch_assoc($query)) {
+	//echo floor($album['counter'] / $max_played['counter'] * 100) . ' * 1/100 * $(\'#bar-popularity-out\').width() + \'px\';' . "\n";
+		
+		echo 'document.getElementById(\'dr' . $album['album_dr'] .'\').style.width="' . round($album['counter'] / $max * 200) . 'px";' . "\n";
 		//echo '$(\'#y'. $album['year'] .'\').transition({ width: \'' . round($album['counter'] / $max * 200) .  'px\', duration: 2000 });' . "\n";
 		}
 	echo '}' . "\n";

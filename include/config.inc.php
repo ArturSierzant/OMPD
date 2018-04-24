@@ -83,6 +83,18 @@ $cfg['youtube_indicator'][] = 'm.youtube.';
 
 
 
+//  +------------------------------------------------------------------------+
+//  | Default album search action                                            |
+//  +------------------------------------------------------------------------+
+//  | One of $cfg['search_name'] from section 'Internet search'              |
+//  | which will be used as default search after clicking album cover        |
+//  | in album view                                                          |
+//  +------------------------------------------------------------------------+
+
+$cfg['default_search_name'] = 'Google';
+
+
+
 //  +------------------- END OF NEW IN O!MPD 1.04 ---------------------------+
 
 

@@ -589,8 +589,8 @@ function evaluateListpos(listpos) {
 	if (previous_listpos != listpos) {
 		document.getElementById('track' + previous_listpos).className = (previous_listpos & 1) ? 'even mouseover' : 'odd mouseover';
 		document.getElementById('track' + listpos).className = 'select';
-		document.getElementById('track' + listpos + '_play').style.visibility = 'visible';
 		document.getElementById('track' + previous_listpos + '_play').style.visibility  = 'hidden';
+		document.getElementById('track' + listpos + '_play').style.visibility = 'visible';
 		document.getElementById('time').innerHTML = formattedTime(0);
 		document.getElementById('timebar').style.width = 0;
 		ajaxRequest('play.php?action=playlistTrack&track_id=' + track_id[listpos] + '&menu=playlist', evaluateTrack);
@@ -681,6 +681,7 @@ function evaluateIsplaying(isplaying, idx) {
 		}
 		else if (isplaying == 1) {
 			// play
+			document.getElementById('track' + idx + '_play').style.visibility = 'visible';		
 			$("#time").removeClass();
 			$("#time").addClass("icon-anchor");
 			$("#play").html('<i class="fa fa-pause sign-ctrl"></i>');
@@ -689,7 +690,6 @@ function evaluateIsplaying(isplaying, idx) {
 			$("#play").addClass("playlist_status_off");
 			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=pause&menu=playlist', evaluateIsplaying);");
 			//$('#track' + idx + '_play').show();
-			document.getElementById('track' + idx + '_play').style.visibility = 'visible';		
 		}
 		else if (isplaying == 3) {
 			// pause
