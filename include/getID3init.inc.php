@@ -23,9 +23,9 @@
 $getID3->encoding        			= 'UTF-8';	// CASE SENSITIVE! - i.e. (must be supported by iconv()) Examples:  ISO-8859-1  UTF-8  UTF-16  UTF-16BE
 $getID3->encoding_id3v1  			= 'ISO-8859-1';	// Should always be 'ISO-8859-1', but some tags may be written in other encodings such as 'EUC-CN'
 // public: Optional tag checks - disable for speed.
-$getID3->option_tag_id3v1			= false;			// Read and process ID3v1 tags
+$getID3->option_tag_id3v1			= true;			// Read and process ID3v1 tags
 $getID3->option_tag_id3v2			= true;		// Read and process ID3v2 tags
-$getID3->option_tag_lyrics3			= false;		// Read and process Lyrics3 tags
+$getID3->option_tag_lyrics3			= true;		// Read and process Lyrics3 tags
 $getID3->option_tag_apetag			= true;		// Read and process APE tags
 $getID3->option_tags_process		= true;		// Copy tags to root key 'tags' and encode to $this->encoding
 $getID3->option_tags_html			= false;		// Copy tags to root key 'tags_html' properly translated from various encodings to HTML entities

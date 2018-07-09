@@ -157,6 +157,10 @@ function mpd($command,$player_host="",$player_port="") {
 				fclose($soket);
 				return 'ACK_ERROR_NO_EXIST';
 			}
+			elseif (substr($line, 0, 8) == 'ACK [5@0') {
+				fclose($soket);
+				return 'ACK_ERROR_UNKNOWN';
+			}
 			else {
 				fclose($soket); 
 				message(__FILE__, __LINE__, 'error', '[b]Music Player Daemon error[/b][br]Error: ' . $line . '[br]Command: ' . $command);
@@ -167,6 +171,9 @@ function mpd($command,$player_host="",$player_port="") {
 			if ($command == 'status' && isset($array['time']) && version_compare($cfg['mpd_version'], '0.16.0', '<')) {
 				list($seconds, $dummy) = explode(':', $array['time'], 2);
 				$array['elapsed'] = $seconds;
+			}
+			elseif (strpos($command,'load') !== false) {
+				$array[] = 'add_OK';
 			}
 			return $array;
 		}
@@ -185,11 +192,18 @@ function mpd($command,$player_host="",$player_port="") {
 			list($key, $value) = explode(': ', $line ,2);
 			$array[$key][] = iconv('UTF-8', NJB_DEFAULT_CHARSET, $value);
 		}
+		elseif ($command == 'listplaylists' || strpos($command,'listplaylistinfo') !== false) {
+			// playlist: pl_1 Last-Modified: 2018-06-08T08:20:07Z
+			list($key, $value) = explode(': ', $line);
+			$array[$key][] = iconv('UTF-8', NJB_DEFAULT_CHARSET, $value);
+		}
+		
 		else {
 			// name: value
 			list($key, $value) = explode(': ', $line, 2);
 			//$array[$key] = $value;	
 			$array[$key] = iconv('UTF-8', NJB_DEFAULT_CHARSET, $value);	
+			
 		}
 	}    
 	fclose($soket);

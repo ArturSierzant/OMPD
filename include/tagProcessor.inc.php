@@ -269,8 +269,9 @@ function parseMimeType($data) {
 }
 
 function parseError($data) {
+    //if (!empty($data['error'])) {
     if (isset($data['error'])) {
-        return implode('<br>', $data['error']);
+				return implode('<br>', $data['error']);
     }
     return '';
 }

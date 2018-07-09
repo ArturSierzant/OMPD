@@ -79,7 +79,8 @@ $header['head']  = "\t" . '<meta http-equiv="Content-Type" content="text/html; c
 
 $header['head'] .= "\t" . '<meta name="generator" content="netjukebox, Copyright (C) 2001-2012 Willem Bartels; O!MPD, Copyright (C) 2015 Artur Sierzant">' . "\n";
 $header['head'] .= "\t" . '<title>' . $header['title'] . '</title>' . "\n";
-$header['head'] .= "\t" . '<link rel="manifest" href="manifest.json">' . "\n";
+$header['head'] .= "\t" . '<link rel="manifest" href="manifest.webmanifest">' . "\n";
+//$header['head'] .= "\t" . '<link rel="manifest" href="manifest.json">' . "\n";
 if (isset($cfg['access_media']) && $cfg['access_media']) {
 	$header['head'] .= "\t" . '<link rel="search" type="application/opensearchdescription+xml" title="O!MPD - Album Artist" href="' . NJB_HOME_URL . 'opensearch.php?action=installAlbumArtist">' . "\n";
 	$header['head'] .= "\t" . '<link rel="search" type="application/opensearchdescription+xml" title="O!MPD - Track Artist" href="' . NJB_HOME_URL . 'opensearch.php?action=installTrackArtist">' . "\n";

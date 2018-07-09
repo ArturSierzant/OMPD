@@ -1,15 +1,14 @@
 <?php
 /////////////////////////////////////////////////////////////////
 /// getID3() by James Heinrich <info@getid3.org>               //
-//  available at http://getid3.sourceforge.net                 //
-//            or http://www.getid3.org                         //
-//          also https://github.com/JamesHeinrich/getID3       //
-/////////////////////////////////////////////////////////////////
+//  available at https://github.com/JamesHeinrich/getID3       //
+//            or https://www.getid3.org                        //
+//            or http://getid3.sourceforge.net                 //
 //                                                             //
-// /demo/demo.browse.php - part of getID3()                     //
+// /demo/demo.browse.php - part of getID3()                    //
 // Sample script for browsing/scanning files and displaying    //
 // information returned by getID3()                            //
-// See readme.txt for more details                             //
+//  see readme.txt for more details                            //
 //                                                            ///
 /////////////////////////////////////////////////////////////////
 
@@ -149,7 +148,7 @@ if (isset($_REQUEST['filename'])) {
 		while ($file = readdir($handle)) {
 			$currentfilename = $listdirectory.'/'.$file;
 			set_time_limit(30); // allocate another 30 seconds to process this file - should go much quicker than this unless intense processing (like bitrate histogram analysis) is enabled
-			echo ' .'; // progress indicator dot
+			echo ' <span title="'.htmlentities($file, ENT_QUOTES).'">.</span>'; // progress indicator dot
 			flush();  // make sure the dot is shown, otherwise it's useless
 			switch ($file) {
 				case '..':
@@ -512,7 +511,7 @@ function table_var_dump($variable, $wrap_in_td=false, $encoding='ISO-8859-1') {
 			if (($imagechunkcheck = getid3_lib::GetDataImageSize($variable, $imageinfo)) && ($imagechunkcheck[2] >= 1) && ($imagechunkcheck[2] <= 3)) {
 				$returnstring .= ($wrap_in_td ? '<td>' : '');
 				$returnstring .= '<table class="dump" cellspacing="0" cellpadding="2">';
-				$returnstring .= '<tr><td><b>type</b></td><td>'.getid3_lib::ImageTypesLookup($imagechunkcheck[2]).'</td></tr>'."\n";
+				$returnstring .= '<tr><td><b>type</b></td><td>'.image_type_to_mime_type($imagechunkcheck[2]).'</td></tr>'."\n";
 				$returnstring .= '<tr><td><b>width</b></td><td>'.number_format($imagechunkcheck[0]).' px</td></tr>'."\n";
 				$returnstring .= '<tr><td><b>height</b></td><td>'.number_format($imagechunkcheck[1]).' px</td></tr>'."\n";
 				$returnstring .= '<tr><td><b>size</b></td><td>'.number_format(strlen($variable)).' bytes</td></tr></table>'."\n";
@@ -595,10 +594,15 @@ function MoreNaturalSort($ar1, $ar2) {
 	return 0;
 }
 
+/**
+ * @param string $string
+ *
+ * @return mixed
+ */
 function PoweredBygetID3($string='') {
 	global $getID3;
 	if (!$string) {
-		$string = '<div style="border: 1px #CCCCCC solid; padding: 5px; margin: 5px 0px; float: left; background-color: #EEEEEE; font-size: 8pt; font-face: sans-serif;">Powered by <a href="http://www.getid3.org/"><b>getID3() v<!--GETID3VER--></b><br>http://www.getid3.org/</a><br>Running on PHP v'.PHP_VERSION.' ('.(8 * PHP_INT_SIZE).'-bit, '.(defined('PHP_OS_FAMILY') ? PHP_OS_FAMILY : PHP_OS).')</div>';
+		$string = '<div style="border: 1px #CCCCCC solid; padding: 5px; margin: 5px 0; float: left; background-color: #EEEEEE; font-size: 8pt; font-family: sans-serif;">Powered by <a href="https://www.getid3.org/"><b>getID3() v<!--GETID3VER--></b><br>https://www.getid3.org/</a><br>Running on PHP v'.PHP_VERSION.' ('.(8 * PHP_INT_SIZE).'-bit, '.(defined('PHP_OS_FAMILY') ? PHP_OS_FAMILY : PHP_OS).')</div>';
 	}
 	return str_replace('<!--GETID3VER-->', $getID3->version(), $string);
 }

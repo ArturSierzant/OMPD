@@ -1181,6 +1181,27 @@ function fileInfo($track, $getID3 = NULL) {
         $metaData = $getID3->analyze($file);
         getid3_lib::CopyTagsToComments($metaData);
 				
+				/* cliLog('metaData:');
+				cliLog(parseMiliseconds($metaData));
+				cliLog(parseAudioBitRate($metaData));
+				cliLog(parseAudioBitsPerSample($metaData));
+				cliLog(parseAudioSampleRate($metaData));
+				cliLog(parseAudioChannels($metaData));
+				cliLog(parseAudioLossless($metaData));
+				cliLog(parseAudioCompressionRatio($metaData));
+				cliLog(parseAudioDataformat($metaData));
+				cliLog(parseAudioEncoder($metaData));
+				cliLog(parseAudioProfile($metaData));
+				cliLog(parseError($metaData));
+				cliLog(parseTrackNumber($metaData));
+				cliLog(parseDiscNumber($metaData));
+				cliLog(parseGenre($metaData));
+				cliLog(parseTrackTitle($metaData));
+				cliLog(parseTrackArtist($metaData));
+				cliLog(parseComment($metaData));
+				cliLog(parseYear($metaData));
+				cliLog(parseAudioDynamicRange($metaData)); */
+				
 				//prevent changing track_id if already set to avoid deleting from favorites
 				if (strpos($track['track_id'],'_') === false) {
 					$track_id = $db->real_escape_string($track['album_id'] . '_' . fileId($file));
@@ -1188,6 +1209,7 @@ function fileInfo($track, $getID3 = NULL) {
 				else {
 					$track_id = $track['track_id'];
 				}
+				cliLog($track_id);
 				
         // TODO: does it make sense to populate artist and track_artist with the same value?
         $query = 'UPDATE track SET
@@ -1211,7 +1233,7 @@ function fileInfo($track, $getID3 = NULL) {
             video_framerate         = ' . (int) parseVideoFrameRate($metaData) . ',
             error                   = "' . $db->real_escape_string(parseError($metaData)) . '",
             track_id                = "' . $track_id . '",
-            disc                    = ' . (int)(parseDiscNumber($metaData)) . ',
+            disc                  = ' . $db->real_escape_string(parseDiscNumber($metaData)) . ',
             number                  = ' . $db->real_escape_string(parseTrackNumber($metaData)) . ',
             genre                   = "' . $db->real_escape_string(parseGenre($metaData)) . '",
             title                   = "' . $db->real_escape_string(parseTrackTitle($metaData)) . '",

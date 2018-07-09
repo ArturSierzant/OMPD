@@ -141,6 +141,15 @@ elseif ($action == 'noImageFront') {
 		WHERE image_front = ""
 		AND album.album_id = bitmap.album_id 
 		ORDER BY album.artist_alphabetic, album.album');
+	$cfg['items_count']  = $noImageFrontCount = mysqli_num_rows($query);
+	if ($noImageFrontCount > $max_item_per_page) {
+		$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id
+		FROM album, bitmap
+		WHERE image_front = ""
+		AND album.album_id = bitmap.album_id 
+		ORDER BY album.artist_alphabetic, album.album
+		LIMIT ' . ($page - 1) * $max_item_per_page . ','  . ($max_item_per_page));
+	}
 }
 elseif ($action == 'imageError') {
 	$title = 'image_front file error';
@@ -159,6 +168,15 @@ elseif ($action == 'noImageFrontCover') {
 		WHERE image_front_width * image_front_height < ' . $cfg['image_front_cover_treshold'] . '
 		AND album.album_id = bitmap.album_id 
 		ORDER BY album.artist_alphabetic, album.album');
+		$cfg['items_count']  = $noImageFrontCoverCount = mysqli_num_rows($query);
+	if ($noImageFrontCoverCount > $max_item_per_page) {
+		$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id, album.image_id
+		FROM album, bitmap
+		WHERE image_front_width * image_front_height < ' . $cfg['image_front_cover_treshold'] . '
+		AND album.album_id = bitmap.album_id 
+		ORDER BY album.artist_alphabetic, album.album
+		LIMIT ' . ($page - 1) * $max_item_per_page . ','  . ($max_item_per_page));
+	}
 }
 elseif ($action == 'noImageBackCover') {
 	$title = 'No ' . $cfg['image_back'] . ' for cover';
@@ -401,30 +419,67 @@ for ($i=0; $i<$histogram_count; $i++)
 	<td>By month:</td>
 	<td></td>
 	<td align="right">
-		<?php 
-		foreach ($histogram as $key => $value) {
-		echo '<div>' . $key . '</div>';
+		<?php
+		$isHidden = false;
+		$maxItems = 24;
+		$i = 0;
+		foreach ($histogram as $key => $value) {		
+			echo '<div' . (($i > $maxItems) ? ' class="no-display"' : '') . ' id="incOfDiscs' . $i . '">' . $key . '</div>';
+			$i++;
+			if ($i > $maxItems) $isHidden = true;
 		}
 		?>
 	</td>
 	<td></td>
 	<td></td>
 	<td class="bar">
-		<?php 
+		<?php
+		$i = 0;
 		foreach ($histogram as $key => $value) {
-		echo '<div><div class="out-statistics"><div style="width: ' . ($value/$max)*100 . 'px;" class="in"></div></div></div>';
-		}
+			$month = (int)substr($key,-2);
+			$year  = (int)substr($key,0,4);
+			
+			$first = mktime(0,0,0,$month,1,$year);
+			$first = new DateTime(date('r', $first));
+			$tsStart = $first->getTimestamp();
+			
+			$last = mktime(23,59,00,$month+1,0,$year);
+			$last = new DateTime(date('r', $last));
+			$tsEnd = $last->getTimestamp();
+			
+			echo '<div onClick="window.location.href=\'' . NJB_HOME_URL . 'index.php?action=viewNew&tsStart=' . $tsStart . '&tsEnd=' . $tsEnd . '&addedOn=' . $key . '\'" id="incOfDiscsCount' . $i . '"' . (($i > $maxItems) ? ' class="no-display pointer"' : ' class="pointer"') . ' onMouseOver="return overlib(\'See new albums from ' . $key . '\');" onMouseOut="return nd();"><div class="out-statistics"><div style="width: ' . ($value/$max)*100 . 'px;" class="in"></div></div></div>';
+			$i++;}
 		?>
+		
 	</td>
 	<td>
 	<?php 
+		$i = 0;
 		foreach ($histogram as $key => $value) {
-		echo '<div style="text-align: right;">' . $value . '</div>';
+		echo '<div style="text-align: right;" id="incOfDiscsCount' . $i . '"' . (($i > $maxItems) ? ' class="no-display"' : '') . '>' . $value . '</div>';
+		$i++;
 		}
 		?>
 	</td>
 	<td></td>
 </tr>
+<?php 
+if ($isHidden) {
+?>
+<tr id="histMoreRow" class="odd mouseover">
+	<td></td>
+	<td></td>
+	<td></td>
+	<td></td>
+	<td></td>
+	<td></td>
+	<td><div class="buttons" style="text-align: center;"><span id="histMore" style="padding: 5px;">more...</span></div></td>
+	<td></td>
+	<td></td>
+</tr>
+<?php
+}
+?>
 
 
 <tr class="header">
@@ -633,7 +688,7 @@ for ($i=0; $i<$histogram_count; $i++)
 	<td colspan="9"></td>
 </tr>
 
-<tr class="odd_error mouseover">
+<tr class="odd mouseover">
 	<td></td>
 	<td><a href="statistics.php?action=fileError">Error:</a></td>
 	<td></td>
@@ -652,6 +707,12 @@ for ($i=0; $i<$histogram_count; $i++)
 <?php
 	} ?>
 </table>
+<script>
+$('#histMore').click(function(){
+	$("[id^='incOfDiscs']").show();
+	$("#histMoreRow").hide();
+});
+</script>
 <?php
 	$cfg['items_count'] = 0; //to avoid pagination on statistic page
 	require_once('include/footer.inc.php');

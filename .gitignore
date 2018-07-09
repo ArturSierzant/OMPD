@@ -6,5 +6,6 @@ _notepad++_edit_session
 mpd_sync.sh
 test.php
 test1.php
+test*
 TODO.txt
 get-db-data.php

@@ -116,6 +116,10 @@ function changePlayer(player_id) {
 				if (n>0 || m>0) {
 					window.location = "playlist.php";
 				};
+				var f = winLoc.indexOf("favorite.php");
+				if (f>0) {
+					window.location = "favorite.php";
+				};
 				toggleChangePlayer();
 			},
 			error : function() {
@@ -507,7 +511,8 @@ $action 		= get('action');
 <script type="text/javascript">
 	var target = document.getElementById('waitIndicator');
 	var spinner = new Spinner(opts);
-	<?php if ($action != 'view3' && $action != 'downloadAlbum' && $action != 'downloadTrack' && $pos === false) echo ('showSpinner();'); ?>
+	<?php if ($action != 'view3' && $action != 'downloadAlbum' && $action != 'downloadTrack' && $pos === false) echo ('showSpinner();'); 
+	?>
 </script>
 
 <div class="wrapper">
@@ -851,7 +856,10 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 	<td class="side-margin"></td>
 	<td>
 
-	
+<?php
+	@ob_flush();
+	flush();
+?>	
 
 	
 <!-- end header -->

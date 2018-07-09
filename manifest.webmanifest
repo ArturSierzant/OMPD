@@ -1,0 +1,16 @@
+{
+  "background_color": "gray",
+  "description": "Free, opensource mpd client",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "image/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "name": "O!MPD
+	Surf Your Music Collection",
+  "short_name": "O!MPD",
+  "start_url": "index.php"
+}

@@ -43,6 +43,8 @@ elseif	($action == 'stop')				stop();
 elseif	($action == 'prev')				prev_();
 elseif	($action == 'beginOfTrack')		beginOfTrack();
 elseif	($action == 'next')				next_();
+elseif	($action == 'playMPDplaylist')		playMPDplaylist();
+elseif	($action == 'addMPDplaylist')		addMPDplaylist();
 elseif	($action == 'playSelect')		playSelect();
 elseif	($action == 'addSelect')		addSelect();
 elseif	($action == 'addSelectUrl')		addSelectUrl();
@@ -340,6 +342,69 @@ function playSelect() {
 	if ($album_id) {	
 		backgroundQueries();
 	}
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Play MPD playlist                                                      |
+//  +------------------------------------------------------------------------+
+function playMPDplaylist() {
+	global $cfg, $db;
+	authenticate('access_play');
+	require_once('include/play.inc.php');
+	$favorite_id	= get('favorite_id');
+	$data = array();
+	$playResult = 'play_error';
+	
+	mpd('stop');
+	if ($cfg['play_queue'] == false)
+		mpd('clear');
+	$playResult = mpd('load ' . $favorite_id);
+	mpd('play');
+	if ($playResult == 'ACK_ERROR_NO_EXIST') {
+		$playResult = 'play_error';
+	}
+	$data['playResult'] = $playResult;
+	$data['favorite_id'] = $favorite_id;
+	ob_start();
+	echo safe_json_encode($data);
+	header('Connection: close');
+	header('Content-Length: ' . ob_get_length());
+	ob_end_flush();
+	ob_flush();
+	flush();
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Add MPD playlist                                                       |
+//  +------------------------------------------------------------------------+
+function addMPDplaylist() {
+	global $cfg, $db;
+	authenticate('access_play');
+	require_once('include/play.inc.php');
+	$favorite_id	= get('favorite_id');
+	$data = array();
+	$playResult = 'play_error';
+	
+	$playResult = mpd('load ' . $favorite_id);
+	
+	if ($playResult == 'ACK_ERROR_NO_EXIST') {
+		$playResult = 'add_error';
+	}
+	$data['addResult'] = $playResult;
+	$data['favorite_id'] = $favorite_id;
+	ob_start();
+	echo safe_json_encode($data);
+	header('Connection: close');
+	header('Content-Length: ' . ob_get_length());
+	ob_end_flush();
+	ob_flush();
+	flush();
 }
 
 

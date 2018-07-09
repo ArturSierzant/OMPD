@@ -776,6 +776,49 @@ function arrangeFavItem(toPosition,i,isMoveToTop,favorite_id){
 };
 
 
+function arrangeFavItemMPD(toPosition,i,isMoveToTop,favorite_id){
+	if (i >= 0) fromPosition = i;
+	
+	
+	if (toPosition < 0) removeItem = true 
+	else removeItem = false;
+	
+	toggleInsert('off');
+	console.log('fromPosition: ' + fromPosition + ' toPosition: ' + toPosition);
+	if (fromPosition != toPosition) {
+		if (removeItem) {
+			action = 'removeItem';
+			//console.log ('remove ' + i);
+		}
+		else {
+			action = 'moveItem';
+		}
+		
+		var size = $tileSize;
+		var request = $.ajax({  
+			url: "ajax-favorite-arrange-MPD.php",  
+			type: "POST",  
+			data: { action : action,
+					favorite_id : favorite_id,
+					toPosition: toPosition,
+					fromPosition: fromPosition,
+					isMoveToTop: isMoveToTop},  
+			dataType: "html"
+		}); 
+		
+		request.done(function( data ) {  
+			$( "#favoriteList" ).html( data );
+			//calcTileSize();
+			//hideSpinner();
+		}); 
+		
+		request.fail(function( jqXHR, textStatus ) {  
+			alert( "Request failed: " + textStatus );	
+		}); 
+	}
+};
+
+
 function playlistSave(action, id, saveTrackId, host, port) {
 	
 	var saveTrack = 'false';

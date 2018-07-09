@@ -2354,6 +2354,11 @@ h1 {
 	display: inline-block;
 }
 
+#paginationGoTo {
+	font-size: 1em;
+	padding: 1px;
+}
+
 .paginator-nav {
 	height: 3.4em;
 	background-color: rgba(235, 235, 235, 0.80);

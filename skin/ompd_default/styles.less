@@ -2,71 +2,71 @@
     | styles.css                                                             |
     +------------------------------------------------------------------------+ */
 
-
-/*
-INFO : replaced all html colors code with vars, to easy skin O!MPD
-some of them are not identified, read all "WARNING", and set the correct var
-TO_DO :
-- pass forget html color code in vars, not usefull to skin
-- pass background-color:rgba() in vars too
-- clean misc temp color vars
-- source a file with vars, to not change default template ? modify skin select html page
-*/
-
 @import url("./../styles_inc.less");
 
 @font-face {
     font-family: Roboto;
     src: url(fonts/Roboto/Roboto-Regular.ttf);
-        font-weight: 400;
+    font-weight: 400;
 }
 
 @font-face {
     font-family: Roboto;
     src: url(fonts/Roboto/Roboto-Light.ttf);
-        font-weight: 300;
+    font-weight: 300;
 }
 
 /* Main background */
 @bg-main: #faf9f9;
+
 /* Sub background */
 @bg-sub: #fafafa;
-/* Categories background */
+
+/* Categories background (headers, footers, album/now playing) */
 @bg-categories: #ececec;
-/* Background color of tracklist */
+
+/* Background color of track in tracklist/playlist */
 @bg-track: #ffffff;
-@bg-track-playing-active: #e74c3c;
+
 /* Background playlist current track */
 @bg-playlist-active: #f5f5f5;
+@bg-track-playing-active: #e74c3c;
+
 /* Background of track submenu */
 @bg-track-submenu: #fafafa;
+
 /* Main banner background */
 @bg-banner: #2c3e50;
+
 /* Main sub banner background */
 @bg-sub-banner-2: #2c3e50;
+
 /* Main sub sub banner background */
 @bg-sub-sub-banner-2: #3c4e60;
+
 /* Sub banner background */
 @bg-sub-banner: #16a085;
+
 /* Sub sub banner background */
 @bg-sub-sub-banner: #36c0a5;
+
 /* Background of forms */
 @bg-forms: #fefefe;
 @bg-forms-banner: #fefefe;
+
 /* Separators in subbanner */
 @separator-sub-banner: #cccccc;
+
 /* fonts */
 @font-first: #2C3E50;
 @font-active: #3498db;
 @font-banner: #2C3E50;
-@font-second: #2C3E50;
 @font-categories: #777777;
 @font-tags: #ffffff;
 @font-search-button: #ffffff;
 @font-sub-banner: #ffffff;
 @font-sub-sub-banner: #ffffff;
 @font-sub-button: #fdf6e3;
-/* need to search for font-artist-title-library */
 @font-album-title-library: #ffffff;
 @font-artist-library: #bbbbbb;
 @font-track-playing: #e74c3c;
@@ -79,45 +79,30 @@ TO_DO :
 
 /* buttons */
 @button: #777777;
-@button-sub: #777777;
-@button-sub-shadow: #fefefe;
 @button-banner: #bbbbbb;
 @button-banner-active : #ffffff;
+
+/* buttons in add/save playlist menu and submenus */
+@button-sub: #777777;
+
+/* buttons in select player, paginator, favorites, etc.*/
 @button-nav: #16a085;
 @button-quick-play: #ffffff;
+
+/* buttons in Now Playing: ff, play/pause, etc. */
 @button-playlist: #9f9f9f;
 @button-playlist-off: #f0f0f0;
 @button-playlist-on: #e74c3c;
+
 /* logo */
 @logo-first-color: #3498db;
 @logo-second-color: #ffffff;
+
 /* playing bars */
 @playing-bar: #e74c3c;
 @bg-playing-bar: #e3e3e3;
-/* Active click color */
+
+/* Active color */
 @active-nav: #e74c3c;
 @active-banner: #e74c3c;
 
-/* MISC / temp colors */
-
-@misc-1: #2b2b2c;
-@misc-2: #cccccc;
-
-@grey-things: @misc-1;
-@ezero-things: @misc-1;
-@white-things: @misc-2;
-@ddd-things: @misc-2;
-@aaa-things: @misc-2;
-@ccc-things: @misc-2;
-@eee-things: @misc-2;
-@fe-things: @misc-2;
-
-/* @grey-things: #777777;
-@white-things: #ffffff;
-@ddd-things: #dddddd;
-@aaa-things: #aaaaaa;
-@ccc-things: #cccccc;
-@eee-things: #eeeeee;
-@fe-things: #fefefe;
-@ezero-things: #e0e0e0;
-@tracklist-banner-and-separator: @bg-track; */

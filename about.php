@@ -164,13 +164,16 @@ function about() {
 	<td>
 	<ul style="padding-left: 1em;">
 	<li> added ability to play audio streams from Youtube movies (requires <a href="https://github.com/rg3/youtube-dl" target="_new">youtube-dl</a>)</li>
-	<li> added new skins</li>
+	<li> added new skins (skins are now based on <a href="http://lesscss.org/">{less}</a>)</li>
+	<li> added support for mpd playlists</li>
 	<li> added view for Album Dynamic Range</li>
+	<li> added direct navigation to selected page in paginator</li>
 	<li> added search action for album cover in album view</li>
-	<li> added 'Play next' to track menu in 'Now Playing'</li>
+	<li> added 'Play next' and 'Remove all below' to track menu in 'Now Playing'</li>
 	<li> added config file editor</li>
 	<li> added consume mode on/off (long press on 'Delete played')</li>
 	<li> added stop function in 'Now Playing' (long press on play/pause button)</li>
+	<li> improved sorting by genre in search results</li>
 	<li> fixed bugs</li>
 	</ul>
 	<br>
@@ -360,6 +363,13 @@ function about() {
 	<td>Longpress</td>
 	<td></td>
 	<td><a href="http://github.com/vaidik/jquery-longpress/" target="_new">http://github.com/vaidik/jquery-longpress/</a></td>
+	<td></td>
+</tr>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
+	<td>{less}</td>
+	<td></td>
+	<td><a href="http://lesscss.org/">http://lesscss.org/</a></td>
 	<td></td>
 </tr>
 

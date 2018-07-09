@@ -1389,6 +1389,7 @@ function albumMultidisc($query){
 	global $cfg, $db;
 	$album_multidisc = array();
 	$mdTab = array();
+	
 	while ($album = mysqli_fetch_assoc($query)) {		
 		$multidisc_count = 0;
 		if ($album) {
@@ -1397,7 +1398,7 @@ function albumMultidisc($query){
 				if ($md_indicator !== false) {
 					$md_ind_pos = stripos($album['album'], $md_indicator);
 					$md_title = substr($album['album'], 0, $md_ind_pos);
-					$query_md = mysqli_query($db, 'SELECT album, image_id, album_id 
+					$query_md = mysqli_query($db, 'SELECT album, image_id, album_id, genre_id 
 					FROM album 
 					WHERE album LIKE "' . mysqli_real_escape_string($db, $md_title) . '%" AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '" AND album <> "' . mysqli_real_escape_string($db, $album['album']) . '"
 					ORDER BY album');
@@ -1414,6 +1415,7 @@ function albumMultidisc($query){
 					'album' => $album['album'],
 					'artist_alphabetic' => $album['artist_alphabetic'],
 					'year' => $album['year'],
+					'genre_id' => $album['genre_id'],
 					'allDiscs' => 'allDiscs'
 					);
 				}
@@ -1425,6 +1427,7 @@ function albumMultidisc($query){
 				'album' => $album['album'],
 				'artist_alphabetic' => $album['artist_alphabetic'],
 				'year' => $album['year'],
+				'genre_id' => $album['genre_id'],
 				'allDiscs' => ''
 				);
 			}
@@ -1460,6 +1463,22 @@ function updateGenre() {
 				}
 			}
 		}
+		
+		//rebuild genre tab to avoid wrong sort in case of multi-genre albums
+		$query = mysqli_query($db,'SELECT * FROM genre ORDER BY genre');	
+		$genTab = array();
+		$i = 1;
+		while ($genres = mysqli_fetch_assoc($query)) {
+			$genTab[$i] = $genres['genre'];
+			$i++;
+		}
+		mysqli_query($db,'TRUNCATE genre');
+		foreach ($genTab as $key => $value){
+			mysqli_query($db,'INSERT INTO genre (genre_id, genre, updated)
+									VALUES ("' . $key . '",
+											"' . $db->real_escape_string($value) . '",
+											1)');
+		}
 	}
 	$res = mysqli_query($db,"UPDATE album SET genre_id = ';'"); 
 	
@@ -1483,6 +1502,12 @@ function updateGenre() {
 				elseif (strpos($album_genre_ids,';' . $a1['genre_id'] . ';') === false) {
 						//genre_id not added to album yet -> add it now
 						$album_genre_ids = $album_genre_ids . $a1['genre_id'] . ';';
+						$genresSort = explode(';',ltrim($album_genre_ids,';'));
+						asort($genresSort);
+						$album_genre_ids = '';
+						foreach($genresSort as $key => $value){
+							$album_genre_ids = $album_genre_ids . $value . ';';
+						}
 				}
 				
 				$res = mysqli_query($db,"UPDATE album SET 
