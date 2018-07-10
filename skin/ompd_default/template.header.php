@@ -401,7 +401,7 @@ $(document).ready(function () {
 	
 	$('#updateSelectedDir').click(function(){
 		$('#updateSelectedDir > i').removeClass('fa-refresh').addClass('fa-cog fa-spin');
-		var t = $('#updateDir').val() + '/';
+		var t = $('#updateDir').val();
 		t = t.replace(/&/g,'ompd_ampersand_ompd');
 		t = t.replace(/=/g,'%3D');
 		t = t.replace(/\+/g,'%2B');

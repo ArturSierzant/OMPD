@@ -228,7 +228,7 @@ function authenticate($access, $cache = false, $validate_sign = false, $disable_
 		
 		if ($session['ip'] == '')
 			//message(__FILE__, __LINE__,'test',$session['ip']);
-			message(__FILE__, __LINE__, 'error', '[b]Login failed[/b][br]netjukebox requires cookies to login.[br]Enable cookies in your browser and try again.[br][url=index.php][img]small_login.png[/img]login[/url]');
+			message(__FILE__, __LINE__, 'error', '[b]Login failed[/b][br]O!MPD requires cookies to login.[br]Enable cookies in your browser and try again.[br][url=index.php][img]small_login.png[/img]login[/url]');
 			
 		if ($session['ip'] != $_SERVER['REMOTE_ADDR'])
 			message(__FILE__, __LINE__, 'error', '[b]Login failed[/b][br]Unexpected IP address[br][url=index.php][img]small_login.png[/img]login[/url]');

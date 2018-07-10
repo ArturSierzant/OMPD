@@ -40,12 +40,14 @@ require_once('include/library.inc.php');
 ignore_user_abort(true);
 
 //exit();
+cliLog("Update started");
 
 $cfg['menu'] = 'config';
 $cfg['force_filename_update'] = false;
 
 $action = getpost('action');
 $dir_to_update = getpost('dir_to_update');
+cliLog('dir_to_update from URL: ' . $dir_to_update);
 if (!isset($dir_to_update)) {
 	$dir_to_update = '';
 }
@@ -57,7 +59,6 @@ else {
 
 $flag	= (int) getpost('flag');
 
-cliLog("Update started");
 
 if		(PHP_SAPI == 'cli')					cliUpdate();
 elseif	($action == 'update')				update($dir_to_update);
@@ -244,6 +245,9 @@ function update($dir_to_update = '') {
 		
 		$rel_file = str_replace($cfg['media_dir'],'',$dir_to_update);
 		$rel_file_mpd = rtrim($rel_file,'/');
+		
+		
+		
 		mpdUpdate($rel_file_mpd);
 		
 		//exit();
@@ -307,10 +311,12 @@ function update($dir_to_update = '') {
 		//recursiveScanCount($cfg['media_dir']);
 		clearstatcache();
 		$dir_to_scan = $cfg['media_dir'];
+		
 		if ($dir_to_update != '') {
 			$dir_to_scan = $dir_to_update;
 		}
 		countDirectories($dir_to_scan);
+		
 		
 		if ($dirsCounter == 1) $dirsCounter = 0;
 		/* $result = mysqli_query($db,"update update_progress set 
@@ -585,7 +591,12 @@ function countDirectories($base_dir) {
 		$extension = substr(strrchr($file, '.'), 1);
 		$extension = strtolower($extension);
 		if (in_array($extension, $cfg['media_extension'])) $isMediaDir = 1;
+		//cliLog('$base_dir: ' . $base_dir);
 		$dir = $base_dir.DIRECTORY_SEPARATOR.$file;
+		if (substr($base_dir,-1) == DIRECTORY_SEPARATOR){
+			$dir = $base_dir.$file;
+		}
+		//cliLog('$dir: ' . $dir);
 		if($file == '.' || $file == '..' || (is_dir($dir) === TRUE && in_array($file, $cfg['directory_blacklist']) === TRUE)) continue;
 		if(is_dir($dir)) {
 			$directories []= iconv(NJB_DEFAULT_FILESYSTEM_CHARSET,'UTF-8', $dir);
