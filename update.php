@@ -591,12 +591,10 @@ function countDirectories($base_dir) {
 		$extension = substr(strrchr($file, '.'), 1);
 		$extension = strtolower($extension);
 		if (in_array($extension, $cfg['media_extension'])) $isMediaDir = 1;
-		//cliLog('$base_dir: ' . $base_dir);
 		$dir = $base_dir.DIRECTORY_SEPARATOR.$file;
 		if (substr($base_dir,-1) == DIRECTORY_SEPARATOR){
 			$dir = $base_dir.$file;
 		}
-		//cliLog('$dir: ' . $dir);
 		if($file == '.' || $file == '..' || (is_dir($dir) === TRUE && in_array($file, $cfg['directory_blacklist']) === TRUE)) continue;
 		if(is_dir($dir)) {
 			$directories []= iconv(NJB_DEFAULT_FILESYSTEM_CHARSET,'UTF-8', $dir);

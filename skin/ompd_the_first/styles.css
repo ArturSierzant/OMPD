@@ -2448,6 +2448,30 @@ h1 {
     100% { opacity: 1.0; }
 }
 
+#discBrowser {
+	overflow: auto;
+  white-space:nowrap;
+	text-align: center;
+	display: none;
+	padding-bottom: 5px;
+}
+
+.imgThumb {
+	width: 4em;
+	height: 4em;
+	display: inline-block;
+  vertical-align:top;
+  margin:0 3px 3px 0;
+  white-space:normal;
+	cursor: pointer;
+	vertical-align: top;
+}
+
+.selected {
+	border-bottom: solid 4px #FE5C00;
+	box-sizing: content-box;	
+}
+
 
 
 /* other fonts are set by the table, tr or td classes */

@@ -95,6 +95,16 @@ $cfg['default_search_name'] = 'Google';
 
 
 
+//  +------------------------------------------------------------------------+
+//  | Discography browser                                                    |
+//  +------------------------------------------------------------------------+
+//  | Show thumbnails of all albums for given artist in album view           |
+//  +------------------------------------------------------------------------+
+
+$cfg['show_discography_browser'] = true;
+
+
+
 //  +------------------- END OF NEW IN O!MPD 1.04 ---------------------------+
 
 
@@ -710,6 +720,7 @@ $cfg['no_album_artist'][]           = 'remix';
 $cfg['no_album_artist'][]           = 'sampler';
 $cfg['no_album_artist'][]           = 'singles';
 $cfg['no_album_artist'][]           = 'various';
+$cfg['no_album_artist'][]           = 'Various Artists';
 
 
 

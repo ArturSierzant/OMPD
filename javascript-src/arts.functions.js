@@ -316,7 +316,9 @@ function resizeImgContainer() {
 	if ($("input").is(":focus")) 
 		return;
 		//$("#savePlaylistAsName").blur();
-		
+	
+	$("#discBrowser").hide();
+	
 	var showMenuSave = false;
 	var showMenuUrl = false;
 	var showMenuSearch = false;
@@ -366,7 +368,7 @@ function resizeImgContainer() {
 			else $('#image').css('width', '');
 			$('#image').css('height', maxH);
 			$('#image').css('max-height', maxH);
-			$('#image_container').css('max-height', function(){return (winW) * 1.1;});
+			//$('#image_container').css('max-height', function(){return (winW) * 1.1;});
 			
 			/* imageH = $('#image').height();
 			if (imageH > maxH * 1.1) {
@@ -411,6 +413,16 @@ function resizeImgContainer() {
 	if (showMenuUrl == true) $("#menuSubMiddleMediaAddUrl").show();
 	if (showMenuSearch == true) $("#searchFormAll").show();
 		
+	
+	if (typeof thumbID !== 'undefined') {
+		$("#discBrowser").css("max-width",$("#image_container").width());
+		$("#discBrowser").show();
+		
+		//scroll discography browser to active album
+		if ($(thumbID).position().left > $( "#discBrowser" ).width()/2 + $(thumbID).width()/2){
+				$( "#discBrowser" ).animate({ scrollLeft: ($(thumbID).position().left - $( "#discBrowser" ).width()/2 + $(thumbID).width()/2) }, 500);
+			}
+	}
 } 
 
 

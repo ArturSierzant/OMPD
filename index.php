@@ -1472,10 +1472,13 @@ function view3() {
 	
 	$idx = array_search($cfg['default_search_name'], $cfg['search_name']);
 	
+	
+	
 ?>
 
 
 <div id="album-info-area">
+
 <div id="image_container">
 	<div id="cover-spinner">
 		<img src="image/loader.gif" alt="">
@@ -1485,6 +1488,53 @@ function view3() {
 		<img id="image_in" src="image/transparent.gif" alt="">
 		</a>
 	</span>
+	<?php 
+	if ($cfg['show_discography_browser'] == true && !in_array($album['artist'],$cfg['no_album_artist'])) {
+		
+		$exploded = multiexplode($cfg['artist_separator'],$album['artist']);
+		$l = count($exploded);
+		$search_str = 'artist = "' .  mysqli_real_escape_string($db,$album['artist']) . '"';
+		
+		for ($j=0; $j<$l; $j++) {
+			$art =  mysqli_real_escape_string($db,$exploded[$j]);
+			$as = $cfg['artist_separator'];
+			$count = count($as);
+			$i=0;
+			
+			for($i=0; $i<$count; $i++) {
+			$search_str .= ' OR artist = "' . $art . '" OR artist LIKE "' . $art . '' . $as[$i] . '%" 
+			OR artist LIKE "%' . $as[$i] . '' . $art . '" 
+			OR artist LIKE "%' . $as[$i] . '' . $art . '' . $as[$i] . '%" 
+			OR artist LIKE "% & ' . $art . '' . $as[$i] . '%" 
+			OR artist LIKE "%' . $as[$i] . '' . $art . ' & %"';
+			//last 2 lines above for artist like 'Mitch & Mitch' in 'Zbigniew Wodecki; Mitch & Mitch; Orchestra and Choir'
+			}
+		}
+		
+		$queryStr = 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id, album_dr FROM album WHERE (' . $search_str . '
+			) ORDER BY year, month, artist_alphabetic, album';
+		$query = mysqli_query($db, $queryStr);
+		$discCount = mysqli_num_rows($query);
+		if ($discCount > 1) {
+	?>
+		<div id="discBrowser">
+		<?php 
+		while ($discography = mysqli_fetch_assoc($query)){
+			$selected = '';
+			if ($album_id == $discography['album_id']) {
+				$selected = ' selected';
+			}
+		echo '<img id="thumb' . $discography['album_id'] .  '" class="imgThumb' . $selected . '" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $discography['album_id'] . '"\' src="image.php?image_id=' . $discography['image_id'] . '" onMouseOver="return overlib(\'' . addslashes($discography['artist']) . '</div><div class=' . chr(92) . chr(39) . 'ol_line' . chr(92) . chr(39) . '><div>' . addslashes($discography['album']) . '</div><div class=' . chr(92) . chr(39) . 'ol_line' . chr(92) . chr(39) . '></div><div>' . $discography['year'] . '</div>\', CAPTION , \'Go to album\');" onMouseOut="return nd();" alt="">';
+		}
+		?>
+		<script>
+			var thumbID = '#thumb<?php echo $album_id; ?>';
+		</script>
+		</div>
+	<?php 
+		}
+	}
+	?>
 </div>
 
 
