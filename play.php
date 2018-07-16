@@ -752,7 +752,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 			$fulldirpath = str_replace('ompd_ampersand_ompd','&',$fulldirpath);
 			$fulldirpath = str_replace('ompd_plus_ompd','+',$fulldirpath);
 			$mediafiles = find_all_files($fulldirpath);
-			foreach($mediafiles as $val) {
+			foreach($mediafiles as $key => $val) {
 				playTo($insPos,'',$val);
 			}
 			/* if ($playAfterInsert) {mpd('play ' . $insPos);}

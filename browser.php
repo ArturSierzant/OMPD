@@ -184,7 +184,7 @@ if ($actDir != '/') {
 else {
 	$actDirToShow = '/';
 }
-echo '<span class="nav_tree">DIR: ' . $actDirToShow . '</span>';
+echo '<span class="nav_tree break-word">DIR: ' . $actDirToShow . '</span>';
 if ($showSelect == 'true') {
 	?>
 	<div class="buttons">
@@ -207,6 +207,10 @@ if ($showUpdateSelect == 'true' && $inMediaDir == true) {
 	<?php
 }
 ?>
+
+<div id="goToAlbum" class="buttons no-display">
+	<span>Go to album</span>
+</div>
 
 <script>
 $(window).on('load', function (e) {
@@ -282,7 +286,7 @@ if (is_dir($dir) || $dir == '') {
 	$size = count($rows);
 	//$rows = sortRows($rows);
 	//echo print_r($rows);
-	echo "<table class='border' cellspacing='0' cellpadding='0'>";
+	echo "<table class='border tabFixed' cellspacing='0' cellpadding='0'>";
 	$showUpDir = false;
 	
 	if ($dir != '/') {
@@ -305,7 +309,7 @@ if (is_dir($dir) || $dir == '') {
 		echo "<td class='icon'><i class='fa fa-level-up icon-small'></i></td>";
 		echo "<td class='icon'>";
 		echo "</td>";
-		echo "<td>    ";
+		echo '<td class="fileBrowserItemName">';
 		echo "<a href='" . $self . "?" . $showSelectQS . "dir=" . rawurlencode($topdir) . "#" . $inPagePos . "'>Up to parent dir</a>\n";
 		echo "</td>";
 		echo "<td>";
@@ -315,6 +319,7 @@ if (is_dir($dir) || $dir == '') {
 		echo "</td>";
 		echo "</tr>";
 	}
+	$firstMediaFile = false;
 	for ($i = 0; $i < $size; ++$i) {
 		$j=0;
 		$file_type = "";
@@ -366,7 +371,7 @@ if (is_dir($dir) || $dir == '') {
 				
 				echo '<a href=\'javascript:ajaxRequest("play.php?action=addSelect&amp;dirpath=' . $dirpath . '&amp;track_id=' . $i . '&amp;fulldirpath=' . $fulldirpath . '",evaluateAdd);\' onMouseOver="return overlib(\'Add this directory to playlist\');" onMouseOut="return nd();"><i id="add_' . $i . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';
 				echo "</td>";
-				echo "<td>";
+				echo '<td class="fileBrowserItemName">';
 				echo "<a href='" . $self . "?" . $showSelectQS . "dir=" . rawurlencode($topdir) . "'>" . $rows[$i]['data'] . "</a>\n";
 				echo '';
 				echo "</td>";
@@ -386,6 +391,24 @@ if (is_dir($dir) || $dir == '') {
 			<?php
 			} 
 			elseif ($file_type == 'file') {
+				if (!$firstMediaFile) {
+					$firstMediaFile = true;
+					$query = mysqli_query($db,'SELECT album_id FROM track WHERE relative_file LIKE "%' . mysqli_real_escape_string($db,str_replace($cfg['media_dir'],"",$actDir) . DIRECTORY_SEPARATOR . $rows[$i]['data']) . '"');
+					$pathInDB = mysqli_num_rows($query);
+					if ($pathInDB > 0) {
+						$album = mysqli_fetch_assoc($query);
+						?>
+						<script>
+						$("#goToAlbum").on("click", function() {
+							window.location = "index.php?action=view3&album_id=<?php echo $album['album_id']; ?>";
+						});
+						$("#goToAlbum").show();
+						</script>
+						<?php
+					}
+				}
+				
+				
 				$filepath = myUrlencode($topdir);
 				if ($rows[$i]['file_type'] == 'audio') {
 				?>
@@ -403,7 +426,7 @@ if (is_dir($dir) || $dir == '') {
 					//echo '<i id="add_' . $i . '" class="fa fa-plus-circle fa-fw icon-small"></i>';
 					echo "</td>";
 					//echo '<td class="icon-anchor" onclick="doPlayAction(\'insertSelect\',\'' . $filepath . '\',\'' . $i . '\',\'yes\',evaluateAdd)"  onMouseOver="return overlib(\'Insert and play file\');" onMouseOut="return nd();">';
-					echo '<td>';
+					echo '<td class="fileBrowserItemName">';
 					echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;filepath=' . $filepath . '&amp;track_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'Play file\');" onMouseOut="return nd();">' . $rows[$i]['data'] . '</a>';
 					//echo $rows[$i]['data'];
 					echo '';

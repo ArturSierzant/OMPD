@@ -85,13 +85,21 @@ if (count($file) == 0) {
 <!-- info + control -->
 <div id="info_area">
 <div id="image_container">
+	<!--
 	<div id="cover-spinner">
 		<img src="image/loader.gif" alt="">
 	</div>
+	-->
 	<div id="image">
 		<a href="index.php"><img id="image_in" src="image/transparent.gif" alt=""></a>
 	</div>
+		<div id="waitIndicatorImg"></div>
 </div>
+
+<script>
+/* 	$('#image').css('position', 'absolute');
+	$('#image').css('top', '0'); */
+</script>
 
 <div class="pl-track-info-right">
 <div class="pl-track-info" id="pl-track-info">
@@ -841,7 +849,6 @@ function evaluateTrack(data) {
 			$('#fileInfoForDbTracks').css('visibility', 'visible');
 	}
 	
-	$("#cover-spinner").show();
 	var s = Math.floor(data.miliseconds / 1000);  
 	var m = Math.floor(s / 60);  
 	s = s % 60;
@@ -1008,12 +1015,19 @@ function evaluateTrack(data) {
 		//$("#image_in").attr("src",data.thumbnail);
 		$("#image a").attr("href",data.thumbnail);
 	}
-	else document.getElementById('image').innerHTML = '<a href="#"><img id="image_in" src="<?php echo 'image/'; ?>large_file_not_found.png" alt=""></a>';
-	$("#cover-spinner").hide();
+	else {
+		document.getElementById('image').innerHTML = '<a href="#"><img id="image_in" src="<?php echo 'image/'; ?>large_file_not_found.png" alt=""></a>';
+		$("#waitIndicatorImg").hide();
+	}
+	//$("#cover-spinner").hide();
+	
 	
 	changeTileSizeInfo();
 	resizeImgContainer();
 	
+	/* spinnerImg.stop();
+	$('#image').css('position', 'relative');*/
+	//$("#waitIndicatorImg").hide(); 
 }
 
 
@@ -1054,7 +1068,9 @@ $(document).ready(function() {
 				}, function(e) {
 						//ajaxRequest('play.php?action=play&menu=playlist', evaluateIsplaying);
 				});
-				 
+				/* //proper display cover when using spin.js as spinner
+				$('#image').css('position', 'absolute');
+				$('#image').css('top', '0'); */
 });
 
 

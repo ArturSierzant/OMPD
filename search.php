@@ -92,7 +92,7 @@ function search_all() {
 	echo '</script>';
 	
 	if (!$match_found) echo "No match found.";
-		require_once('include/footer.inc.php');
+	require_once('include/footer.inc.php');
 };
 
 	

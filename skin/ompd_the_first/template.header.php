@@ -59,6 +59,7 @@ var opts = {
   left: 'auto' // Left position relative to parent in px
 };
 
+var spinnerImg = new Spinner(opts);
 
 //adding swipe support
 //$.fn.swipe.defaults.excludedElements = "input, textarea, .noSwipe";
@@ -228,6 +229,15 @@ $(document).ready(function () {
 	};
 	//hideAddressBar();
 	
+	//spinner for image
+	var targetImg = document.getElementById('waitIndicatorImg');
+	if (targetImg != null) {
+		showSpinnerImg(targetImg, spinnerImg);
+	}
+	
+	$("#image_in").load(function() {
+		$("#waitIndicatorImg").hide();
+	});
 	
 	$(window).resize(function() {
 		setMaxWidth();
@@ -434,8 +444,7 @@ $(document).ready(function () {
 		}
 	}, function(e) {
 			ajaxRequest('play.php?action=deletePlayed&menu=playlist');
-	});
-	
+	});	
 	
 });
 
@@ -847,7 +856,7 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 	<td height="100%">
 
 <div id="content" class="content">
-<table cellspacing="0" cellpadding="0" class="fullscreen">
+<table cellspacing="0" cellpadding="0" class="fullscreen tabFixed">
 <!-- <tr>
 	<td colspan="3" height="3px"></td>
 </tr>

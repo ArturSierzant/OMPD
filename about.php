@@ -171,6 +171,7 @@ function about() {
 	<li> added direct navigation to selected page in paginator</li>
 	<li> added search action for album cover in album view</li>
 	<li> added 'Play next' and 'Remove all below' to track menu in 'Now Playing'</li>
+	<li> added 'Go to album' in file browser (if album is in DB)</li>
 	<li> added config file editor</li>
 	<li> added consume mode on/off (long press on 'Delete played')</li>
 	<li> added stop function in 'Now Playing' (long press on play/pause button)</li>

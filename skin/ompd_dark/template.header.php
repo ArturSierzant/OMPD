@@ -59,6 +59,7 @@ var opts = {
   left: 'auto' // Left position relative to parent in px
 };
 
+var spinnerImg = new Spinner(opts);
 
 //adding swipe support
 //$.fn.swipe.defaults.excludedElements = "input, textarea, .noSwipe";
@@ -228,6 +229,21 @@ $(document).ready(function () {
 	};
 	//hideAddressBar();
 	
+	//spinner for image
+	var targetImg = document.getElementById('waitIndicatorImg');
+	if (targetImg != null) {
+		showSpinnerImg(targetImg, spinnerImg);
+	}
+	
+	/* $("#image_in").one("load", function() {
+		$("#waitIndicatorImg").hide();
+	}).each(function() {
+		if(this.complete) $(this).load();
+	}); */
+	
+	$("#image_in").load(function() {
+		$("#waitIndicatorImg").hide();
+	});
 	
 	$(window).resize(function() {
 		setMaxWidth();
@@ -434,8 +450,7 @@ $(document).ready(function () {
 		}
 	}, function(e) {
 			ajaxRequest('play.php?action=deletePlayed&menu=playlist');
-	});
-	
+	});	
 	
 });
 
@@ -708,7 +723,7 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 	$header['menu'] .= "\t" . '<a href="index.php?action=view2&amp;filter=symbol&amp;artist=%23&amp;order=artist"><span>#</span></a>';
 	for ($i = 'a'; $i != 'aa'; $i++)
 		  $header['menu'] .= "\t" . '<a href="index.php?action=view2&amp;filter=start&amp;artist='. $i .'&amp;order=artist"><span>' . $i . '</span></a>';
-	$header['menu'] .= "\t"  . '<a href="index.php?action=view2&amp;artist=Various%20Artists&amp;filter=exact&amp;order=artist"><span>VA</span></a>';
+	$header['menu'] .= "\t"  . '<a href="index.php?action=view2&amp;artist=Various%20Artists&amp;filter=exact&amp;order=album"><span>VA</span></a>';
 	echo $header['menu'];
 	?>
 </div>
@@ -847,7 +862,7 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 	<td height="100%">
 
 <div id="content" class="content">
-<table cellspacing="0" cellpadding="0" class="fullscreen">
+<table cellspacing="0" cellpadding="0" class="fullscreen tabFixed">
 <!-- <tr>
 	<td colspan="3" height="3px"></td>
 </tr>

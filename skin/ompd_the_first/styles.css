@@ -542,6 +542,10 @@ tr.even td, tr.odd td, tr.select td {
 	padding-left: 5px;
 }
 
+.tabFixed {
+	table-layout: fixed;
+}
+
 /*  +------------------------------------------------------------------------+
     | Table menu                                                             |
     +------------------------------------------------------------------------+ */
@@ -1251,7 +1255,7 @@ tr.even {
 }
 
 tr.artist_list {
-	height: 2.5em;
+	height: 3em;
 	background-color: white;
 }
 
@@ -2103,6 +2107,12 @@ iframe.full {
 	width: 100%;
 	height: 100%;
 }
+
+#waitIndicatorImg {
+	background-color:rgba(50,50,50,0.6);
+	z-index: 1000000000;
+}
+
 
 #divCenter {
 	display: none;

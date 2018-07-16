@@ -105,6 +105,19 @@ $cfg['show_discography_browser'] = true;
 
 
 
+//  +------------------------------------------------------------------------+
+//  | Various artists                                                        |
+//  +------------------------------------------------------------------------+
+//  | Names used in ALBUM ARTIST or ARTIST tag for various artist albums     |
+//  +------------------------------------------------------------------------+
+unset($cfg['VA']);
+
+$cfg['VA'][]           = 'Various Artists';
+$cfg['VA'][]           = 'VA';
+$cfg['VA'][]           = 'Różni wykonawcy';
+
+
+
 //  +------------------- END OF NEW IN O!MPD 1.04 ---------------------------+
 
 
@@ -720,7 +733,6 @@ $cfg['no_album_artist'][]           = 'remix';
 $cfg['no_album_artist'][]           = 'sampler';
 $cfg['no_album_artist'][]           = 'singles';
 $cfg['no_album_artist'][]           = 'various';
-$cfg['no_album_artist'][]           = 'Various Artists';
 
 
 

@@ -409,21 +409,27 @@ function resizeImgContainer() {
 			}
 		} 
 	//}
+	
 	if (showMenuSave == true) $("#menuSubMiddleMediaSavePlaylist").show();
 	if (showMenuUrl == true) $("#menuSubMiddleMediaAddUrl").show();
 	if (showMenuSearch == true) $("#searchFormAll").show();
-		
 	
 	if (typeof thumbID !== 'undefined') {
+		$('[id^=thumb]').css('pointer-events','none');
 		$("#discBrowser").css("max-width",$("#image_container").width());
+		$("#discBrowser").css("width",$("#image_container").width());
 		$("#discBrowser").show();
-		
-		//scroll discography browser to active album
-		if ($(thumbID).position().left > $( "#discBrowser" ).width()/2 + $(thumbID).width()/2){
-				$( "#discBrowser" ).animate({ scrollLeft: ($(thumbID).position().left - $( "#discBrowser" ).width()/2 + $(thumbID).width()/2) }, 500);
-			}
+			
+		//scroll discography browser to active album		
+		// '+3' is for right margin of thumb 
+		$("#discBrowser").animate({scrollLeft: (($(thumbID).width() + 3)  * thumbIDCount - $("#discBrowser").width()/2 + $(thumbID).width()/2) }, 500);
+			
+		setTimeout(function() {
+				$('[id^=thumb]').css('pointer-events','all');
+			}, 1000);
 	}
 } 
+
 
 
 function toggleMenuSub(id) {
@@ -660,6 +666,13 @@ function togglePlayedHistory() {
 
 
 
+function showSpinnerImg(targetImg, spinnerImg) {
+	targetImg.style.width = $("#image_container").width() + 'px';
+	targetImg.style.height = $("#image_container").width() + 'px';
+	spinnerImg.spin(targetImg);
+};
+
+
 function showSpinner() {
 	target.style.width = $( window ).width();
 	target.style.height = $( window ).height();
@@ -672,7 +685,6 @@ function showSpinner() {
 function hideSpinner() {
 	spinner.stop();
 	target.style.display = "none";
-	
 };
 
 

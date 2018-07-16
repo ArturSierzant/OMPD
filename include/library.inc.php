@@ -344,7 +344,7 @@ function listOfFavorites($file = true, $stream = true) {
 	$listOfFavorites = "
 	<option class='listDivider' value='' selected disabled style='display: none;'>--- Select playlist ---</option>
 	<option class='listDivider' value='' disabled>--- File playlists ---</option>";
-		$query2 = mysqli_query($db,'SELECT name, favorite_id FROM favorite WHERE stream = 0 ORDER BY name');
+		$query2 = mysqli_query($db,'SELECT name, favorite_id FROM favorite WHERE stream = 0 AND name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" ORDER BY name');
 		while ($player = mysqli_fetch_assoc($query2)) {
 			$listOfFavorites .= "<option value=" . $player['favorite_id'] . ">" . html($player['name']) . "</option>";
 		}
@@ -1328,7 +1328,8 @@ function mime_content_type_replacement($filename) {
 		'm4b' => 'audio/m4b'
 	);
 
-	$ext = strtolower(array_pop(explode('.',$filename)));
+	$exploded = explode('.',$filename);
+	$ext = strtolower(array_pop($exploded));
 	if (array_key_exists($ext, $mime_types)) {
 		return $mime_types[$ext];
 	}
@@ -1367,13 +1368,14 @@ function find_all_files($dir){
             $result[] = $value;
         }
     }
-	
+	if ($result){
 	array_walk(
 		$result,
 		function (&$entry) {
 			$entry = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $entry);
 		}
 	);
+};
 
     return $result;
 } 

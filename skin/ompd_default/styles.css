@@ -477,7 +477,7 @@ tr.select :nth-child(3) {
   padding-left: 0px;
 }
 tr.select td:nth-child(1) {
-  background-color: #e74c3c;
+  /* background-color: (@active-nav); */
 }
 tr.select #trackNumber,
 tr.select .trackNumber {
@@ -488,6 +488,9 @@ tr.even td,
 tr.odd td,
 tr.select td {
   padding-left: 5px;
+}
+.tabFixed {
+  table-layout: fixed;
 }
 /*  +------------------------------------------------------------------------+
     | Table menu                                                             |
@@ -1176,7 +1179,7 @@ tr.even {
   transition: all 300ms linear;
 }
 tr.artist_list {
-  height: 2.5em;
+  height: 3em;
   background-color: #ffffff;
 }
 tr.artist_list td {
@@ -1341,9 +1344,9 @@ img.medium {
   font: inherit;
   font-weight: 300;
   font-size: 16px;
-  background-color: #ececec;
+  background-color: #fefefe;
   border: none;
-  color: #2c3e50;
+  /* color: (@font-first); */
   padding: 0 5px;
   border-radius: 3px 0 0 3px;
 }
@@ -1760,15 +1763,23 @@ td.play-indicator {
 #trackOptions {
   display: none;
 }
+#waitIndicator,
+#waitIndicatorImg {
+  background-color: rgba(50, 50, 50, 0.6);
+  z-index: 1000000000;
+}
 #waitIndicator {
   display: none;
   position: fixed;
   top: 50%;
   left: 50%;
-  background-color: rgba(50, 50, 50, 0.6);
-  z-index: 1000000000;
   width: 100%;
   height: 100%;
+}
+#waitIndicatorImg {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 #divCenter {
   display: none;
@@ -2067,11 +2078,12 @@ h1 {
   }
 }
 #discBrowser {
-  overflow: auto;
+  overflow: hidden;
   white-space: nowrap;
-  text-align: center;
+  text-align: left;
   display: none;
   padding-bottom: 5px;
+  overflow-x: auto;
 }
 .imgThumb {
   width: 4em;
@@ -2085,6 +2097,12 @@ h1 {
 .selected {
   border-bottom: solid 4px #e67e22;
   box-sizing: content-box;
+}
+.fileBrowserItemName {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
 }
 @font-face {
   font-family: Roboto;

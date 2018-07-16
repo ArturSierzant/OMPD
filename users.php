@@ -1,7 +1,7 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant	                         |
-//  | http://www.ompd.pl                                             		 |
+//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
 //  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
@@ -802,7 +802,7 @@ function userStatistics() {
 	<td class="matrix">Play</td>
 	<td class="matrix">Stream</td>
 	<td class="matrix">Download</td>
-	<td class="matrix">Cover</td>
+	<!-- <td class="matrix">Cover</td> -->
 	<td> </td>
 </tr>
 <tr class="line"><td colspan="7"></td></tr>
@@ -828,7 +828,7 @@ function userStatistics() {
 	<td class="matrix"><?php echo ($user['access_play'] || $user['access_add'])	? '<a href="index.php?action=viewPopular&amp;flag=0&amp;period=' . $period . '&amp;user_id=' . $user['user_id'] . '">' . $n[0] . '</a>' : '<img src="' . $cfg['img'] . 'small_uncheck.png" alt="" class="small">'; ?></td>
 	<td class="matrix"><?php echo ($user['access_stream'])						? '<a href="index.php?action=viewPopular&amp;flag=1&amp;period=' . $period . '&amp;user_id=' . $user['user_id'] . '">' . $n[1] . '</a>' : '<img src="' . $cfg['img'] . 'small_uncheck.png" alt="" class="small">'; ?></td>
 	<td class="matrix"><?php echo ($user['access_download'])					? '<a href="index.php?action=viewPopular&amp;flag=2&amp;period=' . $period . '&amp;user_id=' . $user['user_id'] . '">' . $n[2] . '</a>' : '<img src="' . $cfg['img'] . 'small_uncheck.png" alt="" class="small">'; ?></td>
-	<td class="matrix"><?php echo ($user['access_cover'])						? '<a href="index.php?action=viewPopular&amp;flag=3&amp;period=' . $period . '&amp;user_id=' . $user['user_id'] . '">' . $n[3] . '</a>' : '<img src="' . $cfg['img'] . 'small_uncheck.png" alt="" class="small">'; ?></td>
+	<!-- <td class="matrix"><?php echo ($user['access_cover'])						? '<a href="index.php?action=viewPopular&amp;flag=3&amp;period=' . $period . '&amp;user_id=' . $user['user_id'] . '">' . $n[3] . '</a>' : '<img src="' . $cfg['img'] . 'small_uncheck.png" alt="" class="small">'; ?></td> -->
 	<td></td>
 </tr>
 <?php
@@ -851,7 +851,7 @@ function userStatistics() {
 	<td class="matrix"><?php echo $n[NJB_COUNTER_PLAY]; ?></td>
 	<td class="matrix"><?php echo $n[NJB_COUNTER_STREAM]; ?></td>
 	<td class="matrix"><?php echo $n[NJB_COUNTER_DOWNLOAD]; ?></td>
-	<td class="matrix"><?php echo $n[NJB_COUNTER_COVER]; ?></td>
+	<!-- <td class="matrix"><?php echo $n[NJB_COUNTER_COVER]; ?></td> -->
 	<td></td>
 </tr>
 </table>
