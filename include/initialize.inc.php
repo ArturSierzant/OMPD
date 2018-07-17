@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright � 2015-2016 Artur Sierzant                            |
+//  | O!MPD, Copyright � 2015-2018 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -189,11 +189,26 @@ if (NJB_SCRIPT != 'message.php' && NJB_SCRIPT != 'cache.php')
 	require_once(NJB_HOME_DIR . 'include/mysqli.inc.php');
 
 //  +------------------------------------------------------------------------+
-//  | Check and set default favorite and blacklist playlist					 |
+//  | Check and set default favorite and blacklist playlist                  |
 //  +------------------------------------------------------------------------+
 
 checkDefaultFavorites();
 checkDefaultBlacklist();
+
+//  +------------------------------------------------------------------------+
+//  | Simple authenticate                                                    |
+//  +------------------------------------------------------------------------+
+function simpleAuthenticate($access) {
+	global $cfg, $db;
+	$hasAccess = 0;
+	if ($cfg['username'] != '') {
+		$query = mysqli_query($db,"SELECT " . $access . " FROM user WHERE username='" . $cfg['username'] . "' LIMIT 1");
+		while ($userPriv = mysqli_fetch_assoc($query)) {
+			$hasAccess = $userPriv[$access]; 
+		}
+	}
+	return $hasAccess;
+}
 
 //  +------------------------------------------------------------------------+
 //  | Authenticate                                                           |

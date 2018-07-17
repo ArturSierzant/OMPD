@@ -500,6 +500,7 @@ function evaluateVolume(data) {
 function setMaxWidth() {
 	var containerWidth = $(window).width();
 	$("#info_area").css("max-width",containerWidth);
+	$("#info_area_mini").css("max-width",containerWidth);
 	$(".wrapper").css("max-width",containerWidth);
 }
 </script>

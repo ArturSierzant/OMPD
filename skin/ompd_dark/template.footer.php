@@ -144,6 +144,23 @@ $cfg['items_count'] = 0 ?>
 	</div>
 </div>
 
-
-
 <div class="back-to-top"><i class="fa fa-2x fa-arrow-circle-o-up"></i></div>
+
+<?php
+if (NJB_SCRIPT != 'playlist.php' && NJB_SCRIPT != 'message.php' && $cfg['username'] != '' && $cfg['show_miniplayer']) {
+$hasAccess = simpleAuthenticate('access_play');
+if ($hasAccess == 1) {
+?>
+	<div id="miniplayer">
+		<?php 
+		require_once('playlist-mini.php');
+		?>
+	</div>
+<?php
+}
+}
+?>
+
+
+
+

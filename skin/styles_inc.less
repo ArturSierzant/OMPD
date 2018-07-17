@@ -1579,16 +1579,19 @@ div.content {position: relative;}
 .wrapper:after {
   content: "";
   display: block;
-}
-
-.wrapper:after {
-  height: 6.4em;
   width: 100%;
+  /* height: 6.4em; */
+	/* miniplayer: */
+  height: 10.4em;
+	
 }			
 
 .bottom {
   height: 3.2em;
   width: 100%;
+	/* miniplayer: */
+	position: relative;
+	bottom: 4em;
 }
 
 div.screen_footer {
@@ -2091,6 +2094,8 @@ h1 {
 		cursor: pointer;
 		-moz-border-radius: 50%;
 		border-radius: 50%;
+		/* miniplayer: */
+		margin-bottom: 4em;
 	}
 
 .back-to-top:hover {    
@@ -2220,4 +2225,54 @@ h1 {
 	overflow: hidden;
 	white-space: nowrap;
 	width: 100%;
+}
+
+#miniplayer {
+	position: fixed;
+	bottom: 0;
+	height: 4em;
+	width: 100%;
+	background-color: (@bg-categories);
+	max-width: 1280px;
+	border-top: 1px solid lighten(@bg-categories, 10%);
+}
+
+#image_container_mini, #image_in_mini {
+	width: 4em;
+	height: 4em;
+}
+
+#media_control_mini {
+	min-width: 10em;
+	width: 10em;
+	padding-left: 5px;
+}
+
+#file-info-mini, #media_control_mini, #image_container_mini {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+#file-info-mini {
+	color: @font-first;
+	padding-left: 8px;
+	width: 10em;
+	/* max-width: 10em; */
+	line-height: 1.7em;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.artist_mini {
+	font-size: 0.9em;
+}
+
+.track_title_mini {
+	font-size: 1.1em;
+}
+
+.artist_mini, .track_title_mini {
+	overflow: hidden;
+	text-overflow: ellipsis;
 }

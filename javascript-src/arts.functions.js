@@ -428,6 +428,10 @@ function resizeImgContainer() {
 				$('[id^=thumb]').css('pointer-events','all');
 			}, 1000);
 	}
+	
+	$("#file-info-mini").css("width",($("#miniplayer").width() - $("#image_container_mini").width() - $("#media_control_mini").width()));
+	$("#file-info-mini").css("max-width",($("#miniplayer").width() - $("#image_container_mini").width() - $("#media_control_mini").width()));
+	
 } 
 
 
