@@ -223,6 +223,12 @@ $(document).ready(function () {
 	changeTileSizeInfo();
 	resizeImgContainer();
 	addFavSubmenuActions();
+	<?php 
+	if (NJB_SCRIPT != 'playlist.php' && NJB_SCRIPT != 'message.php' && $cfg['username'] != '' && $cfg['show_miniplayer']) {?>
+		setMiniplayer();
+	<?php
+	}
+	?>
 	//edit settings on config page
 	if (typeof myCodeMirror !== 'undefined') {
 		resizeFormSettings($tileSizeArr[1], myCodeMirror);
@@ -502,6 +508,10 @@ function setMaxWidth() {
 	$("#info_area").css("max-width",containerWidth);
 	$("#info_area_mini").css("max-width",containerWidth);
 	$(".wrapper").css("max-width",containerWidth);
+}
+
+function setMiniplayer(){
+		$(".wrapper, .bottom, .back-to-top, div.playlist_button").toggleClass("miniplayer");
 }
 </script>
 

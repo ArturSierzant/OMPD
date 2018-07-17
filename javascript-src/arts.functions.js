@@ -429,7 +429,7 @@ function resizeImgContainer() {
 			}, 1000);
 	}
 	
-	$("#file-info-mini").css("width",($("#miniplayer").width() - $("#image_container_mini").width() - $("#media_control_mini").width()));
+	$("#file-info-mini").css("min-width",($("#miniplayer").width() - $("#image_container_mini").width() - $("#media_control_mini").width()));
 	$("#file-info-mini").css("max-width",($("#miniplayer").width() - $("#image_container_mini").width() - $("#media_control_mini").width()));
 	
 } 
@@ -501,7 +501,7 @@ function scrollToShow(el) {
 	var offset;
 	
 	if (elHeight < windowHeight) {
-		offset = elOffset - ((windowHeight - elHeight)) + 100;
+		offset = elOffset - ((windowHeight - elHeight)) + 150;
 		if (elHeight > (windowHeight / 2)) {
 			offset = elOffset - ((windowHeight - elHeight));
 		}	

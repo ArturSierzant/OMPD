@@ -223,6 +223,12 @@ $(document).ready(function () {
 	changeTileSizeInfo();
 	resizeImgContainer();
 	addFavSubmenuActions();
+	<?php 
+	if (NJB_SCRIPT != 'playlist.php' && NJB_SCRIPT != 'message.php' && $cfg['username'] != '' && $cfg['show_miniplayer']) {?>
+		setMiniplayer();
+	<?php
+	}
+	?>
 	//edit settings on config page
 	if (typeof myCodeMirror !== 'undefined') {
 		resizeFormSettings($tileSizeArr[1], myCodeMirror);
@@ -234,6 +240,12 @@ $(document).ready(function () {
 	if (targetImg != null) {
 		showSpinnerImg(targetImg, spinnerImg);
 	}
+	
+	/* $("#image_in").one("load", function() {
+		$("#waitIndicatorImg").hide();
+	}).each(function() {
+		if(this.complete) $(this).load();
+	}); */
 	
 	$("#image_in").load(function() {
 		$("#waitIndicatorImg").hide();
@@ -494,7 +506,12 @@ function evaluateVolume(data) {
 function setMaxWidth() {
 	var containerWidth = $(window).width();
 	$("#info_area").css("max-width",containerWidth);
+	$("#info_area_mini").css("max-width",containerWidth);
 	$(".wrapper").css("max-width",containerWidth);
+}
+
+function setMiniplayer(){
+		$(".wrapper, .bottom, .back-to-top, div.playlist_button").toggleClass("miniplayer");
 }
 </script>
 
@@ -717,7 +734,7 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 	$header['menu'] .= "\t" . '<a href="index.php?action=view2&amp;filter=symbol&amp;artist=%23&amp;order=artist"><span>#</span></a>';
 	for ($i = 'a'; $i != 'aa'; $i++)
 		  $header['menu'] .= "\t" . '<a href="index.php?action=view2&amp;filter=start&amp;artist='. $i .'&amp;order=artist"><span>' . $i . '</span></a>';
-	$header['menu'] .= "\t"  . '<a href="index.php?action=view2&amp;artist=Various%20Artists&amp;filter=exact&amp;order=artist"><span>VA</span></a>';
+	$header['menu'] .= "\t"  . '<a href="index.php?action=view2&amp;artist=Various%20Artists&amp;filter=exact&amp;order=album"><span>VA</span></a>';
 	echo $header['menu'];
 	?>
 </div>

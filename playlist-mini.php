@@ -182,15 +182,16 @@ for ($i=0; $i < $listlength; $i++) {
 
 <!-- info + control -->
 <div id="info_area_mini">
-<div id="image_container_mini">
+<div id="timebar_mini"></div>
+<div id="image_container_mini" title="Go to Now Playing">
 	<!-- <div id="image_mini"> -->
 		<a href="playlist.php"><img id="image_in_mini" src="image/transparent.gif" alt=""></a>
 	<!-- </div> -->
 </div>
 
 <div id="file-info-mini">
-		<div class="track_title_mini" id="title1">&nbsp;</div>
-		<div class="artist_mini" id="artist1">&nbsp;</div>
+		<div class="track_title_mini" id="track_artist_mini">&nbsp;</div>
+		<div class="artist_mini" id="artist_mini">&nbsp;</div>
 </div>
 
 <!-- <div class="pl-track-info-rightMini"> -->
@@ -255,12 +256,17 @@ $("#time").click(function(){
  
 var testing = '<?php echo $cfg['testing']; ?>';
 
+ajaxRequest('play.php?action=playlistTrack&track_id=' + track_id[<?php echo $listpos; ?>] + '&menu=playlist', evaluateTrack);
+ajaxRequest('play.php?action=playlistStatus&track_id=' + track_id[<?php echo $listpos; ?>] + '&menu=playlist', evaluateStatus);
 
-//function initializeMini() {
-	ajaxRequest('play.php?action=playlistTrack&track_id=' + track_id[<?php echo $listpos; ?>] + '&menu=playlist', evaluateTrack);
-	ajaxRequest('play.php?action=playlistStatus&track_id=' + track_id[<?php echo $listpos; ?>] + '&menu=playlist', evaluateStatus);
-	//ajaxRequest('ajax-track-version.php?track_id=' + track_id[<?php echo $listpos; ?>] + '&menu=playlist', evaluateTrackVersion);
-//}
+
+/* function evaluateStatus(data) {
+	var title = data.title;
+	document.getElementById('title1').innerHTML =  title;
+	var artist = data.track_artist;
+	document.getElementById('artist1').innerHTML =  artist;
+	evaluatePlaytime(data);
+} */
 
 
 function evaluateStatus(data) {
@@ -280,7 +286,7 @@ function evaluateStatus(data) {
 		/* if (title.indexOf("action=streamTo") != -1) {
 			title = data.name; 
 		} */
-		document.getElementById('title1').innerHTML =  title;
+		document.getElementById('track_artist_mini').innerHTML =  title;
 		var rel_file = encodeURIComponent(data.relative_file);
 		//console.log ("rel_file=" + rel_file);
 		
@@ -289,11 +295,9 @@ function evaluateStatus(data) {
 			query_artist = data.track_artist;
 		}
 	}
-	else {
-		$("#saveCurrentTrack").show();
-	}
+	
 	evaluateListpos(data.listpos);
-	//evaluatePlaytime(data);
+	evaluatePlaytime(data);
 	//evaluateRepeat(data.repeat);
 	//evaluateShuffle(data.shuffle);
 	evaluateIsplaying(data.isplaying, data.listpos);
@@ -307,12 +311,7 @@ function evaluateStatus(data) {
 
 function evaluateListpos(listpos) {
 	if (previous_listpos != listpos) {
-		/* document.getElementById('track' + previous_listpos).className = (previous_listpos & 1) ? 'even mouseover' : 'odd mouseover';
-		document.getElementById('track' + listpos).className = 'select';
-		document.getElementById('track' + previous_listpos + '_play').style.visibility  = 'hidden';
-		document.getElementById('track' + listpos + '_play').style.visibility = 'visible';
-		document.getElementById('time').innerHTML = formattedTime(0);
-		document.getElementById('timebar').style.width = 0; */
+		document.getElementById('timebar_mini').style.width = 0; 
 		ajaxRequest('play.php?action=playlistTrack&track_id=' + track_id[listpos] + '&menu=playlist', evaluateTrack);
 		previous_miliseconds = 0;
 		previous_listpos = listpos;
@@ -377,28 +376,28 @@ function evaluateTrackVersion(data) {
 			track_ids = track_ids + data['track_ids'][i] + ";";
 		};
 		other_title_enc = encodeURI(data['title']);
-		$('#title1').addClass('icon-anchor');
+		$('#track_artist_mini').addClass('icon-anchor');
 		$('#title').addClass('icon-anchor');
-		$('#title1').click(function(){
+		$('#track_artist_mini').click(function(){
 				window.location.href='index.php?action=view3all&track_ids=' + track_ids + '&other_title=' + other_title_enc;
 				
 			}
 		);
 		$( "#title" ).click(function() {
-		  $( "#title1" ).click();
+		  $( "#track_artist_mini" ).click();
 		})
 	}
 	else {
-		$('#title1').removeClass('icon-anchor');
+		$('#track_artist_mini').removeClass('icon-anchor');
 		$('#title').removeClass('icon-anchor');
-		$('#title1').off('click');
+		$('#track_artist_mini').off('click');
 		$('#title').off('click');
 	}
 }
 
 function evaluateTrack(data) {
 	// data.artist, data.title, data.album, data.by, data.album_id, data.image_id
-	$('#title1').removeClass('icon-anchor');
+	$('#track_artist_mini').removeClass('icon-anchor');
 	$('#title').removeClass('icon-anchor');
 	$('#title1_wait_indicator').hide();
 	$('#title_wait_indicator').hide();
@@ -456,16 +455,16 @@ function evaluateTrack(data) {
 	}
 	
 	if (data.track_artist[0] == '&nbsp;') {
-		document.getElementById('artist1').innerHTML = '&nbsp;';
-		$("#artist1").hide();
+		document.getElementById('artist_mini').innerHTML = '&nbsp;';
+		$("#artist_mini").hide();
 	}
 	else {
-		document.getElementById('artist1').innerHTML = artist;
-		$("#artist1").show();
+		document.getElementById('artist_mini').innerHTML = artist;
+		$("#artist_mini").show();
 	}
 	// document.getElementById('artist1').innerHTML = (data.track_artist[0] == '&nbsp;') ? '&nbsp;' : artist;
 	
-	document.getElementById('title1').innerHTML = data.title;
+	document.getElementById('track_artist_mini').innerHTML = data.title;
 	var al = data.album;
 	if (data.album_id) {
 		/* var albumLink = '<a href="index.php?action=view3&album_id=' + data.album_id + '">' + data.album + '</a>';
@@ -475,8 +474,8 @@ function evaluateTrack(data) {
 	else if (al.indexOf("://") > 0) {
 		//e.g. stream from youtube 
 		var albumLink = '<a href="' + data.album + '" target="_new">' + data.album + '</a>';
-		document.getElementById('album1').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : 'from ' + albumLink; 
-		document.getElementById('album').innerHTML = albumLink;
+		//document.getElementById('album1').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : 'from ' + albumLink; 
+		//document.getElementById('album').innerHTML = albumLink;
 	}
 	else if (data.relative_file) {
 		var albumLink = '<a href="browser.php?dir=' + data.relative_file + '">' + data.album + '</a>';
@@ -487,42 +486,11 @@ function evaluateTrack(data) {
 		document.getElementById('album1').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : 'from ' + data.album;
 		document.getElementById('album').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : data.album;
 	}
-	/* if (data.year) document.getElementById('year1').innerHTML = document.getElementById('year').innerHTML = '<a href="index.php?action=view2&order=artist&sort=asc&year=' + data.year + '">' + data.year + '</a>';
-	else document.getElementById('year1').innerHTML = document.getElementById('year').innerHTML = '&nbsp;';
-	 */
-
-	if (data.genres) {
-		var inner_html = '';
-		$.each(data.genres, function(key, value){
-			if (inner_html == ''){
-				inner_html = '<a href="index.php?action=view2&order=artist&sort=asc&&genre_id=' + key + '">' + value + '</a>'
-			}
-			else {
-				inner_html = inner_html + ', <a href="index.php?action=view2&order=artist&sort=asc&&genre_id=' + key + '">' + value + '</a>'
-			}
-		});
-		//document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = inner_html;
-	}
-	else {
-		/* if(data.genre_id == '-1') document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = data.genre;
-		else document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = '&nbsp;'; */
-	}
-	//var rel_file = encodeURIComponent(data.relative_file);
-	var rel_file = encodeURIComponent(data.relative_file);
-	//console.log ("rel_file=" + rel_file);
-	var params = data.audio_dataformat + '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + 'bit - ' + data.audio_sample_rate/1000 + 'kHz&nbsp;&bull;&nbsp;' + data.audio_profile;
-	if (data.dr) params = params + '&nbsp;&bull;&nbsp;DR=' + data.dr;
-	params = params + '&nbsp;&bull;<a href="getid3/demos/demo.browse.php?filename=<?php echo $cfg['media_dir']; ?>' + rel_file + '">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;file details</a>';
 	
-	//document.getElementById('parameters').innerHTML = params;
 	var query_artist = '';
 	if (data.track_artist) {
 		query_artist = data.track_artist;
 	}
-	//document.getElementById('lyrics1').innerHTML = document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + query_artist + '+' + data.title_core + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>'; 
-	
-		
-	//console.log ('data.album_id = ' + data.album_id);
 	if (data.album_id) {
 		$("#image_in_mini").attr("src","image.php?image_id=" + data.image_id + "&track_id=" + data.track_id);
 		//$("#image a").attr("href","index.php?action=view3&album_id=" + data.album_id);
@@ -532,14 +500,29 @@ function evaluateTrack(data) {
 		//thumbnail e.g. from Youtube
 		$("#image_in_mini").attr("src","image_crop.php?thumbnail=" + encodeURIComponent(data.thumbnail));
 		//$("#image_in").attr("src",data.thumbnail);
-		$("#image a").attr("href",data.thumbnail);
+		//$("#image a").attr("href",data.thumbnail);
 	}
 	else {
-		document.getElementById('image_mini').innerHTML = '<a href="#"><img id="image_in_mini" src="<?php echo 'image/'; ?>large_file_not_found.png" alt=""></a>';
+		document.getElementById('image_container_mini').innerHTML = '<a href="#"><img id="image_in_mini" src="<?php echo 'image/'; ?>large_file_not_found.png" alt=""></a>';
 		$("#waitIndicatorImg").hide();
 	}
 }
 
+function evaluatePlaytime(data) {
+	// data.miliseconds, data.max, ....
+		console.log("p_m: " + previous_miliseconds);
+	if (previous_miliseconds != data.miliseconds) {
+		var width_ = 0;
+		var progress_bar_width = document.getElementById('info_area_mini').clientWidth;
+		
+		if (data.Time > 0)	width_ = Math.round(data.miliseconds / data.Time * progress_bar_width);
+		if (width_ > progress_bar_width)	width_ = progress_bar_width;
+		
+		$('#timebar_mini').width(width_);
+		previous_miliseconds = data.miliseconds;
+		console.log(data.Time);
+	}
+}
 
 
 $(document).ready(function() {
@@ -547,9 +530,7 @@ $(document).ready(function() {
 				$('#play').longpress(function(e) {
 					ajaxRequest('play.php?action=stop&menu=playlist', evaluateIsplaying);
 				}, function(e) {
-						//ajaxRequest('play.php?action=play&menu=playlist', evaluateIsplaying);
-				});
-				//hideSpinner();				
+				});				
 });
 
 

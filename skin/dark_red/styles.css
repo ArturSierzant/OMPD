@@ -896,6 +896,11 @@ div.playlist_button {
   border: solid 1px #454749;
   color: #454749;
 }
+div.playlist_button.miniplayer {
+  background-color: #cb4b16;
+  border: solid 1px #cb4b16;
+  color: #cb4b16;
+}
 div.playlist_button_play {
   width: 6.1538em;
 }
@@ -1526,14 +1531,16 @@ div.content {
   content: "";
   display: block;
   width: 100%;
-  /* height: 6.4em; */
-  /* miniplayer: */
+  height: 6.4em;
+}
+.wrapper.miniplayer:after {
   height: 10.4em;
 }
 .bottom {
   height: 3.2em;
   width: 100%;
-  /* miniplayer: */
+}
+.bottom.miniplayer {
   position: relative;
   bottom: 4em;
 }
@@ -1983,7 +1990,8 @@ h1 {
   cursor: pointer;
   -moz-border-radius: 50%;
   border-radius: 50%;
-  /* miniplayer: */
+}
+.back-to-top.miniplayer {
   margin-bottom: 4em;
 }
 .back-to-top:hover {
@@ -2114,9 +2122,9 @@ h1 {
   bottom: 0;
   height: 4em;
   width: 100%;
-  background-color: #454749;
+  background-color: #cb4b16;
   max-width: 1280px;
-  border-top: 1px solid #5e6163;
+  border-top: 1px solid #e8632c;
 }
 #image_container_mini,
 #image_in_mini {
@@ -2125,8 +2133,10 @@ h1 {
 }
 #media_control_mini {
   min-width: 10em;
+  max-width: 10em;
   width: 10em;
   padding-left: 5px;
+  display: none;
 }
 #file-info-mini,
 #media_control_mini,
@@ -2137,7 +2147,6 @@ h1 {
 #file-info-mini {
   color: #bdbdbd;
   padding-left: 8px;
-  width: 10em;
   /* max-width: 10em; */
   line-height: 1.7em;
   overflow: hidden;
@@ -2146,14 +2155,21 @@ h1 {
 }
 .artist_mini {
   font-size: 0.9em;
+  line-height: 1.5em;
 }
 .track_title_mini {
   font-size: 1.1em;
 }
 .artist_mini,
 .track_title_mini {
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+#timebar_mini {
+  width: 0px;
+  height: 2px;
+  background-color: #fdf6e3;
 }
 @font-face {
   font-family: Roboto;
