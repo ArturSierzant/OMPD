@@ -165,8 +165,9 @@ function about() {
 	<ul style="padding-left: 1em;">
 	<li> added ability to play audio streams from Youtube movies (requires <a href="https://github.com/rg3/youtube-dl" target="_new">youtube-dl</a>)</li>
 	<li> added new skins (skins are now based on <a href="http://lesscss.org/">{less}</a>)</li>
+	<li> added miniplayer (settable in config.inc.php)</li>
 	<li> added support for mpd playlists</li>
-	<li> added discography browser in album view</li>
+	<li> added discography browser in album view (settable in config.inc.php)</li>
 	<li> added view for Album Dynamic Range</li>
 	<li> added direct navigation to selected page in paginator</li>
 	<li> added search action for album cover in album view</li>
