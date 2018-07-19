@@ -43,6 +43,9 @@ require_once(NJB_HOME_DIR . 'skin/' . $cfg['skin'] . '/template.footer.php');
 
 if (isset($cfg['footer']) && $cfg['footer'] == 'dynamic') {
 	echo '<!-- dynamic content -->' . "\n";
+	//echo '<script>window.location.href="config-update-select.php?action=updateSelect";</script>';
+	
+	
 	@ob_flush();
 	flush();
 }

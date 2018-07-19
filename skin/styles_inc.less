@@ -445,7 +445,7 @@ tr.select #trackNumber, tr.select .trackNumber {
 }
 
 tr.even td, tr.odd td, tr.select td {
-	padding-left: 5px;
+	padding: 2px 2px 2px 5px;
 }
 
 .tabFixed {
@@ -1144,6 +1144,7 @@ tr.artist_list {
 
 tr.artist_list td {
 	border-bottom: dotted 1px @bg-categories;
+	padding: 7px 0;
 }
 
 tr.year {
@@ -2098,8 +2099,8 @@ h1 {
 	color: (@font-active);
 	background-color: rgba(246, 246, 246, 0.3);
 	font-size: 1em;
-	padding-left: 0.74em;
-	padding-top: 0.68em;
+	padding-left: 0.77em;
+	padding-top: 0.64em;
 	display: none;
 	cursor: pointer;
 	-moz-border-radius: 50%;
@@ -2242,7 +2243,7 @@ h1 {
 #miniplayer {
 	position: fixed;
 	bottom: 0;
-	height: 4em;
+	height: 4.2em;
 	width: 100%;
 	background-color: (@bg-banner);
 	max-width: 1280px;
@@ -2260,15 +2261,16 @@ h1 {
 	width: 10em;
 	padding-left: 5px;
 	display: none;
+	vertical-align: middle;
 }
 
-#file-info-mini, #media_control_mini, #image_container_mini {
+#file-info-mini, #image_container_mini {
 	display: table-cell;
 	vertical-align: middle;
 }
 
 #file-info-mini {
-	color: @font-first;
+	color: @button-banner;
 	padding-left: 8px;
 	/* max-width: 10em; */
 	line-height: 1.7em;
@@ -2277,7 +2279,7 @@ h1 {
 	text-overflow: ellipsis;
 }
 
-.artist_mini {
+.artist_mini, #track_number {
 	font-size: 0.9em;
 	line-height: 1.5em;
 }

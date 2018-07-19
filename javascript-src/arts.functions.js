@@ -429,8 +429,20 @@ function resizeImgContainer() {
 			}, 1000);
 	}
 	
-	$("#file-info-mini").css("min-width",($("#miniplayer").width() - $("#image_container_mini").width() - $("#media_control_mini").width()));
-	$("#file-info-mini").css("max-width",($("#miniplayer").width() - $("#image_container_mini").width() - $("#media_control_mini").width()));
+	miniplayerW = $("#miniplayer").width();
+	if (miniplayerW > winW) miniplayerW = winW;
+	$("#file-info-mini").css("min-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));
+	$("#file-info-mini").css("max-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));
+	
+	$("#media_control_mini").css("display","table-cell");
+	
+	if ($(window).width() > 1280) {
+		$(".back-to-top").css("right",($(window).width() - 1280)/2);
+	}
+	else {
+		$(".back-to-top").css("right",10)
+	}
+	
 	
 } 
 
@@ -499,9 +511,13 @@ function scrollToShow(el) {
 	var elHeight = el.height();
 	var windowHeight = $(window).height();
 	var offset;
-	
+	var toTopMB = $(".back-to-top").css("margin-bottom");
+	var toTopB = $(".back-to-top").css("bottom");
+	var toTopMB = parseInt(toTopMB.replace("px",""));
+	var toTopB = parseInt(toTopB.replace("px",""));
+	console.log (toTopB + toTopMB);
 	if (elHeight < windowHeight) {
-		offset = elOffset - ((windowHeight - elHeight)) + 150;
+		offset = elOffset - ((windowHeight - elHeight)) + toTopB + toTopMB + $(".back-to-top").height() + 12;
 		if (elHeight > (windowHeight / 2)) {
 			offset = elOffset - ((windowHeight - elHeight));
 		}	

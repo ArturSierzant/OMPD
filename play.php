@@ -1597,6 +1597,7 @@ function playlistStatus() {
 		
 		$data['hash']			= md5(implode('<seperation>', $playlist));
 		$data['listpos']		= isset($status['song']) ? (int) $status['song'] : 0;
+		$data['totalTracks']		= (int) $status['playlistlength'];
 		$data['volume']			= (int) $status['volume'];
 		$data['repeat']			= (int) $status['repeat'];
 		$data['shuffle']		= (int) $status['random'];

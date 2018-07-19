@@ -795,6 +795,7 @@ function _evaluateFavorite(data) {
 function evaluateTrackVersion(data) {
 	$('#title1_wait_indicator').hide();
 	$('#title_wait_indicator').hide();
+
 	if (data.other_track_version) {
 		var track_ids = '';
 		for (var i = 0; i < data['track_ids'].length; i++) {
@@ -812,12 +813,12 @@ function evaluateTrackVersion(data) {
 		  $( "#title1" ).click();
 		})
 	}
-	else {
+	/* else {
 		$('#title1').removeClass('icon-anchor');
 		$('#title').removeClass('icon-anchor');
 		$('#title1').off('click');
 		$('#title').off('click');
-	}
+	} */
 }
 
 function evaluateTrack(data) {
@@ -830,6 +831,10 @@ function evaluateTrack(data) {
 	current_track_id = data.track_id;
 	if (previous_track_id != data.track_id && data.track_id != null) {
 		//console.log('previous_track_id=' + previous_track_id);
+		$('#title1').removeClass('icon-anchor');
+		$('#title').removeClass('icon-anchor');
+		$('#title1').off('click');
+		$('#title').off('click');
 		$('#title1_wait_indicator').show();
 		$('#title_wait_indicator').show();
 		//console.log('track_id=' + data.track_id);
@@ -889,7 +894,7 @@ function evaluateTrack(data) {
 		document.getElementById('album1').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : 'from ' + albumLink; 
 		document.getElementById('album').innerHTML = albumLink;
 	}
-	else if (al.indexOf("://") > 0) {
+	else if (al.indexOf("://") > 0 && al.indexOf("://") < 6) {
 		//e.g. stream from youtube 
 		var albumLink = '<a href="' + data.album + '" target="_new">' + data.album + '</a>';
 		document.getElementById('album1').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : 'from ' + albumLink; 

@@ -223,8 +223,10 @@ $(document).ready(function () {
 	changeTileSizeInfo();
 	resizeImgContainer();
 	addFavSubmenuActions();
-	<?php 
-	if (NJB_SCRIPT != 'playlist.php' && NJB_SCRIPT != 'message.php' && $cfg['username'] != '' && $cfg['show_miniplayer']) {?>
+	<?php
+	$action = $_GET['action'];
+	if (NJB_SCRIPT != 'playlist.php' && $action != 'license' && NJB_SCRIPT != 'message.php' && $cfg['username'] != '' && $cfg['show_miniplayer']) {
+	?>
 		setMiniplayer();
 	<?php
 	}

@@ -210,6 +210,7 @@ function update($dir_to_update = '') {
 	$cfg['footer'] = 'dynamic';
 	require('include/footer.inc.php');
 	
+	
 	$getID3 = new getID3;
 	//initial settings for getID3:
 	include 'include/getID3init.inc.php';
@@ -229,6 +230,13 @@ function update($dir_to_update = '') {
 	
 	if ($update_status <> 1) {
 		
+		//redirect back to update.php to use ajax status update 
+		$cfg['footer'] = 'close';	
+		echo ('<script>window.location.href="update.php?action=update&sign=' . $cfg['sign'] . '"</script>');
+		
+		@ob_flush();
+		flush();
+	
 		mysqli_query($db,"update update_progress set 
 			update_status = 1,
 			structure_image = '',
