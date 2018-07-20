@@ -29,153 +29,8 @@
 //  +------------------------------------------------------------------------+
 //  | playlist-mini.php                                                      |
 //  +------------------------------------------------------------------------+
-//require_once('include/initialize.inc.php');
-//$cfg['menu'] = 'playlist';
-
-//authenticate('access_play');
-//require_once('include/header.inc.php');
 require_once('include/play.inc.php');
-
-/* if ($cfg['player_type'] == NJB_MPD)	{
-	$status 		= mpd('status');
-	$listpos		= isset($status['song']) ? $status['song'] : 0;
-	$file			= mpd('playlist');
-	$hash			= md5(implode('<seperation>', $file));
-	$listlength		= $status['playlistlength'];
-	$bottom = ($listlength > 1) ? ($listlength - 1) : 0;
-	$volume			= (isset($status['volume']) == false || $status['volume'] == -1) ? false : true;
-	$max_volume		= 100;	
-}
-else
-	message(__FILE__, __LINE__, 'error', '[b]Player not supported[/b]');
-
-
-$playtime = array();
-$track_id = array();
-$playlistTT = 0; */
-//for ($i=0; $i < $listlength; $i++) {
-	/* //streaming track outside of mpd library	
-	$pos = strpos($file[$i],'track_id=');	
-	if ($pos === false) {
-		$query = mysqli_query($db,'SELECT track.title, track.artist, track.track_artist, track.featuring, track.miliseconds, track.track_id, track.genre, album.genre_id, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, track.album_id, track.number, track.track_id, track.year as trackYear FROM track, album WHERE track.album_id=album.album_id AND track.relative_file = "' . 	mysqli_real_escape_string($db,$file[$i]) . '"');
-	} 
-	else {
-		$t_id = substr($file[$i],$pos + 9, 19);
-		$query = mysqli_query($db,'SELECT track.title, track.artist, track.track_artist, track.featuring, track.miliseconds, track.track_id, track.genre, album.genre_id, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, track.album_id, track.number, track.track_id, track.year as trackYear FROM track, album WHERE track.album_id=album.album_id AND track.track_id = "' . 	mysqli_real_escape_string($db,$t_id) . '"');
-	}
-	$table_track = mysqli_fetch_assoc($query);
-	//$playtime[] = (int) $table_track['miliseconds'];
-	//$playlistTT = $playlistTT + (int) $table_track['miliseconds'];
-	$track_id[] = (string) $table_track['track_id'];
-	//$number[] = (string) $table_track['number'];
-	
-	
-	
-	$is_file_stream = false;
-	$pos = strpos($file[$i],'filepath=');
-	if ($pos !== false) {
-		$is_file_stream = true;
-	} */
-	
-	//track not found in OMPD DB - take info from MPD, unless this is a stream of file
-	/* if (!isset($table_track['artist']) && !$is_file_stream) {
-		
-		$playlistinfo = mpd('playlistinfo ' . $i);
-		if (strpos($playlistinfo['file'],'ompd_title=') !== false){
-			//stream from Youtube
-			$parts = parse_url($playlistinfo['file']);
-			parse_str($parts['query'], $query);
-			$table_track['title'] = urldecode($query['ompd_title']);
-			$table_track['album'] = urldecode($query['ompd_webpage']);
-			$playlistinfo['Time'] = (int)urldecode($query['ompd_duration']);
-		}
-		else {
-			if (isset($playlistinfo['Artist'])) 
-				$table_track['track_artist']	= $playlistinfo['Artist'];
-			
-			if (isset($playlistinfo['Name'])) 
-				$table_track['title']	= $playlistinfo['Name'];
-			else if (isset($playlistinfo['Title']))
-				$table_track['title']	= $playlistinfo['Title'];
-			else
-				$table_track['title']	= basename($playlistinfo['file']);
-			
-			if (isset($playlistinfo['Album']))
-				$table_track['album']	= $playlistinfo['Album'];
-			else 
-				$table_track['album']	= $playlistinfo['file'];
-		}
-		
-		$table_track['number'] = $playlistinfo['Pos'] + 1;
-		$table_track['trackYear'] = $playlistinfo['Date'];
-		$table_track['genre'] = $playlistinfo['Genre'];
-		$table_track['miliseconds'] = $playlistinfo['Time'] * 1000;
-		
-	}
-	//this is stream of a file
-	elseif ($is_file_stream) {
-		//TODO: take info from file using getid3
-		$playlistinfo = mpd('playlistinfo ' . $i);
-		$table_track['number'] = $playlistinfo['Pos'] + 1;
-		$filepath = substr($file[$i],$pos + 9, strlen($file[$i]) - $pos);
-		$filepath = urldecode($filepath);
-		$table_track['title'] = basename($filepath);
-		$pos = strpos($filepath, $table_track['title']);
-		$table_track['album'] = substr($filepath, 0, $pos);
-	}
-	$query2 = mysqli_query($db,'SELECT album, year, image_id FROM album WHERE album_id="' . $table_track['album_id'] . '"');
-	$image_id = mysqli_fetch_assoc($query2); */
 ?>
-	
-	<?php 
-	/* $track_title_array = explode(" ", $table_track['title']);
-	$lengths = array_map('strlen', $track_title_array);
-	if (max($lengths) > 30) {
-		$break_method = 'break-all';
-	} 
-	else {
-		$break_method = 'break-word';
-	}
-	?>
-	<?php 
-		if ($image_id['album']) {
-			$album_name = $image_id['album'];
-		} 
-		else { 
-			$album_name = $table_track['album']; 
-		}
-		$album_name_array = explode(" ", $album_name);
-		$lengths = array_map('strlen', $album_name_array);
-		if (max($lengths) > 30) {
-			$break_method = 'break-all';
-		} 
-		else {
-			$break_method = 'break-word';
-		}
-		?>
-		<?php
-	$artist = '';
-		$exploded = multiexplode($cfg['artist_separator'],$table_track['track_artist']);
-		$l = count($exploded);
-		if ($l > 1) {
-			for ($j=0; $j<$l; $j++) {
-				$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$j]) . '">' . html($exploded[$j]) . '</a>';
-				if ($j != $l - 1) {
-					$delimiter = getInbetweenStrings($exploded[$j],$exploded[$j + 1], $table_track['track_artist']);
-					$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($table_track['track_artist']) . '&amp;order=year"><span class="artist_all">' . $delimiter[0] . '</span></a>';
-				}
-			}
-			//echo $artist;
-		} */
-//}
-	//$track_id = '';
-	//echo var_dump($track_id);
-	?>
-	
-
-
-
-
 
 <!-- info + control -->
 <div id="info_area_mini">
@@ -434,7 +289,9 @@ function evaluateTrack(data) {
 			}
 		} 
 		else if (l>0) {
+			if (data.track_artist[0] != '&nbsp;') {
 			artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[0]) + '">' + data.track_artist[0] + '</a>';
+			}
 		}
 	}
 	else {
@@ -459,22 +316,18 @@ function evaluateTrack(data) {
 	else if (al.indexOf("://") > 0 && al.indexOf("://") < 6) {
 		//e.g. stream from youtube 
 		var albumLink = '<a href="' + data.album + '" target="_new">' + data.album + '</a>';
-		//document.getElementById('album1').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : 'from ' + albumLink; 
-		
 		document.getElementById('artist_mini').innerHTML = albumLink;
 	}
 	else if (data.relative_file && artist != '') {
-		var albumLink = '<a href="browser.php?dir=' + data.relative_file + '">' + data.album + '</a>';
-		/* document.getElementById('album1').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : 'from ' + albumLink;  */
+		var albumLink = 'by ' + artist + ' from ' + '<a href="browser.php?dir=' + data.relative_file + '">' + data.album + '</a>';
 		document.getElementById('artist_mini').innerHTML = albumLink;
-		//$("#artist_mini").show();
 	}
 	else if (data.relative_file) {
 		var albumLink = '<a href="browser.php?dir=' + data.relative_file + '">' + data.album + '</a>';
-		/* document.getElementById('album1').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : 'from ' + albumLink;  */
-		document.getElementById('artist_mini').innerHTML = 
-		'by ' + artist + ' from ' + albumLink;
-		//$("#artist_mini").show();
+		document.getElementById('artist_mini').innerHTML = albumLink;
+		}
+	else if (data.album != '&nbsp;' && artist != '') {
+		document.getElementById('artist_mini').innerHTML = 'by ' + artist + ' from ' + data.album;
 	}
 	else if (data.album != '&nbsp;') {
 		document.getElementById('artist_mini').innerHTML = data.album;
@@ -483,6 +336,8 @@ function evaluateTrack(data) {
 		/* document.getElementById('artist_mini').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : data.album; */
 		$("#artist_mini").hide();
 	}
+	
+	console.log ('art: ' + artist);
 	
 	if (data.album_id) {
 		$("#image_in_mini").attr("src","image.php?image_id=" + data.image_id + "&track_id=" + data.track_id);

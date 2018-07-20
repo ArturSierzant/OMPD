@@ -148,7 +148,7 @@ $cfg['items_count'] = 0 ?>
 
 <?php
 $action = $_GET['action'];
-if (NJB_SCRIPT != 'playlist.php' && $action != 'license' && NJB_SCRIPT != 'message.php' && $cfg['username'] != '' && $cfg['show_miniplayer']) {
+if (NJB_SCRIPT != 'playlist.php' && strpos($action,'layerProfile') === false  && $action != 'license' && NJB_SCRIPT != 'message.php' && $cfg['username'] != '' && $cfg['show_miniplayer']) {
 $hasAccess = simpleAuthenticate('access_play');
 if ($hasAccess == 1) {
 ?>

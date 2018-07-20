@@ -31,7 +31,22 @@
 //  +------------------------------------------------------------------------+
 require_once('include/initialize.inc.php');
 require_once('include/library.inc.php');
+/* require_once('include/play.inc.php'); */
+
 header('Content-type: application/json');
+
+/* global $cfg, $db;
+
+if ($cfg['player_type'] == NJB_MPD) {
+	$query1=mysqli_query($db,'SELECT player.player_name as pl, player_host, player_port, player_pass FROM player, session WHERE (sid = BINARY "' . cookie('netjukebox_sid') . '") and player.player_id=session.player_id');
+	$session1 = mysqli_fetch_assoc($query1);
+	$data['player'] = $session1['pl'];
+	//$data['host'] = $session1['player_host'];
+	$cfg['player_host'] = $data['host'] = $session1['player_host'];
+	$cfg['player_port'] = $session1['player_port'];
+	$cfg['player_pass'] = $session1['player_pass'];
+} */
+
 
 $action	= get('action');
 
@@ -1805,6 +1820,12 @@ function playlistTrack() {
 				$filepath = substr($currentsong['file'],$pos + 9, strlen($currentsong['file']) - $pos);
 				$filepath = urldecode($filepath);
 				$relative_file = urlencode(dirname($filepath));
+			}
+		} 
+		else {
+			$f = $cfg['media_dir'] . $currentsong['file'];
+			if (file_exists($f)) {
+				$relative_file = urlencode(dirname($f));
 			}
 		}
 		

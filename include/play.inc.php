@@ -26,7 +26,14 @@
 //  | play.inc.php                                                           |
 //  +------------------------------------------------------------------------+
 if (PHP_SAPI == 'cli' && isset($cfg['player_id']) == false)
-	$cfg['player_id'] = 0;
+	$cfg['player_id'] = 1;
+
+$query=mysqli_query($db,'SELECT player_id FROM player, session WHERE (sid = BINARY "' . cookie('netjukebox_sid') . '") and player.player_id=session.player_id');
+$player = mysqli_fetch_assoc($query);
+
+if ($player['player_id'] != $cfg['player_id'] && mysqli_num_rows($query) > 0) {
+	$cfg['player_id'] = $cfg['player_id'];
+}
 
 $query = mysqli_query($db,'SELECT player_name, player_type, player_host, player_port, player_pass, media_share, player_id
 	FROM player
@@ -126,7 +133,7 @@ function mpd($command,$player_host="",$player_port="") {
 		$player_port = $cfg['player_port'];
 	}
 	
-	$soket = @fsockopen($player_host, $player_port, $error_no, $error_string, 3) or message(__FILE__, __LINE__, 'error', '[b]Music Player Daemon error[/b][br]Failed to connect to: ' . $cfg['player_host'] . ':' . $cfg['player_port'] . '[br]' . $error_string);
+	$soket = @fsockopen($player_host, $player_port, $error_no, $error_string, 3) or message(__FILE__, __LINE__, 'error', '[b]Music Player Daemon error[/b][br]Failed to connect to: ' . $cfg['player_host'] . ':' . $cfg['player_port'] . '[br]' . $error_string . '[br]Check player settings: [url=config.php?action=playerProfile]config.php?action=playerProfile[/url]');
 	if ($cfg['mpd_password'] != '') {
 		@fwrite($soket, "password " . $cfg['mpd_password'] . "\n") or message(__FILE__, __LINE__, 'error', '[b]Music Player Daemon error[/b][br]Failed to write to: ' . $cfg['player_host'] . ':' . $cfg['player_port']);
 	}

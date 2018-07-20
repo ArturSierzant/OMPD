@@ -291,6 +291,7 @@ for ($i=0; $i < $listlength; $i++) {
 		$table_track['number'] = $playlistinfo['Pos'] + 1;
 		$table_track['trackYear'] = $playlistinfo['Date'];
 		$table_track['genre'] = $playlistinfo['Genre'];
+		$album_genres = parseMultiGenre($table_track['genre']);
 		$table_track['miliseconds'] = $playlistinfo['Time'] * 1000;
 		
 	}
@@ -385,6 +386,9 @@ for ($i=0; $i < $listlength; $i++) {
 		<a href="index.php?action=view2&order=artist&sort=asc&genre_id=<?php echo $g_id; ?>"><?php echo $ag; ?></a><br>
 	<?php 
 		}
+	}
+	else {
+			echo $table_track['genre'];
 	}
 	?>
 	</td>

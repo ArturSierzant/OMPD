@@ -191,7 +191,7 @@ CREATE TABLE IF NOT EXISTS `player` (
   `player_id` int(10) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`player_id`),
   KEY `httpq_name` (`player_name`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=19 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 

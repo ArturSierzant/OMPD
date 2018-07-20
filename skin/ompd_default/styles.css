@@ -487,7 +487,7 @@ tr.select .trackNumber {
 tr.even td,
 tr.odd td,
 tr.select td {
-  padding: 2px 2px 2px 5px;
+  /* padding: 2px 2px 2px 5px; */
 }
 .tabFixed {
   table-layout: fixed;
@@ -820,7 +820,7 @@ div.playlist_title {
 }
 div.playlist_title_album {
   font-size: 0.923em;
-  color: #bdbdbd;
+  color: #777777;
 }
 td.playlist_bar_top {
   width: 15.3846em;
@@ -1744,7 +1744,8 @@ img.mpd_img {
   top: -1px;
 }
 td.time {
-  padding-left: 0.4em;
+  /* padding-left: 0.4em; */
+  padding: 2px 2px 2px 5px;
 }
 td.small_cover,
 td.small_cover_md {
