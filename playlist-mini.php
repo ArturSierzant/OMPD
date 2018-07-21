@@ -82,8 +82,6 @@ require_once('include/play.inc.php');
 
 <script type="text/javascript">
 <!--
-//var previous_hash			= '<?php echo $hash; ?>';
-//var previous_listpos		= <?php echo $listpos; ?>;
 var previous_hash			= '';
 var previous_listpos		= '';
 var previous_isplaying		= -1; // force update
@@ -92,27 +90,17 @@ var previous_shuffle		= -1;
 var previous_gain			= -1;
 var previous_miliseconds	= -1;
 var previous_track_id		= 'ff';
-//var playtime				= <?php echo safe_json_encode($playtime); ?>;
-//var track_id				= <?php echo safe_json_encode($track_id); ?>;
 var track_id				= '';
 var current_track_id		= '';
 var timer_id				= 0;
 var timer_function			= 'ajaxRequest("play.php?action=playlistStatus&menu=playlist", evaluateStatus)';
 var timer_delay				= 1000;
-//var list_length				= <?php echo $listlength;?>;
 var list_length				= '';
-//console.trace();
 var fromPosition			= -1
  
 var testing = '<?php echo $cfg['testing']; ?>';
 
 getTrackIDs();
-//ajaxRequest('ajax-playlist-mini.php', evaluatePlaylist);
-
-
-//ajaxRequest('play.php?action=playlistTrack&track_id=' + track_id[<?php echo $listpos; ?>] + '&menu=playlist', evaluateTrack);
-
-//ajaxRequest('play.php?action=playlistStatus&track_id=' + track_id[<?php echo $listpos; ?>] + '&menu=playlist', evaluateStatus);
 
 ajaxRequest('play.php?action=playlistTrack&track_id=' + track_id[previous_listpos] + '&menu=playlist', evaluateTrack);
 
@@ -124,8 +112,6 @@ function getTrackIDs() {
 					url: 'ajax-playlist-mini.php',
 					type: 'GET',
 					async: false,
-					//cache: false,
-					//timeout: 1000,
 					dataType : 'json',
 					error: function(){
 							return true;
@@ -150,39 +136,28 @@ function evaluateStatus(data) {
 	
 	if (previous_hash != data.hash) {
 		getTrackIDs();
-		//ajaxRequest('play.php?action=playlistTrack&track_id=' + track_id[<?php echo $listpos; ?>] + '&menu=playlist', evaluateTrack);
+
 		ajaxRequest('play.php?action=playlistTrack&track_id=' + track_id[previous_listpos] + '&menu=playlist', evaluateTrack);
-		//location.reload(false);
-		//evaluateTrack(data);
 	}
 	
 	document.getElementById('track_number').innerHTML =  (data.listpos + 1) + "/" + data.totalTracks + ". ";
-	//document.getElementById('track_title_mini').innerHTML =  data.title;
 	
 	evaluateListpos(data.listpos);
 	evaluatePlaytime(data);
-	//evaluateRepeat(data.repeat);
-	//evaluateShuffle(data.shuffle);
 	evaluateIsplaying(data.isplaying, data.listpos);
-	//evaluateVolume(data.volume);
-	//evaluateGain(data.gain);
-	//evaluateConsume(data);
-	 
-	
 }
 
 
 function evaluateListpos(listpos) {
 	if (previous_listpos != listpos) {
-		//getTrackIDs();
 		document.getElementById('timebar_mini').style.width = 0; 
 		ajaxRequest('play.php?action=playlistTrack&track_id=' + track_id[listpos] + '&menu=playlist', evaluateTrack);
 		previous_miliseconds = 0;
 		previous_listpos = listpos;
 	}
-	else hideSpinner();
-	//resizeImgContainer();
-}
+	else 
+		hideSpinner();
+	}
 
 function evaluateIsplaying(isplaying, idx) {
 	if (previous_isplaying != isplaying) {
@@ -198,10 +173,6 @@ function evaluateIsplaying(isplaying, idx) {
 			$("#play").addClass("playlist_status_off");
 			$("#play").html('<i class="fa fa-play sign-ctrl"></i>');
 			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=play&menu=playlist', evaluateIsplaying);");
-			//$('#track' + idx + '_play').hide();
-			/* document.getElementById('track' + idx + '_play').style.visibility = 'hidden';
-			document.getElementById('time').innerHTML = formattedTime(0);
-			document.getElementById('timebar').style.width = 0; */
 			previous_miliseconds = 0;
 		}
 		else if (isplaying == 1) {
@@ -210,10 +181,8 @@ function evaluateIsplaying(isplaying, idx) {
 			$("#time").addClass("icon-anchor");
 			$("#play").html('<i class="fa fa-pause sign-ctrl"></i>');
 			$("#play").removeClass();
-			//$("#play").addClass("playlist_status_on");
 			$("#play").addClass("playlist_status_off");
 			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=pause&menu=playlist', evaluateIsplaying);");
-			//$('#track' + idx + '_play').show();
 		}
 		else if (isplaying == 3) {
 			// pause
@@ -221,10 +190,8 @@ function evaluateIsplaying(isplaying, idx) {
 			$("#time").addClass("blink_me icon-anchor");
 			$("#play").html('<i class="fa fa-play sign-ctrl"></i>');
 			$("#play").removeClass();
-			//$("#play").addClass("blink_me playlist_status_on");
 			$("#play").addClass("playlist_status_off");
 			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=play&menu=playlist', evaluateIsplaying);");
-			//$('#track' + idx + '_play').hide();
 		}
 		previous_isplaying = isplaying;
 		console.log('isplaying:' + isplaying + '; idx: ' + idx);
@@ -254,7 +221,6 @@ function evaluateTrackVersion(data) {
 
 function evaluateTrack(data) {
 	// data.artist, data.title, data.album, data.by, data.album_id, data.image_id
-	// $('#track_title_mini').removeClass('icon-anchor');
 	current_track_id = data.track_id;
 	if (previous_track_id != data.track_id && data.track_id != null) {
 		$('#track_title_mini').removeClass('icon-anchor');
@@ -272,7 +238,6 @@ function evaluateTrack(data) {
 	if (s < 10) s = '0' +  s;
 	
 	
-	//document.getElementById('tracktime').innerHTML = m + ':' + s;
 	artist = '';
 	if ($.isArray(data.track_artist)) {
 		l = data.track_artist.length;
@@ -300,11 +265,9 @@ function evaluateTrack(data) {
 	
 	if (data.track_artist[0] == '&nbsp;') {
 		document.getElementById('artist_mini').innerHTML = '&nbsp;';
-		//$("#artist_mini").hide();
 	}
 	else {
 		document.getElementById('artist_mini').innerHTML = artist;
-		//$("#artist_mini").show();
 	}
 	$("#artist_mini").show();
 	document.getElementById('track_title_mini').innerHTML = data.title;
@@ -333,7 +296,6 @@ function evaluateTrack(data) {
 		document.getElementById('artist_mini').innerHTML = data.album;
 	}
 	else {
-		/* document.getElementById('artist_mini').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : data.album; */
 		$("#artist_mini").hide();
 	}
 	
@@ -341,14 +303,10 @@ function evaluateTrack(data) {
 	
 	if (data.album_id) {
 		$("#image_in_mini").attr("src","image.php?image_id=" + data.image_id + "&track_id=" + data.track_id);
-		//$("#image a").attr("href","index.php?action=view3&album_id=" + data.album_id);
-		
 	}
 	else if (data.thumbnail) {
 		//thumbnail e.g. from Youtube
 		$("#image_in_mini").attr("src","image_crop.php?thumbnail=" + encodeURIComponent(data.thumbnail));
-		//$("#image_in").attr("src",data.thumbnail);
-		//$("#image a").attr("href",data.thumbnail);
 	}
 	else {
 		document.getElementById('image_container_mini').innerHTML = '<a href="playlist.php"><img id="image_in_mini" src="<?php echo 'image/'; ?>large_file_not_found.png" alt=""></a>';
@@ -357,7 +315,6 @@ function evaluateTrack(data) {
 
 function evaluatePlaytime(data) {
 	// data.miliseconds, data.max, ....
-		//console.log("p_m: " + previous_miliseconds);
 	if (previous_miliseconds != data.miliseconds) {
 		var width_ = 0;
 		var progress_bar_width = document.getElementById('info_area_mini').clientWidth;

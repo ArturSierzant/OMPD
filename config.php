@@ -420,18 +420,18 @@ function editPlayerProfile() {
 		
 		$txt_menu = 'Edit profile';
 		$query = mysqli_query($db, 'SELECT player_name, player_type, player_host, player_port, player_pass, media_share FROM player WHERE player_id = ' . (int) $player_id);
-		$player = mysqli_fetch_assoc($query);
+		$player2 = mysqli_fetch_assoc($query);
 		
-		if ($player == false)
+		if ($player2 == false)
 			message(__FILE__, __LINE__, 'error', '[b]Error[/b][br]player_id not found in database');
 		
 		$txt_menu			= 'Edit profile';
-		$cfg['player_name']	= $player['player_name'];
+		/* $cfg['player_name']	= $player['player_name'];
 		$cfg['player_type']	= $player['player_type'];
 		$cfg['player_host']	= $player['player_host'];
 		$cfg['player_port']	= $player['player_port'];
 		$cfg['player_pass']	= $player['player_pass'];
-		$cfg['media_share']	= $player['media_share'];
+		$cfg['media_share']	= $player['media_share']; */
 	}
 	
 	// formattedNavigator
@@ -451,7 +451,7 @@ function editPlayerProfile() {
 <tr>
 	<td>Name:</td>
 	<td class="textspace"></td>
-	<td><input type="text" name="name" value="<?php echo html($cfg['player_name']); ?>" maxlength="255" class="edit"></td>
+	<td><input type="text" name="name" value="<?php echo html($player2['player_name']); ?>" maxlength="255" class="edit"></td>
 </tr>
 
 <tr class="textspace"><td colspan="3"></td></tr>
@@ -459,7 +459,7 @@ function editPlayerProfile() {
 <tr>
 	<td>Player:</td>
 	<td></td>
-	<td><input type="radio" name="player_type" value="2" <?php if ($cfg['player_type'] == NJB_MPD) echo 'checked '; ?>class="space" onClick="mpdDefault()"> Only! Music Player Daemon</td>
+	<td><input type="radio" name="player_type" value="2" checked class="space" onClick="mpdDefault()"> Only! Music Player Daemon</td>
 </tr>
 <tr class="textspace"><td colspan="3"></td></tr>
 
@@ -479,12 +479,12 @@ function editPlayerProfile() {
 <tr>
 	<td>Player host:</td>
 	<td></td>
-	<td><input type="text" name="player_host" value="<?php echo html($cfg['player_host']); ?>" maxlength="255" class="edit"></td>
+	<td><input type="text" name="player_host" value="<?php echo html($player2['player_host']); ?>" maxlength="255" class="edit"></td>
 </tr>
 <tr>
 	<td>Player port:</td>
 	<td></td>
-	<td><input type="text" name="player_port" value="<?php echo $cfg['player_port']; ?>" maxlength="5" class="edit"></td>
+	<td><input type="text" name="player_port" value="<?php echo ($player_id == 0 ?  '6600' : $player2['player_port']); ?>" maxlength="5" class="edit"></td>
 </tr>
 <tr class="textspace"><td colspan="3"></td></tr>
 
@@ -508,15 +508,20 @@ function editPlayerProfile() {
 	$temp = explode('/', $cfg['media_dir']);
 ?>
 <script type="text/javascript">
+<?php
+	if (get('player_id') == '0') {
+		echo('mpdDefault();');
+	}
+?>
 <!--
 function initialize() {
 	document.config.name.focus();
 <?php
 	if ($cfg['player_type'] == NJB_MPD) {
-		echo "\tdocument.config.player_pass.className = 'edit readonly';\n";
+		/* echo "\tdocument.config.player_pass.className = 'edit readonly';\n";
 		echo "\tdocument.config.media_share.className = 'edit readonly';\n";
 		echo "\tdocument.config.player_pass.disabled = true;\n";
-		echo "\tdocument.config.media_share.disabled = true;\n";
+		echo "\tdocument.config.media_share.disabled = true;\n"; */
 	}
 	if ($cfg['player_type'] == NJB_VLC){
 		echo "\tdocument.config.player_pass.className = 'edit readonly';\n";
@@ -528,15 +533,15 @@ function initialize() {
 	
 function serverDefault() {
 	document.config.player_host.value = '127.0.0.1';
-	if (document.config.media_share.className != 'edit readonly')
-		document.config.media_share.value = '<?php echo $cfg['media_dir']; ?>';
+	/* if (document.config.media_share.className != 'edit readonly')
+		document.config.media_share.value = '<?php echo $cfg['media_dir']; ?>'; */
 }
 	
 	
 function clientDefault() {
 	document.config.player_host.value = '<?php echo gethostbyaddr($_SERVER['REMOTE_ADDR']); ?>';
-	if (document.config.media_share.className != 'edit readonly')
-		document.config.media_share.value = '<?php echo (NJB_WINDOWS) ? '//' : '/'; echo (isset($_SERVER['SERVER_ADDR'])) ? $_SERVER['SERVER_ADDR'] : $_SERVER['SERVER_NAME']; ?>/<?php echo $temp[count($temp) - 2]; ?>/';
+	/* if (document.config.media_share.className != 'edit readonly')
+		document.config.media_share.value = '<?php echo (NJB_WINDOWS) ? '//' : '/'; echo (isset($_SERVER['SERVER_ADDR'])) ? $_SERVER['SERVER_ADDR'] : $_SERVER['SERVER_NAME']; ?>/<?php echo $temp[count($temp) - 2]; ?>/'; */
 }
 
 		
@@ -565,14 +570,14 @@ function vlcDefault() {
 
 
 function mpdDefault() {
-	document.config.name.value = 'Music Player Daemon (<?php echo $player_id; ?>)';
+	document.config.name.value = 'MPD ID=<?php echo $player_id; ?>';
 	document.config.player_port.value = '6600';
 	document.config.player_pass.value = '';
 	document.config.media_share.value = '';
-	document.config.player_pass.className = 'edit readonly';
-	document.config.media_share.className = 'edit readonly';
-	document.config.player_pass.disabled = true;
-	document.config.media_share.disabled = true;
+	//document.config.player_pass.className = 'edit readonly';
+	//document.config.media_share.className = 'edit readonly';
+	//document.config.player_pass.disabled = true;
+	//document.config.media_share.disabled = true;
 	serverDefault();
 }
 //-->

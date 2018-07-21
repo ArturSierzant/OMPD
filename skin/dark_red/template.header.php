@@ -107,7 +107,7 @@ function changePlayer(player_id) {
 	$.ajax({
 			type: "GET",
 			url: "ajax-change-player.php",
-			data: { 'player_id': player_id, 'sid': '<?php echo cookie('netjukebox_sid'); ?>'},
+			data: { 'player_id': player_id, 'sid': '<?php echo $cfg['sid']; ?>'},
 			dataType : 'json',
 			success : function(json) {
 				$("#activePlayer").html(json['player']);
@@ -120,6 +120,10 @@ function changePlayer(player_id) {
 				var f = winLoc.indexOf("favorite.php");
 				if (f>0) {
 					window.location = "favorite.php";
+				};
+				var o = winLoc.indexOf("config.php?action=playerProfile");
+				if (o>0) {
+					window.location = "config.php?action=playerProfile";
 				};
 				toggleChangePlayer();
 			},
