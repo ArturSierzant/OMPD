@@ -53,7 +53,11 @@ if (!isset($dir_to_update)) {
 }
 else {
 	$dir_to_update = myDecode($dir_to_update);
-	setcookie('update_dir', rtrim($dir_to_update,'/'), time() + (86400 * 30 * 365), "/");
+	if (substr($dir_to_update,-1) != DIRECTORY_SEPARATOR){
+			$dir_to_update = $dir_to_update . DIRECTORY_SEPARATOR;
+		}
+	//setcookie('update_dir', rtrim($dir_to_update,'/'), time() + (86400 * 30 * 365), "/");
+	setcookie('update_dir', $dir_to_update, time() + (86400 * 30 * 365), "/");
 	$cfg['force_filename_update'] = true;
 }
 
