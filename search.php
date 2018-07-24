@@ -1,6 +1,6 @@
  <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2018 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  | This program is free software: you can redistribute it and/or modify   |

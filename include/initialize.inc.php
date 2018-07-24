@@ -34,7 +34,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 
 define('NJB_START_TIME', microtime(true));
 
-define('NJB_VERSION', '1.03');
+define('NJB_VERSION', '1.04');
 define('NJB_DATABASE_VERSION', 42);
 define('NJB_IMAGE_SIZE', 300);
 define('NJB_IMAGE_QUALITY', 85);

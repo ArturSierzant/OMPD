@@ -11,6 +11,7 @@ require_once('include/play.inc.php');
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8"> 
 <meta name="viewport" content="width=device-width, initial-scale: 1, minimal-ui" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="theme-color" content="#1f2429" />

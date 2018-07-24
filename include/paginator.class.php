@@ -1,7 +1,7 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | PHP Paginator Class													 |
-//  | https://gist.github.com/daslicht/c319e18a1c8761f360ad		             |
+//  | PHP Paginator Class                                                    |
+//  | https://gist.github.com/daslicht/c319e18a1c8761f360ad                  |
 //  +------------------------------------------------------------------------+
 
 

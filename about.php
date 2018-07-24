@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2016 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2018 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -159,7 +159,7 @@ function about() {
 <tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
-	<td style="vertical-align: top;">v1.04 <br>201?.??.??</td>
+	<td style="vertical-align: top;">v1.04 <br>2018.07.24</td>
 	<td></td>
 	<td>
 	<ul style="padding-left: 1em;">
@@ -168,9 +168,9 @@ function about() {
 	<li> added miniplayer (settable in config.inc.php)</li>
 	<li> added support for mpd playlists</li>
 	<li> added discography browser in album view (settable in config.inc.php)</li>
-	<li> added view for Album Dynamic Range</li>
+	<li> added view for Album Dynamic Range (DR)</li>
 	<li> added direct navigation to selected page in paginator</li>
-	<li> added search action for album cover in album view</li>
+	<li> added search action for album cover in album view (settable in config.inc.php)</li>
 	<li> added 'Play next' and 'Remove all below' to track menu in 'Now Playing'</li>
 	<li> added 'Go to album' in file browser (if album is in DB)</li>
 	<li> added config file editor</li>
