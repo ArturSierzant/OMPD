@@ -159,6 +159,20 @@ function about() {
 <tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
+	<td style="vertical-align: top;">v1.05 <br>201?.??.??</td>
+	<td></td>
+	<td>
+	<ul style="padding-left: 1em;">
+	<li> added 'Show favorite tracks' for selected genre</li>
+	<li> fixed bugs</li>
+	</ul>
+	<br>
+	</td>
+	<td></td>
+</tr>
+<tr class="line"><td colspan="5"></td></tr>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td>&nbsp;</td>
 	<td style="vertical-align: top;">v1.04 <br>2018.07.24</td>
 	<td></td>
 	<td>
@@ -182,7 +196,8 @@ function about() {
 	<br>
 	</td>
 	<td></td>
-</tr><tr class="line"><td colspan="5"></td></tr>
+</tr>
+<tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
 	<td style="vertical-align: top;">v1.03 <br>2017.05.02</td>

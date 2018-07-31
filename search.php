@@ -41,20 +41,22 @@ $size = floor($aval_width / $colombs);
 $cfg['menu']		= 'Library';
 $action 			= get('action');
 $search_string	 	= get('search_string');
+$genre_id	 	= get('genre_id');
 $group_found		= 'none';
 $match_found		= false;
 	
-if (strlen($search_string) == 0) {
+if (strlen($search_string) == 0 && !$genre_id) {
 	message(__FILE__, __LINE__, 'warning', '[b]Empty search string[/b][br]Enter valid string.');
 	exit();
 }
 
-if (strlen($search_string) < 2) {
+if (strlen($search_string) < 2 && !$genre_id) {
 	message(__FILE__, __LINE__, 'warning', '[b]Search string too short - min. 2 characters[/b][br][url=index.php][img]small_back.png[/img]Back to previous page[/url]');
 	exit();
 }
 
 if	($action == 'search_all')			search_all();
+if	($action == 'fav4genre')			search_fav4genre();
 else	message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]action');
 exit();
 
@@ -85,6 +87,45 @@ function search_all() {
 	album_title();
 	track_artist();
 	track_title();
+	
+	echo '<script type="text/javascript">';
+	//echo 'hideSpinner();';
+	if ($group_found != 'none') { echo 'toggleSearchResults("' . $group_found . '")';}
+	echo '</script>';
+	
+	if (!$match_found) echo "No match found.";
+	require_once('include/footer.inc.php');
+};
+
+	
+//  +------------------------------------------------------------------------+
+//  | Search for favorites tracks for genre                                  |
+//  +------------------------------------------------------------------------+
+function search_fav4genre() {
+	global $cfg, $db, $size, $search_string, $group_found, $match_found, $genre_id;
+	authenticate('access_media');
+	
+	$query = mysqli_query($db,"SELECT genre FROM genre WHERE genre_id=" . mysqli_real_escape_string($db,$genre_id));
+	$rows = mysqli_fetch_assoc($query);
+	$g = $rows['genre'];
+	
+	// formattedNavigator
+	$nav			= array();
+	$nav['name'][]	= 'Library';
+	$nav['url'][]	= 'index.php';
+	$nav['name'][] = 'Genre: ' . $g;
+	$nav['url'][]	= "index.php?action=view2&amp;order=artist&amp;sort=asc&amp;genre_id=" . $genre_id;
+	$nav['name'][] = 'Favorite ' . $g .  ' tracks';
+	require_once('include/header.inc.php');
+	
+	echo '<script type="text/javascript">';
+	echo 'showSpinner();';
+	echo '</script>';
+	
+	@ob_flush();
+	flush();
+	
+	fav4genre($g);
 	
 	echo '<script type="text/javascript">';
 	//echo 'hideSpinner();';
@@ -571,6 +612,200 @@ function track_title() {
 	$isFavorite = false;
 	$isBlacklist = false;
 	if ($track['favorite_id']) $isFavorite = true;
+	if ($track['blacklist_id']) $isBlacklist = true;
+	$tid = $track['tid'];
+	?>
+	
+	<td class="time pl-genre"><?php 
+		$album_genres = parseMultiGenre($track['genre']);
+		if (count($album_genres) > 0) { 
+			foreach($album_genres as $g_id => $ag) {
+		?>
+			<a href="index.php?action=view2&order=artist&sort=asc&genre_id=<?php echo $g_id; ?>"><?php echo $ag; ?></a><br>
+		<?php 
+			}
+		}
+	?>
+	</td>
+	
+	<td onclick="toggleStarSub(<?php echo $i ?>,'<?php echo $tid ?>');" class="pl-favorites">
+		<span id="blacklist-star-bg<?php echo $tid ?>" class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
+		<i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
+		</span>
+	</td>
+	
+	<td align="right"><?php echo formattedTime($track['miliseconds']); ?></td>
+	<td></td>
+</tr>
+
+<tr class="line">
+	<td></td>
+	<td colspan="16"></td>
+</tr>
+
+<tr>
+	<td colspan="20">
+	<?php starSubMenu($i, $isFavorite, $isBlacklist, $tid);?>
+	</td>
+</tr>
+<tr>
+	<td colspan="20">
+	<?php trackSubMenu($i, $track);?>
+	</td>
+</tr>
+
+<?php
+	}
+	echo "</table>";
+	echo "</div>";
+?>
+		<script>
+			$("#add_all_TT").click(function(){
+				$.ajax({
+					type: "GET",
+					url: "play.php",
+					data: { 'action': 'addMultitrack', 'track_ids': '<?php echo $TT_ids; ?>', 'addType':'all_TT' },
+					dataType : 'json',
+					success : function(json) {
+						evaluateAdd(json);
+					},
+					error : function() {
+						$("#add_all_TT").removeClass('fa-cog fa-spin icon-selected').addClass('fa-plus-circle');
+					}	
+				});	
+			});
+		</script>
+<?php
+	}
+}
+//End of Track title	
+
+
+
+//  +------------------------------------------------------------------------+
+//  | favorites tracks for genre                                             |
+//  +------------------------------------------------------------------------+	
+
+function fav4genre($genre) {
+	global $cfg, $db, $size, $search_string, $group_found, $match_found, $genre_id;
+	
+	/* $query = mysqli_query($db,"SELECT favorite_id FROM favorite WHERE name='" . $cfg['favorite_name'] . "'");
+	$rows = mysqli_fetch_assoc($query); */
+	$favorite_id = $cfg['favorite_id'];
+	
+	
+	$query = mysqli_query($db,'SELECT track.track_id
+	FROM track
+	LEFT JOIN favoriteitem on track.track_id = favoriteitem.track_id
+	WHERE favoriteitem.favorite_id=' . mysqli_real_escape_string($db,$favorite_id) . ' AND track.genre = "' . mysqli_real_escape_string($db,$genre) . '"');
+	
+	$rows = mysqli_num_rows($query);
+	
+	if ($rows > 0) {
+		$match_found = true;
+		if ($group_found == 'none')	$group_found = 'TT';
+?>
+<!--
+<h1 onclick='toggleSearchResults("TT");' class="pointer"><i id="iconSearchResultsTT" class="fa fa-chevron-circle-down icon-anchor"></i> Track title (<?php if ($rows > 1) {
+			echo $rows . " matches found";
+		}
+		else {
+			$album = mysqli_fetch_assoc($query);
+			echo $rows . " match found: " . $album['track_artist'];
+		}
+		?>)
+</h1>
+-->
+<div id="searchResultsTT">
+<table cellspacing="0" cellpadding="0" class="border">
+<tr class="header">
+	<td class="icon"></td><!-- track menu -->
+	<td class="icon">
+		<span onMouseOver="return overlib('Add all tracks');" onMouseOut="return nd();">
+			<?php if ($cfg['access_add'])  echo '<i id="add_all_TT" class="fa fa-plus-circle fa-fw icon-small pointer"></i>';?>
+		</span>
+	</td><!-- add track -->
+	<td class="track-list-artist">Track artist&nbsp;</td>
+	<td>Title&nbsp;</td>
+	<td>Album&nbsp;</td>
+	<td class="time pl-genre">Genre&nbsp;</td>
+	<td></td>
+	<td align="right" class="time">Time</td>
+	<td class="space right"></td>
+</tr>
+
+<?php
+	$i=10000;
+	$TT_ids = ''; 
+	
+	$query = mysqli_query($db,'SELECT * FROM 
+	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, album.image_id, album.album, album.artist 
+	FROM track
+	LEFT JOIN album ON track.album_id = album.album_id
+	LEFT JOIN favoriteitem on track.track_id = favoriteitem.track_id
+	WHERE favoriteitem.favorite_id=' . mysqli_real_escape_string($db,$favorite_id) . ' AND track.genre = "' . mysqli_real_escape_string($db,$genre) . '"
+	
+	) as a
+	LEFT JOIN 
+	(SELECT track_id, favorite_id as blacklist_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") as bl ON bl.track_id = a.tid
+	
+	ORDER BY a.artist, a.album, a.title');
+	
+	while ($track = mysqli_fetch_assoc($query)) { 
+		$TT_ids = ($TT_ids == '' ? $track['tid'] : $TT_ids . ';' . $track['tid']);
+	?>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
+	<td class="icon">
+	<span id="menu-track<?php echo ($i)?>">
+	<div onclick='toggleMenuSub(<?php echo ($i)?>);'>
+		<i id="menu-icon<?php echo ($i) ?>" class="fa fa-bars icon-small"></i>
+	</div>
+	</span>
+	</td>
+	
+	<td class="icon">
+	<span>
+	<?php if ($cfg['access_add'])  echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;track_id=' . $track['tid'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . $track['number'] . '\');" onMouseOut="return nd();"><i id="add_' . $track['tid'] . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';?>
+	</span>
+	</td>
+	
+	<!--
+	<td class="track-list-artist"><?php if (mysqli_num_rows(mysqli_query($db,'SELECT track_id FROM track WHERE track.artist="' . mysqli_real_escape_string($db,$track['track_artist']) . '"')) > 1) echo '<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['track_artist']) . '&amp;order=year">' . html($track['track_artist']) . '</a>'; else echo html($track['track_artist']); ?></td>
+	-->
+	
+	<td class="track-list-artist">
+	<?php 
+	$artist = '';
+	$exploded = multiexplode($cfg['artist_separator'],$track['track_artist']);
+	$l = count($exploded);
+	if ($l > 1) {
+		for ($j=0; $j<$l; $j++) {
+			$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($exploded[$j]) . '">' . html($exploded[$j]) . '</a>';
+			if ($j != $l - 1) {
+				$delimiter = getInbetweenStrings($exploded[$j],$exploded[$j + 1], $track['track_artist']);
+				$artist = $artist . '<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['track_artist']) . '&amp;order=year"><span 	class="artist_all">' . $delimiter[0] . '</span></a>';
+			}
+		}
+		echo $artist;
+	}
+	else {
+		echo '<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['track_artist']) . '&amp;order=year">' . html($track['track_artist']) . '</a>';
+	} 
+	?>
+	</td>
+	
+	<td><?php if ($cfg['access_play']) 		echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id=' . $track['tid'] . '\');" onMouseOver="return overlib(\'Play track ' . $track['number'] . '\');" onMouseOut="return nd();">' . html($track['title']) . '</a>';
+			elseif ($cfg['access_add'])		echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;track_id=' . $track['tid'] . '\');" onMouseOver="return overlib(\'Add track\');" onMouseOut="return nd();">' . html($track['title']) . '</a>';
+			elseif ($cfg['access_stream'])	echo '<a href="stream.php?action=playlist&amp;track_id=' . $track['tid'] . '&amp;stream_id=' . $cfg['stream_id'] . '" onMouseOver="return overlib(\'Stream track\');" onMouseOut="return nd();">' . html($track['title']) . '</a>';
+			else 							echo html($track['title']); ?>
+	<span class="track-list-artist-narrow">by <?php echo html($track['track_artist']); ?></span> 
+	</td>
+	<td><a href="index.php?action=view3&amp;album_id=<?php echo $track['album_id']; ?>" <?php echo onmouseoverImage($track['image_id']); ?>><?php echo html($track['album']); ?></a></td>
+	
+	<?php
+	$isFavorite = true;
+	$isBlacklist = false;
+	//if ($track['favorite_id']) $isFavorite = true;
 	if ($track['blacklist_id']) $isBlacklist = true;
 	$tid = $track['tid'];
 	?>

@@ -566,10 +566,14 @@ function genreNavigator($genre_id) {
 		$nav['url'][]  = '';
 	}
 	if ($genre['genre']) {
-		$nav['name'][] = $genre['genre'];
+		$nav['name'][] = 'Genre: ' . $genre['genre'];
 		$nav['url'][]  = '';
 	}
+	/* $nav['name'][] = 'Show favorites '  . $genre['genre'] . ' tracks';
+	$nav['url'][]  = 'search.php?action=fav4genre&genre_id=' . $genre_id; */
 	$nav['open'] = true;
+	
+	//echo ('Show favorites tracks for ' . $genre['genre']);
 	require_once('include/header.inc.php');
 
 }

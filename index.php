@@ -767,8 +767,20 @@ function view2() {
 		$display_all_tracks = true;
 		$resultsFound = true;
 		$album_multidisc = albumMultidisc($query);
+	if($genre_id){
+		$query = mysqli_query($db,"SELECT genre FROM genre WHERE genre_id=" . mysqli_real_escape_string($db,$genre_id));
+		$rows = mysqli_fetch_assoc($query);
+		$g = $rows['genre'];
 	?>
-	
+	<div class="buttons"><span id="fav4genre">Show favorite <?php echo $g; ?> tracks</span></div>
+	<script>
+	$("#fav4genre").on("click",function(){
+		window.location = "search.php?action=fav4genre&genre_id=<?php echo $genre_id; ?>"
+	})
+	</script>
+	<?php 
+		}
+	?>
 <table cellspacing="0" cellpadding="0" class="border">
 <tr>
 	<td colspan="<?php echo $colombs + 2; ?>">
