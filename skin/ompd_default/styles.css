@@ -969,6 +969,10 @@ div.playlist_status_on_border {
   max-width: 1.9em;
   width: 1.9em;
 }
+.pl-tdr {
+  font-size: 1em;
+  text-align: center;
+}
 #favorites,
 #favorites1 {
   cursor: pointer;

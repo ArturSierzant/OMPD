@@ -58,7 +58,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 	}
 	
 	
-	$query = mysqli_query($db,'SELECT track.track_artist, track.artist, track.title, track.featuring, track.miliseconds, track.track_id, track.number, track.relative_file, track.genre, f.blacklist_pos as blacklist_pos, f. favorite_pos as favorite_pos
+	$query = mysqli_query($db,'SELECT track.track_artist, track.artist, track.title, track.featuring, track.dr, track.miliseconds, track.track_id, track.number, track.relative_file, track.genre, f.blacklist_pos as blacklist_pos, f. favorite_pos as favorite_pos
 	FROM track left join 
 		(
 		SELECT favoriteitem.track_id as track_id, b.position as blacklist_pos, f.position as favorite_pos
@@ -108,6 +108,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 				<td class="textspace track-list-artist"></td>
 				<td class="time pl-genre"><?php if ($showGenre) echo'Genre'; ?></td>
 				<td></td>
+				<td align="right" class="time pl-tdr">DR</td>
 				<td align="right" class="time">Time</td>
 				<td class="space right"><div class="space"></div></td>
 			</tr>
@@ -191,6 +192,13 @@ for ($disc; $disc <= $max_disc; $disc++) {
 					</span>
 				</td>
 				
+				<td class="pl-tdr">
+				<?php
+					$tdr = $track['dr'];
+					echo $tdr;
+				?>
+				</td>
+
 				<td align="right"><?php echo formattedTime($track['miliseconds']); ?></td>
 				<td></td>
 			</tr>
