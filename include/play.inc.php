@@ -1,5 +1,9 @@
 <?php
 //  +------------------------------------------------------------------------+
+//  | O!MPD, Copyright © 2015-2018 Artur Sierzant                            |
+//  | http://www.ompd.pl                                                     |
+//  |                                                                        |
+//  |                                                                        |
 //  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
@@ -302,6 +306,7 @@ function mpd_OK($command,$player_host="",$player_port="") {
 function mpdSilent($command,$player_host="",$player_port="") {
 	global $cfg;
 	
+	$time_start = microtime(true);
 	if ($player_host=="" && $player_port==""){
 		$player_host = $cfg['player_host'];
 		$player_port = $cfg['player_port'];
@@ -359,6 +364,8 @@ function mpdSilent($command,$player_host="",$player_port="") {
 				list($seconds, $dummy) = explode(':', $array['time'], 2);
 				$array['elapsed'] = $seconds;
 			}
+			$time_end = microtime(true);
+			$cfg['delay'] = round(($time_end - $time_start) * 1000);
 			return $array;
 		}
 		if ($command == 'playlist' && version_compare($cfg['mpd_version'], '0.16.0', '<')) {

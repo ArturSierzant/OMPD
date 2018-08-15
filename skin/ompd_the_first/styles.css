@@ -66,7 +66,7 @@ i:active {
 @media all and (max-width: 539px) {
 
 	body {font-size: 12px; font-weight: 300;}
-	td.side-margin {width: 1px;}
+	td.side-margin {width: 0px;}
 	td.menu_top_left {display:none;}
 	.full 	{
 			height: 11em; 
@@ -124,7 +124,7 @@ i:active {
 	#info_area {
 		//background-image: url(img/info_area_background.png);
 		background-repeat: repeat;
-		margin: 0 2px;
+		/* margin: 0 2px; */
 
 		position: relative;
 	}
@@ -274,7 +274,7 @@ i:active {
 
 	}
 	#track-progress {width: 75%;}
-	td.side-margin {width: 1px;}	
+	td.side-margin {width: 0px;}	
 
 }
 
@@ -311,7 +311,7 @@ i:active {
 	*/
 	#pl-track-info {display: block;}
 	td.small_cover {display: table-cell;}
-	td.side-margin {width: 1px;}	
+	td.side-margin {width: 0px;}	
 
 	td.play-indicator {display: table-cell;}
 	div.media_control {
@@ -395,7 +395,7 @@ i:active {
 }
 
 #album-info-area {
-	margin: 0 2px;
+	/* margin: 0 2px; */
 	overflow: hidden;
 	background-color: #f0f0f0;
 
@@ -1268,6 +1268,7 @@ tr.year {
 
 tr.year td {
 	border-bottom: dotted 1px #E3E3E3;
+	padding: 7px 5px 7px 0;
 }
 
 
@@ -1885,7 +1886,6 @@ div.tile:active {
 		height: 150px;
 		display: inline-block; 
 		margin: 0 0 1px 1px;
-
 		overflow: hidden;
 		text-overflow: ellipsis;
 		}		
@@ -2470,7 +2470,7 @@ h1 {
 #discBrowser {
 	overflow: auto;
   white-space:nowrap;
-	text-align: center;
+	text-align: left;
 	display: none;
 	padding-bottom: 5px;
 }

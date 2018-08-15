@@ -32,6 +32,15 @@ function changeTileSizeInfo() {
 	else {
 		pos1 = this.href.indexOf('PHP=');
 		ts = this.href.substr(pos1 + 4, 3);
+		/* pos2 = this.href.indexOf('&', pos1);
+		if (pos2<0) {
+			ts = this.href.substr(pos1 + 4, this.href.length - pos1 + 4);
+		}
+		else {
+			ts = this.href.substr(pos1 + 4, pos2 - pos1);
+		} 
+		console.log ('ts: ' + ts);
+		*/
 		this.href = this.href.replace('?tileSizePHP=' + ts,'?tileSizePHP=' + $tileSizeArr[0]);
 	}
 	});
@@ -63,23 +72,26 @@ function calcTileSize() {
 	
     if ($containerWidth <= 639) {
 		$tileCount=3;
-		$tileSize = Math.floor(($containerWidth/$tileCount) - 2);
+		$tileSize = Math.floor(($containerWidth/$tileCount) - 1);
+		//$tileSize = Math.floor((($containerWidth/$tileCount) - 1) * 10) / 10;
     	$('.tile_info').css('font-size', function() { return Math.floor($tileSize/12) + 'px'; });
 	}
 	
     if ($containerWidth > 639 && $containerWidth <= 1024) {
 		$tileCount=5;
-		$tileSize = Math.floor(($containerWidth/$tileCount) - 2);
+		$tileSize = Math.floor(($containerWidth/$tileCount) - 1);
+		//$tileSize = Math.floor((($containerWidth/$tileCount) - 1) * 10)/10;
         $('.tile_info').css('font-size', function() { return Math.floor($tileSize/12) + 'px'; });
 	}
 	
 	if ($containerWidth > 1024 && $containerWidth <=1280) {
 		$tileCount=7;
-		$tileSize = Math.floor(($containerWidth/$tileCount) - 2);
+		$tileSize = Math.floor((($containerWidth)/$tileCount) - 1);
+		//$tileSize = Math.floor((($containerWidth/$tileCount) - 1) * 10)/10;
     	$('.tile_info').css('font-size', function() { return Math.floor($tileSize/13) + 'px'; });
     	//$('.tile_info').css('font-size', function() { return '0.8em'; });
 	}
-	//console.log ($containerWidth);
+	//console.log ('tileSize: ' + $tileSize);
 	return [$tileSize,$containerWidth];
 }
 
@@ -955,12 +967,16 @@ function setFavorite(data) {
 function setBlacklist(data) {
 	if (data.action == "add") {
 		$("#blacklist-star-bg" + data.track_id).addClass("blackstar-selected blackstar");
+		$("#blacklist-star-bg" + data.track_id + "_fav").addClass("blackstar-selected blackstar");
 		$("#blacklist-star-bg-sub" + data.track_id).addClass("blackstar-selected");
+		$("#blacklist-star-bg-sub" + data.track_id + "_fav").addClass("blackstar-selected");
 		$("#addToBlacklist_txt-" + data.track_id).text("Remove from ");
 	}
 	else if (data.action == "remove") {
 		$("#blacklist-star-bg" + data.track_id).removeClass("blackstar-selected blackstar");
+		$("#blacklist-star-bg" + data.track_id + "_fav").removeClass("blackstar-selected blackstar");
 		$("#blacklist-star-bg-sub" + data.track_id).removeClass("blackstar-selected");
+		$("#blacklist-star-bg-sub" + data.track_id + "_fav").removeClass("blackstar-selected");
 		$("#addToBlacklist_txt-" + data.track_id).text("Add to ");
 	}
 	

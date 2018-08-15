@@ -267,15 +267,6 @@ function track_artist() {
 	$i=0;
 	$TA_ids = '';
 	
-	/* 
-	$query = mysqli_query($db,'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, album.image_id, album.album, album.artist
-	FROM track
-	INNER JOIN album ON track.album_id = album.album_id
-	WHERE track.artist LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
-	AND track.artist <> album.artist
-	AND album.artist NOT LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
-	ORDER BY track.artist, album.album, track.title');
-	 */
 	$query = mysqli_query($db,'SELECT * FROM
 	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, album.image_id, album.album, album.artist
 	FROM track

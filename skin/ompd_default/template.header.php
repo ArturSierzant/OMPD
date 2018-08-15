@@ -693,7 +693,9 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 <span id="list" onclick='toggleSubMiddle("Alpha");'>artist <i id="iconmenuSubMiddleMediaAlpha" class="fa fa-chevron-circle-down"></i></span>
 
 <?php echo $header['seperation']; ?>
-<span id="genre" onclick='toggleSubMiddle("Genre");'>genre <i id="iconmenuSubMiddleMediaGenre" class="fa fa-chevron-circle-down"></i></span>
+<!-- <span id="genre" onclick='toggleSubMiddle("Genre");'>genre <i id="iconmenuSubMiddleMediaGenre" class="fa fa-chevron-circle-down"></i></span>
+-->
+<a href="index.php?action=viewGenre">genre</a>
 
 <?php echo $header['seperation']; ?>
 <span id="quickSearch" onclick='toggleSubMiddle("QuickSearch");'>quick search <i id="iconmenuSubMiddleMediaQuickSearch" class="fa fa-chevron-circle-down"></i></span>

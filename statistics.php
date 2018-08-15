@@ -391,7 +391,7 @@ for ($i=0; $i<$histogram_count; $i++)
 	<td align="right">
 		<?php 
 		foreach ($histogram_year as $key => $value) {
-		echo '<div>' . $key . '</div>';
+		echo '<div class="stat_bar">' . $key . '</div>';
 		}
 		?>
 	</td>
@@ -400,14 +400,14 @@ for ($i=0; $i<$histogram_count; $i++)
 	<td class="bar">
 		<?php 
 		foreach ($histogram_year as $key => $value) {
-		echo '<div><div class="out-statistics"><div style="width: ' . ($value/$max_year)*100 . 'px;" class="in"></div></div></div>';
+		echo '<div class="stat_bar"><div class="out-statistics"><div style="width: ' . ($value/$max_year)*100 . 'px;" class="in"></div></div></div>';
 		}
 		?>
 	</td>
 	<td>
 	<?php 
 		foreach ($histogram_year as $key => $value) {
-		echo '<div style="text-align: right;">' . $value . '</div>';
+		echo '<div style="text-align: right;"  class="stat_bar">' . $value . '</div>';
 		}
 		?>
 	</td>
@@ -423,8 +423,19 @@ for ($i=0; $i<$histogram_count; $i++)
 		$isHidden = false;
 		$maxItems = 24;
 		$i = 0;
-		foreach ($histogram as $key => $value) {		
-			echo '<div' . (($i > $maxItems) ? ' class="no-display"' : '') . ' id="incOfDiscs' . $i . '">' . $key . '</div>';
+		foreach ($histogram as $key => $value) {
+			$month = (int)substr($key,-2);
+			$year  = (int)substr($key,0,4);
+			
+			$first = mktime(0,0,0,$month,1,$year);
+			$first = new DateTime(date('r', $first));
+			$tsStart = $first->getTimestamp();
+			
+			$last = mktime(23,59,00,$month+1,0,$year);
+			$last = new DateTime(date('r', $last));
+			$tsEnd = $last->getTimestamp();
+			
+			echo '<div onClick="window.location.href=\'' . NJB_HOME_URL . 'index.php?action=viewNew&tsStart=' . $tsStart . '&tsEnd=' . $tsEnd . '&addedOn=' . $key . '\'"' . (($i > $maxItems) ? ' class="no-display stat_bar pointer"' : ' class="stat_bar pointer"') . ' id="incOfDiscs' . $i . '">' . $key . '</div>';
 			$i++;
 			if ($i > $maxItems) $isHidden = true;
 		}
@@ -447,7 +458,7 @@ for ($i=0; $i<$histogram_count; $i++)
 			$last = new DateTime(date('r', $last));
 			$tsEnd = $last->getTimestamp();
 			
-			echo '<div onClick="window.location.href=\'' . NJB_HOME_URL . 'index.php?action=viewNew&tsStart=' . $tsStart . '&tsEnd=' . $tsEnd . '&addedOn=' . $key . '\'" id="incOfDiscsCount' . $i . '"' . (($i > $maxItems) ? ' class="no-display pointer"' : ' class="pointer"') . ' onMouseOver="return overlib(\'See new albums from ' . $key . '\');" onMouseOut="return nd();"><div class="out-statistics"><div style="width: ' . ($value/$max)*100 . 'px;" class="in"></div></div></div>';
+			echo '<div onClick="window.location.href=\'' . NJB_HOME_URL . 'index.php?action=viewNew&tsStart=' . $tsStart . '&tsEnd=' . $tsEnd . '&addedOn=' . $key . '\'" id="incOfDiscsCount' . $i . '"' . (($i > $maxItems) ? ' class="no-display pointer stat_bar"' : ' class="pointer stat_bar"') . ' onMouseOver="return overlib(\'See new albums from ' . $key . '\');" onMouseOut="return nd();"><div class="out-statistics"><div style="width: ' . ($value/$max)*100 . 'px;" class="in"></div></div></div>';
 			$i++;}
 		?>
 		
@@ -456,7 +467,7 @@ for ($i=0; $i<$histogram_count; $i++)
 	<?php 
 		$i = 0;
 		foreach ($histogram as $key => $value) {
-		echo '<div style="text-align: right;" id="incOfDiscsCount' . $i . '"' . (($i > $maxItems) ? ' class="no-display"' : '') . '>' . $value . '</div>';
+		echo '<div style="text-align: right;" id="incOfDiscsCount' . $i . '"' . (($i > $maxItems) ? ' class="no-display stat_bar"' : '  class="stat_bar"') . '>' . $value . '</div>';
 		$i++;
 		}
 		?>

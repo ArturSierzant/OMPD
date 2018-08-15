@@ -566,7 +566,9 @@ function genreNavigator($genre_id) {
 		$nav['url'][]  = '';
 	}
 	if ($genre['genre']) {
-		$nav['name'][] = 'Genre: ' . $genre['genre'];
+		$nav['name'][] = 'Genre';
+		$nav['url'][]  = 'index.php?&action=viewGenre';
+		$nav['name'][] = $genre['genre'];
 		$nav['url'][]  = '';
 	}
 	/* $nav['name'][] = 'Show favorites '  . $genre['genre'] . ' tracks';
@@ -1391,15 +1393,15 @@ function find_all_files($dir){
 //  | Gropuping of multidisc albums                                          |
 //  +------------------------------------------------------------------------+
 
-function albumMultidisc($query){
+function albumMultidisc($query, $rp =''){
 	global $cfg, $db;
 	$album_multidisc = array();
 	$mdTab = array();
-	
+	$i = 0;
 	while ($album = mysqli_fetch_assoc($query)) {		
 		$multidisc_count = 0;
 		if ($album) {
-			if ($cfg['group_multidisc'] == true) {
+			if ($cfg['group_multidisc'] == true && $rp == '') {
 				$md_indicator = striposa($album['album'], $cfg['multidisk_indicator']);
 				if ($md_indicator !== false) {
 					$md_ind_pos = stripos($album['album'], $md_indicator);
@@ -1427,15 +1429,29 @@ function albumMultidisc($query){
 				}
 			}
 			else {			
-				$album_multidisc[$album['album_add_time'] . '_' . $album['album_id']] = array(
-				'album_id' => $album['album_id'],
-				'image_id' => $album['image_id'],
-				'album' => $album['album'],
-				'artist_alphabetic' => $album['artist_alphabetic'],
-				'year' => $album['year'],
-				'genre_id' => $album['genre_id'],
-				'allDiscs' => ''
-				);
+				if ($rp == 'rp') {
+					$album_multidisc[$album['played_time'] . '_' . $album['album_id']] = array(
+						'album_id' => $album['album_id'],
+						'image_id' => $album['image_id'],
+						'album' => $album['album'],
+						'artist_alphabetic' => $album['artist_alphabetic'],
+						'year' => $album['year'],
+						'genre_id' => $album['genre_id'],
+						'allDiscs' => '',
+						'played_time' => $album['played_time']
+						);
+				}
+				else {
+					$album_multidisc[$album['album_add_time'] . '_' . $album['album_id']] = array(
+						'album_id' => $album['album_id'],
+						'image_id' => $album['image_id'],
+						'album' => $album['album'],
+						'artist_alphabetic' => $album['artist_alphabetic'],
+						'year' => $album['year'],
+						'genre_id' => $album['genre_id'],
+						'allDiscs' => ''
+						);
+				}
 			}
 		}
 	}

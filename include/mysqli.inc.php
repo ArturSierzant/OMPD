@@ -162,7 +162,7 @@ function updateDatabase() {
 	if ($cfg['database_version'] < 28 || $cfg['database_version'] > NJB_DATABASE_VERSION) {
 		message(__FILE__, __LINE__, 'error', '[b]MySQL update error[/b][br]'
 			. 'Incremental upgrade is not supported from this database version.'
-			. '[list][*]Delete your old database.[*]On the next start O!MPD automatic creates a new MySQL database and table structure.[/list]');
+			. '[list][*]Delete your old database.[*]On the next start O!MPD automaticly creates a new MySQL database and table structure.[/list]');
 	}
 	else {
 		for ($i = $cfg['database_version'] + 1; $i <= NJB_DATABASE_VERSION; $i++)

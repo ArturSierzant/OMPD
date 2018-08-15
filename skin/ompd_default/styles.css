@@ -428,6 +428,9 @@ a:hover {
   color: #3498db;
   text-decoration: none;
 }
+a.sort_selected {
+  color: #e74c3c;
+}
 /*  +------------------------------------------------------------------------+
     | Table                                                                  |
     +------------------------------------------------------------------------+ */
@@ -968,6 +971,7 @@ div.playlist_status_on_border {
   font-size: 1.5em;
   max-width: 1.9em;
   width: 1.9em;
+  padding-right: 0 !important;
 }
 #favorites,
 #favorites1 {
@@ -989,9 +993,6 @@ tr.header a:visited {
 tr.header a:hover {
   color: #2c3e50;
   text-decoration: none;
-}
-tr.header a.sort_selected {
-  color: #e74c3c;
 }
 tr.header td {
   white-space: nowrap;
@@ -1159,6 +1160,10 @@ table.error tr.line {
     +------------------------------------------------------------------------+ */
 td.bar {
   vertical-align: middle;
+  padding-left: 5px;
+}
+.stat_bar {
+  padding: 3px 2px 3px 2px;
 }
 td.bar_space {
   width: 1px;
@@ -1197,6 +1202,7 @@ tr.year {
 }
 tr.year td {
   border-bottom: dotted 1px #ececec;
+  padding: 7px 5px 7px 0;
 }
 tr.odd_ok {
   height: 3.0769em;
@@ -1752,6 +1758,7 @@ td.small_cover_md {
   width: 4.3em;
   height: 4.3em;
   line-height: 0;
+  padding: 0 !important;
 }
 td.trackNumber {
   padding: 0px 0px 0 0;
@@ -2195,6 +2202,7 @@ h1 {
 /* Main sub sub banner background */
 /* Sub banner background */
 /* Sub sub banner background */
+/* Footer background */
 /* Background of forms */
 /* Separators in subbanner */
 /* fonts */
