@@ -214,6 +214,7 @@ if (count($file) == 0) {
 	<td class="time">Artist</td>
 	<td class="time pl-genre">Genre</td>
 	<td class="time pl-year">Year</td>
+	<td class="pl-tdr">DR</td>
 	<td class="time">Time</td>
 	<td class="iconDel"></td><!-- optional delete -->
 </tr>
@@ -225,11 +226,11 @@ for ($i=0; $i < $listlength; $i++) {
 	//streaming track outside of mpd library	
 	$pos = strpos($file[$i],'track_id=');	
 	if ($pos === false) {
-		$query = mysqli_query($db,'SELECT track.title, track.artist, track.track_artist, track.featuring, track.miliseconds, track.track_id, track.genre, album.genre_id, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, track.album_id, track.number, track.track_id, track.year as trackYear FROM track, album WHERE track.album_id=album.album_id AND track.relative_file = "' . 	mysqli_real_escape_string($db,$file[$i]) . '"');
+		$query = mysqli_query($db,'SELECT track.title, track.artist, track.track_artist, track.featuring, track.miliseconds, track.track_id, track.genre, album.genre_id, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, track.album_id, track.number, track.track_id, track.dr, track.year as trackYear FROM track, album WHERE track.album_id=album.album_id AND track.relative_file = "' . 	mysqli_real_escape_string($db,$file[$i]) . '"');
 	} 
 	else {
 		$t_id = substr($file[$i],$pos + 9, 19);
-		$query = mysqli_query($db,'SELECT track.title, track.artist, track.track_artist, track.featuring, track.miliseconds, track.track_id, track.genre, album.genre_id, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, track.album_id, track.number, track.track_id, track.year as trackYear FROM track, album WHERE track.album_id=album.album_id AND track.track_id = "' . 	mysqli_real_escape_string($db,$t_id) . '"');
+		$query = mysqli_query($db,'SELECT track.title, track.artist, track.track_artist, track.featuring, track.miliseconds, track.track_id, track.genre, album.genre_id, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, track.album_id, track.number, track.track_id, track.dr, track.year as trackYear FROM track, album WHERE track.album_id=album.album_id AND track.track_id = "' . 	mysqli_real_escape_string($db,$t_id) . '"');
 	}
 	$table_track = mysqli_fetch_assoc($query);
 	$playtime[] = (int) $table_track['miliseconds'];
@@ -399,6 +400,18 @@ for ($i=0; $i < $listlength; $i++) {
 	?>
 	<td class="time pl-year">
 	<a href="index.php?action=view2&order=artist&sort=asc&year=<?php echo $year ?>"><?php echo $year ?></a>
+	</td>
+
+	<?php
+	if ($table_track['dr'] === NULL) {
+		$tdr = '-';
+		}
+	 else {
+		$tdr = $table_track['dr'];
+		}
+	?>
+	<td class="time pl-tdr">
+	<?php echo $tdr ?>
 	</td>
 	
 	<td class="time"><?php if (isset($table_track['miliseconds'])) echo formattedTime($table_track['miliseconds']); ?></td>

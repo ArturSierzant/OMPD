@@ -1038,6 +1038,11 @@ div.playlist_status_on_border	{border: solid 1px rgb(77, 144, 254);}
 	max-width: 1.5em;
 	}
 
+.pl-tdr {
+  font-size: 1em;
+  text-align: center;
+}
+
 
 
 
