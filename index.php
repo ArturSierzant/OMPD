@@ -840,7 +840,8 @@ function view2() {
 			$genre = mysqli_fetch_assoc($query);
 			
 			if ($genreAct != $genrePrev){
-				echo '<div class="decade">' . html($genre['genre']) . '</div>';
+				echo '<span class="nav_tree"><a href="index.php?action=view2&order=artist&sort=asc&genre_id=' . $genreAct. '">' . html($genre['genre']) . '</a></span>';
+				//echo '<div class="decade">' . html($genre['genre']) . '</div>';
 			}
 		}
 		draw_tile($size,$album_m,$album_m['allDiscs']);
