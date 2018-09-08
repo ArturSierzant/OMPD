@@ -223,7 +223,7 @@ function album_artist() {
 function track_artist() {
 	global $cfg, $db, $size, $search_string, $group_found, $match_found;
 
-	$query = mysqli_query($db,'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, album.image_id, album.album, album.artist
+	$query = mysqli_query($db,'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, track.dr, album.image_id, album.album, album.artist
 	FROM track
 	INNER JOIN album ON track.album_id = album.album_id
 	WHERE track.artist LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
@@ -259,7 +259,10 @@ function track_artist() {
 		<td>Album&nbsp;</td>
 		<td class="time pl-genre">Genre&nbsp;</td>
 		<td></td>
-		<td align="right" class="time">Time</td>
+		<?php if ($cfg['show_DR']){ ?>
+		<td class="time pl-tdr">DR</td>
+		<?php } ?>
+		<td align="right" class="time time_w">Time</td>
 		<td class="space right"></td>
 	</tr>
 
@@ -268,7 +271,7 @@ function track_artist() {
 	$TA_ids = '';
 	
 	$query = mysqli_query($db,'SELECT * FROM
-	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, album.image_id, album.album, album.artist
+	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist
 	FROM track
 	INNER JOIN album ON track.album_id = album.album_id
 	WHERE track.artist LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
@@ -369,9 +372,19 @@ function track_artist() {
 		<i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
 		</span>
 	</td>
+
+	<?php if ($cfg['show_DR']){ ?>
+	<td class="pl-tdr">
+	<?php
+		$tdr = ($track['dr'] === NULL ? '-' : $track['dr']);
+		echo $tdr;
+	?>
+	</td>
+	<?php } ?>
+
 	
-		<td align="right"><?php echo formattedTime($track['miliseconds']); ?></td>
-		<td></td>
+	<td align="right"><?php echo formattedTime($track['miliseconds']); ?></td>
+	<td></td>
 	</tr>
 
 	<tr class="line">
@@ -519,7 +532,10 @@ function track_title() {
 	<td>Album&nbsp;</td>
 	<td class="time pl-genre">Genre&nbsp;</td>
 	<td></td>
-	<td align="right" class="time">Time</td>
+	<?php if ($cfg['show_DR']){ ?>
+	<td class="time pl-tdr">DR</td>
+	<?php } ?>
+	<td align="right" class="time time_w">Time</td>
 	<td class="space right"></td>
 </tr>
 
@@ -537,7 +553,7 @@ function track_title() {
 	 */
 	 
 	 $query = mysqli_query($db,'SELECT * FROM 
-	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, album.image_id, album.album, album.artist 
+	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist 
 	FROM track
 	INNER JOIN album ON track.album_id = album.album_id
 	WHERE track.title LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%") as a
@@ -624,6 +640,15 @@ function track_title() {
 		<i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
 		</span>
 	</td>
+	
+	<?php if ($cfg['show_DR']){ ?>
+	<td class="pl-tdr">
+	<?php
+		$tdr = ($track['dr'] === NULL ? '-' : $track['dr']);
+		echo $tdr;
+	?>
+	</td>
+	<?php } ?>
 	
 	<td align="right"><?php echo formattedTime($track['miliseconds']); ?></td>
 	<td></td>
@@ -721,7 +746,10 @@ function fav4genre($genre) {
 	<td>Album&nbsp;</td>
 	<td class="time pl-genre">Genre&nbsp;</td>
 	<td></td>
-	<td align="right" class="time">Time</td>
+	<?php if ($cfg['show_DR']){ ?>
+	<td class="time pl-tdr">DR</td>
+	<?php } ?>
+	<td align="right" class="time time_w">Time</td>
 	<td class="space right"></td>
 </tr>
 
@@ -730,7 +758,7 @@ function fav4genre($genre) {
 	$TT_ids = ''; 
 	
 	$query = mysqli_query($db,'SELECT * FROM 
-	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, album.image_id, album.album, album.artist 
+	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist 
 	FROM track
 	LEFT JOIN album ON track.album_id = album.album_id
 	LEFT JOIN favoriteitem on track.track_id = favoriteitem.track_id
@@ -818,6 +846,15 @@ function fav4genre($genre) {
 		<i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
 		</span>
 	</td>
+	
+	<?php if ($cfg['show_DR']){ ?>
+	<td class="pl-tdr">
+	<?php
+		$tdr = ($track['dr'] === NULL ? '-' : $track['dr']);
+		echo $tdr;
+	?>
+	</td>
+	<?php } ?>
 	
 	<td align="right"><?php echo formattedTime($track['miliseconds']); ?></td>
 	<td></td>

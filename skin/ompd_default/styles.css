@@ -976,6 +976,8 @@ div.playlist_status_on_border {
 .pl-tdr {
   font-size: 1em;
   text-align: center;
+  width: 2em;
+  max-width: 2em;
 }
 #favorites,
 #favorites1 {
@@ -1756,6 +1758,10 @@ img.mpd_img {
 td.time {
   /* padding-left: 0.4em; */
   padding: 2px 2px 2px 5px;
+}
+td.time_w {
+  width: 3em;
+  max-width: 3em;
 }
 td.small_cover,
 td.small_cover_md {

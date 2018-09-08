@@ -108,8 +108,10 @@ for ($disc; $disc <= $max_disc; $disc++) {
 				<td class="textspace track-list-artist"></td>
 				<td class="time pl-genre"><?php if ($showGenre) echo'Genre'; ?></td>
 				<td></td>
-				<td align="right" class="time pl-tdr">DR</td>
-				<td align="right" class="time">Time</td>
+				<?php if ($cfg['show_DR']){ ?>
+				<td class="time pl-tdr">DR</td>
+				<?php } ?>
+				<td align="right" class="time time_w">Time</td>
 				<td class="space right"><div class="space"></div></td>
 			</tr>
 		<?php
@@ -191,13 +193,14 @@ for ($disc; $disc <= $max_disc; $disc++) {
 					<i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
 					</span>
 				</td>
-				
+				<?php if ($cfg['show_DR']){ ?>
 				<td class="pl-tdr">
 				<?php
-					$tdr = $track['dr'];
+					$tdr = ($track['dr'] === NULL ? '-' : $track['dr']);
 					echo $tdr;
 				?>
 				</td>
+				<?php } ?>
 
 				<td align="right"><?php echo formattedTime($track['miliseconds']); ?></td>
 				<td></td>

@@ -164,6 +164,7 @@ function about() {
 	<td>
 	<ul style="padding-left: 1em;">
 	<li> added 'Show favorite tracks' for selected genre</li>
+	<li> added info about Track Dynamic Range in track lists (settable in config.inc.php)</li>
 	<li> fixed bugs</li>
 	</ul>
 	<br>

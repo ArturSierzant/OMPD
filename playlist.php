@@ -214,7 +214,9 @@ if (count($file) == 0) {
 	<td class="time">Artist</td>
 	<td class="time pl-genre">Genre</td>
 	<td class="time pl-year">Year</td>
+	<?php if ($cfg['show_DR']){ ?>
 	<td class="pl-tdr">DR</td>
+	<?php } ?>
 	<td class="time">Time</td>
 	<td class="iconDel"></td><!-- optional delete -->
 </tr>
@@ -402,17 +404,13 @@ for ($i=0; $i < $listlength; $i++) {
 	<a href="index.php?action=view2&order=artist&sort=asc&year=<?php echo $year ?>"><?php echo $year ?></a>
 	</td>
 
-	<?php
-	if ($table_track['dr'] === NULL) {
-		$tdr = '-';
-		}
-	 else {
-		$tdr = $table_track['dr'];
-		}
+	<?php if ($cfg['show_DR']){ 
+	$tdr = ($table_track['dr'] === NULL ? '-' : $table_track['dr']);
 	?>
 	<td class="time pl-tdr">
 	<?php echo $tdr ?>
 	</td>
+	<?php } ?>
 	
 	<td class="time"><?php if (isset($table_track['miliseconds'])) echo formattedTime($table_track['miliseconds']); ?></td>
 

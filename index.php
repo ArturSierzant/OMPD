@@ -902,7 +902,10 @@ if ($filter == 'whole' && !$genre_id && !$year && !$isVA) {
 	<td>Album&nbsp;</td>
 	<td class="time pl-genre">Genre&nbsp;</td>
 	<td class="icon"></td><!-- star -->
-	<td align="right" class="time">Time</td>
+	<?php if ($cfg['show_DR']){ ?>
+	<td class="time pl-tdr">DR</td>
+	<?php } ?>
+	<td align="right" class="time time_w">Time</td>
 	<td class="space right"></td>
 </tr>
 
@@ -912,7 +915,7 @@ if ($filter == 'whole' && !$genre_id && !$year && !$isVA) {
 	$search_string = get('artist');
 	
 	$queryTA = mysqli_query($db,'SELECT * FROM
-	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, album.image_id, album.album, album.artist
+	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist
 	FROM track
 	INNER JOIN album ON track.album_id = album.album_id '
 	. $filter_queryTA .
@@ -1004,6 +1007,15 @@ if ($filter == 'whole' && !$genre_id && !$year && !$isVA) {
 		<i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
 		</span>
 	</td>
+	
+	<?php if ($cfg['show_DR']){ ?>
+	<td class="pl-tdr">
+	<?php
+		$tdr = ($track['dr'] === NULL ? '-' : $track['dr']);
+		echo $tdr;
+	?>
+	</td>
+	<?php } ?>
 	
 	<td align="right"><?php echo formattedTime($track['miliseconds']); ?></td>
 	<td></td>
@@ -1109,7 +1121,10 @@ if ($filter == 'whole' && !$genre_id && !$year && !$isVA) {
 	<td>Album&nbsp;</td>
 	<td class="time pl-genre">Genre&nbsp;</td>
 	<td class="icon"></td><!-- star -->
-	<td align="right" class="time">Time</td>
+	<?php if ($cfg['show_DR']){ ?>
+	<td class="time pl-tdr">DR</td>
+	<?php } ?>
+	<td align="right" class="time time_w">Time</td>
 	<td class="space right"></td>
 </tr>
 
@@ -1118,7 +1133,7 @@ if ($filter == 'whole' && !$genre_id && !$year && !$isVA) {
 	$FAV_ids = '';
 	$search_string = get('artist');
 	$filter_query = str_replace('artist ','track.artist ',$filter_query);
-	$queryFav = mysqli_query($db, 'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.relative_file, track.miliseconds, track.number, track.genre, favoriteitem.favorite_id, album.album
+	$queryFav = mysqli_query($db, 'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.relative_file, track.miliseconds, track.number, track.genre, track.dr, favoriteitem.favorite_id, album.album
 		FROM track
 		INNER JOIN favoriteitem ON track.track_id = favoriteitem.track_id 
 		LEFT JOIN album ON track.album_id = album.album_id '
@@ -1200,6 +1215,15 @@ if ($filter == 'whole' && !$genre_id && !$year && !$isVA) {
 		<i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>_fav"></i>
 		</span>
 	</td>
+	
+	<?php if ($cfg['show_DR']){ ?>
+	<td class="pl-tdr">
+	<?php
+		$tdr = ($track['dr'] === NULL ? '-' : $track['dr']);
+		echo $tdr;
+	?>
+	</td>
+	<?php } ?>
 	
 	<td align="right"><?php echo formattedTime($track['miliseconds']); ?></td>
 	<td></td>
@@ -2169,6 +2193,9 @@ function view3all() {
 	<td><a <?php echo ($order_bitmap_album == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $url; ?>&amp;order=album&amp;sort=<?php echo $sort_album; ?>">Album&nbsp;<?php echo $order_bitmap_album; ?></a></td>
 	<td class="time pl-genre">Genre&nbsp;</td>
 	<td></td>
+	<?php if ($cfg['show_DR']){ ?>
+	<td class="time pl-tdr">DR</td>
+	<?php } ?>
 	<td align="right" class="time">Time</td>
 	<td class="space right"></td>
 </tr>
@@ -2179,7 +2206,7 @@ function view3all() {
 	//$query = mysqli_query($db, 'SELECT track.artist, track.title, track.number, track.featuring, track.album_id, track.track_id, track.miliseconds, track.relative_file, album.image_id, album.album FROM track, album ' . $filter_query . ' ' . $order_query);
 	
 	$q = 'SELECT * FROM
-	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, album.image_id, album.album, album.artist
+	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist
 	FROM track
 	INNER JOIN album ON track.album_id = album.album_id '
 	. $filter_query . ' ' . $order_query .') as a
@@ -2270,6 +2297,15 @@ function view3all() {
 		<i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
 		</span>
 	</td>
+	
+	<?php if ($cfg['show_DR']){ ?>
+	<td class="pl-tdr">
+	<?php
+		$tdr = ($track['dr'] === NULL ? '-' : $track['dr']);
+		echo $tdr;
+	?>
+	</td>
+	<?php } ?>
 	
 	<td align="right"><?php echo formattedTime($track['miliseconds']); ?></td>
 	<td></td>
