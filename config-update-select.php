@@ -144,7 +144,7 @@ function updateSelect() {
 	<td>&nbsp;</td>
 	<td>
 		<div class="buttons">
-		<span id="updateAll" onmouseover="return overlib('Update this dir');" onmouseout="return nd();">&nbsp;<i class="fa fa-refresh fa-fw"></i> Update all</span>
+		<span id="updateAll" onmouseover="return overlib('Update all');" onmouseout="return nd();">&nbsp;<i class="fa fa-refresh fa-fw"></i> Update all</span>
 		</div>
 		<div id="errorMessage"></div>	
 	</td>

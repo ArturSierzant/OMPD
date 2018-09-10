@@ -1,7 +1,7 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2018 Artur Sierzant	                           |
-//  | http://www.ompd.pl                                             		     |
+//  | O!MPD, Copyright © 2015-2018 Artur Sierzant                            |
+//  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
 //  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
@@ -48,6 +48,7 @@ $cfg['force_filename_update'] = false;
 $action = getpost('action');
 $dir_to_update = getpost('dir_to_update');
 cliLog('dir_to_update from URL: ' . $dir_to_update);
+
 if (!isset($dir_to_update)) {
 	$dir_to_update = '';
 }
@@ -646,6 +647,8 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	$isUpdateRequired	= false;
     $new_array          = array();
 	
+	cliLog('force_filename_update: ' . var_export($cfg['force_filename_update'],true));
+	
 	if ($cfg['name_source'] != 'tags') {
 		if (preg_match('#^(0{0,1}1)(0{1,3}1)+\.\s+.+#', $filename[0], $match) && preg_match('#^(\d{' . strlen($match[1] . $match[2]) . '})+\.\s+.+#', $filename[count($filename)-1])) {
 			// Multi disc
@@ -692,8 +695,8 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	}
 
 	
-	//dir modified: files or dirs added
-	if (filemtime(dirname($file[0])) > $last_update) {
+	//dir modified: files or dirs added or forceUpdate
+	if (filemtime(dirname($file[0])) > $last_update || $cfg['force_filename_update']) {
 		$isUpdateRequired = true;
 	}
 	else {
