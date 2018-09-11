@@ -76,7 +76,7 @@ function home() {
 </div>
 <?php }
 	?>
-<table cellspacing="0" cellpadding="0" class="border">
+<table cellspacing="0" cellpadding="0" class="border tabFixed break-word">
 <tr class="header">
 	
 	<td class="icon"></td><!-- optional play -->

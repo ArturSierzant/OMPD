@@ -1123,7 +1123,7 @@ function fileInfoLoop($rel_file = '') {
     while($continue === TRUE) {
         cliLog("processing batch LIMIT  " . $curFilesCounter . ",". $batchSize);
         $query = "
-            SELECT relative_file, filesize, filemtime, album_id
+            SELECT relative_file, filesize, filemtime, album_id, track_id
             FROM track
             WHERE updated
             ORDER BY relative_file
@@ -1137,6 +1137,7 @@ function fileInfoLoop($rel_file = '') {
             ORDER BY relative_file
             LIMIT " . $curFilesCounter . "," . $batchSize . ";";
 		}
+		
         $result = $db->query($query);
         while($track = $result->fetch_assoc()) {
             $curFilesCounter++;
@@ -1227,13 +1228,14 @@ function fileInfo($track, $getID3 = NULL) {
 				cliLog(parseAudioDynamicRange($metaData)); */
 				
 				//prevent changing track_id if already set to avoid deleting from favorites
+				cliLog('track_id old:' . $track['track_id']);
 				if (strpos($track['track_id'],'_') === false) {
 					$track_id = $db->real_escape_string($track['album_id'] . '_' . fileId($file));
 				}
 				else {
 					$track_id = $track['track_id'];
 				}
-				cliLog($track_id);
+				cliLog('track_id new:' . $track_id);
 				
         // TODO: does it make sense to populate artist and track_artist with the same value?
         $query = 'UPDATE track SET
