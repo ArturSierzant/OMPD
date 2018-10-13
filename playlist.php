@@ -107,6 +107,14 @@ if (count($file) == 0) {
 	<div class="pl-fld-name">track title</div>
 	<div class="pl-track-artist"><span id="artist">&nbsp;</span></div>
 	<div class="pl-fld-name">track artist</div>
+	<?php 
+	if($cfg['show_composer']) {
+	?>
+	<div class="pl-track-artist"><span id="composer">&nbsp;</span></div>
+	<div class="pl-fld-name" id="composer_label">track composer</div>
+	<?php 
+	}
+	?>
 	<div class="pl-track-artist"><span id="album">&nbsp;</span></div>
 	<div class="pl-fld-name">album</div>
 	<div class="pl-track-artist"><span id="genre">&nbsp;</span></div>
@@ -874,6 +882,15 @@ function evaluateTrack(data) {
 	s = s % 60;
 	if (s < 10) s = '0' +  s;
 	
+	<?php 
+	if ($cfg['show_composer']) {
+		echo 'var show_composer = true;';
+	}
+	else {
+		echo 'var show_composer = false;';
+	}
+	
+	?>
 	
 	document.getElementById('tracktime').innerHTML = m + ':' + s;
 	artist = '';
@@ -900,6 +917,39 @@ function evaluateTrack(data) {
 	}
 	
 	document.getElementById('artist1').innerHTML = (data.track_artist[0] == '&nbsp;') ? '&nbsp;' : 'by ' + artist;
+	
+	composer = '';
+	if (show_composer) { 
+		if ($.isArray(data.track_composer)) {
+			l = data.track_composer.length;
+			if (l>1) {
+				for (i=0; i<l; i++) {
+					composer = composer + '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_composer_url[i]) + '">' + data.track_composer[i] + '</a>';
+					if (i!=l-1) {
+						var delimiter = data.track_composer_all.match(data.track_composer_url[i] + "(.*)" + data.track_composer_url[i+1]);
+						if (testing == 'on') {
+							delimiter[1] = delimiter[1].replace(';','&');
+						}
+						composer = composer + '<a href="index.php?action=view2&order=artist&sort=asc&artist=' + data.track_composer_url_all + '"><span class="artist_all">' + delimiter[1] + '</span></a>';
+					}
+				}
+			} 
+			else if (l>0) {
+				composer = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_composer_url[0]) + '">' + data.track_composer[0] + '</a>';
+			}
+		}
+		else {
+			composer = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + data.track_composer_url_all + '">' + data.track_composer + '</a>';
+		}
+		$('#composer').show();
+		$('#composer_label').show();
+		document.getElementById('artist1').innerHTML = (data.track_composer == '') ? document.getElementById('artist1').innerHTML : document.getElementById('artist1').innerHTML + ' (' + composer + ')';
+		document.getElementById('composer').innerHTML = composer; 
+		if (data.track_composer == '') {
+			document.getElementById('composer').innerHTML = '-'; 
+		}
+	}
+
 	document.getElementById('artist').innerHTML = artist; 
 	document.getElementById('track_number1').innerHTML = document.getElementById('track_number').innerHTML = data.number;
 	document.getElementById('title1').innerHTML = document.getElementById('title').innerHTML =  data.title;
@@ -945,7 +995,8 @@ function evaluateTrack(data) {
 	}
 	else if(data.genre_id == '-1') document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = data.genre;
 	else document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = '&nbsp;';
-	
+		console.log ('data.genres=' + data.genre);
+
 	//var rel_file = encodeURIComponent(data.relative_file);
 	var rel_file = encodeURIComponent(data.relative_file);
 	//console.log ("rel_file=" + rel_file);

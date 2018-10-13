@@ -663,8 +663,10 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 <div class="playlist_indicator">
 	<div class="buttons">
 		<span class="pointer" onClick="ajaxRequest('play.php?action=volumeImageMap&amp;dx=' + $('#volumeValue').width() + '&amp;x=' + ($('#volumeBar').width() -($('#volumeValue').width() * 0.05)) + '&amp;menu=playlist', evaluateVolume);"><i class="fa fa-volume-down fa-lg fa-fw"></i></span>
-		<div id="volumeValue" class="out pointer" onClick="ajaxRequest('play.php?action=volumeImageMap&amp;dx=' + this.clientWidth + '&amp;x=' + getRelativeX(event, this) + '&amp;menu=playlist', evaluateVolume);">
+		<div id="volumeValueWrapper" onClick="ajaxRequest('play.php?action=volumeImageMap&amp;dx=' + this.clientWidth + '&amp;x=' + getRelativeX(event, this) + '&amp;menu=playlist', evaluateVolume);">
+		<div id="volumeValue" class="out pointer">
 			<div id="volumeBar" style="width: 0px; overflow: hidden;" class="in"></div>
+		</div>
 		</div>
 		<span class="playlist_status_off" id="volume" style="text-align: left; padding-left: 1px; display: none; align: middle;"></span>
 		<span class="pointer" onClick="ajaxRequest('play.php?action=volumeImageMap&amp;dx=' + $('#volumeValue').width() + '&amp;x=' + ($('#volumeBar').width() +($('#volumeValue').width() * 0.05)) + '&amp;menu=playlist', evaluateVolume);"><i class="fa fa-volume-up fa-lg fa-fw"></i></span>
@@ -690,7 +692,7 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 
 
 <span id="menuMiddleMedia">
-<span id="list" onclick='toggleSubMiddle("Alpha");'>artist <i id="iconmenuSubMiddleMediaAlpha" class="fa fa-chevron-circle-down"></i></span>
+<span id="list" onclick='toggleSubMiddle("Alpha");'>people <i id="iconmenuSubMiddleMediaAlpha" class="fa fa-chevron-circle-down"></i></span>
 
 <?php echo $header['seperation']; ?>
 <!-- <span id="genre" onclick='toggleSubMiddle("Genre");'>genre <i id="iconmenuSubMiddleMediaGenre" class="fa fa-chevron-circle-down"></i></span>
@@ -733,17 +735,20 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 <div id="menuSubMiddleMediaAlpha">
 	<?php
 	$header['menu'] = 'Artist<br><a href="index.php?action=view1&amp;filter=all&amp;order=artist"><span>all</span></a>';
-	//ArtS
 	$header['menu'] .= "\t" . '<a href="index.php?action=view1&amp;filter=symbol&amp;artist=&amp;order=artist"><span>#</span></a>';
 	for ($i = 'a'; $i != 'aa'; $i++)
 		  $header['menu'] .= "\t" . '<a href="index.php?action=view1&amp;filter=start&amp;artist='. $i .'&amp;order=artist"><span>' . $i . '</span></a>';
 	
 	$header['menu'] .= '<br>Album artist<br><a href="index.php?action=view2&amp;filter=all&amp;order=artist"><span>all</span></a>';
-	//ArtS
 	$header['menu'] .= "\t" . '<a href="index.php?action=view2&amp;filter=symbol&amp;artist=%23&amp;order=artist"><span>#</span></a>';
 	for ($i = 'a'; $i != 'aa'; $i++)
 		  $header['menu'] .= "\t" . '<a href="index.php?action=view2&amp;filter=start&amp;artist='. $i .'&amp;order=artist"><span>' . $i . '</span></a>';
 	$header['menu'] .= "\t"  . '<a href="index.php?action=view2&amp;artist=Various%20Artists&amp;filter=exact&amp;order=album"><span>VA</span></a>';
+	
+	$header['menu'] .= '<br>Composer<br><a href="index.php?action=viewComposer&amp;filter=all&amp;order=composer"><span>all</span></a>';
+	$header['menu'] .= "\t" . '<a href="index.php?action=viewComposer&amp;filter=symbol&amp;order=composer"><span>#</span></a>';
+	for ($i = 'a'; $i != 'aa'; $i++)
+		  $header['menu'] .= "\t" . '<a href="index.php?action=viewComposer&amp;filter=start&amp;composer='. $i .'&amp;order=composer"><span>' . $i . '</span></a>';
 	echo $header['menu'];
 	?>
 </div>

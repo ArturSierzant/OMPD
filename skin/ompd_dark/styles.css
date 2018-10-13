@@ -149,8 +149,11 @@ i:active {
   #searchFormAll input {
     height: 2.5em;
   }
-  #volumeValue {
+  #volumeValueWrapper {
     width: 70%;
+  }
+  #volumeValue {
+    width: 100%;
   }
   #favoriteTableFirstCol {
     min-width: 8em;
@@ -255,7 +258,8 @@ i:active {
   #searchFormAll input {
     height: 2em;
   }
-  #volumeValue {
+  #volumeValue,
+  #volumeValueWrapper {
     width: 450px;
   }
   #favoriteTableFirstCol {
@@ -592,8 +596,12 @@ td.menu_bottom_right {
 #volumeValue {
   display: inline-block;
   position: relative;
-  /* top: -0.5em; */
+}
+#volumeValueWrapper {
+  display: inline-block;
+  position: relative;
   margin: 0 5px;
+  height: 100%;
 }
 #volumeArea {
   padding: 5px;
@@ -763,9 +771,11 @@ td.menu_bottom_right {
   border: 1px solid #fdf6e3;
   display: inline-block;
   padding: 0 5px !important;
+  /* padding: 1px 2px !important; */
   margin: 0 0.3em;
   text-align: center;
   white-space: nowrap;
+  line-height: 1.2em;
 }
 #fixedMenu {
   background: inherit;
@@ -962,7 +972,7 @@ div.playlist_status_on_border {
 }
 .pl-track-favorites {
   font-size: 1.4em;
-  padding-top: 0.769em;
+  padding-top: 0.5em;
   color: #fdf6e3;
 }
 .pl-favorites {
@@ -1027,6 +1037,9 @@ tr.header_bigger {
 }
 tr.header td.icon span i {
   font-size: 2em;
+}
+tr.header td.padding3 {
+  padding-left: 3px;
 }
 tr.footer a:link {
   color: #bdbdbd;
@@ -1765,8 +1778,8 @@ td.time_w {
 }
 td.small_cover,
 td.small_cover_md {
-  width: 4.3em;
-  height: 4.3em;
+  width: 4em;
+  height: 4em;
   line-height: 0;
   padding: 0 !important;
 }
@@ -1833,6 +1846,7 @@ td.play-indicator {
   color: #fdf6e3;
   display: table-cell;
   vertical-align: middle;
+  padding-right: 5px;
 }
 .quick-play {
   font-size: 3.5em;
@@ -2057,6 +2071,7 @@ h1 {
 }
 .break-word {
   word-wrap: break-word;
+  white-space: normal !important;
 }
 .break-all {
   word-break: break-all;

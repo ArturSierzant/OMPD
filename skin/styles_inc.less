@@ -114,8 +114,12 @@ i:active {
 		height: 2.5em;
 	}
 	
-	#volumeValue {
+	#volumeValueWrapper {
 		width: 70%;
+	}
+	
+	#volumeValue{
+		width: 100%;
 	}
 	
 	#favoriteTableFirstCol {
@@ -199,7 +203,7 @@ i:active {
 		height: 2em;
 	}
 	
-	#volumeValue {
+	#volumeValue, #volumeValueWrapper {
 		width: 450px;
 	}
 	
@@ -538,9 +542,18 @@ td.menu_bottom_right			{width: 0.769em;}
 #volumeValue {
 	display:inline-block;
 	position: relative;
-	/* top: -0.5em; */
+}
+
+#volumeBar {
+	background: (@volume-bar);
+}
+	
+#volumeValueWrapper {
+	display:inline-block;
+	position: relative;
 	margin: 0 5px;
-	}
+	height: 100%;
+}
 
 #volumeArea {
 	padding: 5px;
@@ -715,9 +728,11 @@ td.menu_bottom_right			{width: 0.769em;}
 	border: 1px solid (@font-active);
 	display: inline-block;
 	padding: 0 5px !important;
+	/* padding: 1px 2px !important; */
     margin: 0 0.3em;
 	text-align: center;
 	white-space: nowrap;
+	line-height: 1.2em;
 }
 
 #fixedMenu {
@@ -916,7 +931,7 @@ div.playlist_status_on_border	{border: solid 1px (@font-banner);}
 
 .pl-track-favorites {
 	font-size: 1.4em;
-	padding-top: 0.769em;
+	padding-top: 0.5em;
 	color: (@font-active);
 }
 
@@ -984,6 +999,10 @@ tr.header_bigger {
 
 tr.header td.icon  span i {
 	font-size: 2em;
+}
+
+tr.header td.padding3 {
+	padding-left: 3px;
 }
 
 tr.footer a:link				{color: (@font-first);}
@@ -1851,8 +1870,8 @@ td.time_w {
 
 td.small_cover,
 td.small_cover_md {
-	width: 4.3em;
-	height: 4.3em;
+	width: 4em;
+	height: 4em;
 	line-height: 0;
 	padding: 0 !important;
 	}
@@ -1930,6 +1949,7 @@ td.play-indicator {
 			color: (@font-active);
 			display: table-cell;
 			vertical-align: middle;
+			padding-right: 5px;
 }
 			
 .quick-play {
@@ -2183,6 +2203,7 @@ h1 {
 
 .break-word {
 	word-wrap: break-word;
+	white-space: normal !important;
 }
 
 .break-all {
@@ -2227,7 +2248,7 @@ h1 {
 
 #discBrowser {
 	overflow: hidden;
-  white-space:nowrap;
+	white-space:nowrap;
 	text-align: left;
 	display: none;
 	padding-bottom: 5px;
@@ -2238,9 +2259,9 @@ h1 {
 	width: 4em;
 	height: 4em;
 	display: inline-block;
-  vertical-align:top;
-  margin:0 3px 3px 0;
-  white-space:normal;
+	vertical-align:top;
+	margin:0 3px 3px 0;
+	white-space:normal;
 	cursor: pointer;
 	vertical-align: top;
 }

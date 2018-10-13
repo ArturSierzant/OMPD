@@ -330,6 +330,7 @@ CREATE TABLE IF NOT EXISTS `track` (
   `comment` text NULL,
   `year` smallint(4) unsigned DEFAULT NULL,
   `dr` tinyint(3) unsigned  DEFAULT NULL,
+  `composer` VARCHAR(333) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
   KEY `artist` (`artist`(333)),
   KEY `title` (`title`(333)),
   KEY `relative_file` (`relative_file`(255)),
@@ -668,7 +669,7 @@ INSERT INTO `user` VALUES ('anonymous', 'adf8efe68157cf37503f86d602bec6d593750c3
 -- Default server
 --
 
-INSERT INTO `server` VALUES ('database_version', '42');
+INSERT INTO `server` VALUES ('database_version', '44');
 INSERT INTO `server` VALUES ('escape_char_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('getid3_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('image_quality', '0');

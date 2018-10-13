@@ -1729,7 +1729,7 @@ function playlistTrack() {
 	
 	if ($track_id !='') {
  	
-		$query = mysqli_query($db,'SELECT track.artist, album.artist AS album_artist, title, featuring, miliseconds, relative_file, album, album.image_id, album.album_id, track.genre, track.audio_bitrate, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, album.genre_id, track.audio_profile, track.track_artist, album.year as year, track.number, track.comment, track.track_id, track.year as trackYear, track.dr, album.album_dr
+		$query = mysqli_query($db,'SELECT track.artist, track.composer as track_composer, album.artist AS album_artist, title, featuring, miliseconds, relative_file, album, album.image_id, album.album_id, track.genre, track.audio_bitrate, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, album.genre_id, track.audio_profile, track.track_artist, album.year as year, track.number, track.comment, track.track_id, track.year as trackYear, track.dr, album.album_dr
 			FROM track, album 
 			WHERE track.album_id = album.album_id
 			AND track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
@@ -1742,6 +1742,11 @@ function playlistTrack() {
 		$title = $track['title'];
 		
 		$exploded = multiexplode($cfg['artist_separator'],$track['track_artist']);
+		
+		if ($cfg['testing'] == 'on' && !in_array(', ',$cfg['artist_separator'])) {
+			$cfg['artist_separator'][] = ', ';
+		}
+		$explodedComposer = multiexplode($cfg['artist_separator'],$track['track_composer']);
 		
 		$inFavorite = false;
 		if (isset($cfg['favorite_id'])) {
@@ -1763,6 +1768,10 @@ function playlistTrack() {
 		$data['track_artist_all']	= $track['track_artist'];
 		$data['track_artist_url']	= $exploded;
 		$data['track_artist_url_all']	= (string) rawurlencode($track['track_artist']);
+		$data['track_composer']	= $explodedComposer;
+		$data['track_composer_all']	= $track['track_composer'];
+		$data['track_composer_url']	= $explodedComposer;
+		$data['track_composer_url_all']	= (string) rawurlencode($track['track_composer']);
 		$data['title']		= (string) $track['title'];
 		$data['album']		= (string) $track['album'];
 		//$data['album']		= (string) $title;
@@ -1880,6 +1889,10 @@ function playlistTrack() {
 		$data['track_artist_url']	= $exploded;
 		$data['track_artist_url_all']	= (string) rawurlencode($currentsong['Artist']);
 		$data['track_artist_all']	= (string) ($currentsong['Artist']);
+		$data['track_composer']	= '';
+		$data['track_composer_all']	= '';
+		$data['track_composer_url']	= '';
+		$data['track_composer_url_all']	='';
 		$data['title'] = (string) $title;
 		$data['album']		= (string) $album;
 		$data['by']			= (string) '';
@@ -1887,6 +1900,7 @@ function playlistTrack() {
 		$data['album_id']	= (string) '';
 		$data['year']	= postProcessYear($currentsong['Date']);
 		$data['genre']	= (string) trim($currentsong['Genre']);
+		if (empty($data['genre'])) $data['genre'] = '&nbsp;';
 		$query = mysqli_query($db,'SELECT genre, genre_id FROM genre WHERE genre = "' . $data['genre'] . '" LIMIT 1');
 		if (mysqli_num_rows($query) > 0) {
 			$genre = mysqli_fetch_assoc($query);

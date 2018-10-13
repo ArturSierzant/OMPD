@@ -270,6 +270,14 @@ function parseComment($data) {
     return '';
 }
 
+function parseComposer($data) {
+    if (isset($data['comments']['composer'][0])) {
+        return $data['comments']['composer'][0];
+    }
+    return '';
+}
+
+
 // TODO: this function is currently not used but removed from old fileInfo() code-mess
 // consider to make use of it within fileStructure() or whereelse needed
 function parseAlbumArtist($data) {

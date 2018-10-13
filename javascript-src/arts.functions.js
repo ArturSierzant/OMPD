@@ -1070,3 +1070,15 @@ function doPlayAction(action, filepath, track_id, playAfterInsert, doFunction) {
 			}	
 		});
 };
+
+
+function setAnchorClick() {
+	$('a').click(function(){
+		$(this).find('> i[id^="play_"]').removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
+		$(this).find('> i[id^="add_"]').removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
+		$(this).find('> i[id^="insertPlay_"]').removeClass('fa-play-circle').addClass('fa-cog fa-spin icon-selected');
+		$(this).find('> i[id^="insert_"]').removeClass('fa-indent').addClass('fa-cog fa-spin icon-selected');
+		$(this).find('> i[id^="playTo_"]').removeClass('fa-share-square-o').addClass('fa-cog fa-spin icon-selected');
+		$(this).find('> i[id^="randomPlay"]').removeClass('fa-random').addClass('fa-cog fa-spin icon-selected');
+	})
+};

@@ -661,6 +661,13 @@ td.menu_bottom_right			{width: 0.769em;}
 	color: #eee;
 }
 
+#volumeValueWrapper {
+  display: inline-block;
+  position: relative;
+  margin: 0 5px;
+  height: 100%;
+}
+
 #selectPlayer > span, #playlistAction > span {
 	cursor: pointer;
 	/* color: #4D90FE; */

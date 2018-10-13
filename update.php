@@ -306,18 +306,6 @@ function update($dir_to_update = '') {
 		}
 		
 		
-		//mysqli_query($db,'TRUNCATE album_id');
-		
-		//mysqli_query($db,'UPDATE genre SET updated = 0 WHERE genre <> ""');
-		/* $query = mysqli_query($db,'SELECT MAX(CAST(genre_id AS UNSIGNED)) AS last_genre_id FROM genre');
-		$rsGenre = mysqli_fetch_assoc($query);
-		if ($rsGenre['last_genre_id'] > 0) {
-			$lastGenre_id = ($rsGenre['last_genre_id'] + 1);
-			}
-		else {
-			$lastGenre_id = 1;
-		} */
-		
 		$cfg['timer'] = 0; // force update
 	
 		//recursiveScanCount_add2table($cfg['media_dir']);
@@ -328,6 +316,7 @@ function update($dir_to_update = '') {
 		if ($dir_to_update != '') {
 			$dir_to_scan = $dir_to_update;
 		}
+		$mediaDirs = array();
 		countDirectories($dir_to_scan);
 		
 		
@@ -585,6 +574,39 @@ function recursiveScan($dir) {
 //  | Recursive scan - count directories                                     |
 //  +------------------------------------------------------------------------+
 
+function countDirectories_($dir) {
+	global $mediaDirs, $cfg, $db, $dirsCounter;
+	cliLog('countDirectories for ' . $base_dir);
+	
+	$dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir);
+	$dir = str_replace('[','\[',$dir);
+	$dir = str_replace(']','\]',$dir);
+	
+	$tree = glob(rtrim($dir, '/') . '/*' );
+    
+    if (is_array($tree)) {
+        foreach($tree as $file) {
+            if (is_dir($file)) {
+				countDirectories($file);
+            } elseif (is_file($file)) {
+				$extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+				if (in_array($extension, $cfg['media_extension'])) {
+					if (!in_array($dir,$mediaDirs)){
+						$mediaDirs[] = $dir;
+						$dirsCounter++;
+						mysqli_query($db,"UPDATE update_progress SET 
+				structure_image = 'Counting media directories: " . $dirsCounter . "'");
+					}
+					else {
+						continue;
+					}
+				}
+            }
+        }
+    }
+	return $mediaDirs;
+}
+
 function countDirectories($base_dir) {
 	global $cfg, $db, $dirsCounter, $filesCounter, $isMediaDir;
 	$isMediaDir = 0;
@@ -600,9 +622,11 @@ function countDirectories($base_dir) {
 		$entries = @scandir($base_dir) or message(__FILE__, __LINE__, 'error', '[b]Failed to open directory:[/b][br]' . $base_dir . '[list][*]Check media_dir value in the config.inc.php file[*]Check file permission[/list]');
 	}
 	$directories = array();
-	foreach(scandir($base_dir) as $file) {
-		$extension = substr(strrchr($file, '.'), 1);
-		$extension = strtolower($extension);
+	//foreach(scandir($base_dir) as $file) {
+	foreach($entries as $file) {
+		/* $extension = substr(strrchr($file, '.'), 1);
+		$extension = strtolower($extension); */
+		$extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
 		if (in_array($extension, $cfg['media_extension'])) $isMediaDir = 1;
 		$dir = $base_dir.DIRECTORY_SEPARATOR.$file;
 		if (substr($base_dir,-1) == DIRECTORY_SEPARATOR){
@@ -1267,7 +1291,8 @@ function fileInfo($track, $getID3 = NULL) {
             comment                 = "' . $db->real_escape_string(parseComment($metaData)) . '",
             track_artist            = "' . $db->real_escape_string(parseTrackArtist($metaData)) . '",
             year                    = ' . parseYear($metaData) . ',
-            dr                      = ' . parseAudioDynamicRange($metaData) . '
+            dr                      = ' . parseAudioDynamicRange($metaData) . ',
+            composer                = "' . $db->real_escape_string(parseComposer($metaData)) . '"
             WHERE relative_file     = BINARY "' . $db->real_escape_string($track['relative_file']) . '";';
         mysqli_query($db, $query);
     }
