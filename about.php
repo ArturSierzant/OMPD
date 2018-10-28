@@ -163,8 +163,10 @@ function about() {
 	<td></td>
 	<td>
 	<ul style="padding-left: 1em;">
+	<li> added support for COMPOSER tag (partially settable in config.inc.php)</li>
 	<li> added 'Show favorite tracks' for selected genre</li>
 	<li> added info about Track Dynamic Range in track lists (settable in config.inc.php)</li>
+	<li> changed genre view</li>
 	<li> fixed bugs</li>
 	</ul>
 	<br>

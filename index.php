@@ -64,6 +64,7 @@ elseif	($action == 'viewComposer')		viewComposer();
 elseif	($action == 'viewNew')			viewNew();
 elseif	($action == 'viewPopular')		viewPopular();
 elseif	($action == 'viewRecentlyPlayed')		viewRecentlyPlayed();
+elseif	($action == 'viewPlayedAtDay')			viewPlayedAtDay();
 else	message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]action');
 exit();
 
@@ -2024,7 +2025,7 @@ else
 	
 	<div class="line">
 		<div class="add-info-left">Last time:</div>
-		<div class="add-info-right"><span id="last_played"><?php echo ($played['time']) ? (date("Y-m-d H:i",$played['time']) . '<span id="playedCal" class=" icon-anchor" onclick="togglePlayedHistory();">&nbsp;&nbsp;<i class="fa fa-calendar fa-lg"></i></span>') : '-'; ?></span>
+		<div class="add-info-right"><span id="last_played"><?php echo ($played['time']) ? '<a href="index.php?action=viewPlayedAtDay&day=' . date("Y-m-d",$played['time']) . '">' . (date("Y-m-d H:i",$played['time']) . '</a><span id="playedCal" class=" icon-anchor" onclick="togglePlayedHistory();">&nbsp;&nbsp;<i class="fa fa-calendar fa-lg"></i></span>') : '-'; ?></span>
 		</div>
 	</div>
 	
@@ -2035,7 +2036,7 @@ else
 		$queryHist = mysqli_query($db, 'SELECT time, album_id FROM counter WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" ORDER BY time DESC');
 		while($playedHistory = mysqli_fetch_assoc($queryHist)) { ?>
 		<div class="add-info-left"></div>
-		<div class="add-info-right"><span><?php echo ($playedHistory['time']) ? date("Y-m-d H:i",$playedHistory['time']) : '-'; ?></span>
+		<div class="add-info-right"><span><?php echo ($playedHistory['time']) ? '<a href="index.php?action=viewPlayedAtDay&day=' . date("Y-m-d",$playedHistory['time']) . '">' . date("Y-m-d H:i",$playedHistory['time']) . '</a>' : '-'; ?></span>
 		</div>
 		<?php } ?>
 	</div>
@@ -3969,6 +3970,61 @@ function viewRecentlyPlayed() {
 
 </table>
 
+
+<?php
+	
+	require_once('include/footer.inc.php');
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | View played at given day                                               |
+//  +------------------------------------------------------------------------+
+function viewPlayedAtDay() {
+	global $cfg, $db;
+	global $base_size, $spaces, $scroll_bar_correction;
+	
+	authenticate('access_media');
+	$type = (get('type') ? get('type') : '');
+	$day = (get('day') ? get('day') : '');
+	$ts = strtotime($day);
+	// formattedNavigator
+	$nav			= array();
+	$nav['name'][]	= 'Library';
+	$nav['url'][]	= 'index.php';
+	$nav['name'][]	= 'Albums played at ' . $day;
+	require_once('include/header.inc.php');
+	
+	$beginOfDay = strtotime("midnight", $ts);
+	$endOfDay   = strtotime("tomorrow", $beginOfDay) - 1;
+	$i = 0;
+	$page = (get('page') ? get('page') : 1);
+	$max_item_per_page = $cfg['max_items_per_page'];
+	
+	
+	$query_rp = mysqli_query($db, '
+		SELECT a.album_id, a.image_id, a.album, a.artist_alphabetic, counter.time as played_time
+		FROM counter JOIN (SELECT album_id, image_id, album, artist_alphabetic FROM album) as a on a.album_id = counter.album_id WHERE counter.time > ' . $beginOfDay . ' AND counter.time < ' . $endOfDay . ' ORDER BY played_time DESC
+		' );
+	
+	$album_multidisc = albumMultidisc($query_rp, 'rp');
+?>
+
+
+
+<div class="albums_container">
+<?php
+	
+	if ($tileSizePHP) $size = $tileSizePHP;
+	$prevDate = '';
+	$currDate = '';
+	foreach (array_slice($album_multidisc,($page - 1) * $max_item_per_page,$max_item_per_page) as $album_m) {
+		draw_tile($size,$album_m,'allDiscs');
+	}
+?>
+</div>
 
 <?php
 	

@@ -597,6 +597,9 @@ td.menu_bottom_right {
   display: inline-block;
   position: relative;
 }
+#volumeBar {
+  background: #b53d00;
+}
 #volumeValueWrapper {
   display: inline-block;
   position: relative;
@@ -1618,6 +1621,11 @@ div.in {
   background: -ms-linear-gradient(left, #b53d00, #b53d00);
   background-color: #b53d00;
 }
+div.in-static {
+  width: 0px;
+  height: 100%;
+  background-color: #b53d00;
+}
 #bar-indicator {
   position: absolute;
   background-color: #b53d00;
@@ -1721,6 +1729,7 @@ td.iconDel {
   color: #777777;
   vertical-align: middle;
   margin: 0.2em 0.2em 0.2em 0;
+  line-height: 1.2em;
 }
 .icon-small-selected {
   font-size: 1.8em;

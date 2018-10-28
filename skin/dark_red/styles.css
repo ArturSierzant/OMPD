@@ -1621,6 +1621,11 @@ div.in {
   background: -ms-linear-gradient(left, #cb4b16, #cb4b16);
   background-color: #cb4b16;
 }
+div.in-static {
+  width: 0px;
+  height: 100%;
+  background-color: #cb4b16;
+}
 #bar-indicator {
   position: absolute;
   background-color: #fdf6e3;
@@ -1724,6 +1729,7 @@ td.iconDel {
   color: #eee8d5;
   vertical-align: middle;
   margin: 0.2em 0.2em 0.2em 0;
+  line-height: 1.2em;
 }
 .icon-small-selected {
   font-size: 1.8em;

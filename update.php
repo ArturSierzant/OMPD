@@ -62,6 +62,10 @@ else {
 	$cfg['force_filename_update'] = true;
 }
 
+if (substr($cfg['media_dir'],-1) != DIRECTORY_SEPARATOR){
+	$cfg['media_dir'] = $cfg['media_dir'] . DIRECTORY_SEPARATOR;
+}
+
 $flag	= (int) getpost('flag');
 
 
@@ -94,7 +98,6 @@ function update($dir_to_update = '') {
 	$startTime = new DateTime();
 	
 	cliLog("Update start time: " . date("Ymd H:i:s"));
-
 	$path = $cfg['media_dir'];
 	$curFilesCounter = 0;
 	$curDirsCounter = 0;

@@ -84,6 +84,7 @@ if (count($file) == 0) {
 
 <!-- info + control -->
 <div id="info_area">
+
 <div id="image_container">
 	<!--
 	<div id="cover-spinner">
@@ -159,7 +160,7 @@ if (count($file) == 0) {
 		<span class="icon-anchor" name="time" id="time" style="text-align: right; padding-right:1px;"></span>
 		<div id="track-progress" class="out pointer" style="display:inline-block;" onClick="ajaxRequest('play.php?action=seekImageMap&amp;dx=' + this.clientWidth + '&amp;x=' + getRelativeX(event, this) + '&amp;menu=playlist', evaluatePlaytime);">
 			<div id="bar-indicator"></div>
-			<div id="timebar" style=" overflow: hidden;" class="in"></div>
+			<div id="timebar" style=" overflow: hidden;" class="in-static"></div>
 			
 		</div>
 		<span class="playlist_status_off" name="tracktime" id="tracktime" style="text-align: left; padding-left: 1px; display: inline;"></span>
