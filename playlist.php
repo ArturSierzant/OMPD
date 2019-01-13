@@ -70,10 +70,10 @@ else
 
 
 $featuring = false;
-for ($i=0; $i < $listlength && !$featuring; $i++) {
+/* for ($i=0; $i < $listlength && !$featuring; $i++) {
 	$query = mysqli_query($db,'SELECT featuring FROM track WHERE featuring != "" AND relative_file = "' . mysqli_real_escape_string($db,$file[$i]) . '"');
 	if (mysqli_fetch_row($query)) $featuring = true;
-}
+} */
 if (count($file) == 0) {
 	message(__FILE__, __LINE__, 'warning', '[b]Playlist is empty[/b][br][br]
 	[url=index.php]Add[/url] some music!');
@@ -245,7 +245,7 @@ for ($i=0; $i < $listlength; $i++) {
 	}
 	$table_track = mysqli_fetch_assoc($query);
 	$playtime[] = (int) $table_track['miliseconds'];
-	$playlistTT = $playlistTT + (int) $table_track['miliseconds'];
+	//$playlistTT = $playlistTT + (int) $table_track['miliseconds'];
 	$track_id[] = (string) $table_track['track_id'];
 	
 	$album_genres = parseMultiGenre($table_track['genre']);
@@ -421,7 +421,18 @@ for ($i=0; $i < $listlength; $i++) {
 	</td>
 	<?php } ?>
 	
-	<td class="time"><?php if (isset($table_track['miliseconds'])) echo formattedTime($table_track['miliseconds']); ?></td>
+	<td class="time" id="time_<?php echo $i; ?>_<?php echo round($table_track['miliseconds']/1000) * 1000; ?>">
+		<?php 
+		if ($table_track['miliseconds'] > 0) {
+			echo formattedTime($table_track['miliseconds']); 
+			if ($playlistTT > -1) {
+				$playlistTT = $playlistTT + round($table_track['miliseconds']/1000) * 1000;
+			}
+		}
+		else {
+			$playlistTT = -1;
+		}
+		?></td>
 
 	
 	<td class="iconDel">
@@ -636,6 +647,14 @@ function evaluateListpos(listpos) {
 
 function evaluatePlaytime(data) {
 	// data.miliseconds, data.max, ....
+	<?php 
+	if ($playlistTT > -1) {
+		echo "var playlistTT = " . $playlistTT . ";";
+	}
+	else {
+		echo "var playlistTT = -1;";
+	}
+	?>
 	if (previous_miliseconds != data.miliseconds) {
 		document.getElementById('time').innerHTML = formattedTime(data.miliseconds);
 		var width_ = 0;
@@ -648,7 +667,7 @@ function evaluatePlaytime(data) {
 		$('#timebar').width(width_);
 		previous_miliseconds = data.miliseconds;
 	}
-	if(data.hasStream != 'true' && !data.repeat && !data.single && !data.shuffle){
+	/* if(data.hasStream != 'true' && !data.repeat && !data.single && !data.shuffle){
 		$("span[id^='end_time'").show();
 		$("span[id^='end_time'").html('End at: ' + data.end_time + '&nbsp;&bull;&nbsp;');
 		$("span[id^='end_in'").show();
@@ -657,13 +676,31 @@ function evaluatePlaytime(data) {
 	else {
 		$("span[id^='end_time'").hide();
 		$("span[id^='end_in'").hide();
-	}
-	if(data.hasStream != 'true'){
+	} */
+	if((data.hasStream != 'true' || playlistTT > -1) && !data.repeat && !data.single && !data.shuffle){
+		var tt1 = 0;
+		for (var k = data.listpos; k <= (data.totalTracks - 1); k++){
+			var plItem = "td[id^='time_" + k + "'";
+			var p = $(plItem).attr('id').split("_")[1];
+			var t = $(plItem).attr('id').split("_")[2];
+			if (p>=k) {
+				tt1 = (tt1 + parseInt(t));
+			}
+		}
+		var cDate = Math.floor(new Date().getTime() / 1000) * 1000;
+		var end_in = tt1 - data.miliseconds;
+		var end_time = new Date(cDate + end_in);
 		$("span[id^='total_time'").show();
-		$("span[id^='total_time'").html('Total: ' + data.total_time);
+		$("span[id^='total_time'").html('Total: ' + msToTime(playlistTT));
+		$("span[id^='end_time'").show();
+		$("span[id^='end_time'").html('End at: ' + end_time.getHours() + ':' + end_time.getMinutes() + '&nbsp;&bull;&nbsp;');
+		$("span[id^='end_in'").show();
+		$("span[id^='end_in'").html('Left: ' + msToTime(end_in) + '&nbsp;&bull;&nbsp;');
 	}
 	else {
 		$("span[id^='total_time'").hide();
+		$("span[id^='end_time'").hide();
+		$("span[id^='end_in'").hide();
 	}
 }
 
@@ -1102,7 +1139,31 @@ function evaluateTrack(data) {
 	//$("#waitIndicatorImg").hide(); 
 }
 
-
+function msToTime(s) {
+	var t = 0;
+	var ms = s % 1000;
+	s = (s - ms) / 1000;
+	var secs = s % 60;
+	s = (s - secs) / 60;
+	var mins = s % 60;
+	var hrs = (s - mins) / 60;
+	
+	if (mins < 10) {
+		mins = '0' + mins;
+	}
+	
+	if (secs < 10) {
+		secs = '0' + secs;
+	}
+	
+	if (hrs > 0) {
+		t = hrs + ':' + mins + ':' + secs;
+	}
+	else {
+		t = mins + ':' + secs;
+	}
+	return t;
+}
 
 $(document).ready(function() {
 	

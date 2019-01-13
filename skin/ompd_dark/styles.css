@@ -927,7 +927,7 @@ div.playlist_indicator {
   color: #bdbdbd;
 }
 div.playlist_status_off {
-  color: #bdbdbd;
+  text-shadow: -1px 0 #bdbdbd, 0 1px #bdbdbd, 1px 0 #bdbdbd, 0 -1px #bdbdbd;
 }
 div.playlist_status_on {
   color: #b53d00;
@@ -2215,6 +2215,14 @@ h1 {
   height: 2px;
   background-color: #b53d00;
 }
+.shadow-down {
+  box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.6);
+  transition: box-shadow 0.3s ease-in-out;
+}
+.shadow-up {
+  box-shadow: 0px -4px 7px 0px rgba(0, 0, 0, 0.6);
+  transition: box-shadow 0.3s ease-in-out;
+}
 @font-face {
   font-family: Roboto;
   src: url(fonts/Roboto/Roboto-Regular.ttf);
@@ -2248,3 +2256,4 @@ h1 {
 /* logo */
 /* playing bars */
 /* Active color */
+/* Player buttons outline */

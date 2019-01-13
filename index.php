@@ -1868,7 +1868,7 @@ function view3() {
 				$selected = ' selected';
 				$thumbIDCount = $thumbCount;
 			}
-		echo '<img id="thumb' . $discography['album_id'] .  '" class="imgThumb' . $selected . '" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $discography['album_id'] . '"\' src="image.php?image_id=' . $discography['image_id'] . '" onMouseOver="return overlib(\'' . addslashes($discography['artist']) . '</div><div class=' . chr(92) . chr(39) . 'ol_line' . chr(92) . chr(39) . '><div>' . addslashes($discography['album']) . '</div><div class=' . chr(92) . chr(39) . 'ol_line' . chr(92) . chr(39) . '></div><div>' . $discography['year'] . '</div>\', CAPTION , \'Go to album\');" onMouseOut="return nd();" alt="">';
+		echo '<img id="thumb' . $discography['album_id'] .  '" class="imgThumb' . $selected . '" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $discography['album_id'] . '"\' src="image.php?image_id=' . $discography['image_id'] . '" onMouseOver="return overlib(\'' . htmlspecialchars(addslashes($discography['artist']), ENT_QUOTES) . '</div><div class=' . chr(92) . chr(39) . 'ol_line' . chr(92) . chr(39) . '><div>' . htmlspecialchars(addslashes($discography['album']), ENT_QUOTES) . '</div><div class=' . chr(92) . chr(39) . 'ol_line' . chr(92) . chr(39) . '></div><div>' . $discography['year'] . '</div>\', CAPTION , \'Go to album\');" onMouseOut="return nd();" alt="">';
 		$thumbCount++;
 		}
 		?>

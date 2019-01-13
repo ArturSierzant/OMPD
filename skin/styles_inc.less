@@ -864,8 +864,9 @@ div.playlist_button.miniplayer{
 }
 
 
-div.playlist_button_play		{ width: 6.1538em;
-							}
+div.playlist_button_play { 
+	width: 6.1538em;
+}
 
 div.playlist_indicator { 
 	padding-top: 0.5em;
@@ -874,13 +875,21 @@ div.playlist_indicator {
   color: (@font-first);
 }
 							
-div.playlist_status_off 			{color: (@button-playlist-off); 
-								}
+div.playlist_status_off when (@player-button-outline = true) {
+	text-shadow: -1px 0 @button-playlist-off, 0 1px @button-playlist-off, 1px 0 @button-playlist-off, 0 -1px @button-playlist-off;
+}
 
-div.playlist_status_on 			{color: (@button-playlist-on);
-								}
+div.playlist_status_off when not (@player-button-outline = true) {
+	color: (@button-playlist-off);
+}
 
-div.playlist_status_on_border	{border: solid 1px (@font-banner);}
+div.playlist_status_on {
+	color: (@button-playlist-on);
+}
+
+div.playlist_status_on_border {
+	border: solid 1px (@font-banner);
+}
 
 .sign {
 	font-size: 1.8em; 
@@ -2342,4 +2351,14 @@ h1 {
 	width: 0px;
 	height: 2px;
 	background-color: @active-banner;
+}
+
+.shadow-down {
+	box-shadow: 0px 4px 7px 0px rgba(0,0,0,0.6);
+	transition: box-shadow 0.3s ease-in-out;
+}
+
+.shadow-up {
+	box-shadow: 0px -4px 7px 0px rgba(0,0,0,0.6);
+	transition: box-shadow 0.3s ease-in-out;
 }
