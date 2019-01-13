@@ -693,7 +693,7 @@ function evaluatePlaytime(data) {
 		$("span[id^='total_time'").show();
 		$("span[id^='total_time'").html('Total: ' + msToTime(playlistTT));
 		$("span[id^='end_time'").show();
-		$("span[id^='end_time'").html('End at: ' + end_time.getHours() + ':' + end_time.getMinutes() + '&nbsp;&bull;&nbsp;');
+		$("span[id^='end_time'").html('End at: ' + end_time.getHours() + ':' + (end_time.getMinutes() < 10 ? '0' : '') + end_time.getMinutes() + '&nbsp;&bull;&nbsp;');
 		$("span[id^='end_in'").show();
 		$("span[id^='end_in'").html('Left: ' + msToTime(end_in) + '&nbsp;&bull;&nbsp;');
 	}
