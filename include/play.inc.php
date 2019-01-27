@@ -202,10 +202,32 @@ function mpd($command,$player_host="",$player_port="") {
 			list($key, $value) = explode(': ', $line ,2);
 			$array[$key][] = iconv('UTF-8', NJB_DEFAULT_CHARSET, $value);
 		}
-		elseif ($command == 'listplaylists' || strpos($command,'listplaylistinfo') !== false) {
-			// playlist: pl_1 Last-Modified: 2018-06-08T08:20:07Z
+		elseif (strpos($command,'listplaylistinfo') !== false) {
+			/* 
+			file: nas/Duran Duran/Notorious/01. Duran Duran - Notorious.flac
+			Last-Modified: 2016-03-10T21:34:59Z
+			Title: Notorious
+			Album: Notorious
+			Artist: Duran Duran
+			Genre: New Romantic
+			AlbumArtist: Duran Duran
+			Disc: 1/1
+			Date: 1986
+			Track: 01
+			Time: 258 
+			*/
 			list($key, $value) = explode(': ', $line);
 			$array[$key][] = iconv('UTF-8', NJB_DEFAULT_CHARSET, $value);
+		}
+		elseif ($command == 'listplaylists') {
+			/*
+			playlist: pl_1 
+			Last-Modified: 2018-06-08T08:20:07Z
+			*/
+			if (strpos($line,'playlist:') !== false) {
+				list($key, $value) = explode(': ', $line);
+				$array[] = iconv('UTF-8', NJB_DEFAULT_CHARSET, $value);
+			}
 		}
 		
 		else {

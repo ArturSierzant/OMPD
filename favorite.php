@@ -151,6 +151,7 @@ function home() {
 	
 	require_once('include/play.inc.php');
 	$playlists = mpd('listplaylists');
+	sort($playlists, SORT_NATURAL);
 	
 	if (count($playlists) > 0 && $playlists !== 'ACK_ERROR_UNKNOWN') {
 ?>
@@ -167,10 +168,9 @@ function home() {
 		</tr>
 
 		<?php	
-		//print_r($playlists);
-		for ($j = 0; $j < count($playlists['playlist']); $j++) {
-			$plName = $playlists['playlist'][$j];
-			$plLastMod = $playlists['Last-Modified'][$j];
+		for ($j = 0; $j < count($playlists); $j++) {
+			$plName = $playlists[$j];
+			//$plLastMod = $playlists['Last-Modified'][$j];
 		?>		
 			<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 				
