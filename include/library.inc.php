@@ -1325,6 +1325,7 @@ function mime_content_type_replacement($filename) {
 		'oga' => 'audio/ogg', 
 		'ape' => 'audio/ape', 
 		'dsf' => 'audio/dsf', 
+		'dff' => 'audio/dff', 
 		'flac' => 'audio/flac', 
 		'wv' => 'audio/wv', 
 		'wav' => 'audio/wav', 
