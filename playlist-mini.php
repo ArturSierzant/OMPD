@@ -140,7 +140,7 @@ function evaluateStatus(data) {
 		ajaxRequest('play.php?action=playlistTrack&track_id=' + track_id[previous_listpos] + '&menu=playlist', evaluateTrack);
 	}
 	
-	if (data.listpos > 0) {
+	if (data.totalTracks > 0) {
 		document.getElementById('track_number').innerHTML =  (data.listpos + 1) + "/" + data.totalTracks + ". ";
 	}
 	else {
@@ -294,7 +294,7 @@ function evaluateTrack(data) {
 		var albumLink = '<a href="browser.php?dir=' + data.relative_file + '">' + data.album + '</a>';
 		document.getElementById('artist_mini').innerHTML = albumLink;
 		}
-	else if (data.album != '&nbsp;' && artist != '' && data.listpos > 0) {
+	else if (data.album != '&nbsp;' && artist != '' && data.totalTracks > 0) {
 		document.getElementById('artist_mini').innerHTML = 'by ' + artist + ' from ' + data.album;
 	}
 	else if (data.album != '&nbsp;') {
