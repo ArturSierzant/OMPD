@@ -3710,6 +3710,7 @@ function viewPopular() {
 	elseif	($period == 'month')	$days = 31;
 	elseif	($period == 'year')		$days = 365;
 	elseif	($period == 'overall')	$days = 365 * 1000;
+	elseif	($period == 'artist')	$days = 0;
 	else							message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]period');
 	
 	if ($user_id == 0) {
@@ -3720,15 +3721,30 @@ function viewPopular() {
 		$nav['name'][]	= 'Library';
 		$nav['url'][]	= 'index.php';
 		$nav['name'][]	= 'Popular';
-		
-		$query_pop = mysqli_query($db, 'SELECT artist, artist_alphabetic, album, image_id, album.album_id, COUNT(*) AS counter
-			FROM counter, album
-			WHERE counter.flag <= 1
-			AND counter.time > ' . (int) (time() - 86400 * $days) . '
-			AND counter.album_id = album.album_id
-			GROUP BY album.album_id
-			ORDER BY counter DESC, time DESC
-			LIMIT 50');
+		if ($period == 'artist') {
+			$va = '';
+			$vaArray = $cfg['VA'];
+			array_walk($vaArray, function(&$value, &$key){
+				$value = str_replace($value,"'" . $value . "'", $value);
+			});
+			$query_pop = mysqli_query($db,'SELECT album.artist, artist_alphabetic, COUNT(album.artist) as counter 
+				FROM album 
+				LEFT JOIN counter ON album.album_id = counter.album_id
+				WHERE album.artist NOT IN (' . implode(',',$vaArray) . ')
+				GROUP BY album.artist
+				ORDER BY counter DESC, album.artist
+				LIMIT 100');
+		}
+		else {
+			$query_pop = mysqli_query($db, 'SELECT artist, artist_alphabetic, album, image_id, album.album_id, COUNT(*) AS counter
+				FROM counter, album
+				WHERE counter.flag <= 1
+				AND counter.time > ' . (int) (time() - 86400 * $days) . '
+				AND counter.album_id = album.album_id
+				GROUP BY album.album_id
+				ORDER BY counter DESC, time DESC
+				LIMIT 50');
+		}
 		//echo 'num_rows: ' . mysqli_num_rows($query);
 		$url = 'index.php?action=viewPopular';
 	}
@@ -3775,6 +3791,8 @@ function viewPopular() {
 <table cellspacing="0" cellpadding="0" class="tab">
 <tr>
 	
+	<td class="<?php echo ($period == 'artist') ? 'tab_on' : 'tab_off'; ?>" onClick="location.href='<?php echo $url; ?>&amp;period=artist';">Artist</td>
+	<td class="tab_none tabspace"></td>
 	<td class="<?php echo ($period == 'week') ? 'tab_on' : 'tab_off'; ?>" onClick="location.href='<?php echo $url; ?>&amp;period=week';">Week</td>
 	<td class="tab_none tabspace"></td>
 	<td class="<?php echo ($period == 'month') ? 'tab_on' : 'tab_off'; ?>" onClick="location.href='<?php echo $url; ?>&amp;period=month';">Month</td>
@@ -3788,26 +3806,14 @@ function viewPopular() {
 <table width="100%" cellspacing="0" cellpadding="0" class="tab_border">
 <tr class="tab_header">
 	<td class="icon"></td><!-- menu -->
-	<td<?php if ($cfg['access_play'] || $cfg['access_add'] || $cfg['access_stream']) echo' class="space"'; ?>></td>
+	<td class="trackNumber">#</td>
 	<td>Artist</td>
-	<td class="textspace"></td>
-	<td>Album</td>
-	<td class="textspace"></td>
-	<td colspan="2">Count</td>
-	<td colspan="2"></td>
-	<td class="space"></td>
+	<td><?php echo($period == "artist" ? "" : "Album"); ?></td>
+	<td colspan="2"><?php echo($period == "artist" ? "Total albums played" : "Count"); ?></td>
 </tr>
 
 <?php
-	$query = mysqli_query($db, 'SELECT artist, artist_alphabetic, album, image_id, album.album_id, COUNT(*) AS counter
-			FROM counter, album
-			WHERE user_id = ' . (int) $user_id . '
-			AND counter.flag = ' . $flag . '
-			AND counter.time > ' . (int) (time() - 86400 * $days) . '
-			AND counter.album_id = album.album_id
-			GROUP BY album.album_id
-			ORDER BY counter DESC, time DESC
-			LIMIT 50');
+	
 	$i=0;
 	while ($album = mysqli_fetch_assoc($query_pop)) {
 		if ($i == 0) $max = $album['counter']; ?>
@@ -3819,38 +3825,69 @@ function viewPopular() {
 	</div>
 	</span>
 	</td>
-	<td></td>
+	<td class="trackNumber"><?php echo $i; ?></td>
 	<td><a href="index.php?action=view2&amp;artist=<?php echo rawurlencode($album['artist_alphabetic']); ?>&amp;order=year"><?php echo html($album['artist']); ?></a></td>
-	<td></td>
 	<td><a href="index.php?action=view3&amp;album_id=<?php echo $album['album_id']; ?>" <?php echo onmouseoverImage($album['image_id']); ?>><?php echo html($album['album']); ?></a></td>
-	<td></td>
-	<td class="bar_space">&nbsp;</td>
-	<td><?php echo $album['counter']; ?> &nbsp;</td>
+	<td class="counter"><?php echo $album['counter']; ?> &nbsp;</td>
 	<td class="bar" onMouseOver="return overlib('<?php echo $album['counter']; ?>');" onMouseOut="return nd();">
 	<div class="out-popular"><div style="width: <?php echo  round($album['counter'] / $max * 100); ?>px;" class="in"></div></div>
 	</td>
-	<td class="bar_space">&nbsp;</td>
-	<td></td>
-</tr>
+	</tr>
 <tr class="line">
 	<td></td>
 	<td colspan="16"></td>
 </tr>
 <tr>
 <td colspan="16">
-<div class="menuSub" id="menu-sub-track<?php echo $i ?>" onclick='//offMenuSub(<?php echo $i ?>);'> 
+ <?php 
+	if ($period == 'artist') {
+		?>
+		<div class="menuSub menuSubLeft" id="menu-sub-track<?php echo $i ?>" onclick='//offMenuSub(<?php echo $i ?>);'>
+		<?php
+		$query_album = mysqli_query($db, "SELECT album.artist, artist_alphabetic, album.album, album.album_id, album.image_id, COUNT(*) as counter 
+			FROM album 
+			LEFT JOIN counter ON album.album_id = counter.album_id
+			WHERE album.artist = '" . $album['artist'] . "'
+			GROUP BY album.album
+			ORDER BY counter DESC, album.album");
+	?>
+	<table cellspacing="0" cellpadding="0">
+	<tr class="tab_header">
+		<td class="space left"></td>
+		<td>Album</td>
+		<td></td>
+		<td>Count</td>
+	</tr>
+	<?php
+		while ($albums = mysqli_fetch_assoc($query_album)) {
+			echo '<tr class="album_list">';
+			echo '<td></td>';
+			echo '<td class="small_cover_sub"><a href="index.php?action=view3&amp;album_id=' . $albums['album_id'] .'"><img class="small_cover_sub" src="image.php?image_id=' . $albums['image_id'] . '"></a></td>';
+			echo '<td><a href="index.php?action=view3&amp;album_id=' . $albums['album_id'] .'">' . html($albums['album']) . '</a></td>';
+			echo '<td>' . $albums['counter'] . '</td>';
+			echo '</tr>';
+		}
+	?>
+	</table>
+	<?php
+	}
+	else { ?>
+		<div class="menuSub" id="menu-sub-track<?php echo $i ?>" onclick='//offMenuSub(<?php echo $i ?>);'>
+
+		<div><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;album_id=' . $album['album_id'] . '\',evaluateAdd);"><i id="play_' . $album['album_id'] . '" class="fa fa-play-circle-o fa-fw icon-small"></i>Play album</a>'; ?>
+		</div>
+		
+		<div>
+		<?php if ($cfg['access_add'])  echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&album_id=' . $album['album_id'] . '\',evaluateAdd);ajaxRequest(\'play.php?action=updateAddPlay&album_id=' . $album['album_id'] . '\',updateAddPlay);"><i id="add_' . $album['album_id'] . '" class="fa fa-plus-circle fa-fw icon-small"></i>Add to playlist</a>';?>
+		</div>
+		
+		<div onClick="offMenuSub('');">
+		<?php if ($cfg['access_add'])  echo '<a href="stream.php?action=playlist&amp;album_id=' . $album['album_id'] . '&amp;stream_id=' . $cfg['stream_id'] . '"><i class="fa fa-rss fa-fw icon-small"></i>Stream album</a>';?>
+		</div>
 	
-	<div><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;album_id=' . $album['album_id'] . '\',evaluateAdd);"><i id="play_' . $album['album_id'] . '" class="fa fa-play-circle-o fa-fw icon-small"></i>Play album</a>'; ?>
-	</div>
-	
-	<div>
-	<?php if ($cfg['access_add'])  echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&album_id=' . $album['album_id'] . '\',evaluateAdd);ajaxRequest(\'play.php?action=updateAddPlay&album_id=' . $album['album_id'] . '\',updateAddPlay);"><i id="add_' . $album['album_id'] . '" class="fa fa-plus-circle fa-fw icon-small"></i>Add to playlist</a>';?>
-	</div>
-	
-	<div onClick="offMenuSub('');">
-	<?php if ($cfg['access_add'])  echo '<a href="stream.php?action=playlist&amp;album_id=' . $album['album_id'] . '&amp;stream_id=' . $cfg['stream_id'] . '"><i class="fa fa-rss fa-fw icon-small"></i>Stream album</a>';?>
-	</div>
-	
+	<?php 
+	}
+	?>
 	
 </div>
 </td>

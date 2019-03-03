@@ -335,10 +335,11 @@ function evaluatePlaytime(data) {
 
 $(document).ready(function() {
 				
-				$('#play').longpress(function(e) {
-					ajaxRequest('play.php?action=stop&menu=playlist', evaluateIsplaying);
-				}, function(e) {
-				});				
+	$('#play').longpress(function(e) {
+		ajaxRequest('play.php?action=stop&menu=playlist', evaluateIsplaying);
+	}, function(e) {
+	});
+	
 });
 
 

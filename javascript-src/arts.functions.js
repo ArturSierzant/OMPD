@@ -323,6 +323,16 @@ function resizeFormSettings(containerWidth, myCodeMirror) {
 }
 
 function resizeImgContainer() {
+	
+	var winW = $(window).width();
+	
+	miniplayerW = $("#miniplayer").width();
+	if (miniplayerW > winW) miniplayerW = winW;
+	$("#file-info-mini").css("min-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));
+	$("#file-info-mini").css("max-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));
+	
+	$("#media_control_mini").css("display","table-cell");
+	
 	//prevent resizing when virtual keybord is visible on mobile devices 
 	//if ($("#savePlaylistAsName").is(":focus") || $("#savePlaylistComment").is(":focus") || $("#addUrlAddress").is(":focus")) 
 	if ($("input").is(":focus")) 
@@ -352,7 +362,7 @@ function resizeImgContainer() {
 	//if ($("#searchFormAll").css('display')=='none') {
 		//window.scrollTo(0, 0);
 		var winH = $(window).height();
-		var winW = $(window).width();
+		winW = $(window).width();
 		var bodyMaxWidth = $('body').css('max-width');
 		var maxH;
 		var minW;
@@ -441,12 +451,12 @@ function resizeImgContainer() {
 			}, 1000);
 	}
 	
-	miniplayerW = $("#miniplayer").width();
+	/* miniplayerW = $("#miniplayer").width();
 	if (miniplayerW > winW) miniplayerW = winW;
 	$("#file-info-mini").css("min-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));
 	$("#file-info-mini").css("max-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));
 	
-	$("#media_control_mini").css("display","table-cell");
+	$("#media_control_mini").css("display","table-cell"); */
 	
 	if ($(window).width() > 1280) {
 		$(".back-to-top").css("right",($(window).width() - 1280)/2);
@@ -522,20 +532,36 @@ function scrollToShow(el) {
 	var elOffset = el.offset().top;
 	var elHeight = el.height();
 	var windowHeight = $(window).height();
+	var windowScrollTop = $(window).scrollTop();
 	var offset;
 	var toTopMB = $(".back-to-top").css("margin-bottom");
 	var toTopB = $(".back-to-top").css("bottom");
 	var toTopMB = parseInt(toTopMB.replace("px",""));
 	var toTopB = parseInt(toTopB.replace("px",""));
 	console.log (toTopB + toTopMB);
+	console.log ("elOffset: " + elOffset);
+	console.log ("windowScrollTop: " + windowScrollTop);
+	console.log ("elHeight: " + elHeight);
+	console.log ("windowHeight: " + windowHeight);
 	if (elHeight < windowHeight) {
-		offset = elOffset - ((windowHeight - elHeight)) + toTopB + toTopMB + $(".back-to-top").height() + 12;
-		if (elHeight > (windowHeight / 2)) {
-			offset = elOffset - ((windowHeight - elHeight));
+		if ((elOffset - 130)  < windowScrollTop) {
+			console.log("0");
+			offset = elOffset - 130;
+		}
+		else {
+			offset = elOffset - ((windowHeight - elHeight)) + toTopB + toTopMB + $(".back-to-top").height() + 12;
+			console.log("1");
+			if (elHeight > (windowHeight / 2)) {
+				console.log("2");
+				//offset = elOffset - ((windowHeight - elHeight));
+				offset = elOffset - 130;
+			}
 		}	
 	}
 	else {
-		offset = elOffset;
+		console.log("3");
+		console.log(el);
+		offset = elOffset - 130;
 	}
 	var speed = 200;
 	$('html, body').animate({scrollTop:offset}, speed);
@@ -553,6 +579,11 @@ $.fn.is_on_screen = function(){
     var bounds = this.offset();
     bounds.right = bounds.left + this.outerWidth();
     bounds.bottom = bounds.top + this.outerHeight() + 130;
+	bounds.top = bounds.top - 110;
+	console.log("viewport.top: " + viewport.top);
+	console.log("viewport.bottom: " + viewport.bottom);
+	console.log("bounds.top: " + bounds.top);
+	console.log("bounds.bottom: " + bounds.bottom);
  
     return (!(viewport.right < bounds.left || viewport.left > bounds.right || viewport.bottom < bounds.bottom || viewport.top > bounds.top));
 };

@@ -1026,7 +1026,7 @@ div.playlist_status_on_border	{border: solid 1px rgb(77, 144, 254);}
 	
 .pl-track-artist {
 	font-size: 1.1em;
-	padding-top: 0.769em;
+	padding-top: 0.5em;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	}
@@ -1160,6 +1160,7 @@ tr.tab_header {
 	height: 1.6154em;
 	color: #555555;
 	font-weight: normal;
+	line-height: 3em;
 }
 
 #header_user_name {
@@ -1228,6 +1229,7 @@ table.error tr.line {
 td.bar {
 	/*width: 15.3846em;*/
 	vertical-align: middle;
+	width: 115px;
 }
 
 
@@ -1268,10 +1270,17 @@ tr.artist_list {
 	background-color: white;
 }
 
-tr.artist_list td {
+tr.artist_list td, tr.album_list td {
 	border-bottom: dotted 1px #E3E3E3;
 }
 
+tr.album_list {
+	height: 3em;
+}
+
+tr.album_list td {
+	padding: 0;
+}
 
 tr.year {
 	height: 2em;
@@ -1382,6 +1391,9 @@ td.textspace {
 	width: 2.3077em;
 }
 
+td.counter {
+	width: 4em;
+}
 
 td.matrix {
 	width: 5em;
@@ -2243,7 +2255,10 @@ iframe.full {
 			border-top: 0px;
 		}	
 
-		
+.menuSubLeft {
+	padding: 0;
+}
+
 .menuSubRight {	display: none;
 			visibility: visible;
 			background-color: #f6f6f6;
@@ -2569,6 +2584,11 @@ h1 {
 	background-color: #fe9c00;
 }
 
+.small_cover_sub {
+	height: 3em;
+	width: 3em;
+	margin-right: 5px;
+}
 
 
 /* other fonts are set by the table, tr or td classes */
