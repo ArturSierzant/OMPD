@@ -88,13 +88,18 @@ function search_all() {
 	track_artist();
 	track_title();
 	track_composer();
+	if (!$match_found) echo "No match found in local DB.";
+	if ($cfg['use_tidal']) {
+		echo '<span class="nav_tree">Results from TIDAL:</span>';
+		tidal_artist();
+	}
 	
 	echo '<script type="text/javascript">';
 	//echo 'hideSpinner();';
 	if ($group_found != 'none') { echo 'toggleSearchResults("' . $group_found . '")';}
 	echo '</script>';
 	
-	if (!$match_found) echo "No match found.";
+	
 	require_once('include/footer.inc.php');
 };
 
@@ -1148,4 +1153,82 @@ function fav4genre($genre) {
 	}
 }
 //End of Track title	
+
+//  +------------------------------------------------------------------------+
+//  | Artists from Tidal                                                     |
+//  +------------------------------------------------------------------------+
+
+function tidal_artist(){
+	global $cfg, $db, $size, $search_string;
+?>
+<div>
+<h1 onclick='toggleSearchResults("TIA");' class="pointer" id="tidalArtists"><i id="iconSearchResultsTIA" class="fa fa-chevron-circle-down icon-anchor"></i> Artists</h1>
+<div id="searchResultsTIA">
+<span id="albumsLoadingIndicator">
+		<i class="fa fa-cog fa-spin icon-small"></i> Loading artists list...
+</span>
+<?php 
+//if ($tileSizePHP) $size = $tileSizePHP;
+
+?>
+</div>
+</div>
+<script>
+
+$('#tidalArtists').click(function() {	
+	//$('#iframeRefresh').removeClass("icon-anchor");
+	//$('#iframeRefresh').addClass("icon-selected fa-spin");
+	var size = $tileSize;
+	var artist = '<?php echo $search_string;?>';
+	var request = $.ajax({  
+		url: "ajax-tidal-search.php",  
+		type: "POST",  
+		data: { search : "artists", tileSize : size, artist : artist },  
+		dataType: "html"
+	}); 
+	
+	request.done(function( data ) {  
+		if (data.indexOf('href') > 0) { //check if any album recieved
+			//$("[id='suggested']").show();
+			$( "#searchResultsTIA" ).html( data );	
+		}
+		else {
+			var jsonObj = JSON.parse(data);
+			if (jsonObj.return == 1) {
+				$("#albumsLoadingIndicator").hide();
+				$("#searchResultsTIA").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Python script.<br>Error message:<br><br>' + jsonObj.response + '</div>');
+			}
+			else {
+				$("#albumsLoadingIndicator").hide();
+				$("#searchResultsTIA").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
+			}
+		}
+		calcTileSize();
+		//console.log (data.length);
+	}); 
+	
+	request.fail(function( jqXHR, textStatus ) {  
+		//alert( "Request failed: " + textStatus );	
+	}); 
+
+	request.always(function() {
+		// $('#iframeRefresh').addClass("icon-anchor");
+		// $('#iframeRefresh').removeClass("icon-selected fa-spin");
+		$('[id^="add_tidal"]').click(function(){
+			$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
+		});
+
+		$('[id^="play_tidal"]').click(function(){
+			$(this).removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
+		});
+		
+	});
+
+});
+
+</script>
+<?php
+}
+
+//End of Artists from Tidal
 ?>

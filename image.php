@@ -63,6 +63,20 @@ function image($image_id, $quality, $track_id) {
 	/* $query  = mysqli_query($db,'SELECT image, image_front FROM bitmap WHERE image_id = "' . mysqli_real_escape_string($db,$image_id) . '" LIMIT 1');
 	$bitmap = mysqli_fetch_assoc($query) or imageError(); */
 	
+	if (strpos($track_id,'tidal_') !== false || strpos($image_id,'tidal_') !== false) {
+		if ($track_id) $album_id = getTidalId($track_id);
+		if ($image_id) $album_id = getTidalId($image_id);
+		
+		header('Cache-Control: max-age=31536000');
+		if ($quality == 'hq') {
+			streamData(file_get_contents("http://images.osl.wimpmusic.com/im/im?w=1000&h=1000&albumid=" . $album_id), false, false, '"never_expire"');
+		}
+		else {		
+			streamData(file_get_contents("http://images.osl.wimpmusic.com/im/im?w=300&h=300&albumid=" . $album_id), false, false, '"never_expire"');	
+		}
+		exit();
+	}
+	
 	if (!empty($track_id)) 
 	$query  = mysqli_query($db,'SELECT bitmap.image, bitmap.image_front, track.relative_file, track.track_id, bitmap.image_id  FROM bitmap LEFT JOIN track on bitmap.album_id = track.album_id WHERE bitmap.image_id = "' . mysqli_real_escape_string($db,$image_id) . '" AND track.track_id = "' . mysqli_real_escape_string($db,$track_id) . '" LIMIT 1');
 

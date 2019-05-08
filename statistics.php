@@ -58,7 +58,6 @@ if	($audio_dataformat)	{
 	$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
 		FROM track, album 
 		WHERE track.audio_dataformat = "' . mysqli_real_escape_string($db,$audio_dataformat) . '"
-		AND track.video_dataformat = ""
 		AND track.album_id = album.album_id 
 		GROUP BY album.album_id 
 		ORDER BY album.artist_alphabetic, album.album');
@@ -67,7 +66,6 @@ if	($audio_dataformat)	{
 			$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
 			FROM track, album 
 			WHERE track.audio_dataformat = "' . mysqli_real_escape_string($db,$audio_dataformat) . '"
-			AND track.video_dataformat = ""
 			AND track.album_id = album.album_id 
 			GROUP BY album.album_id 
 			ORDER BY album.artist_alphabetic, album.album
@@ -559,10 +557,10 @@ if ($isHidden) {
 
 <?php
 	$i = 0;
-	$query = mysqli_query($db,'SELECT audio_dataformat FROM track WHERE audio_dataformat != "" AND video_dataformat = "" GROUP BY audio_dataformat ORDER BY audio_dataformat');
+	$query = mysqli_query($db,'SELECT audio_dataformat FROM track WHERE audio_dataformat != ""  GROUP BY audio_dataformat ORDER BY audio_dataformat');
 	while($track = mysqli_fetch_assoc($query)) {
 		$audio_dataformat = $track['audio_dataformat'];
-		$track = mysqli_fetch_assoc(mysqli_query($db,'SELECT SUM(miliseconds) AS sum_miliseconds FROM track WHERE audio_dataformat = "' . mysqli_real_escape_string($db,$audio_dataformat) . '" AND video_dataformat = ""')); ?>
+		$track = mysqli_fetch_assoc(mysqli_query($db,'SELECT SUM(miliseconds) AS sum_miliseconds FROM track WHERE audio_dataformat = "' . mysqli_real_escape_string($db,$audio_dataformat) . '"')); ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 	<td></td>
 	<td><a href="statistics.php?audio_dataformat=<?php echo $audio_dataformat; ?>"><?php echo $audio_dataformat;?>:</a></td>

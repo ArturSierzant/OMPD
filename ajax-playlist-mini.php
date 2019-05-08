@@ -62,6 +62,82 @@ if ($cfg['player_type'] == NJB_MPD) {
 		if ($pos !== false) {
 			$is_file_stream = true;
 		}
+	
+	
+		//track not found in OMPD DB - take info from MPD, unless this is a stream of file
+		if (!isset($table_track['artist']) && !$is_file_stream) {
+			$tidalTrack = '';
+			$playlistinfo = mpd('playlistinfo ' . $i);
+			if (strpos($playlistinfo['file'],'ompd_title=') !== false){
+				//stream from Youtube
+				$parts = parse_url($playlistinfo['file']);
+				parse_str($parts['query'], $query);
+				$table_track['title'] = urldecode($query['ompd_title']);
+				$table_track['album'] = urldecode($query['ompd_webpage']);
+				$playlistinfo['Time'] = (int)urldecode($query['ompd_duration']);
+			}
+			elseif (strpos($playlistinfo['file'],'tidal://') !== false) {
+				//stream from Tidal unrecognized by mpd
+				/* $split = explode("/", $playlistinfo['file']);
+				$tidalTrackId = $split[count($split)-1]; */
+				$tidalTrackId = getTidalId($playlistinfo['file']);
+				$track_id[$i] = 'tidal_' . $tidalTrackId;
+				$query = mysqli_query($db, "SELECT tidal_track.title, tidal_track.artist, tidal_track.seconds, tidal_track.number, tidal_track.genre_id, tidal_album.album, tidal_album.album_date, tidal_album.album_id FROM tidal_track LEFT JOIN tidal_album ON tidal_track.album_id = tidal_album.album_id WHERE track_id = '" . $tidalTrackId . "' LIMIT 1");
+				$tidalTrack = mysqli_fetch_assoc($query);
+				
+				if ($tidalTrack) {
+					$table_track['title'] = $tidalTrack['title'];
+					$table_track['track_artist'] = $tidalTrack['artist'];
+					$table_track['album'] = $tidalTrack['album'];
+					$table_track['miliseconds'] = ((int) $tidalTrack['seconds']) * 1000;
+					$table_track['number'] = $tidalTrack['number'];
+					$album_date = new DateTime($tidalTrack['album_date']);
+					$table_track['trackYear'] = $album_date->format('Y');
+					$table_track['track_id'] = 'tidal_' . $tidalTrack['album_id'];
+				}
+				else {
+					$table_track['title'] = 'Tidal track_id ' . $tidalTrackId;
+					$table_track['track_artist'] = "";
+					$table_track['album'] = "";
+				}
+			}
+			else {
+				if (isset($playlistinfo['Artist'])) 
+					$table_track['track_artist']	= $playlistinfo['Artist'];
+				/* else 
+					$table_track['track_artist']	= basename($playlistinfo['file']); */
+				
+				if (isset($playlistinfo['Name'])) 
+					$table_track['title']	= $playlistinfo['Name'];
+				else if (isset($playlistinfo['Title']))
+					$table_track['title']	= $playlistinfo['Title'];
+				else
+					$table_track['title']	= basename($playlistinfo['file']);
+				
+				if (isset($playlistinfo['Album']))
+					$table_track['album']	= $playlistinfo['Album'];
+				else 
+					$table_track['album']	= $playlistinfo['file'];
+			}
+			if (!$tidalTrack) {
+				$table_track['number'] = $playlistinfo['Pos'] + 1;
+				$table_track['trackYear'] = $playlistinfo['Date'];
+				$table_track['genre'] = $playlistinfo['Genre'];
+				$album_genres = parseMultiGenre($table_track['genre']);
+				$table_track['miliseconds'] = $playlistinfo['Time'] * 1000;
+			}
+		}
+		//this is stream of a file
+		elseif ($is_file_stream) {
+			//TODO: take info from file using getid3
+			$playlistinfo = mpd('playlistinfo ' . $i);
+			$table_track['number'] = $playlistinfo['Pos'] + 1;
+			$filepath = substr($file[$i],$pos + 9, strlen($file[$i]) - $pos);
+			$filepath = urldecode($filepath);
+			$table_track['title'] = basename($filepath);
+			$pos = strpos($filepath, $table_track['title']);
+			$table_track['album'] = substr($filepath, 0, $pos);
+		}
 	}
 	$data['track_id'] = $track_id;
 	$data['hash'] = $hash;

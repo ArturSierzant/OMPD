@@ -74,6 +74,31 @@ $cfg['show_DR'] = false;
 $cfg['show_composer'] = false;
 
 
+//  +------------------------------------------------------------------------+
+//  | Tidal                                                                  |
+//  +------------------------------------------------------------------------+
+//  | Support for Tidal requires Python. By dafault Python scripts will be   |
+//  | executed by simply calling:                                            |
+//  |                                                                        |
+//  | python script.py                                                       |
+//  |                                                                        |
+//  | If that doesn't work try to define path to Python binaries in section  |
+//  | 'Play audio from Youtube' in $cfg['python_path']                       |
+//  |                                                                        |
+//  | Also token is required. You can find instruction how to get it from    |
+//  | https://github.com/lucaslg26/TidalAPI                                  |
+//  |                                                                        |
+//  | And mpd must have Tidal plugin properly configured:                    |
+//  |  - mpd version >=0.21                                                  |
+//  |  - plugin 'tidal' in mpd.conf with valid username/password/token fields|
+//  |                                                                        |
+//  +------------------------------------------------------------------------+
+
+$cfg['tidal_username'] = "";
+$cfg['tidal_password'] = "";
+$cfg['tidal_token'] = "";
+
+
 //  +------------------- END OF NEW IN O!MPD 1.05 ---------------------------+
 
 
@@ -206,6 +231,7 @@ unset($cfg['album_versions_indicator']);
 $cfg['album_versions_indicator'][] = " (";
 $cfg['album_versions_indicator'][] = " [";
 $cfg['album_versions_indicator'][] = ", ";
+$cfg['album_versions_indicator'][] = ": ";
 
 
 
@@ -449,6 +475,7 @@ $cfg['artist_separator'][] = 	" and ";
 $cfg['artist_separator'][] = 	" with ";
 $cfg['artist_separator'][] = 	" feat. ";
 $cfg['artist_separator'][] = 	" ft. ";
+$cfg['artist_separator'][] = 	" + ";
 //$cfg['artist_separator'][] = 	", ";
 
 

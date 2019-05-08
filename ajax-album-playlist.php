@@ -57,21 +57,33 @@ for ($disc; $disc <= $max_disc; $disc++) {
 		$queryPart = ' AND disc = ' . (int) $disc . ' ';
 	}
 	
-	
-	$query = mysqli_query($db,'SELECT track.track_artist, track.artist, track.title, track.featuring, track.dr, track.miliseconds, track.track_id, track.number, track.relative_file, track.genre, f.blacklist_pos as blacklist_pos, f. favorite_pos as favorite_pos
-	FROM track left join 
-		(
-		SELECT favoriteitem.track_id as track_id, b.position as blacklist_pos, f.position as favorite_pos
-				FROM favoriteitem 
-				LEFT JOIN 
-			(SELECT track_id, position FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") b ON favoriteitem.track_id = b.track_id 
+	if (strpos($album_id,'tidal_') !== false) {
+		$queryStr = "
+		SELECT CONCAT('tidal_',tidal_track.track_id) as track_id, tidal_track.title, tidal_track.artist as track_artist, (tidal_track.seconds * 1000) as miliseconds, tidal_track.disc, tidal_track.number, tidal_track.genre_id, tidal_album.album, tidal_album.album_date, tidal_album.album_id FROM tidal_track LEFT JOIN tidal_album ON tidal_track.album_id = tidal_album.album_id WHERE tidal_album.album_id='" . str_replace('tidal_','',$album_id) . "'
+		ORDER BY disc, number";
+		$query = mysqli_query($db,$queryStr);
+		$track_count = mysqli_num_rows($query);
+		if ($track_count == 0){
+			getTracksFromTidalAlbum(str_replace('tidal_','',$album_id));
+			$query = mysqli_query($db,$queryStr);
+		}
+	}
+	else {
+		$query = mysqli_query($db,'SELECT track.track_artist, track.artist, track.title, track.featuring, track.dr, track.miliseconds, track.track_id, track.number, track.relative_file, track.genre, f.blacklist_pos as blacklist_pos, f. favorite_pos as favorite_pos
+		FROM track left join 
+			(
+			SELECT favoriteitem.track_id as track_id, b.position as blacklist_pos, f.position as favorite_pos
+					FROM favoriteitem 
 					LEFT JOIN 
-						(SELECT track_id, position FROM favoriteitem WHERE favorite_id = "' . $cfg['favorite_id'] . '") f ON favoriteitem.track_id = f.track_id
-		) f
-	ON track.track_id = f.track_id
-	WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"' . $queryPart . ' AND track.error = "" 
-	GROUP BY track.track_id
-	ORDER BY number,relative_file');
+				(SELECT track_id, position FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") b ON favoriteitem.track_id = b.track_id 
+						LEFT JOIN 
+							(SELECT track_id, position FROM favoriteitem WHERE favorite_id = "' . $cfg['favorite_id'] . '") f ON favoriteitem.track_id = f.track_id
+			) f
+		ON track.track_id = f.track_id
+		WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"' . $queryPart . ' AND track.error = "" 
+		GROUP BY track.track_id
+		ORDER BY number,relative_file');
+	}
 	$hasTrack = false;
 	$track_count = mysqli_num_rows($query);
 	if ($track_count > 0) $hasTrack = true;
@@ -185,15 +197,23 @@ for ($disc; $disc <= $max_disc; $disc++) {
 				if ($track['favorite_pos']) $isFavorite = true;
 				if ($track['blacklist_pos']) $isBlacklist = true;
 				$tid = $track['track_id'];
+				
+				if (!isTidal($album_id)) { 
 				?>
+					<td onclick="toggleStarSub(<?php echo $i + $disc * 100 ?>,'<?php echo $tid ?>');" class="pl-favorites">
+						<span id="blacklist-star-bg<?php echo $tid ?>" class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
+						<i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
+						</span>
+					</td>
+				<?php 
+				}
+				else {
+				?>
+				<td></td>
+				<?php
+				}
 				
-				
-				<td onclick="toggleStarSub(<?php echo $i + $disc * 100 ?>,'<?php echo $tid ?>');" class="pl-favorites">
-					<span id="blacklist-star-bg<?php echo $tid ?>" class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
-					<i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
-					</span>
-				</td>
-				<?php if ($cfg['show_DR']){ ?>
+				if ($cfg['show_DR']){ ?>
 				<td class="pl-tdr">
 				<?php
 					$tdr = ($track['dr'] === NULL ? '-' : $track['dr']);
@@ -212,22 +232,26 @@ for ($disc; $disc <= $max_disc; $disc++) {
 
 			<tr>
 			<td colspan="10">
-			<?php starSubMenu($i + $disc * 100, $isFavorite, $isBlacklist, $tid);?>
+			<?php if (!isTidal($album_id)) starSubMenu($i + $disc * 100, $isFavorite, $isBlacklist, $tid);?>
 			</td>
 			</tr>
 
 			<tr>
 			<td colspan="10">
-			<?php trackSubMenu($i + $disc * 100, $track);?>
+			<?php trackSubMenu($i + $disc * 100, $track, $album_id);?>
 			</td>
 			</tr>
 			<?php
 		}
-	$query = mysqli_query($db, 'SELECT SUM(miliseconds) AS sum_miliseconds FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" AND disc = ' . (int) $disc);
+		if (isTidal($album_id)) {
+			$query = mysqli_query($db, 'SELECT (seconds * 1000) AS sum_miliseconds FROM tidal_album WHERE album_id = "' .  mysqli_real_escape_string($db,getTidalId($album_id)) . '"');
+		}
+		else {
+			$query = mysqli_query($db, 'SELECT SUM(miliseconds) AS sum_miliseconds FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" AND disc = ' . (int) $disc);
+			
+		}
+		$track = mysqli_fetch_assoc($query);
 	
-	$track = mysqli_fetch_assoc($query); ?>
-
-	<?php 
 		echo '</table>';
 		?>
 		<div><h1><div class="total-time">Total: <?php echo formattedTime($track['sum_miliseconds']); ?></div></h1>

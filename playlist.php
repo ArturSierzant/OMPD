@@ -238,7 +238,7 @@ for ($i=0; $i < $listlength; $i++) {
 	$pos = strpos($file[$i],'track_id=');	
 	if ($pos === false) {
 		$query = mysqli_query($db,'SELECT track.title, track.artist, track.track_artist, track.featuring, track.miliseconds, track.track_id, track.genre, album.genre_id, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, track.album_id, track.number, track.track_id, track.dr, track.year as trackYear FROM track, album WHERE track.album_id=album.album_id AND track.relative_file = "' . 	mysqli_real_escape_string($db,$file[$i]) . '"');
-	} 
+	}	
 	else {
 		$t_id = substr($file[$i],$pos + 9, 19);
 		$query = mysqli_query($db,'SELECT track.title, track.artist, track.track_artist, track.featuring, track.miliseconds, track.track_id, track.genre, album.genre_id, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, track.album_id, track.number, track.track_id, track.dr, track.year as trackYear FROM track, album WHERE track.album_id=album.album_id AND track.track_id = "' . 	mysqli_real_escape_string($db,$t_id) . '"');
@@ -271,7 +271,7 @@ for ($i=0; $i < $listlength; $i++) {
 	}
 	//track not found in OMPD DB - take info from MPD, unless this is a stream of file
 	if (!isset($table_track['artist']) && !$is_file_stream) {
-		
+		$tidalTrack = '';
 		$playlistinfo = mpd('playlistinfo ' . $i);
 		if (strpos($playlistinfo['file'],'ompd_title=') !== false){
 			//stream from Youtube
@@ -280,6 +280,31 @@ for ($i=0; $i < $listlength; $i++) {
 			$table_track['title'] = urldecode($query['ompd_title']);
 			$table_track['album'] = urldecode($query['ompd_webpage']);
 			$playlistinfo['Time'] = (int)urldecode($query['ompd_duration']);
+		}
+		elseif (strpos($playlistinfo['file'],'tidal://') !== false) {
+			//stream from Tidal unrecognized by mpd
+			/* $split = explode("/", $playlistinfo['file']);
+			$tidalTrackId = $split[count($split)-1]; */
+			$tidalTrackId = getTidalId($playlistinfo['file']);
+			$track_id[$i] = 'tidal_' . $tidalTrackId;
+			$query = mysqli_query($db, "SELECT tidal_track.title, tidal_track.artist, tidal_track.seconds, tidal_track.number, tidal_track.genre_id, tidal_album.album, tidal_album.album_date, tidal_album.album_id FROM tidal_track LEFT JOIN tidal_album ON tidal_track.album_id = tidal_album.album_id WHERE track_id = '" . $tidalTrackId . "' LIMIT 1");
+			$tidalTrack = mysqli_fetch_assoc($query);
+			
+			if ($tidalTrack) {
+				$table_track['title'] = $tidalTrack['title'];
+				$table_track['track_artist'] = $tidalTrack['artist'];
+				$table_track['album'] = $tidalTrack['album'];
+				$table_track['miliseconds'] = ((int) $tidalTrack['seconds']) * 1000;
+				$table_track['number'] = $tidalTrack['number'];
+				$album_date = new DateTime($tidalTrack['album_date']);
+				$table_track['trackYear'] = $album_date->format('Y');
+				$table_track['track_id'] = 'tidal_' . $tidalTrack['album_id'];
+			}
+			else {
+				$table_track['title'] = 'Tidal track_id ' . $tidalTrackId;
+				$table_track['track_artist'] = "";
+				$table_track['album'] = "";
+			}
 		}
 		else {
 			if (isset($playlistinfo['Artist'])) 
@@ -299,13 +324,13 @@ for ($i=0; $i < $listlength; $i++) {
 			else 
 				$table_track['album']	= $playlistinfo['file'];
 		}
-		
-		$table_track['number'] = $playlistinfo['Pos'] + 1;
-		$table_track['trackYear'] = $playlistinfo['Date'];
-		$table_track['genre'] = $playlistinfo['Genre'];
-		$album_genres = parseMultiGenre($table_track['genre']);
-		$table_track['miliseconds'] = $playlistinfo['Time'] * 1000;
-		
+		if (!$tidalTrack) {
+			$table_track['number'] = $playlistinfo['Pos'] + 1;
+			$table_track['trackYear'] = $playlistinfo['Date'];
+			$table_track['genre'] = $playlistinfo['Genre'];
+			$album_genres = parseMultiGenre($table_track['genre']);
+			$table_track['miliseconds'] = $playlistinfo['Time'] * 1000;
+		}
 	}
 	//this is stream of a file
 	elseif ($is_file_stream) {
@@ -581,23 +606,25 @@ function evaluateStatus(data) {
 		//history.go();
 	}
 	data.max = playtime[data.listpos];
-	if (!current_track_id) { //track not found in DB, get data from MPD
+	if (!current_track_id || current_track_id.indexOf('tidal_') > -1) { //track not found in DB, get data from MPD
+		if (current_track_id.indexOf('tidal_') == -1) {
+			var title = data.title;
+			document.getElementById('title1').innerHTML = document.getElementById('title').innerHTML =  title;
+			var query_artist = '';
+			if (data.track_artist) {
+				query_artist = data.track_artist;
+			}
+			document.getElementById('lyrics1').innerHTML = document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>';
+		}
 		data.max = data.Time;
-		var title = data.title;
 		/* if (title.indexOf("action=streamTo") != -1) {
 			title = data.name; 
 		} */
-		document.getElementById('title1').innerHTML = document.getElementById('title').innerHTML =  title;
 		var rel_file = encodeURIComponent(data.relative_file);
 		//console.log ("rel_file=" + rel_file);
 		var params = data.audio_dataformat + '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + 'bit - ' + data.audio_sample_rate/1000 + 'kHz&nbsp;&bull;&nbsp;' + data.audio_profile;
 		document.getElementById('parameters').innerHTML = params;
 		
-		var query_artist = '';
-		if (data.track_artist) {
-			query_artist = data.track_artist;
-		}
-		document.getElementById('lyrics1').innerHTML = document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>';
 		
 		$('#favorites').html('&nbsp;');
 		$('#favorites1').html('&nbsp;');
@@ -1019,7 +1046,9 @@ function evaluateTrack(data) {
 	else if(data.genre) document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = data.genre;
 	else document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = '&nbsp;';
 	 */
-	if (data.genres) {
+	//console.log('data.genres.length: ' + JSON.stringify(data.genres));
+	//empty genres has string '[]', not empty is longer then 2
+	if (JSON.stringify(data.genres).length > 2) {
 		var inner_html = '';
 		$.each(data.genres, function(key, value){
 			if (inner_html == ''){
@@ -1030,10 +1059,14 @@ function evaluateTrack(data) {
 			}
 		});
 		document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = inner_html;
-	}
+	} 
 	else if(data.genre_id == '-1') document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = data.genre;
-	else document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = '&nbsp;';
-		console.log ('data.genres=' + data.genre);
+	else {
+		document.getElementById('genre1').innerHTML = '';
+		document.getElementById('genre').innerHTML = '-';
+	}
+	
+	//console.log ('data.genre_id=' + data.genre_id);
 
 	//var rel_file = encodeURIComponent(data.relative_file);
 	var rel_file = encodeURIComponent(data.relative_file);

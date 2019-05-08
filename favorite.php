@@ -752,7 +752,7 @@ function deleteFavoriteMPD($favorite_id) {
 	$cfg['player_host'] = $session1['player_host'];
 	$cfg['player_port'] = $session1['player_port'];
 	$cfg['player_pass'] = $session1['player_pass'];
-	mpd('rm ' . $favorite_id);
+	mpd('rm "' . $favorite_id . '"');
 	home();
 }
 

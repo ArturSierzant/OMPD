@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS `cache` (
 
 CREATE TABLE IF NOT EXISTS `counter` (
   `sid` varchar(40) NOT NULL DEFAULT '',
-  `album_id` varchar(11) NOT NULL DEFAULT '',
+  `album_id` varchar(30) NOT NULL DEFAULT '',
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
   `flag` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `time` int(10) unsigned NOT NULL DEFAULT '0',
@@ -341,6 +341,46 @@ CREATE TABLE IF NOT EXISTS `track` (
   KEY `updated` (`updated`),
   KEY `error` (`error`),
   KEY `transcoded` (`transcoded`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Struktura tabeli dla  `tidal_album`
+--
+
+CREATE TABLE IF NOT EXISTS `tidal_album` (
+  `album_id` bigint unsigned NOT NULL DEFAULT '0',
+  `artist` varchar(333) NOT NULL DEFAULT '',
+  `artist_alphabetic` varchar(333) NOT NULL DEFAULT '',
+  `artist_id` bigint unsigned NOT NULL DEFAULT '0',
+  `album` varchar(333) NOT NULL DEFAULT '',
+  `album_date` varchar(21) DEFAULT NULL,
+  `genre_id` varchar(255) NOT NULL DEFAULT '',
+  `discs` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `seconds` int(7) unsigned NOT NULL DEFAULT '0',
+  `last_update_time` int(10) unsigned NOT NULL DEFAULT '0',
+  UNIQUE KEY `album_id` (`album_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Struktura tabeli dla  `tidal_track`
+--
+
+CREATE TABLE IF NOT EXISTS `tidal_track` (
+  `track_id` bigint unsigned NOT NULL DEFAULT '0',
+  `title` varchar(333) NOT NULL DEFAULT '',
+  `artist` varchar(333) NOT NULL DEFAULT '',
+  `artist_alphabetic` varchar(333) NOT NULL DEFAULT '',
+  `genre_id` varchar(255) NOT NULL DEFAULT '',
+  `disc` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `seconds` int(5) unsigned NOT NULL DEFAULT '0',
+  `number` smallint(5) unsigned DEFAULT NULL,
+  `album_id` bigint unsigned NOT NULL DEFAULT '0',
+  `last_update_time` int(10) unsigned NOT NULL DEFAULT '0',
+  UNIQUE KEY `track_id` (`track_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -669,7 +709,7 @@ INSERT INTO `user` VALUES ('anonymous', 'adf8efe68157cf37503f86d602bec6d593750c3
 -- Default server
 --
 
-INSERT INTO `server` VALUES ('database_version', '44');
+INSERT INTO `server` VALUES ('database_version', '45');
 INSERT INTO `server` VALUES ('escape_char_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('getid3_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('image_quality', '0');

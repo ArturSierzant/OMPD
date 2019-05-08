@@ -55,9 +55,16 @@ $cfg['search_url_combined']		= $cfg['search_url_combined'][$search_id];
 $cfg['search_method']			= $cfg['search_method'][$search_id];	
 $cfg['search_charset']			= $cfg['search_charset'][$search_id];
 
+if (isTidal($album_id)) {
+$query = mysqli_query($db,'SELECT artist, album
+	FROM tidal_album
+	WHERE album_id = "' . mysqli_real_escape_string($db,getTidalId($album_id)) . '"');
+}
+else {
 $query = mysqli_query($db,'SELECT artist, album
 	FROM album
 	WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '"');
+}
 $album = mysqli_fetch_assoc($query);
 
 if ($album == false)

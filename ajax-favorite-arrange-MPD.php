@@ -43,19 +43,19 @@ $cfg['player_pass'] = $session1['player_pass'];
 	
 if ($action == 'moveItem') {
 	if ($isMoveToTop == 'true') {
-		mpd('playlistmove ' . $favorite_id . ' ' . $fromPosition . ' 0');
+		mpd('playlistmove "' . $favorite_id . '" ' . $fromPosition . ' 0');
 	}
 	else {
 		if ($fromPosition > $toPosition) $toPosition++;
-		mpd('playlistmove ' . $favorite_id . ' ' . $fromPosition . ' ' . $toPosition);
+		mpd('playlistmove "' . $favorite_id . '" ' . $fromPosition . ' ' . $toPosition);
 	}
 }
 elseif ($action == 'removeItem') {
 	
-	$pl = mpd("playlistdelete " . $favorite_id . " " . $fromPosition);
+	$pl = mpd('playlistdelete "' . $favorite_id . '" ' . $fromPosition);
 }
 
-$playlist = mpd('listplaylistinfo ' . $favorite_id);
+$playlist = mpd('listplaylistinfo "' . $favorite_id . '"');
 
 ?>
 <script type="text/javascript">

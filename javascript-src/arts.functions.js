@@ -169,7 +169,7 @@ function evaluateAdd(data) {
 			}, timeOut);
 			
 		}
-		else if (data.playResult == 'add_OK') {
+		else if (data.playResult == 'play_OK') {
 			$('[id="play_' + data.album_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-check-square icon-ok');
 			offMenuSub('');
 			
@@ -228,7 +228,7 @@ function evaluateAdd(data) {
 			
 		}
 		
-		else if (data.playResult == 'add_OK') {
+		else if (data.playResult == 'play_OK') {
 			$('[id="play_' + data.track_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-check-square icon-ok');
 			offMenuSub('');
 			

@@ -25,12 +25,12 @@ global $cfg, $db;
 $track_id = get('track_id');
 $data = array();
 
-/* $query = mysqli_query($db,'SELECT track.artist, album.artist AS album_artist, title, featuring, miliseconds, relative_file, album, album.image_id, album.album_id, track.genre, track.audio_bitrate, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, album.genre_id, track.audio_profile, track.track_artist, album.year as year, track.number, track.comment, track.track_id, track.year as trackYear, track.dr, album.album_dr
-		FROM track, album 
-		WHERE track.album_id = album.album_id
-		AND track_id = "' . mysqli_real_escape_string($db,$track_id) . '"'); */
-$query = mysqli_query($db,'SELECT title	FROM track WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
-	
+if (isTidal($track_id)){
+	$query = mysqli_query($db,'SELECT title	FROM tidal_track WHERE track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
+}
+else {
+	$query = mysqli_query($db,'SELECT title	FROM track WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
+}	
 $track = mysqli_fetch_assoc($query);
 
 $title = $track['title'];
@@ -72,7 +72,7 @@ $query = mysqli_query($db,$q);
 
 if (strlen($title) > 0) {
 	$num_rows = mysqli_num_rows($query);
-	if ($num_rows > 1) {
+	if ($num_rows > 1 || ($num_rows == 1 && isTidal($track_id))) {
 		$other_track_version = true;
 	}
 }

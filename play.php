@@ -58,21 +58,21 @@ elseif	($action == 'stop')				stop();
 elseif	($action == 'prev')				prev_();
 elseif	($action == 'beginOfTrack')		beginOfTrack();
 elseif	($action == 'next')				next_();
-elseif	($action == 'playMPDplaylist')		playMPDplaylist();
-elseif	($action == 'addMPDplaylist')		addMPDplaylist();
+elseif	($action == 'playMPDplaylist')	playMPDplaylist();
+elseif	($action == 'addMPDplaylist')	addMPDplaylist();
 elseif	($action == 'playSelect')		playSelect();
 elseif	($action == 'addSelect')		addSelect();
 elseif	($action == 'addSelectUrl')		addSelectUrl();
-elseif	($action == 'addMultitrack')		addMultitrack();
+elseif	($action == 'addMultitrack')	addMultitrack();
 elseif	($action == 'insertSelect')		insertSelect();
 elseif	($action == 'seekImageMap')		seekImageMap();
 elseif	($action == 'playIndex')		playIndex();
 elseif	($action == 'deleteIndex')		deleteIndex();
-elseif	($action == 'deleteBelowIndex')		deleteBelowIndex();
+elseif	($action == 'deleteBelowIndex')	deleteBelowIndex();
 elseif	($action == 'deleteIndexAjax')	deleteIndexAjax();
 elseif	($action == 'deletePlayed')		deletePlayed();
 elseif	($action == 'crop')				crop();
-elseif	($action == 'consume')				consume();
+elseif	($action == 'consume')			consume();
 elseif	($action == 'moveTrack')		moveTrack();
 elseif	($action == 'volumeImageMap')	volumeImageMap();
 elseif	($action == 'toggleMute')		toggleMute();
@@ -340,8 +340,14 @@ function playSelect() {
 		if ($cfg['play_queue'] == false)
 			mpd('clear');
 		$playResult = addTracks('play');
-	}	
-	$data['playResult'] = $playResult;
+	}
+	if ($playResult == 'add_OK') {
+		$data['playResult'] = 'play_OK';
+	}
+	else {
+		$data['playResult'] = 'play_error';
+	}
+	
 	$data['album_id'] = $album_id;
 	$data['track_id'] = $track_id;
 	$data['favorite_id'] = $favorite_id;
@@ -406,7 +412,7 @@ function addMPDplaylist() {
 	$data = array();
 	$playResult = 'play_error';
 	
-	$playResult = mpd('load ' . $favorite_id);
+	$playResult = mpd('load "' . $favorite_id . '"');
 	
 	if ($playResult == 'ACK_ERROR_NO_EXIST') {
 		$playResult = 'add_error';
@@ -452,8 +458,8 @@ function addSelect() {
 		$status = mpd('status');
 		if ($cfg['add_autoplay'] && $status['playlistlength'] == 0)	
 			$addResult = addTracks('play');
-		else														
-			$addResult = addTracks('add');		
+		else
+			$addResult = addTracks('add');
 	}
 	$data['addResult'] = $addResult; 
 	if ($random) 
@@ -581,7 +587,12 @@ function insertSelect() {
 		else
 			$addResult = addTracks('addid',$insPos, $playAfterInsert);		
 	}
-	if ($addResult == 'add_OK') $addResult = 'insert_OK';
+	if ($addResult == 'add_OK') {
+		$addResult = 'insert_OK';
+	}
+	else {
+		$addResult = 'insert_error';
+	}
 	if ($playAfterInsert == 'yes') { 
 		$data['insertPlayResult'] = $addResult;
 	}
@@ -624,70 +635,88 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	
 	
 	if ($track_id) {
-		$query = mysqli_query($db,'SELECT relative_file, track_id FROM track WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
+		if (isTidal($track_id)) {
+			$query = mysqli_query($db,'SELECT CONCAT("' . MPD_TIDAL_URL . '", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
+		}
+		else {
+			$query = mysqli_query($db,'SELECT relative_file, track_id FROM track WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
+		}
 	}
 	elseif ($album_id) {
-		$select_md = ''; 
-		$md_indicator = '';
-		$mds_updateCounter = array();
-		if ($cfg['group_multidisc'] == true && $md == 'allDiscs') {
-			$query_md = mysqli_query($db,'SELECT album, artist FROM album WHERE album_id = "' . $album_id . '"');
-			$album = mysqli_fetch_assoc($query_md);
-			$md_indicator = striposa($album['album'], $cfg['multidisk_indicator']);
-			if ($md_indicator !== false) {
-				$md_ind_pos = stripos($album['album'], $md_indicator);
-				$md_title = substr($album['album'], 0,  $md_ind_pos);
-				$query_md = mysqli_query($db, 'SELECT album, image_id, album_id 
-				FROM album 
-				WHERE album LIKE "' . mysqli_real_escape_string($db, $md_title) . '%" AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '"
-				ORDER BY album');
-				$mds = '';
-				while ($album_md = mysqli_fetch_assoc($query_md)) {
-					$mds = ($mds == '' ? '"' . $album_md['album_id'] . '"' : $mds . ', "' . $album_md['album_id'] . '"'); 
-					$mds_updateCounter[] = $album_md['album_id'];
-				};
-				if ($mds != ''){
-					$select_md = ' track.album_id IN (' . $mds . ') ';
-				}
-			}
-			//check if multidiscs have different values for 'disc' to keep right track order in playlist (prior update procedure always put '1' as 'disc', no mater what value of 'part_of_set'/'discnumber' tag was)
-			$query = mysqli_query($db,'SELECT disc 
-			FROM track LEFT JOIN album ON track.album_id = album.album_id 
-			WHERE ' . $select_md . ' GROUP BY disc');
-			$multidiscs_count = mysqli_num_rows($query);
-			
-			$order_by = 'track.relative_file, track.disc, track.number';
-			if ($multidiscs_count > 1) {
-				$order_by = 'track.disc, track.number, track.relative_file';
-			}
-			
-			$query_str = 'SELECT relative_file, track_id 
-			FROM track LEFT JOIN album ON track.album_id = album.album_id 
-			WHERE ' . $select_md . ' AND track.track_id NOT IN 
-			(SELECT track_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") 
-			ORDER BY ' . $order_by;
-		}
-		if ($cfg['group_multidisc'] == false || $md_indicator == '' || $md != 'allDiscs') {
-			$part_of_set = '';
-			if ($disc) {
-				$part_of_set = ' AND disc = ' . $disc . ' ';
-			}
-			$query_str = 'SELECT relative_file, track_id 
-			FROM track 
-			WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '"'
-			. $part_of_set . 
-			' AND track_id NOT IN 
-			(SELECT track_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") ';
-			$mds_updateCounter[] = $album_id;
+		if (isTidal($album_id)) {
+			$tidal_album_id = str_replace("tidal_","",$album_id);
 			if ($insertType == 'album' && $insPos > 0) {
-				$query_str = $query_str . ' ORDER BY disc DESC, number DESC, relative_file DESC';
+				$tidal_tracks = getTracksFromTidalAlbum($tidal_album_id, 'DESC');
 			}
 			else {
-				$query_str = $query_str . ' ORDER BY disc, number, relative_file';
+				$tidal_tracks = getTracksFromTidalAlbum($tidal_album_id);
 			}
-		}
+			$mds_updateCounter = array();
+			$mds_updateCounter[] = $album_id;
+		} 
+		else {
+			$select_md = ''; 
+			$md_indicator = '';
+			$mds_updateCounter = array();
+			if ($cfg['group_multidisc'] == true && $md == 'allDiscs') {
+				$query_md = mysqli_query($db,'SELECT album, artist FROM album WHERE album_id = "' . $album_id . '"');
+				$album = mysqli_fetch_assoc($query_md);
+				$md_indicator = striposa($album['album'], $cfg['multidisk_indicator']);
+				if ($md_indicator !== false) {
+					$md_ind_pos = stripos($album['album'], $md_indicator);
+					$md_title = substr($album['album'], 0,  $md_ind_pos);
+					$query_md = mysqli_query($db, 'SELECT album, image_id, album_id 
+					FROM album 
+					WHERE album LIKE "' . mysqli_real_escape_string($db, $md_title) . '%" AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '"
+					ORDER BY album');
+					$mds = '';
+					while ($album_md = mysqli_fetch_assoc($query_md)) {
+						$mds = ($mds == '' ? '"' . $album_md['album_id'] . '"' : $mds . ', "' . $album_md['album_id'] . '"'); 
+						$mds_updateCounter[] = $album_md['album_id'];
+					};
+					if ($mds != ''){
+						$select_md = ' track.album_id IN (' . $mds . ') ';
+					}
+				}
+				//check if multidiscs have different values for 'disc' to keep right track order in playlist (prior update procedure always put '1' as 'disc', no mater what value of 'part_of_set'/'discnumber' tag was)
+				$query = mysqli_query($db,'SELECT disc 
+				FROM track LEFT JOIN album ON track.album_id = album.album_id 
+				WHERE ' . $select_md . ' GROUP BY disc');
+				$multidiscs_count = mysqli_num_rows($query);
+				
+				$order_by = 'track.relative_file, track.disc, track.number';
+				if ($multidiscs_count > 1) {
+					$order_by = 'track.disc, track.number, track.relative_file';
+				}
+				
+				$query_str = 'SELECT relative_file, track_id 
+				FROM track LEFT JOIN album ON track.album_id = album.album_id 
+				WHERE ' . $select_md . ' AND track.track_id NOT IN 
+				(SELECT track_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") 
+				ORDER BY ' . $order_by;
+			}
+			if ($cfg['group_multidisc'] == false || $md_indicator == '' || $md != 'allDiscs') {
+				$part_of_set = '';
+				if ($disc) {
+					$part_of_set = ' AND disc = ' . $disc . ' ';
+				}
+				$query_str = 'SELECT relative_file, track_id 
+				FROM track 
+				WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '"'
+				. $part_of_set . 
+				' AND track_id NOT IN 
+				(SELECT track_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") ';
+				$mds_updateCounter[] = $album_id;
+				if ($insertType == 'album' && $insPos > 0) {
+					$query_str = $query_str . ' ORDER BY disc DESC, number DESC, relative_file DESC';
+				}
+				else {
+					$query_str = $query_str . ' ORDER BY disc, number, relative_file';
+				}
+			}
 
-		$query = mysqli_query($db,$query_str);
+			$query = mysqli_query($db,$query_str);
+		}
 	}
 	elseif ($favorite_id) {
 		$query = mysqli_query($db,'SELECT stream FROM favorite WHERE favorite_id = ' . (int) $favorite_id . ' AND stream = 1');
@@ -741,7 +770,28 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	
 	$n = $index;
 	$first = true;
-	if ($filepath){
+	if (isTidal($album_id)) {
+		if ($tidal_tracks) {
+			$tidal_tracks = json_decode($tidal_tracks, true);
+			foreach ($tidal_tracks as $tidal_track) {
+				$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['track_id'] . ' ' . $insPos);
+				//if (strpos($mpdCommand,'ACK') !== false) {
+				if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST') {
+					return 'add_error';
+				}
+			}
+			$n++;
+			if ($playAfterInsert) {mpd('play ' . $insPos);}
+			if ($first && $mode == 'play') {
+				mpd('play ' . $index);
+			}
+			$first = false;
+		}
+		else {
+			return 'add_error';
+		}
+	} 
+	elseif ($filepath){
 		$filepath = str_replace('ompd_ampersand_ompd','&',$filepath);
 		$filepath = str_replace('ompd_plus_ompd','+',$filepath);
 		//$filepath = str_replace('"','\"',$filepath);
@@ -792,6 +842,9 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 					if ($first && $mode == 'play')
 						mpd('play ' . $index);
 					break; */
+				}
+				elseif ($mpdCommand == 'ACK_ERROR_UNKNOWN') {
+					return 'add_error';
 				}
 			}
 			$n++;
@@ -1728,16 +1781,27 @@ function playlistTrack() {
 	$currentsong	= mpd('currentsong');
 	
 	if ($track_id !='') {
- 	
-		$query = mysqli_query($db,'SELECT track.artist, track.composer as track_composer, album.artist AS album_artist, title, featuring, miliseconds, relative_file, album, album.image_id, album.album_id, track.genre, track.audio_bitrate, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, album.genre_id, track.audio_profile, track.track_artist, album.year as year, track.number, track.comment, track.track_id, track.year as trackYear, track.dr, album.album_dr
-			FROM track, album 
-			WHERE track.album_id = album.album_id
-			AND track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
-		$track = mysqli_fetch_assoc($query);
-		
-		$query = mysqli_query($db,'SELECT image_front FROM bitmap WHERE image_id="' . mysqli_real_escape_string($db,$track['image_id']) . '"');
-		$bitmap = mysqli_fetch_assoc($query);
-		
+		if (isTidal($track_id)) {
+			$track_id = getTidalId($track_id);
+			$query = mysqli_query($db,'SELECT tidal_track.artist, NULL as track_composer, tidal_album.artist AS album_artist, tidal_track.title, NULL as featuring, (tidal_track.seconds * 1000) as miliseconds, NULL as relative_file, tidal_album.album, CONCAT("tidal_", tidal_album.album_id) as image_id, CONCAT("tidal_",tidal_album.album_id) as album_id, tidal_track.genre_id as genre, NULL as audio_bitrate, NULL as audio_dataformat, NULL as audio_bits_per_sample, NULL as audio_sample_rate, tidal_album.genre_id, NULL as audio_profile, tidal_track.artist as track_artist, SUBSTRING(tidal_album.album_date,1,4) as year, tidal_track.number, NULL as comment, CONCAT("tidal_", tidal_track.track_id) as track_id, NULL as trackYear, NULL as dr, NULL as album_dr
+				FROM tidal_track, tidal_album 
+				WHERE tidal_track.album_id = tidal_album.album_id
+				AND tidal_track.track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
+			$track = mysqli_fetch_assoc($query);
+			
+			/* $query = mysqli_query($db,'SELECT image_front FROM bitmap WHERE image_id="' . mysqli_real_escape_string($db,$track['image_id']) . '"');
+			$bitmap = mysqli_fetch_assoc($query); */
+		}
+		else {
+			$query = mysqli_query($db,'SELECT track.artist, track.composer as track_composer, album.artist AS album_artist, title, featuring, miliseconds, relative_file, album, album.image_id, album.album_id, track.genre, track.audio_bitrate, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, album.genre_id, track.audio_profile, track.track_artist, album.year as year, track.number, track.comment, track.track_id, track.year as trackYear, track.dr, album.album_dr
+				FROM track, album 
+				WHERE track.album_id = album.album_id
+				AND track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
+			$track = mysqli_fetch_assoc($query);
+			
+			$query = mysqli_query($db,'SELECT image_front FROM bitmap WHERE image_id="' . mysqli_real_escape_string($db,$track['image_id']) . '"');
+			$bitmap = mysqli_fetch_assoc($query);
+		}
 		$other_track_version = false;
 		$title = $track['title'];
 		
@@ -1907,7 +1971,8 @@ function playlistTrack() {
 			$data['genres'] = parseMultiGenreId($genre['genre_id']);
 		}
 		else {
-			$data['genre_id']	= (string) '-1';	
+			$data['genre_id']	= (string) '-1';
+			$data['genres'] = parseMultiGenre(trim($currentsong['Genre']));
 		}
 		if ($data['isStream'] == 'true')
 			$data['audio_dataformat']	= (string) 'Stream';
@@ -1944,9 +2009,10 @@ function playlistTrack() {
 function updateAddPlay() {
 	global $cfg, $db;
 	//authenticate('access_playlist', false, false, true);
-	
-	sleep(1);
 	$album_id = get('album_id');
+	$data = array();
+	
+	sleep(6);
 	
 	$query = mysqli_query($db,'SELECT COUNT(c.album_id) as counter, c.time FROM (SELECT time, album_id FROM counter WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '" ORDER BY time DESC) c ORDER BY c.time');
 	$played = mysqli_fetch_assoc($query);
@@ -1960,13 +2026,13 @@ function updateAddPlay() {
 	$max_played = mysqli_fetch_assoc($query);
 	
 	$popularity = round($played['counter'] / $max_played['counter'] * 100);
-	$data = array();
 	
 	$data['played']			= (string) $played['counter'] . ' ' . (($played['counter'] == 1) ? ' time' : ' times');
 	$data['last_played']	= date("Y-m-d H:i",$played['time']);
 	$data['popularity']		= (int) $popularity;
 	$data['album_id']		= $album_id;
 	//$data['bar_popularity']		= (string) floor($popularity * 1.8);
+
 	echo safe_json_encode($data);
 }
 

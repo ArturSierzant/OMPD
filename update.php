@@ -1359,10 +1359,10 @@ function databaseCleanup() {
 		FROM share_stream LEFT JOIN album
 		ON share_stream.album_id = album.album_id
 		WHERE album.album_id IS NULL');
-	mysqli_query($db,'DELETE counter
+	mysqli_query($db,"DELETE counter
 		FROM counter LEFT JOIN album
 		ON counter.album_id = album.album_id
-		WHERE album.album_id IS NULL');
+		WHERE album.album_id IS NULL AND counter.album_id NOT LIKE 'tidal_%'");
 	mysqli_query($db,'DELETE counter
 		FROM counter LEFT JOIN user
 		ON counter.user_id = user.user_id

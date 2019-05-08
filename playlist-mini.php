@@ -259,9 +259,9 @@ function evaluateTrack(data) {
 			}
 		} 
 		else if (l>0) {
-			if (data.track_artist[0] != '&nbsp;') {
+			//if (data.track_artist[0] != '&nbsp;') {
 			artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[0]) + '">' + data.track_artist[0] + '</a>';
-			}
+			//}
 		}
 	}
 	else {
@@ -294,7 +294,8 @@ function evaluateTrack(data) {
 		var albumLink = '<a href="browser.php?dir=' + data.relative_file + '">' + data.album + '</a>';
 		document.getElementById('artist_mini').innerHTML = albumLink;
 		}
-	else if (data.album != '&nbsp;' && artist != '' && data.totalTracks > 0) {
+	//else if (data.album != '&nbsp;' && artist != '' && data.totalTracks > 0) {
+	else if (data.album != '&nbsp;' && artist != '') {
 		document.getElementById('artist_mini').innerHTML = 'by ' + artist + ' from ' + data.album;
 	}
 	else if (data.album != '&nbsp;') {

@@ -31,11 +31,17 @@
 //  +------------------------------------------------------------------------+
 error_reporting(E_ALL ^ E_NOTICE);
 @ini_set('display_errors', 0);
+if ($cfg['testing'] == 'on') {
+	@ini_set('display_errors', -1);
+	if (function_exists('opcache_reset') == true) {
+		opcache_reset();
+	}
+}
 
 define('NJB_START_TIME', microtime(true));
 
 define('NJB_VERSION', '1.04');
-define('NJB_DATABASE_VERSION', 44);
+define('NJB_DATABASE_VERSION', 45);
 define('NJB_IMAGE_SIZE', 300);
 define('NJB_IMAGE_QUALITY', 85);
 define('NJB_WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
@@ -43,6 +49,9 @@ define('NJB_SCRIPT', basename($_SERVER['SCRIPT_NAME']));
 define('NJB_HTTPS', (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) != 'off') ? true : false);
 //define('NJB_HTTPS', ($_SERVER['HTTPS'] == 'off' ? false : true));
 
+define('TIDAL_ALBUM_URL','https://listen.tidal.com/album/');
+define('TIDAL_MAX_CACHE_TIME', 24*60*60); //24h in [s]
+define('MPD_TIDAL_URL','tidal://track/');
 
 
 define('NJB_HTTPQ', 0);
@@ -86,9 +95,19 @@ if ($cfg['timezone'] != '') {
     date_default_timezone_set($cfg['timezone']);
 }
 
-// +------------------------------------------------------------------------+
-// | Proxy settings                                                         |
-// +------------------------------------------------------------------------+
+//  +------------------------------------------------------------------------+
+//  | Tidal                                                                  |
+//  +------------------------------------------------------------------------+
+
+$cfg['use_tidal'] = false;
+if ($cfg['tidal_username'] && $cfg['tidal_password'] && $cfg['tidal_token']) {
+	$cfg['use_tidal'] = true;
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Proxy settings                                                         |
+//  +------------------------------------------------------------------------+
 if ($cfg['proxy_enable'] == true) {
 stream_context_set_default(
  array(
