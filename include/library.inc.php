@@ -378,7 +378,7 @@ function listOfFavorites($file = true, $stream = true) {
 //  +------------------------------------------------------------------------+
 //  | Albums from Tidal                                                      |
 //  +------------------------------------------------------------------------+
-function showAlbumsFromTidal($artist, $size) {
+function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 	global $cfg, $db;
 	
 	
@@ -432,9 +432,14 @@ function showAlbumsFromTidal($artist, $size) {
 			}
 		}
 		else {
+			if ($ajax) {
 			$data['results'] = 0;
 			echo safe_json_encode($data);
-			return;
+			return;}
+			else {
+				echo "No results found on TIDAL.";
+				return;
+			}
 		}
 	}
 	else {

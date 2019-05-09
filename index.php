@@ -2245,14 +2245,14 @@ function viewTidalAlbums() {
 <?php
 	
 	if ($tileSizePHP) $size = $tileSizePHP;
-	$res = showAlbumsFromTidal($tidalArtist, $size, $tidalArtistId);
-	$results = json_decode($res, true);
+	showAlbumsFromTidal($tidalArtist, $size, false, $tidalArtistId);
+	/* $results = json_decode($res, true);
 	if ($results['results'] == 0) {
 		echo "No results found on TIDAL.";
 	}
 	else {
 		echo $res;
-	}
+	} */
 ?>
 </div>
 
