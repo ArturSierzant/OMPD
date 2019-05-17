@@ -92,6 +92,9 @@ function search_all() {
 	if ($cfg['use_tidal']) {
 		echo '<span class="nav_tree">Results from TIDAL:</span>';
 		tidal_artist();
+		tidal_albums();
+		tidal_tracks();
+		tidal_scripts();
 	}
 	
 	echo '<script type="text/javascript">';
@@ -1155,55 +1158,73 @@ function fav4genre($genre) {
 //End of Track title	
 
 //  +------------------------------------------------------------------------+
-//  | Artists from Tidal                                                     |
+//  | Java scripts for TIDAL part                                            |
 //  +------------------------------------------------------------------------+
 
-function tidal_artist(){
-	global $cfg, $db, $size, $search_string;
-?>
-<div>
-<h1 onclick='toggleSearchResults("TIA");' class="pointer" id="tidalArtists"><i id="iconSearchResultsTIA" class="fa fa-chevron-circle-down icon-anchor"></i> Artists</h1>
-<div id="searchResultsTIA">
-<span id="albumsLoadingIndicator">
-		<i class="fa fa-cog fa-spin icon-small"></i> Loading artists list...
-</span>
-<?php 
-//if ($tileSizePHP) $size = $tileSizePHP;
+function tidal_scripts(){
 
+global $search_string;
 ?>
-</div>
-</div>
 <script>
 
-$('#tidalArtists').click(function() {	
-	//$('#iframeRefresh').removeClass("icon-anchor");
-	//$('#iframeRefresh').addClass("icon-selected fa-spin");
+var requestDone = false;
+
+$('#tidalArtists').click(function() {
+	if (!requestDone) tidalSearchAll();
+});
+
+$('#tidalAlbums').click(function() {
+	if (!requestDone) tidalSearchAll();
+});
+
+$('#tidalTracks').click(function() {
+	if (!requestDone) tidalSearchAll();
+});
+
+function tidalSearchAll(){	
 	var size = $tileSize;
-	var artist = '<?php echo $search_string;?>';
+	var searchStr = "<?php echo tidalEscapeChar($search_string);?>";
 	var request = $.ajax({  
 		url: "ajax-tidal-search.php",  
 		type: "POST",  
-		data: { search : "artists", tileSize : size, artist : artist },  
-		dataType: "html"
+		data: { search : "all", tileSize : size, searchStr : searchStr },  
+		dataType: "json"
 	}); 
 	
-	request.done(function( data ) {  
-		if (data.indexOf('href') > 0) { //check if any album recieved
-			//$("[id='suggested']").show();
-			$( "#searchResultsTIA" ).html( data );	
+	request.done(function( data ) {
+		if (data['return'] == 1) {
+			$("[id*='LoadingIndicator']").hide();
+			$("[id*='searchResultsTI']").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Python script.<br>Error message:<br><br>' + data['response'] + '</div>');
+			return;
+		}
+		
+		if (data['artists_results'] > 0) {
+			$( "#searchResultsTIA" ).html( data['artists'] );	
 		}
 		else {
-			var jsonObj = JSON.parse(data);
-			if (jsonObj.return == 1) {
-				$("#albumsLoadingIndicator").hide();
-				$("#searchResultsTIA").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Python script.<br>Error message:<br><br>' + jsonObj.response + '</div>');
-			}
-			else {
-				$("#albumsLoadingIndicator").hide();
-				$("#searchResultsTIA").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
-			}
+			$("#artistsLoadingIndicator").hide();
+			$("#searchResultsTIA").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
 		}
+		
+		if (data['albums_results'] > 0) {
+			$( "#searchResultsTIAl" ).html( data['albums'] );	
+		}
+		else {
+			$("#albumsLoadingIndicator").hide();
+			$("#searchResultsTIAl").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
+		}
+		
+		if (data['tracks_results'] > 0) {
+			$( "#searchResultsTIT" ).html( data['tracks'] );	
+		}
+		else {
+			$("#tracksLoadingIndicator").hide();
+			$("#searchResultsTIT").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
+		}
+		
 		calcTileSize();
+		setAnchorClick();
+		requestDone = true;
 		//console.log (data.length);
 	}); 
 	
@@ -1223,12 +1244,88 @@ $('#tidalArtists').click(function() {
 		});
 		
 	});
-
-});
+};
 
 </script>
 <?php
+
 }
+
+
+//  +------------------------------------------------------------------------+
+//  | Artists from Tidal                                                     |
+//  +------------------------------------------------------------------------+
+
+function tidal_artist(){
+	global $cfg, $db, $size, $search_string;
+?>
+<div>
+<h1 onclick='toggleSearchResults("TIA");' class="pointer" id="tidalArtists"><i id="iconSearchResultsTIA" class="fa fa-chevron-circle-down icon-anchor"></i> Artists</h1>
+<div id="searchResultsTIA">
+<span id="artistsLoadingIndicator">
+		<i class="fa fa-cog fa-spin icon-small"></i> Loading artists list...
+</span>
+<?php 
+//if ($tileSizePHP) $size = $tileSizePHP;
+
+?>
+</div>
+</div>
+
+<?php
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Albums from Tidal                                                      |
+//  +------------------------------------------------------------------------+
+
+function tidal_albums(){
+	global $cfg, $db, $size, $search_string;
+?>
+<div>
+<h1 onclick='toggleSearchResults("TIAl");' class="pointer" id="tidalAlbums"><i id="iconSearchResultsTIAl" class="fa fa-chevron-circle-down icon-anchor"></i> Albums</h1>
+<div id="searchResultsTIAl">
+<span id="albumsLoadingIndicator">
+		<i class="fa fa-cog fa-spin icon-small"></i> Loading albums list...
+</span>
+<?php 
+//if ($tileSizePHP) $size = $tileSizePHP;
+
+?>
+</div>
+</div>
+
+<?php
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Tracks from Tidal                                                      |
+//  +------------------------------------------------------------------------+
+
+function tidal_tracks(){
+	global $cfg, $db, $size, $search_string;
+?>
+<div>
+<h1 onclick='toggleSearchResults("TIT");' class="pointer" id="tidalTracks"><i id="iconSearchResultsTIT" class="fa fa-chevron-circle-down icon-anchor"></i> Tracks</h1>
+<div id="searchResultsTIT">
+<span id="tracksLoadingIndicator">
+		<i class="fa fa-cog fa-spin icon-small"></i> Loading tracks list...
+</span>
+<?php 
+//if ($tileSizePHP) $size = $tileSizePHP;
+
+?>
+</div>
+</div>
+
+<?php
+}
+
+
+
 
 //End of Artists from Tidal
 ?>

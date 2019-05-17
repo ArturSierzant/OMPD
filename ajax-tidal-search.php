@@ -29,13 +29,17 @@ authenticate('access_media');
 
 $size = $_POST["tileSize"];
 $search = $_POST["search"];
-$artist = $_POST["artist"];
+$searchStr = $_POST["searchStr"];
+$ajax = $_POST["ajax"];
 
 if ($search == 'albums') {
-	showAlbumsFromTidal($artist, $size);
+	showAlbumsFromTidal($searchStr, $size, $ajax, '');
 }
 elseif ($search == 'artists') {
-	showArtistsFromTidal($artist, $size);
+	showArtistsFromTidal($searchStr, $size);
+}
+elseif ($search == 'all') {
+	showAllFromTidal($searchStr, $size);
 }
 ?>
 

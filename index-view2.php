@@ -525,7 +525,7 @@ var artist = '<?php echo $artist;?>';
 var request = $.ajax({  
 	url: "ajax-tidal-search.php",  
 	type: "POST",  
-	data: { search: "albums", tileSize : size, artist : artist },  
+	data: { search: "albums", tileSize : size, searchStr : artist, ajax : true },  
 	dataType: "html"
 }); 
 

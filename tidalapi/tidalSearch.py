@@ -30,6 +30,7 @@ if field == 'artist':
 			item = {"album_id" : album.id, "album_title" : album.name, "album_date" : str(album.release_date), "album_duration" : str(album.duration)}
 			albums.append(item)
 		jsonResponse = { "artist" : artist, "artist_id" : artist_id, "artist_bio" : artist_bio, "albums" : albums }
+
 elif field == 'artists':
 	searchResults = session.search('artist', value)
 	if searchResults.artists:
@@ -39,7 +40,7 @@ elif field == 'artists':
 		jsonResponse = {"artists" : artists} 
 	
 elif field == 'albumTracks':
-	album_id = value
+	album_id = value.replace("'","")
 	tracks_list = session.get_album_tracks(album_id)
 	for track in tracks_list:
 #		track_url = session.get_media_url(track.id)
@@ -53,10 +54,20 @@ elif field == 'track':
 		item = {"track_id" : str(track.id), "track_number": str(track.track_num), "track_title" : track.name, "track_duration" : str(track.duration), "disc_number" : str(track.disc_num), "track_artist" : track.artist.name}
 		jsonResponse.append(item)
 
+elif field == 'album':
+	album_id = value.replace("'","")
+	album = session.get_album(album_id)
+	item = {"album_id" : album.id, "album_title" : album.name, "album_date" : str(album.release_date), "album_duration" : str(album.duration), "artists" : (album.artists[0])}
+	jsonResponse.append(item)
+
 elif field == 'trackURL':
 	searchResults = session.get_media_url(value)	
 	item = {"track_id" : value, "trackURL": str(searchResults)}
 	jsonResponse.append(item)
+
+elif field == 'all':
+	searchResults = session.search_all(value)	
+	jsonResponse.append(searchResults)
 
 print(json.dumps(jsonResponse))
 

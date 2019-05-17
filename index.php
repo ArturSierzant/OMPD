@@ -2235,7 +2235,7 @@ function viewTidalAlbums() {
 	$nav			= array();
 	$nav['name'][]	= 'Library';
 	$nav['url'][]	= 'index.php';
-	$nav['name'][]	= 'Tidal: ablums by ' . html($tidalArtist);
+	$nav['name'][]	= 'Tidal: ablums by ' . ($tidalArtist);
 	
 	require_once('include/header.inc.php');
 
@@ -2246,13 +2246,6 @@ function viewTidalAlbums() {
 	
 	if ($tileSizePHP) $size = $tileSizePHP;
 	showAlbumsFromTidal($tidalArtist, $size, false, $tidalArtistId);
-	/* $results = json_decode($res, true);
-	if ($results['results'] == 0) {
-		echo "No results found on TIDAL.";
-	}
-	else {
-		echo $res;
-	} */
 ?>
 </div>
 

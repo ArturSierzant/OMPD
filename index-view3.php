@@ -40,31 +40,6 @@ if ($album_id == '') {
 	exit;
 }
 
-/* if ($album_id == '' && $cfg['image_share']) {
-	if ($cfg['image_share_mode'] == 'played') {
-		$query = mysqli_query($db, 'SELECT album_id
-			FROM counter
-			WHERE flag <= 1
-			ORDER BY time DESC
-			LIMIT 1');
-		$counter	= mysqli_fetch_assoc($query);
-		$album_id	= $counter['album_id'];
-	}
-	else {
-		$query = mysqli_query($db, 'SELECT album_id, album_add_time
-			FROM album
-			ORDER BY album_add_time DESC
-			LIMIT 1');
-		$album		= mysqli_fetch_assoc($query);
-		$album_id	= $album['album_id'];
-	}
-
-	header('Location: ' . NJB_HOME_URL . 'index.php?action=view3&album_id=' . rawurldecode($album_id));
-	exit();
-} */
-
-
-
 authenticate('access_media');
 
 if (strpos($album_id, 'tidal_') !== false) {
@@ -72,9 +47,33 @@ if (strpos($album_id, 'tidal_') !== false) {
 	FROM tidal_album
 	WHERE album_id = "' .  mysqli_real_escape_string($db,getTidalId($album_id)) . '"');
 	//$albumType = 'tidal';
-	$album = mysqli_fetch_assoc($query);
-	$image_id = $album_id;
-	$total_time['sum_miliseconds'] = $album['seconds'] * 1000;
+	//album already in OMPD database
+	if (mysqli_num_rows($query) > 0) {
+		$album = mysqli_fetch_assoc($query);
+		$image_id = $album_id;
+		$total_time['sum_miliseconds'] = $album['seconds'] * 1000;
+	}
+	else {
+		$getAlbum = json_decode(getAlbumFromTidal(getTidalId($album_id)),true);
+		if ($getAlbum['return'] == 1) {
+			$errMessage = '[b]Error in executing Python script[/b][br]Error message:[br]'; 
+			foreach($getAlbum['response'] as $res){
+				$errMessage .= $res . '[br]';
+			}
+			message(__FILE__, __LINE__, 'error', $errMessage);
+		}
+		if ($getAlbum['results'] == 0) {
+			$album = false;
+		}
+		else {
+			$query = mysqli_query($db, 'SELECT *, REPLACE(album_date," 00:00:00","") as year
+			FROM tidal_album
+			WHERE album_id = "' .  mysqli_real_escape_string($db,getTidalId($album_id)) . '"');
+			$album = mysqli_fetch_assoc($query);
+			$image_id = $album_id;
+			$total_time['sum_miliseconds'] = $album['seconds'] * 1000;
+		}
+	}
 }
 else {
 	$query = mysqli_query($db, 'SELECT artist_alphabetic, artist, album, year, month, image_id, album_add_time, album.genre_id, album_dr

@@ -219,6 +219,17 @@ class Session(object):
         result = self._map_request(url, params, ret=ret_type)
         return SearchResult(**{ret_type: result})
 
+    def search_all(self, value):
+        params = {
+            'query': value,
+            'limit': 50,
+            #'types': 'ARTISTS,ALBUMS,TRACKS,VIDEOS,PLAYLISTS',
+            'types': 'ARTISTS,ALBUMS,TRACKS',
+        }
+        url = 'search/'
+        json_obj = self.request('GET', url, params).json()
+        return json_obj
+
 
 def _parse_artist(json_obj):
     return Artist(id=json_obj['id'], name=json_obj['name'])
@@ -232,6 +243,7 @@ def _parse_album(json_obj, artist=None):
         'name': json_obj['title'],
         'num_tracks': json_obj.get('numberOfTracks'),
         'duration': json_obj.get('duration'),
+        'artists': json_obj.get('artists'),
         'artist': artist,
     }
     if 'releaseDate' in json_obj:

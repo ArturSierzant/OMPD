@@ -253,6 +253,14 @@ function evaluateAdd(data) {
 			  $('[id="insert_' + data.track_id +'"]').removeClass('fa-check-square icon-ok').addClass('fa-indent');
 			}, timeOut);
 		}
+		else if (data.insertResult == 'insert_error') {
+			$('[id="insert_' + data.track_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-exclamation-triangle icon-nok');
+			
+			setTimeout(function(){
+			  $('[id="insert_' + data.track_id +'"]').removeClass('fa-exclamation-triangle icon-nok').addClass('fa-indent');
+			}, timeOut);
+			
+		}
 		else if (data.insertPlayResult == 'insert_OK') {
 			$('[id="insertPlay_' + data.track_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-check-square icon-ok');
 			offMenuSub('');
@@ -261,11 +269,11 @@ function evaluateAdd(data) {
 			  $('[id="insertPlay_' + data.track_id +'"]').removeClass('fa-check-square icon-ok').addClass('fa-play-circle');
 			}, timeOut);
 		}
-		else if (data.insertResult == 'insert_error') {
-			$('[id="insert_' + data.track_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-exclamation-triangle icon-nok');
+		else if (data.insertPlayResult == 'insert_error') {
+			$('[id="insertPlay_' + data.track_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-exclamation-triangle icon-nok');
 			
 			setTimeout(function(){
-			  $('[id="insert_' + data.track_id +'"]').removeClass('fa-exclamation-triangle icon-nok').addClass('fa-indent');
+			  $('[id="insertPlay_' + data.track_id +'"]').removeClass('fa-exclamation-triangle icon-nok').addClass('fa-play-circle');
 			}, timeOut);
 			
 		}
