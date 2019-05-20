@@ -27,8 +27,19 @@ if field == 'artist':
 		artist = searchResults.artists[0].name
 		albums_list = session.get_artist_albums(artist_id)
 		for album in albums_list:
-			item = {"album_id" : album.id, "album_title" : album.name, "album_date" : str(album.release_date), "album_duration" : str(album.duration)}
+			item = {"album_id" : album.id, "album_title" : album.name, "album_date" : str(album.release_date), "album_duration" : str(album.duration), "album_type" : "album"}
 			albums.append(item)
+		if len(albums) == 0:
+			eps_list = session.get_artist_albums_ep_singles(artist_id)
+			for album in eps_list:
+				item = {"album_id" : album.id, "album_title" : album.name, "album_date" : str(album.release_date), "album_duration" : str(album.duration), "album_type" : "ep"}
+				albums.append(item)
+		if len(albums) == 0:
+			other_list = session.get_artist_albums_other(artist_id)
+			for album in other_list:
+				item = {"album_id" : album.id, "album_title" : album.name, "album_date" : str(album.release_date), "album_duration" : str(album.duration)}
+			albums.append(item)
+
 		jsonResponse = { "artist" : artist, "artist_id" : artist_id, "artist_bio" : artist_bio, "albums" : albums }
 
 elif field == 'artists':

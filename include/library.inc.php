@@ -379,15 +379,16 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 	global $cfg, $db;
 	
 	
-	$sql = "SELECT MIN(last_update_time) as last_update_time 
+	$sql = "SELECT MIN(last_update_time) as min_last_update_time 
 	FROM tidal_album 
-	WHERE artist = '" . mysqli_real_escape_string($db,$artist) . "'";	
+	WHERE artist = '" . mysqli_real_escape_string($db,$artist) . "'
+	AND last_update_time > 0";
 	
 	$query = mysqli_query($db, $sql);
 	$res = mysqli_fetch_assoc($query);
 	$data = array();
 	
-	if ($res['last_update_time'] < (time() - TIDAL_MAX_CACHE_TIME) || !$query) {
+	if ($res['min_last_update_time'] < (time() - TIDAL_MAX_CACHE_TIME) || !$query) {
 	
 		$field = 'artist';
 		$value = $artist;
@@ -484,7 +485,7 @@ function getAlbumFromTidal($album_id) {
 	$sql = "REPLACE INTO tidal_album 
 	(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time)
 	VALUES (
-	'" . $album["album_id"] . "', '" . mysqli_real_escape_string($db,$album["artists"]["name"]) . "', '" . mysqli_real_escape_string($db,$album["artists"]["name"]) . "', '" . $album["artists"]["id"] . "', '" . mysqli_real_escape_string($db,$album["album_title"]) . "', '" . $album["album_date"] . "', '', 1, '" . $album["album_duration"] . "','" . time() . "')";
+	'" . $album["album_id"] . "', '" . mysqli_real_escape_string($db,$album["artists"]["name"]) . "', '" . mysqli_real_escape_string($db,$album["artists"]["name"]) . "', '" . $album["artists"]["id"] . "', '" . mysqli_real_escape_string($db,$album["album_title"]) . "', '" . $album["album_date"] . "', '', 1, '" . $album["album_duration"] . "','0')";
 	
 	mysqli_query($db, $sql);
 	$data['results'] = 1;
@@ -735,7 +736,7 @@ function tidalSearchCommand($field, $value) {
 //  +------------------------------------------------------------------------+
 
 function isTidal($id) {
-	if (strpos($id,"tidal_") !== false || strpos($id,TIDAL_ALBUM_URL) !== false || strpos($id,MPD_TIDAL_URL) !== false) {
+	if (strpos($id,"tidal_") !== false || strpos($id,'tidal.com/') !== false || strpos($id,MPD_TIDAL_URL) !== false) {
 		return true;
 	}
 	return false;
@@ -748,7 +749,7 @@ function isTidal($id) {
 
 function getTidalId($id){
 	//for tidal://track/ or tidal://album/, etc
-	if (strpos($id,'tidal://') !== false || strpos($id,TIDAL_ALBUM_URL) !== false) {
+	if (strpos($id,'tidal://') !== false || strpos($id,'tidal.com/') !== false) {
 		return end(explode('/',$id));
 	}
 	else {
@@ -1229,15 +1230,16 @@ function copyFilename($filename) {
 //  +------------------------------------------------------------------------+
 function bbcode($string) {
 	global $cfg;
+	//$string = str_replace("/","ompdslashompd",$string);
 	$bbcode = array(
 		'#\[br\]#s',
-		'#\[b\](.*?)\[\/b\]#s',
-		'#\[i\](.*?)\[\/i\]#s',
-		'#\[img\]([a-z_]+\.png)\[\/img\]#s',
-		'#\[url=([a-z]+\.php(?:\?.*)?)\](.*?)\[\/url\]#s',
-		'#\[url\]((?:http|https|ftp)://.*?)\[\/url\]#s',
-		'#\[url=((?:http|https|ftp)://.*?)\](.*?)\[\/url\]#s',
-		'#\[email\]([a-z0-9._%-]+@[a-z0-9.-]+\.[a-z]{2,4})\[\/email\]#si');
+		'#\[b\](.*?)\[/b\]#s',
+		'#\[i\](.*?)\[/i\]#s',
+		'#\[img\]([a-z_]+\.png)\[/img\]#s',
+		'#\[url=([a-z]+\.php(?:\?.*)?)\](.*?)\[/url\]#s',
+		'#\[url\]((?:http|https|ftp)://.*?)\[/url\]#s',
+		'#\[url=((?:http|https|ftp)://.*?)\](.*?)\[/url\]#s',
+		'#\[email\]([a-z0-9._%-]+@[a-z0-9.-]+\.[a-z]{2,4})\[/email\]#si');
 	$replace = array(
 		'<br>',
 		'<strong>$1</strong>',

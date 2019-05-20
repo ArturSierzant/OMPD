@@ -726,7 +726,9 @@ function message($file, $line, $type, $message)	{
 			last_update = '" . date('Y-m-d, H:i:s')   . "'
 			");
 		
-		
+		$message = str_replace("\r", "", $message);
+		$message = str_replace("\n", "", $message);
+		$message = str_replace("\t", "", $message);
 		$url = NJB_HOME_URL;
 		$url .= 'message.php';
 		$url .= '?message=' . rawurlencode($message);

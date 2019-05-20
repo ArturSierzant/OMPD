@@ -554,8 +554,6 @@ request.fail(function( jqXHR, textStatus ) {
 }); 
 
 request.always(function() {
-	// $('#iframeRefresh').addClass("icon-anchor");
-	// $('#iframeRefresh').removeClass("icon-selected fa-spin");
 	$('[id^="add_tidal"]').click(function(){
 		$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
 	});
@@ -567,7 +565,20 @@ request.always(function() {
 });
 
 });
-
+<?php
+	$sql = "SELECT MIN(last_update_time) as last_update_time 
+	FROM tidal_album 
+	WHERE artist = '" . mysqli_real_escape_string($db,$artist) . "'
+	AND last_update_time > 0";
+	
+	$query = mysqli_query($db, $sql);
+	$res = mysqli_fetch_assoc($query);
+	if ($res['last_update_time'] > (time() - TIDAL_MAX_CACHE_TIME)) {
+?>
+$('#tidalAlbums').click();
+<?php
+	}
+?>
 </script>
 <?php
 } //use_tidal

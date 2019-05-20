@@ -558,12 +558,16 @@ function addSelectUrl() {
 			else {
 				$tidal_tracks = getTracksFromTidalAlbum($id);
 				$tidal_tracks = json_decode($tidal_tracks, true);
-			
-				foreach ($tidal_tracks as $tidal_track) {
-					$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['track_id']);
-					//if (strpos($mpdCommand,'ACK') !== false) {
-					if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST') {
-						return 'add_error';
+				if ($tidal_tracks['return'] == 1) { //no results found on TIDAL
+					return 'add_error';
+				}
+				else {
+					foreach ($tidal_tracks as $tidal_track) {
+						$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['track_id']);
+						//if (strpos($mpdCommand,'ACK') !== false) {
+						if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST') {
+							return 'add_error';
+						}
 					}
 				}
 			}

@@ -75,8 +75,7 @@ $featuring = false;
 	if (mysqli_fetch_row($query)) $featuring = true;
 } */
 if (count($file) == 0) {
-	message(__FILE__, __LINE__, 'warning', '[b]Playlist is empty[/b][br][br]
-	[url=index.php]Add[/url] some music!');
+	message(__FILE__, __LINE__, 'warning', '[b]Playlist is empty[/b][br][br][url=index.php]Add[/url] some music!');
 	require_once('include/footer.inc.php');
 	exit;
 }
