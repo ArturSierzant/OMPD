@@ -736,7 +736,8 @@ function tidalSearchCommand($field, $value) {
 //  +------------------------------------------------------------------------+
 
 function isTidal($id) {
-	if (strpos($id,"tidal_") !== false || strpos($id,'tidal.com/') !== false || strpos($id,MPD_TIDAL_URL) !== false) {
+	global $cfg;
+	if (strpos($id,"tidal_") !== false || strpos($id,'tidal.com/') !== false || strpos($id,MPD_TIDAL_URL) !== false || strpos($id,$cfg['upmpdcli_tidal']) !== false) {
 		return true;
 	}
 	return false;
@@ -748,9 +749,14 @@ function isTidal($id) {
 //  +------------------------------------------------------------------------+
 
 function getTidalId($id){
+	global $cfg;
 	//for tidal://track/ or tidal://album/, etc
 	if (strpos($id,'tidal://') !== false || strpos($id,'tidal.com/') !== false) {
 		return end(explode('/',$id));
+	}
+	elseif (strpos($id,$cfg['upmpdcli_tidal']) !== false)
+	{
+		return end(explode('=',$id));
 	}
 	else {
 		return str_replace('tidal_','',$id);
@@ -1703,10 +1709,47 @@ function tidalEscapeChar($str1){
 
 
 //  +------------------------------------------------------------------------+
+//  | Replace 'The Beatles' with 'Beatles, The'                              |
+//  +------------------------------------------------------------------------+
+
+function moveTheToEnd($artist){
+	global $cfg;
+	if ($cfg['testing'] == 'on') {
+		$artist = urldecode($artist);
+		if (strtolower(substr( $artist, 0, 4 )) == "the ") {
+			$artist = str_replace("the ", "", strtolower($artist));
+			$artist = $artist . ", the";
+		}
+	}
+	return $artist;
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Replace 'Beatles, The' with 'The Beatles'                              |
+//  +------------------------------------------------------------------------+
+
+function moveTheToBegining($artist){
+	global $cfg;
+	if ($cfg['testing'] == 'on') {
+		$artist = urldecode($artist);
+		if (strtolower(substr( $artist, -5 )) == ", the") {
+			$artist = str_replace(", the", "", strtolower($artist));
+			$artist = "the " . $artist;
+		}
+	}
+	return $artist;
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
 //  | mime_content_type replacement by svogal:                               |
 //  | http://php.net/manual/en/function.mime-content-type.php#87856          |
 //  +------------------------------------------------------------------------+
-
 
 function mime_content_type_replacement($filename) {
 

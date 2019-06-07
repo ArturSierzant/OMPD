@@ -91,12 +91,37 @@ $cfg['show_composer'] = false;
 //  | And mpd must have Tidal plugin properly configured:                    |
 //  |  - mpd version >=0.21                                                  |
 //  |  - plugin 'tidal' in mpd.conf with valid username/password/token fields|
-//  |                                                                        |
+//  | Or instead of mpd's Tidal plugin you can use upmpdcli-tidal - see      |
+//  | section 'Tidal via upmpdcli' below                                     |
 //  +------------------------------------------------------------------------+
 
 $cfg['tidal_username'] = "";
 $cfg['tidal_password'] = "";
 $cfg['tidal_token'] = "";
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Tidal via upmpdcli                                                     |
+//  +------------------------------------------------------------------------+
+//  | O!MPD can play Tidal's music using streams prepared by upmpdcli-tidal. |
+//  | Enter here url of that stream. Basicaly it consists of ip address      |
+//  | of computer where upmpdlci is installed, port number and some control  |
+//  | string, e.g.:                                                          |
+//  |                                                                        |
+//  | http://192.168.1.100:49149/tidal/track?version=1&trackId=              |
+//  |                                                                        |
+//  | All you have to change in above url is ip address and port.            |
+//  | Port should be the same as plgmicrohttpport in /etc/upmpdcli.conf      |
+//  |                                                                        |
+//  | Using Tidal via upmpdcli lets you use mpd without Tidal plugin.        |
+//  +------------------------------------------------------------------------+
+
+$cfg['upmpdcli_tidal'] = "";
+
+
+
+
 
 
 //  +------------------- END OF NEW IN O!MPD 1.05 ---------------------------+

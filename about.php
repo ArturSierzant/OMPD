@@ -394,6 +394,13 @@ function about() {
 	<td><a href="http://lesscss.org/">http://lesscss.org/</a></td>
 	<td></td>
 </tr>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
+	<td>tidalapi</td>
+	<td></td>
+	<td><a href="https://github.com/tamland/python-tidal">https://github.com/tamland/python-tidal</a></td>
+	<td></td>
+</tr>
 
 
 

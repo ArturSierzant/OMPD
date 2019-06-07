@@ -33,6 +33,7 @@ $searchStr = $_POST["searchStr"];
 $ajax = $_POST["ajax"];
 
 if ($search == 'albums') {
+	$searchStr = moveTheToBegining($searchStr);
 	showAlbumsFromTidal($searchStr, $size, $ajax, '');
 }
 elseif ($search == 'artists') {

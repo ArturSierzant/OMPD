@@ -245,6 +245,8 @@ def _parse_album(json_obj, artist=None):
         'duration': json_obj.get('duration'),
         'artists': json_obj.get('artists'),
         'artist': artist,
+        'audio_quality': json_obj.get('audioQuality'),
+        'type': json_obj.get('type'),
     }
     if 'releaseDate' in json_obj:
         try:

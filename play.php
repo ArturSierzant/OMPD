@@ -548,7 +548,12 @@ function addSelectUrl() {
 			//TIDAL track
 			if (strpos($url, MPD_TIDAL_URL) !== false) {
 				$tidal_tracks['track_id'] = $id;
-				$mpdCommand = mpd('addid ' . $url);
+				if ($cfg['upmpdcli_tidal'] != "") {
+					$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $id . '"');
+				}
+				else {
+					$mpdCommand = mpd('addid ' . $url);
+				}
 				if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST') {
 					return 'add_error';
 				}
@@ -558,16 +563,17 @@ function addSelectUrl() {
 			else {
 				$tidal_tracks = getTracksFromTidalAlbum($id);
 				$tidal_tracks = json_decode($tidal_tracks, true);
-				if ($tidal_tracks['return'] == 1) { //no results found on TIDAL
-					return 'add_error';
-				}
-				else {
-					foreach ($tidal_tracks as $tidal_track) {
+			
+				foreach ($tidal_tracks as $tidal_track) {
+					if ($cfg['upmpdcli_tidal'] != "") {
+						$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $tidal_track['track_id'] . '"');
+					}
+					else {
 						$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['track_id']);
-						//if (strpos($mpdCommand,'ACK') !== false) {
-						if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST') {
-							return 'add_error';
-						}
+					}
+					//if (strpos($mpdCommand,'ACK') !== false) {
+					if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST') {
+						return 'add_error';
 					}
 				}
 			}
@@ -658,7 +664,6 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	
 	$track_id			= ($track_id == '' ? get('track_id') : $track_id);
 	$album_id			= get('album_id');
-	$tidal_album_id			= get('tidal_album_id');
 	$disc					= get('disc');
 	$filepath			= get('filepath');
 	$dirpath			= get('dirpath');
@@ -672,15 +677,14 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	
 	if ($track_id) {
 		if (isTidal($track_id)) {
-			$query = mysqli_query($db,'SELECT CONCAT("' . MPD_TIDAL_URL . '", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
-			//track not added to DB yet (e.g. result of search)
-			if (mysqli_num_rows($query) == 0 && $tidal_album_id){
-				getTracksFromTidalAlbum($tidal_album_id);
-				$query = mysqli_query($db,'SELECT CONCAT("' . MPD_TIDAL_URL . '", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
-				if (mysqli_num_rows($query) == 0) {
-					return 'add_error';
-				}
+			if ($cfg['upmpdcli_tidal'] != "") {
+				$query = mysqli_query($db,'SELECT CONCAT("' . mysqli_real_escape_string($db,$cfg['upmpdcli_tidal']) . '", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
 			}
+			else {
+				$query = mysqli_query($db,'SELECT CONCAT("' . MPD_TIDAL_URL . '", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
+			}
+			//track not added to DB yet (e.g. result of search)
+
 		}
 		else {
 			$query = mysqli_query($db,'SELECT relative_file, track_id FROM track WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
@@ -818,7 +822,12 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 		if ($tidal_tracks) {
 			$tidal_tracks = json_decode($tidal_tracks, true);
 			foreach ($tidal_tracks as $tidal_track) {
-				$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['track_id'] . ' ' . $insPos);
+				if ($cfg['upmpdcli_tidal'] != "") {
+					$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $tidal_track['track_id'] . '" ' . $insPos);
+					}
+				else {
+					$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['track_id'] . ' ' . $insPos);
+				}
 				//if (strpos($mpdCommand,'ACK') !== false) {
 				if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST') {
 					return 'add_error';

@@ -335,6 +335,7 @@ function resizeImgContainer() {
 	var winW = $(window).width();
 	
 	miniplayerW = $("#miniplayer").width();
+	console.log("miniplayerW: " + miniplayerW);
 	if (miniplayerW > winW) miniplayerW = winW;
 	$("#file-info-mini").css("min-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));
 	$("#file-info-mini").css("max-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));

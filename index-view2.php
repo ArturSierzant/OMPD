@@ -50,6 +50,8 @@ $order	 	= get('order')				or $order = ($year || $dr ? 'artist' : (in_array(strt
 $sort	 	= get('sort') == 'desc'		? 'desc' : 'asc';
 $qsType 	= (int) get('qsType')				or $qsType = false;
 
+$artist = moveTheToEnd($artist);
+
 $sort_artist			= 'asc';
 $sort_album				= 'asc';
 $sort_genre				= 'asc';
@@ -254,11 +256,23 @@ else {
 			}
 		}
 		else {
-			$where = 'artist_alphabetic = "' .  mysqli_real_escape_string($db,$artist) . '" OR artist = "' .  mysqli_real_escape_string($db,$artist) . '"';
+			if ($cfg['testing'] == 'on'){
+				$where = 'artist = "' .  mysqli_real_escape_string($db,moveTheToEnd($artist)) . '" OR artist = "' .  mysqli_real_escape_string($db,moveTheToBegining($artist)) . '"';
+			}
+			else {
+				$where = 'artist_alphabetic = "' .  mysqli_real_escape_string($db,$artist) . '" OR artist = "' .  mysqli_real_escape_string($db,$artist) . '"';
+			}
 		}
 		$filter_query = 'WHERE (' . $where . ')';
 	}
-	elseif ($filter == 'like')		$filter_query = 'WHERE (artist_alphabetic LIKE "%' .  mysqli_real_escape_string($db,$artist) . '%" OR artist LIKE "%' .  mysqli_real_escape_string($db,$artist) . '%")';
+	elseif ($filter == 'like'){		
+		if ($cfg['testing'] == 'on'){
+			$filter_query = 'WHERE (artist LIKE "%' .  mysqli_real_escape_string($db,moveTheToEnd($artist)) . '%" OR artist LIKE "%' .  mysqli_real_escape_string($db,moveTheToBegining($artist)) . '%")';
+		}
+		else {
+			$filter_query = 'WHERE (artist_alphabetic LIKE "%' .  mysqli_real_escape_string($db,$artist) . '%" OR artist LIKE "%' .  mysqli_real_escape_string($db,$artist) . '%")';
+		}
+	}
 	elseif ($filter == 'smart')		$filter_query = 'WHERE (artist_alphabetic  LIKE "%' . mysqli_real_escape_like($artist) . '%" OR artist LIKE "%' . mysqli_real_escape_like($artist) . '%" OR artist SOUNDS LIKE "' .  mysqli_real_escape_string($db,$artist) . '")';
 	elseif ($filter == 'start')		$filter_query = 'WHERE (artist_alphabetic  LIKE "' . mysqli_real_escape_like($artist) . '%")';
 	elseif ($filter == 'symbol')	$filter_query = 'WHERE (artist_alphabetic  NOT BETWEEN "a" AND "zzzzzz")';
@@ -280,12 +294,26 @@ else {
 			$search_str = '';
 			
 			for($i=0; $i<$count; $i++) {
-			$search_str .= ' OR artist LIKE "' . $art . '' . $as[$i] . '%" 
-			OR artist LIKE "%' . $as[$i] . '' . $art . '" 
-			OR artist LIKE "%' . $as[$i] . '' . $art . '' . $as[$i] . '%" 
-			OR artist LIKE "% & ' . $art . '' . $as[$i] . '%" 
-			OR artist LIKE "%' . $as[$i] . '' . $art . ' & %"';
-			//last 2 lines above for artist like 'Mitch & Mitch' in 'Zbigniew Wodecki; Mitch & Mitch; Orchestra and Choir'
+				if ($cfg['testing'] == 'on'){
+					$search_str .= ' OR artist LIKE "' . moveTheToEnd($art) . '' . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . '' . moveTheToEnd($art) . '" 
+					OR artist LIKE "%' . $as[$i] . '' . moveTheToEnd($art) . '' . $as[$i] . '%" 
+					OR artist LIKE "% & ' . moveTheToEnd($art) . '' . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . '' . moveTheToEnd($art) . ' & %"';
+					$search_str .= ' OR artist LIKE "' . moveTheToBegining($art) . '' . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . '' . moveTheToBegining($art) . '" 
+					OR artist LIKE "%' . $as[$i] . '' . moveTheToBegining($art) . '' . $as[$i] . '%" 
+					OR artist LIKE "% & ' . moveTheToBegining($art) . '' . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . '' . moveTheToBegining($art) . ' & %"';
+				}
+				else {
+					$search_str .= ' OR artist LIKE "' . $art . '' . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . '' . $art . '" 
+					OR artist LIKE "%' . $as[$i] . '' . $art . '' . $as[$i] . '%" 
+					OR artist LIKE "% & ' . $art . '' . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . '' . $art . ' & %"';
+					//last 2 lines above for artist like 'Mitch & Mitch' in 'Zbigniew Wodecki; Mitch & Mitch; Orchestra and Choir'
+				}
 			}
 			
 			
@@ -532,7 +560,7 @@ var request = $.ajax({
 request.done(function( data ) {  
 	if (data.indexOf('tile') > 0) { //check if any album recieved
 		//$("[id='suggested']").show();
-		$( "#searchResultsTI" ).html( data );	
+		$( "#searchResultsTI" ).html( data );
 	}
 	else {
 		var jsonObj = JSON.parse(data);
@@ -566,11 +594,19 @@ request.always(function() {
 
 });
 <?php
-	$sql = "SELECT MIN(last_update_time) as last_update_time 
-	FROM tidal_album 
-	WHERE artist = '" . mysqli_real_escape_string($db,$artist) . "'
-	AND last_update_time > 0";
-	
+	if ($cfg['testing'] == 'on'){
+		$sql = "SELECT MIN(last_update_time) as last_update_time 
+		FROM tidal_album 
+		WHERE (artist = '" . mysqli_real_escape_string($db,moveTheToEnd($artist)) . "'
+		OR artist = '" . mysqli_real_escape_string($db,moveTheToBegining($artist)) . "')
+		AND last_update_time > 0";
+	}
+	else {
+		$sql = "SELECT MIN(last_update_time) as last_update_time 
+		FROM tidal_album 
+		WHERE artist = '" . mysqli_real_escape_string($db,$artist) . "'
+		AND last_update_time > 0";
+	}
 	$query = mysqli_query($db, $sql);
 	$res = mysqli_fetch_assoc($query);
 	if ($res['last_update_time'] > (time() - TIDAL_MAX_CACHE_TIME)) {

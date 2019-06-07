@@ -280,7 +280,7 @@ for ($i=0; $i < $listlength; $i++) {
 			$table_track['album'] = urldecode($query['ompd_webpage']);
 			$playlistinfo['Time'] = (int)urldecode($query['ompd_duration']);
 		}
-		elseif (strpos($playlistinfo['file'],'tidal://') !== false) {
+		elseif (strpos($playlistinfo['file'],'tidal://') !== false || strpos($playlistinfo['file'],$cfg['upmpdcli_tidal']) !== false) {
 			//stream from Tidal unrecognized by mpd
 			/* $split = explode("/", $playlistinfo['file']);
 			$tidalTrackId = $split[count($split)-1]; */

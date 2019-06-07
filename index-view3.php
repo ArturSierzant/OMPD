@@ -304,7 +304,7 @@ if ($cfg['show_discography_browser'] == true && !in_array($album['artist'],$cfg[
 		) ORDER BY year, month, artist_alphabetic, album';
 	$query = mysqli_query($db, $queryStr);
 	$discCount = mysqli_num_rows($query);
-	if ($discCount > 1) {
+	if ($discCount > 1 or isTidal($album_id)) {
 ?>
 	<div id="discBrowser">
 	<?php 
