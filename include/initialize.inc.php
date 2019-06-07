@@ -31,12 +31,9 @@
 //  +------------------------------------------------------------------------+
 error_reporting(E_ALL ^ E_NOTICE);
 @ini_set('display_errors', 0);
-if ($cfg['testing'] == 'on') {
-	@ini_set('display_errors', -1);
-	if (function_exists('opcache_reset') == true) {
-		opcache_reset();
-	}
-}
+
+//prevent buffering for nginx
+header('X-Accel-Buffering: no');
 
 define('NJB_START_TIME', microtime(true));
 
