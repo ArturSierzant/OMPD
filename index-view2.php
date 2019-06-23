@@ -537,19 +537,25 @@ if ($cfg['use_tidal'] && $artist && $artist != 'All albums') {
 <span id="albumsLoadingIndicator">
 	<i class="fa fa-cog fa-spin icon-small"></i> Loading albums...
 </span>
-<?php 
-//if ($tileSizePHP) $size = $tileSizePHP;
-
-?>
 </div>
 </div>
 <script>
 
 $('#tidalAlbums').click(function() {	
+<?php 
+if ($tileSizePHP) {
+	$size = $tileSizePHP;
+}
+else {
+	$size = '$tileSize';
+}
+?>
 //$('#iframeRefresh').removeClass("icon-anchor");
 //$('#iframeRefresh').addClass("icon-selected fa-spin");
-var size = $tileSize;
-var artist = '<?php echo $artist;?>';
+//var size = $tileSize;
+var size = <?php echo $size; ?>;
+console.log ('$tileSize: ' + $tileSize);
+var artist = '<?php echo $artist; ?>';
 var request = $.ajax({  
 	url: "ajax-tidal-search.php",  
 	type: "POST",  
@@ -574,6 +580,7 @@ request.done(function( data ) {
 		}
 	}
 	calcTileSize();
+	
 	//console.log (data.length);
 }); 
 

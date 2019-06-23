@@ -169,7 +169,7 @@ if ($cfg['offline'])
 //  | Check PHP version                                                      |
 //  +------------------------------------------------------------------------+
 if (version_compare(PHP_VERSION, '5.2.0', '<'))
-	message(__FILE__, __LINE__, 'error', '[b]netjukebox ' . NJB_VERSION . ' requires PHP 5.2.0 or higher[/b][br]Now PHP ' . PHP_VERSION . ' is running.');
+	message(__FILE__, __LINE__, 'error', '[b]O!MPD ' . NJB_VERSION . ' requires PHP 5.2.0 or higher[/b][br]Now PHP ' . PHP_VERSION . ' is running.');
 
 
 

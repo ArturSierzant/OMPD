@@ -560,7 +560,7 @@ function addSelectUrl() {
 				$data['track_id'] = 'tidal_' . $id;
 			}
 			//TIDAL album
-			else {
+			elseif (strpos($url,TIDAL_ALBUM_URL) !== false) {
 				$tidal_tracks = getTracksFromTidalAlbum($id);
 				$tidal_tracks = json_decode($tidal_tracks, true);
 			
@@ -576,6 +576,7 @@ function addSelectUrl() {
 						return 'add_error';
 					}
 				}
+				updateCounter('tidal_' . $id, NJB_COUNTER_PLAY);
 			}
 			if ($first && $mode == 'play') {
 				mpd('play ' . $index);
@@ -612,6 +613,7 @@ function insertSelect() {
 	require_once('include/play.inc.php');
 	$album_id = get('album_id');
 	$track_id = get('track_id');
+	$position_id = get('position_id');
 	$data = array();
 	$addResult = 'insert_error';
 	
@@ -642,6 +644,8 @@ function insertSelect() {
 	}
 	$data['album_id'] = $album_id;
 	$data['track_id'] = $track_id;
+	$data['position_id'] = $position_id;
+	
 	ob_start();
 	echo safe_json_encode($data);
 	header('Connection: close');
@@ -684,15 +688,26 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 				$query = mysqli_query($db,'SELECT CONCAT("' . MPD_TIDAL_URL . '", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
 			}
 			//track not added to DB yet (e.g. result of search)
+			if (mysqli_num_rows($query) == 0) {
+				$tidal_tracks_tmp = getTracksFromTidalAlbum(getTidalId($album_id));
+				if ($cfg['upmpdcli_tidal'] != "") {
+					$query = mysqli_query($db,'SELECT CONCAT("' . mysqli_real_escape_string($db,$cfg['upmpdcli_tidal']) . '", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
+				}
+				else {
+					$query = mysqli_query($db,'SELECT CONCAT("' . MPD_TIDAL_URL . '", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
+				}
+			}
 
 		}
 		else {
 			$query = mysqli_query($db,'SELECT relative_file, track_id FROM track WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
 		}
 	}
-	elseif ($album_id) {
+	//only whole albums, not single tracks from e.g. search results
+	elseif ($album_id && !isTidal($track_id)) {
 		if (isTidal($album_id)) {
-			$tidal_album_id = str_replace("tidal_","",$album_id);
+			//$tidal_album_id = str_replace("tidal_","",$album_id);
+			$tidal_album_id = getTidalId($album_id);
 			if ($insertType == 'album' && $insPos > 0) {
 				$tidal_tracks = getTracksFromTidalAlbum($tidal_album_id, 'DESC');
 			}
@@ -818,7 +833,8 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	
 	$n = $index;
 	$first = true;
-	if (isTidal($album_id)) {
+	//only whole albums, not single tracks from e.g. search results
+	if (isTidal($album_id) && !isTidal($track_id)) {
 		if ($tidal_tracks) {
 			$tidal_tracks = json_decode($tidal_tracks, true);
 			foreach ($tidal_tracks as $tidal_track) {
@@ -927,7 +943,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 			}
 		}
 	}
-	if ($album_id) {
+	if ($album_id && count($mds_updateCounter) > 0) {
 		foreach ($mds_updateCounter as $md_album_id) {
 			updateCounter($md_album_id, NJB_COUNTER_PLAY);
 		}

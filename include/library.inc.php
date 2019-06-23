@@ -179,8 +179,10 @@ function trackSubMenu($i, $track, $album_id = '', $type = 'echo') {
 		$track['track_id'] = $track['tid']; // needed in search.php 'Track Artist'
 	}
 	$tidalAlbumId = '';
-	if (is_numeric($track['album']['id'])) { //needed in play.php addTracks for TIDAL tracks not added to DB
-		$tidalAlbumId = '&amp;tidal_album_id=' . $track['album']['id']; 
+	
+	//needed in play.php addTracks for TIDAL tracks not added to DB:
+	if (isset($track['album']['id']) && is_numeric($track['album']['id'])) { 
+		$tidalAlbumId = '&amp;album_id=tidal_' . $track['album']['id']; 
 	}
 	
 	$track['relative_file'] = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $track['relative_file']);
@@ -647,13 +649,11 @@ function showAllFromTidal($searchStr, $size) {
 		$tracksList .= '
 		<tr class="header">
 			<td class="icon"></td><!-- track menu -->
-			<td class="icon">
-			<span onMouseOver="return overlib(\'Add all tracks\');" onMouseOut="return nd();">';
-		if ($cfg["access_add"]) {  
-			$tracksList .= '<i id="add_all_TT" class="fa fa-plus-circle fa-fw icon-small pointer"></i>';
+			<td class="icon">';
+		if ($cfg["access_add"] && false) {  
+			$tracksList .= '<span onMouseOver="return overlib(\'Add all tracks\');" onMouseOut="return nd();"><i id="add_all_TT" class="fa fa-plus-circle fa-fw icon-small pointer"></i></span>';
 		}
 		$tracksList .= '
-			</span>
 			</td><!-- add track -->
 			<td class="track-list-artist">Track artist&nbsp;</td>
 			<td>Title&nbsp;</td>
@@ -682,14 +682,22 @@ function showAllFromTidal($searchStr, $size) {
 				<td class="icon">
 				<span>';
 			if ($cfg['access_add']) {
-				$tracksList .= '<a href="javascript:ajaxRequest(\'play.php?action=addSelectUrl&amp;url=' . MPD_TIDAL_URL . $track['id'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . addslashes($track['title']) . '\');" onMouseOut="return nd();"><i id="add_tidal_' . $track['id'] . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';
+				$tracksList .= '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;album_id=tidal_' . $track['album']['id'] .'&amp;track_id=' . $track['track_id'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . addslashes($track['title']) . '\');" onMouseOut="return nd();"><i id="add_tidal_' . $track['id'] . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';
 			}
 			$tracksList .= '
 				</span>
 				</td>
-				<td class="track-list-artist">' . $track['artists'][0]['name'] . '</td>
-				<td>' . $track['title'] . '</td>
-				<td><a href="index.php?action=view3&amp;album_id=tidal_' . $track['album']['id'] . '">' . $track['album']['title'] . '</a></td>
+				<td class="track-list-artist">
+				<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['artists'][0]['name']) . '&amp;order=year">' . html($track['artists'][0]['name']) . '</a>
+				</td>
+				
+				<td><a id="a_play_track' . $i . '" href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;album_id=tidal_' . $track['album']['id'] .'&amp;track_id=' . $track['track_id'] . '&amp;position_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'Play track ' . $track['number'] . '\');" onMouseOut="return nd();">' . $track['title'] . '</a>
+				<span class="track-list-artist-narrow">by ' . html($track['artists'][0]['name']) . '</span>
+				</td>
+				
+				<td><a href="index.php?action=view3&amp;album_id=tidal_' . $track['album']['id'] . '">' . $track['album']['title'] . '</a>
+				</td>
+				
 				<td></td>
 				<td>' . formattedTime($track['duration'] * 1000) . '</td>
 				<td></td>

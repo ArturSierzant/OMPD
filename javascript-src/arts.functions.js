@@ -152,7 +152,7 @@ function evaluateAdd(data) {
 	if (data.random) {data.album_id = 'random'};
 	if (data.disc) {data.album_id = data.album_id + '_' + data.disc};
 	if (data.addType) {data.album_id = data.addType};
-	if (data.album_id) { 
+	if (data.album_id && !data.track_id) { 
 		if (data.addResult == 'add_OK') {
 			$('[id="add_' + data.album_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-check-square icon-ok');
 			offMenuSub('');
@@ -263,17 +263,22 @@ function evaluateAdd(data) {
 		}
 		else if (data.insertPlayResult == 'insert_OK') {
 			$('[id="insertPlay_' + data.track_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-check-square icon-ok');
+			$('[id="menu-icon' + data.position_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-check-square icon-ok');
 			offMenuSub('');
 			
 			setTimeout(function(){
 			  $('[id="insertPlay_' + data.track_id +'"]').removeClass('fa-check-square icon-ok').addClass('fa-play-circle');
+			  $('[id="menu-icon' + data.position_id +'"]').removeClass('fa-check-square icon-ok').addClass('fa-bars');
+			  
 			}, timeOut);
 		}
 		else if (data.insertPlayResult == 'insert_error') {
 			$('[id="insertPlay_' + data.track_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-exclamation-triangle icon-nok');
+			$('[id="menu-icon' + data.position_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-exclamation-triangle icon-nok');
 			
 			setTimeout(function(){
 			  $('[id="insertPlay_' + data.track_id +'"]').removeClass('fa-exclamation-triangle icon-nok').addClass('fa-play-circle');
+			  $('[id="menu-icon' + data.position_id +'"]').removeClass('fa-exclamation-triangle icon-nok').addClass('fa-bar');
 			}, timeOut);
 			
 		}
@@ -1114,6 +1119,10 @@ function doPlayAction(action, filepath, track_id, playAfterInsert, doFunction) {
 
 function setAnchorClick() {
 	$('a').click(function(){
+		if ($(this).attr('id').indexOf("a_play_track") > -1) {
+			var id = $(this).attr('id').replace("a_play_track","");
+			$("#menu-icon" + id).removeClass('fa-bars').addClass('fa-cog fa-spin icon-selected');
+		}
 		$(this).find('> i[id^="play_"]').removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
 		$(this).find('> i[id^="add_"]').removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
 		$(this).find('> i[id^="insertPlay_"]').removeClass('fa-play-circle').addClass('fa-cog fa-spin icon-selected');

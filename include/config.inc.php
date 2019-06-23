@@ -115,6 +115,8 @@ $cfg['tidal_token'] = "";
 //  | Port should be the same as plgmicrohttpport in /etc/upmpdcli.conf      |
 //  |                                                                        |
 //  | Using Tidal via upmpdcli lets you use mpd without Tidal plugin.        |
+//  |                                                                        |
+//  | Section 'Tidal' above must also be defined.                            |
 //  +------------------------------------------------------------------------+
 
 $cfg['upmpdcli_tidal'] = "";

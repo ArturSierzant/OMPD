@@ -1223,6 +1223,7 @@ function tidalSearchAll(){
 		}
 		
 		calcTileSize();
+		changeTileSizeInfo();
 		setAnchorClick();
 		requestDone = true;
 		//console.log (data.length);
