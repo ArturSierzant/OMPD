@@ -37,7 +37,7 @@ header('X-Accel-Buffering: no');
 
 define('NJB_START_TIME', microtime(true));
 
-define('NJB_VERSION', '1.04');
+define('NJB_VERSION', '1.05');
 define('NJB_DATABASE_VERSION', 45);
 define('NJB_IMAGE_SIZE', 300);
 define('NJB_IMAGE_QUALITY', 85);
@@ -47,6 +47,7 @@ define('NJB_HTTPS', (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !
 //define('NJB_HTTPS', ($_SERVER['HTTPS'] == 'off' ? false : true));
 
 define('TIDAL_ALBUM_URL','https://listen.tidal.com/album/');
+define('TIDAL_APP_ALBUM_URL','https://tidal.com/album/');
 define('TIDAL_MAX_CACHE_TIME', 24*60*60); //24h in [s]
 define('MPD_TIDAL_URL','tidal://track/');
 
@@ -712,6 +713,10 @@ function message($file, $line, $type, $message)	{
 		}
 		exit();
 	}
+	elseif (NJB_SCRIPT == 'update.php') {
+		mysqli_query($db,"UPDATE update_progress SET update_time = '" . mysqli_real_escape_string($db, bbcode($message) . "<br><a href='config.php?update=cancel'><i class='fa fa-times-circle pointer icon-selected'></i>&nbsp;&nbsp;Cancel update</a>") . "'");
+		exit();
+	}
 	elseif (NJB_SCRIPT != 'message.php') {
 		if (in_array(@$_GET['menu'], array('favorite', 'playlist', 'config')))
 			$cfg['menu'] = $_GET['menu'];
@@ -754,7 +759,7 @@ function message($file, $line, $type, $message)	{
 }
 
 //  +------------------------------------------------------------------------+
-//  | Check if default favorites playlist is created						 |
+//  | Check if default favorites playlist is created                         |
 //  +------------------------------------------------------------------------+
 function checkDefaultFavorites() {
 	global $cfg, $db;

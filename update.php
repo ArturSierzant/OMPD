@@ -39,6 +39,8 @@ require_once('include/library.inc.php');
 
 ignore_user_abort(true);
 
+register_shutdown_function('fatalErrorHandle');
+
 //exit();
 cliLog("Update started");
 
@@ -54,16 +56,16 @@ if (!isset($dir_to_update)) {
 }
 else {
 	$dir_to_update = myDecode($dir_to_update);
-	if (substr($dir_to_update,-1) != DIRECTORY_SEPARATOR){
-			$dir_to_update = $dir_to_update . DIRECTORY_SEPARATOR;
+	if (substr($dir_to_update,-1) != "/"){
+			$dir_to_update = $dir_to_update . "/";
 		}
 	//setcookie('update_dir', rtrim($dir_to_update,'/'), time() + (86400 * 30 * 365), "/");
 	setcookie('update_dir', $dir_to_update, time() + (86400 * 30 * 365), "/");
 	$cfg['force_filename_update'] = true;
 }
 
-if (substr($cfg['media_dir'],-1) != DIRECTORY_SEPARATOR){
-	$cfg['media_dir'] = $cfg['media_dir'] . DIRECTORY_SEPARATOR;
+if (substr($cfg['media_dir'],-1) != "/"){
+	$cfg['media_dir'] = $cfg['media_dir'] . "/";
 }
 
 $flag	= (int) getpost('flag');
@@ -168,7 +170,7 @@ function update($dir_to_update = '') {
 </table>
 <script>
 	hideSpinner();
-	window.setInterval(function() {
+	var intervalId = window.setInterval(function() {
 		show_update_progress();
 	}, 500);
 	
@@ -202,7 +204,13 @@ function update($dir_to_update = '') {
 				else
 					$("#cleanup").html(json['cleanup']);
 				
-				$("#updateTime").html(json['update_time']);
+				s = json['update_time'];
+				if (s.indexOf("Update error") > -1) {
+					$("#updateTime").html(json['update_time']);
+					clearInterval(intervalId);
+				}
+				else
+					$("#updateTime").html(json['update_time']);
 				
 			}
 		});
@@ -468,7 +476,7 @@ function recursiveScan($dir) {
         $entries = @scandir($dir);
     }
     else {
-        $entries = @scandir($dir) or message(__FILE__, __LINE__, 'error', '[b]Failed to open directory:[/b][br]' . $dir . '[list][*]Check media_dir value in the config.inc.php file[*]Check file permission[/list]');
+        $entries = @scandir($dir) or message(__FILE__, __LINE__, 'error', '[b]Update error![/b] [br][br][b]Failed to open directory:[/b][br]' . $dir . '[list][*]Check media_dir value in the config.inc.php file[*]Check file permission[/list]');
     }
 	
 	//$dir = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $dir);
@@ -622,7 +630,8 @@ function countDirectories($base_dir) {
 		$entries = @scandir($base_dir);
 	}
 	else {
-		$entries = @scandir($base_dir) or message(__FILE__, __LINE__, 'error', '[b]Failed to open directory:[/b][br]' . $base_dir . '[list][*]Check media_dir value in the config.inc.php file[*]Check file permission[/list]');
+		$entries = @scandir($base_dir) or message(__FILE__, __LINE__, 'error', '[b]Update error![/b] [br][br][b]Failed to open directory:[/b][br]' . $base_dir . '[list][*]Check media_dir value in the config.inc.php file[*]Check file permission[/list]');
+
 	}
 	$directories = array();
 	//foreach(scandir($base_dir) as $file) {
@@ -631,8 +640,8 @@ function countDirectories($base_dir) {
 		$extension = strtolower($extension); */
 		$extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
 		if (in_array($extension, $cfg['media_extension'])) $isMediaDir = 1;
-		$dir = $base_dir.DIRECTORY_SEPARATOR.$file;
-		if (substr($base_dir,-1) == DIRECTORY_SEPARATOR){
+		$dir = $base_dir. '/' .$file;
+		if (substr($base_dir,-1) == '/'){
 			$dir = $base_dir.$file;
 		}
 		if($file == '.' || $file == '..' || (is_dir($dir) === TRUE && in_array($file, $cfg['directory_blacklist']) === TRUE)) continue;
@@ -759,6 +768,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 		$file_d = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $file[0]);
 		
 		$ThisFileInfo = $getID3->analyze($file_d);
+		
 		getid3_lib::CopyTagsToComments($ThisFileInfo); 
 		
 		cliLog('getid3 ok');
@@ -766,9 +776,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 		$artist = parseAlbumArtist($ThisFileInfo);
 		
 		if ($artist == 'Unknown AlbumArtist') {
-			
 			$artist = parseTrackArtist($ThisFileInfo);
-			
 		};
 		
 		$artist_alphabetic	= $artist;
@@ -984,7 +992,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 				if ($ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/jpeg')	$image = NJB_HOME_DIR . 'tmp/' . $image_front_arr[0] . '.jpg';
 				if ($ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/png')	$image = NJB_HOME_DIR . 'tmp/' . $image_front_arr[0] . '.png';
 				if (file_put_contents($image, $ThisFileInfo['comments']['picture'][0]['data']) === false) 
-					message(__FILE__, __LINE__, 'error', '[b]Failed to write image to:[/b][br]' . $image .'[br] file: ' . $file[0] .'[br] data: [br]Check write permissions.');
+					message(__FILE__, __LINE__, 'error', '[b]Update error![/b] [br][br][b]Failed to write image to:[/b][br]' . $image .'[br] file: ' . $file[0] .'[br] data: [br]Check write permissions.');
 				$flag = 0; // No image
 				
 		}
@@ -1020,7 +1028,12 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	$query	= mysqli_query($db,'SELECT filesize, filemtime, image_id, flag FROM bitmap WHERE album_id = "' . $db->real_escape_string($album_id) . '"');
 	$bitmap	= mysqli_fetch_assoc($query);
 	
-	if ($bitmap['filesize'] == $filesize && filemtimeCompare($bitmap['filemtime'], $filemtime)) {
+	$imageRefresh = false;
+	if (strpos($bitmap['image_id'],'no_image') !== false) {
+		$imageRefresh = true;
+	}
+	
+	if ($bitmap['filesize'] == $filesize && filemtimeCompare($bitmap['filemtime'], $filemtime) && !$cfg['force_filename_update'] && !$imageRefresh) {
 		/* image_front			= "' . $db->real_escape_string($image_front) . '",
 			image_back			= "' . $db->real_escape_string($image_back) . '", */
 		mysqli_query($db,'UPDATE bitmap SET
@@ -1325,14 +1338,14 @@ function fileId($file) {
 	$filesize = filesize($file);
 	
 	if ($filesize > 5120) {
-		$filehandle	= @fopen($file, 'rb') or message(__FILE__, __LINE__, 'error', '[b]Failed to open file:[/b][br]' . $file . '[list][*]Check file permission[/list]');
+		$filehandle	= @fopen($file, 'rb') or message(__FILE__, __LINE__, 'error', '[b]Update error![/b] [br][br][b]Failed to open file:[/b][br]' . $file . '[list][*]Check file permission[/list]');
 		fseek($filehandle, round(0.5 * $filesize - 2560 - 1));
 		$data = fread($filehandle, 5120);
 		$data .= ($filesize + (microtime(true) * mt_rand(1,1000)));
 		fclose($filehandle);
 	}
 	else
-		$data = @file_get_contents($file) or message(__FILE__, __LINE__, 'error', '[b]Failed to open file:[/b][br]' . $file . '[list][*]Check file permission[/list]');
+		$data = @file_get_contents($file) or message(__FILE__, __LINE__, 'error', '[b]Update error![/b] [br][br][b]Failed to open file:[/b][br]' . $file . '[list][*]Check file permission[/list]');
 	
 	$crc32 = dechex(crc32($data));
 	return str_pad($crc32, 8, '0', STR_PAD_LEFT);
@@ -2004,7 +2017,7 @@ function resampleImage($image, $size = NJB_IMAGE_SIZE) {
 	
 	if (is_jpg($image) && imageSX($src_image) == $size && imageSY($src_image) == $size) {
 		cliLog("resampleImage data");
-		$data = @file_get_contents($image) or message(__FILE__, __LINE__, 'error', '[b]Failed to open file:[/b][br]' . $image);
+		$data = @file_get_contents($image) or message(__FILE__, __LINE__, 'error', '[b]Update error![/b] [br][br][b]Failed to open file:[/b][br]' . $image);
 	}
 	elseif (imageSY($src_image) / imageSX($src_image) <= 1) {
 		cliLog("resampleImage crop 1");
@@ -2100,5 +2113,19 @@ function logImageError() {
 	$image_front = $image = NJB_HOME_DIR . 'image/no_image.png';
 	$flag = 10; // image error
 }
+
+
+//  +------------------------------------------------------------------------+
+//  | Fatal error handling by https://stackoverflow.com/a/3389021            |
+//  +------------------------------------------------------------------------+
+function fatalErrorHandle() { 
+    $error = error_get_last();
+    // fatal error, E_ERROR === 1
+    if ($error['type'] === E_ERROR) {
+				cliLog('PHP Fatal Error: ' . $error['message'] . '; line: ' . $error['line'] . '; file: ' . $error['file']);
+				message(__FILE__, __LINE__, 'error', '[b]Update error![/b] [br][br][b]PHP Fatal Error[/b][br]' . $error['message'] . ' [br] File: ' . $error['file'] . '[br] Line: ' . $error['line'] . '[br]');
+    } 
+}
+
 
 ?>

@@ -100,13 +100,13 @@ elseif ($action == 'unique_played') {
 	$title = 'Played albums';
 	//$onmouseoverImage = true;
 	$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
-		FROM album RIGHT JOIN (SELECT DISTINCT counter.album_id FROM counter) as c
+		FROM album RIGHT JOIN (SELECT DISTINCT counter.album_id FROM counter WHERE counter.album_id NOT LIKE "tidal_%") as c
 		ON album.album_id = c.album_id
 		ORDER BY album.artist_alphabetic, album.album');
 	$cfg['items_count'] = $album_count = mysqli_num_rows($query);
 	if ($album_count > $max_item_per_page) {
 			$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
-			FROM album RIGHT JOIN (SELECT DISTINCT counter.album_id FROM counter) as c
+			FROM album RIGHT JOIN (SELECT DISTINCT counter.album_id FROM counter WHERE counter.album_id NOT LIKE "tidal_%") as c
 			ON album.album_id = c.album_id
 			ORDER BY album.artist_alphabetic, album.album
 			LIMIT ' . ($page - 1) * $max_item_per_page . ','  . ($max_item_per_page));
@@ -260,11 +260,11 @@ function mediaStatistics() {
 		HAVING n1 > 1 AND n2 > 1');
 	$duplicate_name = mysqli_affected_rows($db);
 	
-	$query = mysqli_query($db,'SELECT COUNT(*) as played FROM counter');
+	$query = mysqli_query($db,'SELECT COUNT(*) as played FROM counter WHERE album_id NOT LIKE "tidal_%"');
 	$rsPlayed = mysqli_fetch_assoc($query);
 	$total_played_albums = $rsPlayed['played'];
 	
-	$query = mysqli_query($db,'SELECT COUNT(c.album_id) as played FROM (SELECT DISTINCT album_id FROM counter) as c');
+	$query = mysqli_query($db,'SELECT COUNT(c.album_id) as played FROM (SELECT DISTINCT album_id FROM counter WHERE album_id NOT LIKE "tidal_%") as c');
 	$rsPlayedUnique = mysqli_fetch_assoc($query);
 	$unique_played_albums = $rsPlayedUnique['played'];
 	

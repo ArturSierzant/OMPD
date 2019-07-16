@@ -1899,7 +1899,7 @@ function viewPopular() {
 			});
 			$query_pop = mysqli_query($db,'SELECT album.artist, artist_alphabetic, COUNT(album.artist) as counter 
 				FROM album 
-				LEFT JOIN counter ON album.album_id = counter.album_id
+				JOIN counter ON album.album_id = counter.album_id
 				WHERE album.artist NOT IN (' . implode(',',$vaArray) . ')
 				GROUP BY album.artist
 				ORDER BY counter DESC, album.artist
@@ -1983,6 +1983,7 @@ function viewPopular() {
 </tr>
 
 <?php
+
 	
 	$i=0;
 	while ($album = mysqli_fetch_assoc($query_pop)) {
@@ -2017,7 +2018,7 @@ function viewPopular() {
 		$query_album = mysqli_query($db, "SELECT album.artist, artist_alphabetic, album.album, album.album_id, album.image_id, COUNT(*) as counter 
 			FROM album 
 			LEFT JOIN counter ON album.album_id = counter.album_id
-			WHERE album.artist = '" . $album['artist'] . "'
+			WHERE album.artist = '" . mysqli_real_escape_string($db, $album['artist']) . "'
 			GROUP BY album.album
 			ORDER BY counter DESC, album.album");
 	?>

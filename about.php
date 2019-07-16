@@ -159,13 +159,14 @@ function about() {
 <tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
-	<td style="vertical-align: top;">v1.05 <br>201?.??.??</td>
+	<td style="vertical-align: top;">v1.05 <br>2019.0?.??</td>
 	<td></td>
 	<td>
 	<ul style="padding-left: 1em;">
 	<li> added support for TIDAL</li>
 	<li> added support for COMPOSER tag (partially settable in config.inc.php)</li>
 	<li> added 'Show favorite tracks' for selected genre</li>
+	<li> added popularity of artists (Library -> Popular -> Artist)</li>
 	<li> added info about Track Dynamic Range in track lists (settable in config.inc.php)</li>
 	<li> changed genre view</li>
 	<li> fixed bugs</li>
@@ -175,7 +176,8 @@ function about() {
 	<td></td>
 </tr>
 <tr class="line"><td colspan="5"></td></tr>
-<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+<tr class="<?php echo ($i++ & 1) ? 
+'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
 	<td style="vertical-align: top;">v1.04 <br>2018.07.24</td>
 	<td></td>

@@ -160,7 +160,7 @@ function mpd($command,$player_host="",$player_port="") {
 		}
 	};
 	while (!feof($soket)) {
-		$line = trim(@fgets($soket, 1024));
+		$line = trim(@fgets($soket, 2048));
 		if (substr($line, 0, 3) == 'ACK') {
 			//file doesn't exist or no access to file
 			if (substr($line, 0, 8) == 'ACK [50@' || substr($line, 0, 7) == 'ACK [4@') {
@@ -368,7 +368,7 @@ function mpdSilent($command,$player_host="",$player_port="") {
 	};
 	
 	while (!feof($soket)) {
-		$line = trim(@fgets($soket, 1024));
+		$line = trim(@fgets($soket, 2048));
 		if (substr($line, 0, 3) == 'ACK') {
 			//file doesn't exists or no access to file
 			if (substr($line, 0, 8) == 'ACK [50@' || substr($line, 0, 7) == 'ACK [4@') {

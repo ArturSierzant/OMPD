@@ -560,7 +560,7 @@ function addSelectUrl() {
 				$data['track_id'] = 'tidal_' . $id;
 			}
 			//TIDAL album
-			elseif (strpos($url,TIDAL_ALBUM_URL) !== false) {
+			elseif (strpos($url,TIDAL_ALBUM_URL) !== false || strpos($url,TIDAL_APP_ALBUM_URL) !== false) {
 				$tidal_tracks = getTracksFromTidalAlbum($id);
 				$tidal_tracks = json_decode($tidal_tracks, true);
 			

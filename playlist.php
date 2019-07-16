@@ -243,6 +243,7 @@ for ($i=0; $i < $listlength; $i++) {
 		$query = mysqli_query($db,'SELECT track.title, track.artist, track.track_artist, track.featuring, track.miliseconds, track.track_id, track.genre, album.genre_id, track.audio_dataformat, track.audio_bits_per_sample, track.audio_sample_rate, track.album_id, track.number, track.track_id, track.dr, track.year as trackYear FROM track, album WHERE track.album_id=album.album_id AND track.track_id = "' . 	mysqli_real_escape_string($db,$t_id) . '"');
 	}
 	$table_track = mysqli_fetch_assoc($query);
+	
 	$playtime[] = (int) $table_track['miliseconds'];
 	//$playlistTT = $playlistTT + (int) $table_track['miliseconds'];
 	$track_id[] = (string) $table_track['track_id'];
@@ -279,6 +280,7 @@ for ($i=0; $i < $listlength; $i++) {
 			$table_track['title'] = urldecode($query['ompd_title']);
 			$table_track['album'] = urldecode($query['ompd_webpage']);
 			$playlistinfo['Time'] = (int)urldecode($query['ompd_duration']);
+			$table_track['track_artist'] = "";
 		}
 		elseif (strpos($playlistinfo['file'],'tidal://') !== false || strpos($playlistinfo['file'],$cfg['upmpdcli_tidal']) !== false) {
 			//stream from Tidal unrecognized by mpd
