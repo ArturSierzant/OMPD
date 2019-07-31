@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2018 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -145,6 +145,7 @@ function evaluateStatus(data) {
 	}
 	else {
 		document.getElementById('track_number').innerHTML = "Playlist is empty";
+		document.getElementById('artist_mini').innerHTML = "";
 	}
 	
 	evaluateListpos(data.listpos);

@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2018 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -555,7 +555,7 @@ else {
 //var size = $tileSize;
 var size = <?php echo $size; ?>;
 console.log ('$tileSize: ' + $tileSize);
-var artist = '<?php echo $artist; ?>';
+var artist = '<?php echo tidalEscapeChar($artist); ?>';
 var request = $.ajax({  
 	url: "ajax-tidal-search.php",  
 	type: "POST",  

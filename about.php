@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2018 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -84,7 +84,7 @@ function about() {
 <tr class="header header_bigger">
 	<td class="space"></td>
 	<td colspan="3" style="white-space: normal;">
-	O!MPD&nbsp;<?php echo html(NJB_VERSION); ?>,&nbsp;Copyright&nbsp;&copy;&nbsp;2015-2018&nbsp;Artur&nbsp;Sier&#380;ant<br>
+	O!MPD&nbsp;<?php echo html(NJB_VERSION); ?>,&nbsp;Copyright&nbsp;&copy;&nbsp;2015-2019&nbsp;Artur&nbsp;Sier&#380;ant<br>
 	
 	</td>
 	<td class="space"></td>
@@ -159,12 +159,12 @@ function about() {
 <tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
-	<td style="vertical-align: top;">v1.05 <br>2019.0?.??</td>
+	<td style="vertical-align: top;">v1.05 <br>2019.07.31</td>
 	<td></td>
 	<td>
 	<ul style="padding-left: 1em;">
 	<li> added support for TIDAL</li>
-	<li> added support for COMPOSER tag (partially settable in config.inc.php)</li>
+	<li> added support for COMPOSER tag (settable in config.inc.php)</li>
 	<li> added 'Show favorite tracks' for selected genre</li>
 	<li> added popularity of artists (Library -> Popular -> Artist)</li>
 	<li> added info about Track Dynamic Range in track lists (settable in config.inc.php)</li>

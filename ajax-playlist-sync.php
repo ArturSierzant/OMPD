@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2018 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -103,7 +103,8 @@ elseif ($action == 'Add') {
 		if ($action_status == 'ACK_ERROR_NO_EXIST'){
 			//file not found in MPD database - add stream
 			$dest_playlist = mpdSilent('playlist', $dest_host, $dest_port);
-			if (!$dest_playlist) {
+			if (!$dest_playlist && count($dest_playlist) <> 0) {
+				$data['dest_playlist'] = $dest_playlist[0];
 				echo json_encode($data);
 				exit();
 			}

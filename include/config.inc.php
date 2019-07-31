@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2018 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -85,7 +85,7 @@ $cfg['show_composer'] = false;
 //  | If that doesn't work try to define path to Python binaries in section  |
 //  | 'Play audio from Youtube' in $cfg['python_path']                       |
 //  |                                                                        |
-//  | Also token is required. You can find instruction how to get it from    |
+//  | Token is also required. You can find instruction how to get it from    |
 //  | https://github.com/lucaslg26/TidalAPI                                  |
 //  |                                                                        |
 //  | And mpd must have Tidal plugin properly configured:                    |

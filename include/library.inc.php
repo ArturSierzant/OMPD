@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2018 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -695,7 +695,7 @@ function showAllFromTidal($searchStr, $size) {
 				<span class="track-list-artist-narrow">by ' . html($track['artists'][0]['name']) . '</span>
 				</td>
 				
-				<td><a href="index.php?action=view3&amp;album_id=tidal_' . $track['album']['id'] . '">' . $track['album']['title'] . '</a>
+				<td><a id="a_album' . $i . '" href="index.php?action=view3&amp;album_id=tidal_' . $track['album']['id'] . '">' . $track['album']['title'] . '</a>
 				</td>
 				
 				<td></td>
@@ -1708,6 +1708,7 @@ function mpdEscapeChar($str1){
 function tidalEscapeChar($str1){
 	
 	$str1 = str_replace('"','',$str1);
+	$str1 = str_replace("'",'',$str1);
 	$str1 = str_replace('&','',$str1);
 	
 	return $str1;

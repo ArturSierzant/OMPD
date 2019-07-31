@@ -1,5 +1,5 @@
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015 Artur Sierzant                                 |
+//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -1119,8 +1119,13 @@ function doPlayAction(action, filepath, track_id, playAfterInsert, doFunction) {
 
 function setAnchorClick() {
 	$('a').click(function(){
-		if ($(this).attr('id').indexOf("a_play_track") > -1) {
-			var id = $(this).attr('id').replace("a_play_track","");
+		if (this.hasAttribute('id')) {
+			if ($(this).attr('id').indexOf("a_play_track") > -1) {
+				var id = $(this).attr('id').replace("a_play_track","");
+			}
+			if ($(this).attr('id').indexOf("a_album") > -1) {
+				var id = $(this).attr('id').replace("a_album","");
+			}
 			$("#menu-icon" + id).removeClass('fa-bars').addClass('fa-cog fa-spin icon-selected');
 		}
 		$(this).find('> i[id^="play_"]').removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
@@ -1129,5 +1134,6 @@ function setAnchorClick() {
 		$(this).find('> i[id^="insert_"]').removeClass('fa-indent').addClass('fa-cog fa-spin icon-selected');
 		$(this).find('> i[id^="playTo_"]').removeClass('fa-share-square-o').addClass('fa-cog fa-spin icon-selected');
 		$(this).find('> i[id^="randomPlay"]').removeClass('fa-random').addClass('fa-cog fa-spin icon-selected');
+		
 	})
 };

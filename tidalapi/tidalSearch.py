@@ -25,6 +25,11 @@ if field == 'artist':
 		artist_id = searchResults.artists[0].id
 		artist_bio = session.get_artist_bio(artist_id)
 		artist = searchResults.artists[0].name
+		for art in searchResults.artists:
+			if art.name.lower() == value.lower():
+				artist_id = art.id
+				artist_bio = session.get_artist_bio(artist_id)
+				artist = art.name
 		albums_list = session.get_artist_albums(artist_id)
 		for album in albums_list:
 			item = {"album_id" : album.id, "album_title" : album.name, "album_date" : str(album.release_date), "album_duration" : str(album.duration)}
