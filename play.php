@@ -2081,7 +2081,7 @@ function updateAddPlay() {
 	$album_id = get('album_id');
 	$data = array();
 	
-	sleep(6);
+	//sleep(6);
 	
 	$query = mysqli_query($db,'SELECT COUNT(c.album_id) as counter, c.time FROM (SELECT time, album_id FROM counter WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '" ORDER BY time DESC) c ORDER BY c.time');
 	$played = mysqli_fetch_assoc($query);

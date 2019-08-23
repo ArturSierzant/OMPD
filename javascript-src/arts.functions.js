@@ -147,6 +147,7 @@ function evaluatePlayTo(data) {
 
 function evaluateAdd(data) {
 	var timeOut = 2000;
+	albumId = data.album_id;
 	if (data.favorite_id) {data.album_id = data.favorite_id};
 	if (data.file_id) {data.album_id = data.file_id};
 	if (data.random) {data.album_id = 'random'};
@@ -283,7 +284,18 @@ function evaluateAdd(data) {
 			
 		}
 	}
-	
+	if (albumId){
+	$.ajax({  
+			url: "play.php",  
+			type: "GET",  
+			data: { action : 'updateAddPlay',
+					album_id : albumId,
+					},  
+			dataType: "json"
+		}).done(function(data) {
+			updateAddPlay(data);
+		}); 
+	}
 };
 
 function playAlbum(albumId, md){

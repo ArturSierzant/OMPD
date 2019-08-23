@@ -385,12 +385,23 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 	FROM tidal_album 
 	WHERE artist = '" . mysqli_real_escape_string($db,$artist) . "'
 	AND last_update_time > 0";
+	$query = mysqli_query($db, $sql);
+	$res = mysqli_fetch_assoc($query);
+	$minDate = $res['min_last_update_time'];
 	
+	$sql = "SELECT MAX(last_update_time) as min_last_update_time 
+	FROM tidal_album 
+	WHERE artist = '" . mysqli_real_escape_string($db,$artist) . "'
+	AND last_update_time > 0";
 	$query = mysqli_query($db, $sql);
 	$res = mysqli_fetch_assoc($query);
 	$data = array();
 	
-	if ($res['min_last_update_time'] < (time() - TIDAL_MAX_CACHE_TIME) || !$query) {
+	//prevent diaplaying albums deleted from Tidal
+	$forceUpdate = false;
+	if (abs($res['min_last_update_time'] - $minDate) > 10) $forceUpdate = true;
+	
+	if ($res['min_last_update_time'] < (time() - TIDAL_MAX_CACHE_TIME) || !$query || $forceUpdate) {
 	
 		$field = 'artist';
 		$value = $artist;
@@ -413,6 +424,8 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 		}
 		//echo("Bio:" . $artist["artist_bio"] . "<br>");
 		if ($artist['albums']) {
+			$sql = "DELETE FROM tidal_album WHERE artist = '" . mysqli_real_escape_string($db,$value) . "'";
+			mysqli_query($db, $sql);
 			$albums = json_decode($output[0], true)['albums'];
 			usort($albums, function ($a, $b) {
 				return $a['album_date'] <=> $b['album_date'];

@@ -70,12 +70,28 @@ else
 
 
 $featuring = false;
-/* for ($i=0; $i < $listlength && !$featuring; $i++) {
-	$query = mysqli_query($db,'SELECT featuring FROM track WHERE featuring != "" AND relative_file = "' . mysqli_real_escape_string($db,$file[$i]) . '"');
-	if (mysqli_fetch_row($query)) $featuring = true;
-} */
+
 if (count($file) == 0) {
-	message(__FILE__, __LINE__, 'warning', '[b]Playlist is empty[/b][br][br][url=index.php]Add[/url] some music!');
+	?>
+	
+	<table cellspacing="10" cellpadding="0" class="warning" align="center">
+	<tr>
+		<td rowspan="3" valign="top"><img src="<?php echo $cfg['img']; ?>medium_message_warning.png" alt=""></td>
+		<td><strong>Playlist is empty</strong><br><br><a href="index.php">Add</a> some music!</td>
+	</tr>
+	</table>
+	
+	<script>
+	var timer_id = 0;
+	var timer_function = 'ajaxRequest("play.php?action=playlistStatus&menu=playlist", evaluateStatus)';
+	var timer_delay = 1000;
+	function evaluateStatus (data) {
+		if (data.totalTracks > 0) {
+			location.reload();
+		}
+	}
+	</script>
+	<?php
 	require_once('include/footer.inc.php');
 	exit;
 }

@@ -265,6 +265,9 @@ function evaluateTrack(data) {
 			//}
 		}
 	}
+	/* else if (typeof data.track_artist == 'undefined') {
+		artist = '';
+	} */
 	else {
 		artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + data.track_artist_url_all + '">' + data.track_artist + '</a>';
 	}
@@ -296,7 +299,7 @@ function evaluateTrack(data) {
 		document.getElementById('artist_mini').innerHTML = albumLink;
 		}
 	//else if (data.album != '&nbsp;' && artist != '' && data.totalTracks > 0) {
-	else if (data.album != '&nbsp;' && artist != '') {
+	else if (data.album != '&nbsp;' && artist != '' && artist != '<a href="index.php?action=view2&order=year&sort=asc&artist="></a>') {
 		document.getElementById('artist_mini').innerHTML = 'by ' + artist + ' from ' + data.album;
 	}
 	else if (data.album != '&nbsp;') {
@@ -305,8 +308,9 @@ function evaluateTrack(data) {
 	else {
 		$("#artist_mini").hide();
 	}
-	
-	console.log ('art: ' + artist);
+	//$("#artist_mini").show();
+	//console.table (data);
+	console.log ("artist: " + artist);
 	
 	if (data.album_id) {
 		$("#image_in_mini").attr("src","image.php?image_id=" + data.image_id + "&track_id=" + data.track_id);
