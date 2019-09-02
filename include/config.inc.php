@@ -77,15 +77,7 @@ $cfg['show_composer'] = false;
 //  +------------------------------------------------------------------------+
 //  | Tidal                                                                  |
 //  +------------------------------------------------------------------------+
-//  | Support for Tidal requires Python. By dafault Python scripts will be   |
-//  | executed by simply calling:                                            |
-//  |                                                                        |
-//  | python script.py                                                       |
-//  |                                                                        |
-//  | If that doesn't work try to define path to Python binaries in section  |
-//  | 'Play audio from Youtube' in $cfg['python_path']                       |
-//  |                                                                        |
-//  | Token is also required. You can find instruction how to get it from    |
+//  | Token is required. You can find instruction how to get it from         |
 //  | https://github.com/lucaslg26/TidalAPI                                  |
 //  |                                                                        |
 //  | And mpd must have Tidal plugin properly configured:                    |

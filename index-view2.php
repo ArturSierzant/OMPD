@@ -572,7 +572,7 @@ request.done(function( data ) {
 		var jsonObj = JSON.parse(data);
 		if (jsonObj.return == 1) {
 			$("#albumsLoadingIndicator").hide();
-			$("#searchResultsTI").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Python script.<br>Error message:<br><br>' + jsonObj.response + '</div>');
+			$("#searchResultsTI").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Tidal request.<br>Error message:<br><br>' + jsonObj.response + '</div>');
 		}
 		else {
 			$("#albumsLoadingIndicator").hide();

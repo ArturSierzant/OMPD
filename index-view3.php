@@ -56,7 +56,7 @@ if (strpos($album_id, 'tidal_') !== false) {
 	else {
 		$getAlbum = json_decode(getAlbumFromTidal(getTidalId($album_id)),true);
 		if ($getAlbum['return'] == 1) {
-			$errMessage = '[b]Error in executing Python script[/b][br]Error message:[br]'; 
+			$errMessage = '[b]Error in execution Tidal request.[/b][br]Error message:[br]'; 
 			foreach($getAlbum['response'] as $res){
 				$errMessage .= $res . '[br]';
 			}

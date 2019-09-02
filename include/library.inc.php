@@ -380,7 +380,6 @@ function listOfFavorites($file = true, $stream = true) {
 function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 	global $cfg, $db;
 	
-	
 	$sql = "SELECT MIN(last_update_time) as min_last_update_time 
 	FROM tidal_album 
 	WHERE artist = '" . mysqli_real_escape_string($db,$artist) . "'
@@ -395,6 +394,7 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 	AND last_update_time > 0";
 	$query = mysqli_query($db, $sql);
 	$res = mysqli_fetch_assoc($query);
+	
 	$data = array();
 	
 	//prevent diaplaying albums deleted from Tidal
@@ -402,45 +402,95 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 	if (abs($res['min_last_update_time'] - $minDate) > 10) $forceUpdate = true;
 	
 	if ($res['min_last_update_time'] < (time() - TIDAL_MAX_CACHE_TIME) || !$query || $forceUpdate) {
-	
-		$field = 'artist';
-		$value = $artist;
-		$command = tidalSearchCommand($field, $value);
+		$t = new TidalAPI;
+		$t->username = $cfg["tidal_username"];
+		$t->password = $cfg["tidal_password"];
+		$t->token = $cfg["tidal_token"];
+		if (NJB_WINDOWS) $t->fixSSLcertificate();
+		$conn = $t->connect();
 		
-		$exeRes = exec($command, $output, $ret);
-		//echo $exeRes;
-		if ($ret == 1) { //error in execution python script
-			$data['return'] = $ret;
-			$data['response'] = $output;
+		if ($conn === true){
+			if ($tidalArtistId) {
+				$results = $t->getArtistAlbums($tidalArtistId,999);
+			}
+			else if ($artist) {
+				$results = $t->search("artists",$artist);
+				if (count($results) == 0) {
+					if ($ajax) {
+						$data['results'] = 0;
+						echo safe_json_encode($data);
+						return;
+					}
+					else {
+						echo "No results found on TIDAL.";
+						return;
+					}
+				}
+				else {
+					foreach($results["items"] as $res) {
+						if (strtolower($res["name"]) == strtolower($artist)){
+							$tidalArtistId = $res["id"];
+							break;
+						}
+					}
+					$results = $t->getArtistAlbums($tidalArtistId,999);
+				}
+			}
+		}
+		else {
+			$data['return'] = $conn["return"];
+			$data['response'] = $conn["error"];
 			echo safe_json_encode($data);
 			return;
 		}
 
-		$artist = json_decode($output[0], true);
-		if ($artist['results'] == '0') {
-			$data['results'] = 0;
-			echo safe_json_encode($data);
-			return;
+		if ($results['totalNumberOfItems'] === 0) {
+			if ($ajax) {
+				$data['results'] = 0;
+				echo safe_json_encode($data);
+				return;
+			}
+			else {
+				echo "No results found on TIDAL.";
+				return;
+			}
 		}
-		//echo("Bio:" . $artist["artist_bio"] . "<br>");
-		if ($artist['albums']) {
-			$sql = "DELETE FROM tidal_album WHERE artist = '" . mysqli_real_escape_string($db,$value) . "'";
+
+		if ($results['items']) {
+			$sql = "DELETE FROM tidal_album WHERE artist_id = '" . mysqli_real_escape_string($db,$tidalArtistId) . "'";
 			mysqli_query($db, $sql);
-			$albums = json_decode($output[0], true)['albums'];
+			$albums = $results['items'];
 			usort($albums, function ($a, $b) {
-				return $a['album_date'] <=> $b['album_date'];
+				return $a['releaseDate'] <=> $b['releaseDate'];
 			});
 			foreach ($albums as $album) {
+				
+				$artists = '';
+				foreach ($album["artists"] as $a){
+					if ($artists == ''){
+						$artists = $a["name"];
+					}
+					else {
+						$artists = $artists . " & " . $a["name"];
+					}
+				}
+				if ($artists == '') $artists = $album["artist"]["name"];
+				
 				$sql = "REPLACE INTO tidal_album 
 				(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time)
 				VALUES (
-				'" . $album["album_id"] . "', '" . mysqli_real_escape_string($db,$artist["artist"]) . "', '" . mysqli_real_escape_string($db,$artist["artist"]) . "', '" . $artist["artist_id"] . "', '" . mysqli_real_escape_string($db,$album["album_title"]) . "', '" . $album["album_date"] . "', '', 1, '" . $album["album_duration"] . "','" . time() . "')";
+				'" . $album["id"] . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . $album["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$album["title"]) . "', '" . $album["releaseDate"] . "', '', 1, '" . $album["duration"] . "','" . time() . "')";
+				
+				/* $sql = "REPLACE INTO tidal_album 
+				(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time)
+				VALUES (
+				'" . $album["id"] . "', '" . mysqli_real_escape_string($db,$album["artist"]["name"]) . "', '" . mysqli_real_escape_string($db,$album["artist"]["name"]) . "', '" . $album["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$album["title"]) . "', '" . $album["releaseDate"] . "', '', 1, '" . $album["duration"] . "','" . time() . "')"; */
 				
 				mysqli_query($db, $sql);
 				
-				$tidalAlbum["album_id"] = 'tidal_' . $album["album_id"];
-				$tidalAlbum["album"] = $album["album_title"];
-				$tidalAlbum["artist_alphabetic"] = $artist["artist"];
+				$tidalAlbum["album_id"] = 'tidal_' . $album["id"];
+				$tidalAlbum["album"] = $album["title"];
+				$tidalAlbum["artist_alphabetic"] = $artists;
 				draw_tile($size, $tidalAlbum);
 			}
 		}
@@ -478,34 +528,83 @@ function getAlbumFromTidal($album_id) {
 
 	$data = array();
 	
-	$field = 'album';
-	$value = $album_id;
-	$command = tidalSearchCommand($field, $value);
-	
-	$exeRes = exec($command, $output, $ret);
-	//echo $exeRes;
-	if ($ret == 1) { //error in execution python script
-		$data['return'] = $ret;
-		$data['response'] = $output;
-		return safe_json_encode($data);
+	$t = new TidalAPI;
+	$t->username = $cfg["tidal_username"];
+	$t->password = $cfg["tidal_password"];
+	$t->token = $cfg["tidal_token"];
+	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	$conn = $t->connect();
+	if ($conn === true){
+		$results = $t->getAlbum($album_id);
 	}
-
-	$album = json_decode($output[0], true);
-	$album = $album[0];
-	if (count($album) == '0') {
+	else {
+		$data['return'] = $conn["return"];
+		$data['response'] = $conn["error"];
+		echo safe_json_encode($data);
+		return;
+	}
+	
+	if (count($results) == 0) {
 		$data['results'] = 0;
 		return safe_json_encode($data);
 	}
 	
+	$artists = '';
+	foreach ($results["artists"] as $a){
+		if ($artists == ''){
+			$artists = $a["name"];
+		}
+		else {
+			$artists = $artists . " & " . $a["name"];
+		}
+	}
+	if ($artists == '') $artists = $results["artist"]["name"];
+	
 	$sql = "REPLACE INTO tidal_album 
 	(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time)
 	VALUES (
-	'" . $album["album_id"] . "', '" . mysqli_real_escape_string($db,$album["artists"]["name"]) . "', '" . mysqli_real_escape_string($db,$album["artists"]["name"]) . "', '" . $album["artists"]["id"] . "', '" . mysqli_real_escape_string($db,$album["album_title"]) . "', '" . $album["album_date"] . "', '', 1, '" . $album["album_duration"] . "','0')";
+	'" . $results["id"] . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . $results["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$results["title"]) . "', '" . $results["releaseDate"] . "', '', 1, '" . $results["duration"] . "','0')";
+	
+	/* $sql = "REPLACE INTO tidal_album 
+	(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time)
+	VALUES (
+	'" . $results["id"] . "', '" . mysqli_real_escape_string($db,$results["artist"]["name"]) . "', '" . mysqli_real_escape_string($db,$results["artist"]["name"]) . "', '" . $results["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$results["title"]) . "', '" . $results["releaseDate"] . "', '', 1, '" . $results["duration"] . "','0')"; */
 	
 	mysqli_query($db, $sql);
 	$data['results'] = 1;
 	return safe_json_encode($data);
 }
+
+
+//  +------------------------------------------------------------------------+
+//  | Album from Tidal with selected track                                   |
+//  +------------------------------------------------------------------------+
+function getTrackAlbumFromTidal($track_id) {
+	global $cfg, $db;
+
+	$data = array();
+	
+	$t = new TidalAPI;
+	$t->username = $cfg["tidal_username"];
+	$t->password = $cfg["tidal_password"];
+	$t->token = $cfg["tidal_token"];
+	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	$conn = $t->connect();
+	if ($conn === true){
+		$results = $t->getTrack($track_id);
+	}
+	else {
+		return false;
+	}
+	
+	if ($album = $results["album"]["id"]) {
+		return $album;
+	}
+	else {
+		return false;
+	}
+	
+	}
 
 
 
@@ -517,39 +616,61 @@ function getTracksFromTidalAlbum($album_id, $order = '') {
 	$field = 'albumTracks';
 	$value = $album_id;
 	
-	$sql = "SELECT album_id FROM tidal_album WHERE album_id = " . $value;
+	$sql = "SELECT album_id FROM tidal_album WHERE album_id = " . $album_id;
 	$query = mysqli_query($db,$sql);
 	if (mysqli_num_rows($query) == 0) {
-		getAlbumFromTidal($value);
+		getAlbumFromTidal($album_id);
 	}
-	$command = tidalSearchCommand($field, $value);
+	 
+	$t = new TidalAPI;
+	$t->username = $cfg["tidal_username"];
+	$t->password = $cfg["tidal_password"];
+	$t->token = $cfg["tidal_token"];
+	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	$conn = $t->connect();
+	if ($conn === true){
+		$results = $t->getAlbumTracks($album_id);
+	}
+	else {
+		$data['return'] = $conn["return"];
+		$data['response'] = $conn["error"];
+		echo safe_json_encode($data);
+		return;
+	}
 	
-	exec($command, $output, $ret);
-	
-	if ($ret == 1) { //error in execution python script
-		$data['return'] = $ret;
-		$data['response'] = $output;
+	if (!$results["totalNumberOfItems"]) {
+		$data['results'] = 0;
 		return safe_json_encode($data);
 	}
-	
-	$tracks = json_decode($output[0], true);
+	 
+	$tracks = $results["items"];
 	//echo("Bio:" . $artist["artist_bio"] . "<br>");
 	if (count($tracks) > 0) {
 		if ($order == 'DESC') {
 			usort($tracks, function ($a, $b) {
-				return $b['disc_number'] <=> $a['disc_number'] ?: $b['track_number'] <=> $a['track_number'];
+				return $b['volumeNumber'] <=> $a['volumeNumber'] ?: $b['trackNumber'] <=> $a['trackNumber'];
 			});
 		}
 		else {
 			usort($tracks, function ($a, $b) {
-				return $a['disc_number'] <=> $b['disc_number'] ?: $a['track_number'] <=> $b['track_number'];
+				return $a['volumeNumber'] <=> $b['volumeNumber'] ?: $a['trackNumber'] <=> $b['trackNumber'];
 			});
 		}
 		foreach ($tracks as $track){
+			$artists = '';
+			foreach ($track["artists"] as $a){
+				if ($artists == ''){
+					$artists = $a["name"];
+				}
+				else {
+					$artists = $artists . " & " . $a["name"];
+				}
+			}
+			if ($artists == '') $artists = $track["artist"]["name"];
 			$sql = "REPLACE INTO tidal_track 
 			(track_id, title, artist, artist_alphabetic, genre_id, disc, seconds, number, album_id)
 			VALUES (
-			'" . $track["track_id"] . "', '" . mysqli_real_escape_string($db,$track["track_title"]) . "', '" . mysqli_real_escape_string($db,$track["track_artist"]) . "', '" . mysqli_real_escape_string($db,$track["track_artist"]) . "', '', '" . $track["disc_number"] . "', '" . $track["track_duration"] . "', '" . $track["track_number"] . "', '" . $album_id . "')";
+			'" . $track["id"] . "', '" . mysqli_real_escape_string($db,$track["title"]) . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . mysqli_real_escape_string($db,$artists) . "', '', '" . $track["volumeNumber"] . "', '" . $track["duration"] . "', '" . $track["trackNumber"] . "', '" . $album_id . "')";
 			
 			mysqli_query($db, $sql);
 		}
@@ -559,7 +680,7 @@ function getTracksFromTidalAlbum($album_id, $order = '') {
 	return false;
 }
 
-
+/* 
 //  +------------------------------------------------------------------------+
 //  | Artists from Tidal                                                     |
 //  +------------------------------------------------------------------------+
@@ -597,7 +718,7 @@ function showArtistsFromTidal($artist, $size) {
 		//echo ('</div>');
 	}
 }
-
+ */
 
 //  +------------------------------------------------------------------------+
 //  | All from Tidal                                                         |
@@ -610,39 +731,44 @@ function showAllFromTidal($searchStr, $size) {
 	$albumsList = "";
 	$data = array();
 	
-	$command = tidalSearchCommand($field, $value);
-	
-	exec($command, $output, $ret);
-	
-	if ($ret == 1) { //error in execution python script
-		$data['return'] = $ret;
-		$data['response'] = $output;
+	$t = new TidalAPI;
+	$t->username = $cfg["tidal_username"];
+	$t->password = $cfg["tidal_password"];
+	$t->token = $cfg["tidal_token"];
+	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	$conn = $t->connect();
+	if ($conn === true){
+		$results = $t->searchAll($value);
+	}
+	else {
+		$data['return'] = $conn["return"];
+		$data['response'] = $conn["error"];
 		echo safe_json_encode($data);
 		return;
 	}
 	
-	$results = json_decode($output[0], true);
 	
-	if (count($results[0]['artists']['items']) == 0) {
+	
+	if (count($results['artists']['items']) == 0) {
 		$data['artists_results'] = 0;
 	}
-	if ($results[0]['artists']['items']) {
-		$data['artists_results'] = count($results[0]['artists']['items']);
+	if ($results['artists']['items']) {
+		$data['artists_results'] = count($results['artists']['items']);
 		$artistsList = '<table class="border" cellspacing="0" cellpadding="0">';
-		foreach ($results[0]['artists']['items'] as $art) {
+		foreach ($results['artists']['items'] as $art) {
 			$artistsList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=viewTidalAlbums&amp;tidalArtist=' . rawurlencode($art['name']) . '&amp;tidalArtistId=' . rawurlencode($art['id']). '&amp;order=year">' . html($art['name']) . '</a></td></tr>';
 			}
 		$artistsList .= '</table>';
 		$data['artists'] = $artistsList;
 	}
 	
-	if (count($results[0]['albums']['items']) == 0) {
+	if (count($results['albums']['items']) == 0) {
 		$data['albums_results'] = 0;
 	}
-	if ($results[0]['albums']['items']) {
-		$data['albums_results'] = count($results[0]['albums']['items']);
+	if ($results['albums']['items']) {
+		$data['albums_results'] = count($results['albums']['items']);
 		$albumsList = '<table class="border" cellspacing="0" cellpadding="0">';
-		foreach ($results[0]['albums']['items'] as $art) {
+		foreach ($results['albums']['items'] as $art) {
 			$album['album_id'] = 'tidal_' . $art['id'];
 			$album['artist_alphabetic'] = $art['artists'][0]['name'];
 			$album['album'] = $art['title'];
@@ -653,11 +779,11 @@ function showAllFromTidal($searchStr, $size) {
 		$data['albums'] = $albumsList;
 	}
 	
-	if (count($results[0]['tracks']['items']) == 0) {
+	if (count($results['tracks']['items']) == 0) {
 		$data['tracks_results'] = 0;
 	}
-	if ($results[0]['tracks']['items']) {
-		$data['tracks_results'] = count($results[0]['tracks']['items']);
+	if ($results['tracks']['items']) {
+		$data['tracks_results'] = count($results['tracks']['items']);
 		$tracksList = '<table class="border" cellspacing="0" cellpadding="0">';
 		$tracksList .= '
 		<tr class="header">
@@ -678,7 +804,7 @@ function showAllFromTidal($searchStr, $size) {
 		
 		$i=20000;
 		$TT_ids = ''; 
-		foreach ($results[0]['tracks']['items'] as $track) {
+		foreach ($results['tracks']['items'] as $track) {
 			$track['track_id'] = 'tidal_' . $track['id'];
 			$even_odd = ($i++ & 1) ? 'even' : 'odd';
 			$tracksList .= '
@@ -732,6 +858,8 @@ function showAllFromTidal($searchStr, $size) {
 	echo safe_json_encode($data);
 }
 
+
+/* 
 //  +------------------------------------------------------------------------+
 //  | Create command string for TidalAPI Python script                       |
 //  +------------------------------------------------------------------------+
@@ -750,7 +878,7 @@ function tidalSearchCommand($field, $value) {
 	return $command;
 	
 }
-
+ */
 
 //  +------------------------------------------------------------------------+
 //  | Check if album/track is from Tidal                                     |

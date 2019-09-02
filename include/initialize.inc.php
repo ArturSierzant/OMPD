@@ -47,8 +47,10 @@ define('NJB_HTTPS', (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !
 //define('NJB_HTTPS', ($_SERVER['HTTPS'] == 'off' ? false : true));
 
 define('TIDAL_ALBUM_URL','https://listen.tidal.com/album/');
+define('TIDAL_TRACK_URL','https://tidal.com/browse/track/');
 define('TIDAL_APP_ALBUM_URL','https://tidal.com/album/');
-define('TIDAL_MAX_CACHE_TIME', 24*60*60); //24h in [s]
+define('TIDAL_APP_TRACK_URL','https://tidal.com/track/');
+define('TIDAL_MAX_CACHE_TIME', 600); //10min in [s]
 define('MPD_TIDAL_URL','tidal://track/');
 
 
@@ -100,6 +102,7 @@ if ($cfg['timezone'] != '') {
 $cfg['use_tidal'] = false;
 if ($cfg['tidal_username'] && $cfg['tidal_password'] && $cfg['tidal_token']) {
 	$cfg['use_tidal'] = true;
+	require_once('tidalapi/tidal_api.php');
 }
 
 

@@ -1194,7 +1194,7 @@ function tidalSearchAll(){
 	request.done(function( data ) {
 		if (data['return'] == 1) {
 			$("[id*='LoadingIndicator']").hide();
-			$("[id*='searchResultsTI']").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Python script.<br>Error message:<br><br>' + data['response'] + '</div>');
+			$("[id*='searchResultsTI']").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Tidal request.<br><br>' + data['response'] + '<br><br></div>');
 			return;
 		}
 		

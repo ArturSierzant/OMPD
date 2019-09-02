@@ -546,7 +546,17 @@ function addSelectUrl() {
 		if (isTidal($url)) {
 			$id = getTidalId($url);
 			//TIDAL track
-			if (strpos($url, MPD_TIDAL_URL) !== false) {
+			if (strpos($url, MPD_TIDAL_URL) !== false || strpos($url, TIDAL_APP_TRACK_URL) !== false || strpos($url, TIDAL_TRACK_URL) !== false) {
+				//check if album is in OMPD DB:
+				$query = mysqli_query($db,'SELECT track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,$id) . '"');
+				if (mysqli_num_rows($query) == 0) {
+					$album_id = getTrackAlbumFromTidal($id);
+					if (!$album_id) {
+						return 'add_error';
+					}
+					$tidal_tracks = getTracksFromTidalAlbum($album_id);
+				}
+				
 				$tidal_tracks['track_id'] = $id;
 				if ($cfg['upmpdcli_tidal'] != "") {
 					$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $id . '"');
@@ -560,16 +570,16 @@ function addSelectUrl() {
 				$data['track_id'] = 'tidal_' . $id;
 			}
 			//TIDAL album
-			elseif (strpos($url,TIDAL_ALBUM_URL) !== false || strpos($url,TIDAL_APP_ALBUM_URL) !== false) {
+			elseif (strpos($url,TIDAL_ALBUM_URL) !== false || strpos($url,TIDAL_APP_ALBUM_URL) !== false || strpos($url,TIDAL_ALBUM_URL) !== false) {
 				$tidal_tracks = getTracksFromTidalAlbum($id);
 				$tidal_tracks = json_decode($tidal_tracks, true);
 			
 				foreach ($tidal_tracks as $tidal_track) {
 					if ($cfg['upmpdcli_tidal'] != "") {
-						$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $tidal_track['track_id'] . '"');
+						$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $tidal_track['id'] . '"');
 					}
 					else {
-						$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['track_id']);
+						$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['id']);
 					}
 					//if (strpos($mpdCommand,'ACK') !== false) {
 					if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST') {
@@ -839,10 +849,10 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 			$tidal_tracks = json_decode($tidal_tracks, true);
 			foreach ($tidal_tracks as $tidal_track) {
 				if ($cfg['upmpdcli_tidal'] != "") {
-					$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $tidal_track['track_id'] . '" ' . $insPos);
+					$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $tidal_track['id'] . '" ' . $insPos);
 					}
 				else {
-					$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['track_id'] . ' ' . $insPos);
+					$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['id'] . ' ' . $insPos);
 				}
 				//if (strpos($mpdCommand,'ACK') !== false) {
 				if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST') {
