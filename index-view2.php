@@ -50,7 +50,7 @@ $order	 	= get('order')				or $order = ($year || $dr ? 'artist' : (in_array(strt
 $sort	 	= get('sort') == 'desc'		? 'desc' : 'asc';
 $qsType 	= (int) get('qsType')				or $qsType = false;
 
-$artist = moveTheToEnd($artist);
+//$artist = moveTheToEnd($artist);
 
 $sort_artist			= 'asc';
 $sort_album				= 'asc';
@@ -256,21 +256,21 @@ else {
 			}
 		}
 		else {
-			if ($cfg['testing'] == 'on'){
+			if (hasThe($artist)){
 				$where = 'artist = "' .  mysqli_real_escape_string($db,moveTheToEnd($artist)) . '" OR artist = "' .  mysqli_real_escape_string($db,moveTheToBegining($artist)) . '"';
 			}
 			else {
-				$where = 'artist_alphabetic = "' .  mysqli_real_escape_string($db,$artist) . '" OR artist = "' .  mysqli_real_escape_string($db,$artist) . '"';
+				$where = 'artist = "' .  mysqli_real_escape_string($db,$artist) . '"';
 			}
 		}
 		$filter_query = 'WHERE (' . $where . ')';
 	}
 	elseif ($filter == 'like'){		
-		if ($cfg['testing'] == 'on'){
+		if (hasThe($artist)){
 			$filter_query = 'WHERE (artist LIKE "%' .  mysqli_real_escape_string($db,moveTheToEnd($artist)) . '%" OR artist LIKE "%' .  mysqli_real_escape_string($db,moveTheToBegining($artist)) . '%")';
 		}
 		else {
-			$filter_query = 'WHERE (artist_alphabetic LIKE "%' .  mysqli_real_escape_string($db,$artist) . '%" OR artist LIKE "%' .  mysqli_real_escape_string($db,$artist) . '%")';
+			$filter_query = 'WHERE (artist LIKE "%' .  mysqli_real_escape_string($db,$artist) . '%")';
 		}
 	}
 	elseif ($filter == 'smart')		$filter_query = 'WHERE (artist_alphabetic  LIKE "%' . mysqli_real_escape_like($artist) . '%" OR artist LIKE "%' . mysqli_real_escape_like($artist) . '%" OR artist SOUNDS LIKE "' .  mysqli_real_escape_string($db,$artist) . '")';
@@ -287,24 +287,26 @@ else {
 			}
 		}
 		else {
+			//$art = str_replace(
 			$art =  mysqli_real_escape_string($db,$artist);
+			$art = replaceAnds($art);
 			$as = $cfg['artist_separator'];
 			$count = count($as);
 			$i=0;
 			$search_str = '';
 			
 			for($i=0; $i<$count; $i++) {
-				if ($cfg['testing'] == 'on'){
-					$search_str .= ' OR artist LIKE "' . moveTheToEnd($art) . '' . $as[$i] . '%" 
-					OR artist LIKE "%' . $as[$i] . '' . moveTheToEnd($art) . '" 
-					OR artist LIKE "%' . $as[$i] . '' . moveTheToEnd($art) . '' . $as[$i] . '%" 
-					OR artist LIKE "% & ' . moveTheToEnd($art) . '' . $as[$i] . '%" 
-					OR artist LIKE "%' . $as[$i] . '' . moveTheToEnd($art) . ' & %"';
-					$search_str .= ' OR artist LIKE "' . moveTheToBegining($art) . '' . $as[$i] . '%" 
-					OR artist LIKE "%' . $as[$i] . '' . moveTheToBegining($art) . '" 
-					OR artist LIKE "%' . $as[$i] . '' . moveTheToBegining($art) . '' . $as[$i] . '%" 
-					OR artist LIKE "% & ' . moveTheToBegining($art) . '' . $as[$i] . '%" 
-					OR artist LIKE "%' . $as[$i] . '' . moveTheToBegining($art) . ' & %"';
+				if (hasThe($artist)){
+					$search_str .= ' OR artist LIKE "' . moveTheToEnd($art) . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . '" 
+					OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . $as[$i] . '%" 
+					OR artist LIKE "% & ' . moveTheToEnd($art) . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . ' & %"';
+					$search_str .= ' OR artist LIKE "' . moveTheToBegining($art) . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . '" 
+					OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . $as[$i] . '%" 
+					OR artist LIKE "% & ' . moveTheToBegining($art) . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . ' & %"';
 				}
 				else {
 					$search_str .= ' OR artist LIKE "' . $art . '' . $as[$i] . '%" 
@@ -316,9 +318,14 @@ else {
 				}
 			}
 			
-			
-			$filter_query = 'WHERE (
-			artist = "' .  mysqli_real_escape_string($db,$artist) . '"' . $search_str . ')';
+			if (hasThe($artist)){
+				$filter_query = 'WHERE (
+				artist = "' .  mysqli_real_escape_string($db,moveTheToBegining($artist)) . '" OR artist LIKE "' .mysqli_real_escape_string($db,moveTheToBegining($art)) . '" OR artist = "' .  mysqli_real_escape_string($db,moveTheToEnd($artist)) . '" OR artist LIKE "' .mysqli_real_escape_string($db,moveTheToEnd($art)) . '"' . $search_str . ')';
+			}
+			else {
+				$filter_query = 'WHERE (
+				artist = "' .  mysqli_real_escape_string($db,$artist) . '" OR artist LIKE "' .mysqli_real_escape_string($db,$art) . '"' . $search_str . ')';
+			}
 		}
 	}
 	else							message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]filter');
@@ -394,6 +401,7 @@ if (($artist || $year || $dr)) {
 	
 	$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id, album_dr FROM album ' . $filter_query . ' ' . $order_query);
 	//message(__FILE__, __LINE__, 'error', 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query);
+	//echo $filter_query;
 }
 
 if ($tag) {
@@ -433,6 +441,105 @@ $i			= 0;
 $sort_url	= $url;
 $size_url	= $url . '&amp;order=' . $order . '&amp;sort=' . $sort;
 
+if ($cfg['use_tidal']) {
+?>
+
+
+<div>
+<h1 onclick='toggleSearchResults("TB");' class="pointer" id="tidalBio"><i id="iconSearchResultsTB" class="fa fa-chevron-circle-down icon-anchor"></i> Artist biography</h1>
+<div id="searchResultsTB" class="">
+<span id="bioLoadingIndicator">
+	<i class="fa fa-cog fa-spin icon-small"></i> Loading information...
+</span>
+</div>
+</div>
+<script>
+
+$('#tidalBio').click(function() {	
+<?php 
+if ($tileSizePHP) {
+	$size = $tileSizePHP;
+}
+else {
+	$size = '$tileSize';
+}
+?>
+if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
+	var size = <?php echo $size; ?>;
+	console.log ('$tileSize: ' + $tileSize);
+	var artist = '<?php echo tidalEscapeChar($artist); ?>';
+	var request = $.ajax({  
+		url: "ajax-tidal-search.php",  
+		type: "POST",  
+		data: { search: "bio", tileSize : size, searchStr : artist, ajax : true },  
+		dataType: "json"
+	}); 
+
+	request.done(function( data ) {
+		if (data["artist_count"] > 0) { //check if any artist recieved
+			//$("[id='suggested']").show();
+			var bio = data["text"];
+			var img = "";
+			var pic = "";
+			var related_artists = "";
+			if(data["picture"]) {
+				//pic = '<?php echo TIDAL_RESOURCES_URL; ?>' + data["picture"] + '/480x480.jpg';
+				pic = data["picture"];
+				img = '<img src="' + pic + '">'
+			}
+			else {
+				img='<div class="artist_bio_pic_not_found"><i class="fa fa-user"></i></div>';
+			}
+			var artist_bio = '<div style="background-image: url(' + pic + '); background-position: 0 -80px;" class="artist_bio_pic">' + img + '</div><div>' + bio + '</div>';
+			if (data["related_artists"]) {
+				related_artists = '<div style="text-transform: uppercase;">Related artists:<br><br></div><div class="artist_bio_related">';
+				$.each(data["related_artists"], function(index, value){
+					img = '<i class="fa fa-user" style="font-size: 6em;"></i>';
+					if (value["picture"]) {
+						img = '<img src="' + value["picture"] + '">';
+					}
+					related_artists += '<div class="artist_related"><a href="index.php?action=view2&artist=' + encodeURIComponent(value["name"]) + '&order=year"><div class="artist_container_small">' + img + '</div><div>' + value["name"] + '</div></a></div>';
+				});
+				related_artists +='</div>';
+			}
+			artist_bio = artist_bio + related_artists;
+			$( "#searchResultsTB" ).html( artist_bio );
+		}
+		else {
+			if (data["return"] != 0) {
+				$("#bioLoadingIndicator").hide();
+				$("#searchResultsTB").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Tidal request.<br>Error message:<br><br>' + data["response"] + '</div>');
+			}
+			else {
+				$("#bioLoadingIndicator").hide();
+				$("#searchResultsTB").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
+			}
+		}
+		
+		//console.log (data.length);
+	}); 
+
+	request.fail(function( jqXHR, textStatus ) {  
+		//alert( "Request failed: " + textStatus );	
+	}); 
+
+	request.always(function() {
+		$('[id^="add_tidal"]').click(function(){
+			$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
+		});
+
+		$('[id^="play_tidal"]').click(function(){
+			$(this).removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
+		});
+		
+	});
+};
+});
+
+</script>
+<?php
+} //if($cfg['use_tidal'])
+
 $rows = mysqli_num_rows($query);
 
 $resultsFound = false;
@@ -455,6 +562,7 @@ $("#fav4genre").on("click",function(){
 <?php 
 	}
 ?>
+
 <table cellspacing="0" cellpadding="0" class="border">
 <tr>
 <td colspan="<?php echo $colombs + 2; ?>">
@@ -543,6 +651,7 @@ if ($cfg['use_tidal'] && $artist && $artist != 'All albums') {
 
 $('#tidalAlbums').click(function() {	
 <?php 
+//$artist = replaceAnds($artist);
 if ($tileSizePHP) {
 	$size = $tileSizePHP;
 }
@@ -555,7 +664,8 @@ else {
 //var size = $tileSize;
 var size = <?php echo $size; ?>;
 console.log ('$tileSize: ' + $tileSize);
-var artist = '<?php echo tidalEscapeChar($artist); ?>';
+var artist = '<?php echo str_replace("'","\'", $artist); ?>';
+//var artist = '<?php echo ($artist); ?>';
 var request = $.ajax({  
 	url: "ajax-tidal-search.php",  
 	type: "POST",  
@@ -601,17 +711,18 @@ request.always(function() {
 
 });
 <?php
-	if ($cfg['testing'] == 'on'){
+	$artist = replaceAnds($artist);
+	if (hasThe($artist)){
 		$sql = "SELECT MIN(last_update_time) as last_update_time 
 		FROM tidal_album 
-		WHERE (artist = '" . mysqli_real_escape_string($db,moveTheToEnd($artist)) . "'
-		OR artist = '" . mysqli_real_escape_string($db,moveTheToBegining($artist)) . "')
+		WHERE (artist LIKE '" . mysqli_real_escape_string($db,moveTheToEnd($artist)) . "'
+		OR artist LIKE '" . mysqli_real_escape_string($db,moveTheToBegining($artist)) . "')
 		AND last_update_time > 0";
 	}
 	else {
 		$sql = "SELECT MIN(last_update_time) as last_update_time 
 		FROM tidal_album 
-		WHERE artist = '" . mysqli_real_escape_string($db,$artist) . "'
+		WHERE artist LIKE '" . mysqli_real_escape_string($db,$artist) . "'
 		AND last_update_time > 0";
 	}
 	$query = mysqli_query($db, $sql);
@@ -623,6 +734,10 @@ $('#tidalAlbums').click();
 	}
 ?>
 </script>
+
+
+
+
 <?php
 } //use_tidal
 

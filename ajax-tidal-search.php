@@ -42,6 +42,9 @@ elseif ($search == 'artists') {
 elseif ($search == 'all') {
 	showAllFromTidal($searchStr, $size);
 }
+elseif ($search == 'bio') {
+	showArtistBio($searchStr);
+}
 ?>
 
 	

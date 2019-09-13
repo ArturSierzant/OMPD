@@ -379,10 +379,12 @@ function listOfFavorites($file = true, $stream = true) {
 //  +------------------------------------------------------------------------+
 function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 	global $cfg, $db;
-	
+	//echo $artist;
+	//$artist = tidalEscapeChar($artist);
+	//$artist = replaceAnds($artist);
 	$sql = "SELECT MIN(last_update_time) as min_last_update_time 
 	FROM tidal_album 
-	WHERE artist = '" . mysqli_real_escape_string($db,$artist) . "'
+	WHERE artist LIKE '" . mysqli_real_escape_string($db,$artist) . "'
 	AND last_update_time > 0";
 	$query = mysqli_query($db, $sql);
 	$res = mysqli_fetch_assoc($query);
@@ -390,7 +392,7 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 	
 	$sql = "SELECT MAX(last_update_time) as min_last_update_time 
 	FROM tidal_album 
-	WHERE artist = '" . mysqli_real_escape_string($db,$artist) . "'
+	WHERE artist LIKE '" . mysqli_real_escape_string($db,$artist) . "'
 	AND last_update_time > 0";
 	$query = mysqli_query($db, $sql);
 	$res = mysqli_fetch_assoc($query);
@@ -414,6 +416,7 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 				$results = $t->getArtistAlbums($tidalArtistId,999);
 			}
 			else if ($artist) {
+				$artist = tidalEscapeChar(strtolower($artist));
 				$results = $t->search("artists",$artist);
 				if (count($results) == 0) {
 					if ($ajax) {
@@ -428,7 +431,12 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 				}
 				else {
 					foreach($results["items"] as $res) {
-						if (strtolower($res["name"]) == strtolower($artist)){
+						/* if (strtolower($res["name"]) == strtolower($artist)){
+							$tidalArtistId = $res["id"];
+							break;
+						} */
+						//if (tidalEscapeChar(strtolower($res["name"])) == tidalEscapeChar(strtolower($artist))) {
+						if (tidalEscapeChar(strtolower($res["name"])) == $artist) {
 							$tidalArtistId = $res["id"];
 							break;
 						}
@@ -507,8 +515,48 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 		}
 	}
 	else {
-		$sql = "SELECT album_id, album, artist FROM tidal_album
-		WHERE artist = '" . mysqli_real_escape_string($db,$artist) . "'";
+		/* $sql = "SELECT album_id, album, artist FROM tidal_album
+		WHERE artist LIKE '" . mysqli_real_escape_string($db,$artist) . "'"; */
+
+		$art = replaceAnds($artist);
+		$as = $cfg['artist_separator'];
+		$count = count($as);
+		$i=0;
+		$search_str = '';
+		
+		for($i=0; $i<$count; $i++) {
+			if (hasThe($artist)){
+				$search_str .= ' OR artist LIKE "' . moveTheToEnd($art) . $as[$i] . '%" 
+				OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . '" 
+				OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . $as[$i] . '%" 
+				OR artist LIKE "% & ' . moveTheToEnd($art) . $as[$i] . '%" 
+				OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . ' & %"';
+				$search_str .= ' OR artist LIKE "' . moveTheToBegining($art) . $as[$i] . '%" 
+				OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . '" 
+				OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . $as[$i] . '%" 
+				OR artist LIKE "% & ' . moveTheToBegining($art) . $as[$i] . '%" 
+				OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . ' & %"';
+			}
+			else {
+				$search_str .= ' OR artist LIKE "' . $art . '' . $as[$i] . '%" 
+				OR artist LIKE "%' . $as[$i] . '' . $art . '" 
+				OR artist LIKE "%' . $as[$i] . '' . $art . '' . $as[$i] . '%" 
+				OR artist LIKE "% & ' . $art . '' . $as[$i] . '%" 
+				OR artist LIKE "%' . $as[$i] . '' . $art . ' & %"';
+				//last 2 lines above for artist like 'Mitch & Mitch' in 'Zbigniew Wodecki; Mitch & Mitch; Orchestra and Choir'
+			}
+		}
+		
+		if (hasThe($artist)){
+			$filter_query = 'WHERE (
+			artist = "' .  mysqli_real_escape_string($db,moveTheToBegining($artist)) . '" OR artist LIKE "' .mysqli_real_escape_string($db,moveTheToBegining($art)) . '" OR artist = "' .  mysqli_real_escape_string($db,moveTheToEnd($artist)) . '" OR artist LIKE "' .mysqli_real_escape_string($db,moveTheToEnd($art)) . '"' . $search_str . ')';
+		}
+		else {
+			$filter_query = 'WHERE (
+			artist = "' .  mysqli_real_escape_string($db,$artist) . '" OR artist LIKE "' .mysqli_real_escape_string($db,$art) . '"' . $search_str . ') ORDER BY album_date';
+		}
+		
+		$sql = "SELECT album_id, album, artist, album_date FROM tidal_album " . $filter_query;
 		$query = mysqli_query($db,$sql);
 		while($album = mysqli_fetch_assoc($query)) {
 			$tidalAlbum["album_id"] = 'tidal_' . $album["album_id"];
@@ -603,9 +651,105 @@ function getTrackAlbumFromTidal($track_id) {
 	else {
 		return false;
 	}
-	
-	}
+}
 
+
+
+//  +------------------------------------------------------------------------+
+//  | Artist biography from Tidal                                            |
+//  +------------------------------------------------------------------------+
+function showArtistBio($artist_name) {
+	global $cfg, $db;
+	$artist_name = moveTheToBegining($artist_name);
+	$data = array();
+	$t = new TidalAPI;
+	$t->username = $cfg["tidal_username"];
+	$t->password = $cfg["tidal_password"];
+	$t->token = $cfg["tidal_token"];
+	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	$conn = $t->connect();
+	if ($conn === true){
+		$res = $t->search("artists",$artist_name);
+		if ($res["totalNumberOfItems"] == 0) {
+			$data["artist_count"] = 0;
+			$data["return"] = 0;
+		}
+		else {
+			//$data["test"] = $res["totalNumberOfItems"];
+			foreach ($res["items"] as $artist) {
+				/* echo tidalEscapeChar(strtolower($artist["name"])) . '<br>';
+				echo $artist["name"] . '<br>';
+				echo tidalEscapeChar(strtolower($artist_name)) . '<br>';
+				echo $artist_name; */
+				if (tidalEscapeChar(strtolower($artist["name"])) == tidalEscapeChar(strtolower($artist_name))) {
+					$id = $artist["id"];
+					$data = $t->getArtistBio($id);
+					if ($artist["picture"]){
+						$data["picture"] = $t->artistPictureToURL($artist["picture"]);
+						$data["pictureW"] = $t->artistPictureWToURL($artist["picture"]);
+					}
+					else {
+						$data["picture"] = "";
+					}
+					$data["text"] = formatBio($data["text"]);
+					$data["artist_id"] = $id;
+					$data["related_artists"] = $t->getRelatedArtists($id);
+					$i = 0;
+					if ($data["related_artists"]) {
+						foreach($data["related_artists"] as $rel_artist){
+							//$rel_artist["picture"] = $t->artistPictureToURL($rel_artist["picture"]);
+							if ($rel_artist["picture"]) {
+								$data["related_artists"][$i]["picture"] = $t->artistPictureToURL($rel_artist["picture"]);
+							}
+							else {
+								$data["related_artists"][$i]["picture"] = "";
+							}
+							$i++;
+						}
+					}
+					/* $data = $t->getArtistAll($id);
+					$data["picture"] = $t->getArtistPicture($data["rows"][0]["modules"][0]["artist"]["picture"]);
+					$data["text"] = formatBio($data["rows"][0]["modules"][0]["bio"]["text"]); */
+					if ($data["status"] == 404 && strpos($data["userMessage"],"not found") === false) {
+						$data["artist_count"] = 0; 
+					}
+					else {
+						$data["artist_count"] = 1; 
+					}
+					$data["return"] = 0;
+					break;
+				}
+				else {
+					$data["artist_count"] = 0;
+					$data["return"] = 0;
+				}
+			}
+		}
+	}
+	else {
+		$data['return'] = $conn["return"];
+		$data['response'] = $conn["error"];
+	}
+	echo safe_json_encode($data);
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Format artist bio from Tidal                                           |
+//  +------------------------------------------------------------------------+
+function formatBio($bio) {
+	global $cfg, $db;
+	
+	$bio = str_replace("<br/><br/>","<br/>",$bio);
+	$bio = str_replace("<br/>","<br/><br/>",$bio);
+	$bio = str_replace("[/wimpLink]","</a>",$bio);
+	$bio = str_replace('[wimpLink artistId="','<a target="_blank" href="' . TIDAL_ARTIST_URL,$bio);
+	$bio = str_replace('[wimpLink albumId="','<a target="_blank" href="' . TIDAL_ALBUM_URL,$bio);
+	$bio = str_replace('"]','">',$bio);
+	$bio = $bio . "<br/><br/>";
+	return $bio;
+	
+}
 
 
 //  +------------------------------------------------------------------------+
@@ -644,7 +788,6 @@ function getTracksFromTidalAlbum($album_id, $order = '') {
 	}
 	 
 	$tracks = $results["items"];
-	//echo("Bio:" . $artist["artist_bio"] . "<br>");
 	if (count($tracks) > 0) {
 		if ($order == 'DESC') {
 			usort($tracks, function ($a, $b) {
@@ -756,7 +899,8 @@ function showAllFromTidal($searchStr, $size) {
 		$data['artists_results'] = count($results['artists']['items']);
 		$artistsList = '<table class="border" cellspacing="0" cellpadding="0">';
 		foreach ($results['artists']['items'] as $art) {
-			$artistsList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=viewTidalAlbums&amp;tidalArtist=' . rawurlencode($art['name']) . '&amp;tidalArtistId=' . rawurlencode($art['id']). '&amp;order=year">' . html($art['name']) . '</a></td></tr>';
+			//$artistsList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=viewTidalAlbums&amp;tidalArtist=' . rawurlencode($art['name']) . '&amp;tidalArtistId=' . rawurlencode($art['id']). '&amp;order=year">' . html($art['name']) . '</a></td></tr>';
+			$artistsList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=view2&order=year&sort=asc&artist=' . rawurlencode($art['name']) . '&amp;tidalArtistId=' . rawurlencode($art['id']). '&amp;order=year">' . html($art['name']) . '</a></td></tr>';
 			}
 		$artistsList .= '</table>';
 		$data['artists'] = $artistsList;
@@ -859,26 +1003,6 @@ function showAllFromTidal($searchStr, $size) {
 }
 
 
-/* 
-//  +------------------------------------------------------------------------+
-//  | Create command string for TidalAPI Python script                       |
-//  +------------------------------------------------------------------------+
-
-function tidalSearchCommand($field, $value) {
-	global $cfg;
-	$user = $cfg["tidal_username"];
-	$pass = $cfg["tidal_password"];
-	$token = $cfg["tidal_token"];
-	$value = str_replace("'","",$value);
-	$value = str_replace('"',"",$value);
-
-	$command = ($cfg['python_path'] == '' ? 'python' : $cfg['python_path']);
-	$command .= " " . NJB_HOME_DIR . "tidalapi/tidalSearch.py " . $user . " " . $pass . " " . $token . " " . $field . " \"" . $value . "\" 2>&1";
-	
-	return $command;
-	
-}
- */
 
 //  +------------------------------------------------------------------------+
 //  | Check if album/track is from Tidal                                     |
@@ -899,8 +1023,13 @@ function isTidal($id) {
 
 function getTidalId($id){
 	global $cfg;
+	//for stream url from getStreamURL() 
+	if (strpos($id,TIDAL_TRACK_STREAM_URL) !== false) {
+		$id = end(explode('&',$id));
+		return end(explode('=',$id));
+	}
 	//for tidal://track/ or tidal://album/, etc
-	if (strpos($id,'tidal://') !== false || strpos($id,'tidal.com/') !== false) {
+	elseif (strpos($id,'tidal://') !== false || strpos($id,'tidal.com/') !== false) {
 		return end(explode('/',$id));
 	}
 	elseif (strpos($id,$cfg['upmpdcli_tidal']) !== false)
@@ -1843,6 +1972,22 @@ function mpdEscapeChar($str1){
 
 
 //  +------------------------------------------------------------------------+
+//  | Replace ' and ', ' & ', ' + ' with '%' for sql query                   |
+//  +------------------------------------------------------------------------+
+
+function replaceAnds($artist){
+	global $cfg;
+	$artist = strtolower($artist);
+	$artist = str_replace(" and ", "%", $artist);
+	$artist = str_replace(" & ", "%", $artist);
+	$artist = str_replace(" + ", "%", $artist);
+	return $artist;
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
 //  | Escape ", & for use in TIDAL search                                    |
 //  +------------------------------------------------------------------------+
 
@@ -1851,10 +1996,11 @@ function tidalEscapeChar($str1){
 	$str1 = str_replace('"','',$str1);
 	$str1 = str_replace("'",'',$str1);
 	$str1 = str_replace('&','',$str1);
+	$str1 = str_replace(' and ','  ',$str1);
+	$str1 = str_replace('+','',$str1);
 	
 	return $str1;
 }
-
 
 
 
@@ -1865,7 +2011,7 @@ function tidalEscapeChar($str1){
 function moveTheToEnd($artist){
 	global $cfg;
 	if ($cfg['testing'] == 'on') {
-		$artist = urldecode($artist);
+		//$artist = urldecode($artist);
 		if (strtolower(substr( $artist, 0, 4 )) == "the ") {
 			$artist = str_replace("the ", "", strtolower($artist));
 			$artist = $artist . ", the";
@@ -1884,13 +2030,27 @@ function moveTheToEnd($artist){
 function moveTheToBegining($artist){
 	global $cfg;
 	if ($cfg['testing'] == 'on') {
-		$artist = urldecode($artist);
+		//$artist = urldecode($artist);
 		if (strtolower(substr( $artist, -5 )) == ", the") {
 			$artist = str_replace(", the", "", strtolower($artist));
 			$artist = "the " . $artist;
 		}
 	}
 	return $artist;
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Check if artist name contains 'the'                                    |
+//  +------------------------------------------------------------------------+
+
+function hasThe($artist){
+	global $cfg;
+	$hasThe = false;
+	if (strtolower(substr( $artist, 0, 4 )) == "the " || strtolower(substr( $artist, -5 )) == ", the") {
+		$hasThe = true;
+	}
+	return $hasThe;
 }
 
 

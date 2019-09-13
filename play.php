@@ -546,7 +546,7 @@ function addSelectUrl() {
 		if (isTidal($url)) {
 			$id = getTidalId($url);
 			//TIDAL track
-			if (strpos($url, MPD_TIDAL_URL) !== false || strpos($url, TIDAL_APP_TRACK_URL) !== false || strpos($url, TIDAL_TRACK_URL) !== false) {
+			if (strpos($url, MPD_TIDAL_URL) !== false || strpos($url, TIDAL_APP_TRACK_URL) !== false || strpos($url, TIDAL_TRACK_URL) !== false || strpos($url, TIDAL_TRACK_STREAM_URL) !== false) {
 				//check if album is in OMPD DB:
 				$query = mysqli_query($db,'SELECT track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,$id) . '"');
 				if (mysqli_num_rows($query) == 0) {
@@ -558,13 +558,31 @@ function addSelectUrl() {
 				}
 				
 				$tidal_tracks['track_id'] = $id;
-				if ($cfg['upmpdcli_tidal'] != "") {
+				if ($cfg['tidal_direct']) {
+					$t = new TidalAPI;
+					$t->username = $cfg["tidal_username"];
+					$t->password = $cfg["tidal_password"];
+					$t->token = $cfg["tidal_token"];
+					if (NJB_WINDOWS) $t->fixSSLcertificate();
+					$conn = $t->connect();
+					
+					if ($conn === true){
+						$trackURL = $t->getStreamURL($id);
+					}
+					else {
+						$mpdCommand = 'TIDAL_CONNECT_ERROR';
+					}
+					if ($trackURL) {
+						$mpdCommand = mpd('addid ' . $trackURL['url'] . '&track_id=' . $id . ' ' . $insPos);
+					}
+				}
+				elseif ($cfg['upmpdcli_tidal'] && strpos($url, TIDAL_TRACK_STREAM_URL) === false) {
 					$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $id . '"');
 				}
 				else {
 					$mpdCommand = mpd('addid ' . $url);
 				}
-				if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST') {
+				if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST' || $mpdCommand == 'TIDAL_CONNECT_ERROR') {
 					return 'add_error';
 				}
 				$data['track_id'] = 'tidal_' . $id;
@@ -573,16 +591,37 @@ function addSelectUrl() {
 			elseif (strpos($url,TIDAL_ALBUM_URL) !== false || strpos($url,TIDAL_APP_ALBUM_URL) !== false || strpos($url,TIDAL_ALBUM_URL) !== false) {
 				$tidal_tracks = getTracksFromTidalAlbum($id);
 				$tidal_tracks = json_decode($tidal_tracks, true);
-			
+
+				if ($cfg['tidal_direct']) {
+					$t = new TidalAPI;
+					$t->username = $cfg["tidal_username"];
+					$t->password = $cfg["tidal_password"];
+					$t->token = $cfg["tidal_token"];
+					if (NJB_WINDOWS) $t->fixSSLcertificate();
+					$conn = $t->connect();
+				}
+				
 				foreach ($tidal_tracks as $tidal_track) {
-					if ($cfg['upmpdcli_tidal'] != "") {
+					if ($cfg['tidal_direct']) {
+						$trackURL = "";
+						if ($conn === true){
+							$trackURL = $t->getStreamURL($tidal_track['id']);
+						}
+						else {
+							$mpdCommand = 'TIDAL_CONNECT_ERROR';
+						}
+						if ($trackURL) {
+							$mpdCommand = mpd('addid ' . $trackURL['url'] . '&track_id=' . $tidal_track['id'] . ' ' . $insPos);
+						}
+					}
+					elseif ($cfg['upmpdcli_tidal']) {
 						$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $tidal_track['id'] . '"');
 					}
 					else {
 						$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['id']);
 					}
 					//if (strpos($mpdCommand,'ACK') !== false) {
-					if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST') {
+					if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST' || $mpdCommand == 'TIDAL_CONNECT_ERROR') {
 						return 'add_error';
 					}
 				}
@@ -691,7 +730,25 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	
 	if ($track_id) {
 		if (isTidal($track_id)) {
-			if ($cfg['upmpdcli_tidal'] != "") {
+			if ($cfg['tidal_direct']) {
+				$t = new TidalAPI;
+				$t->username = $cfg["tidal_username"];
+				$t->password = $cfg["tidal_password"];
+				$t->token = $cfg["tidal_token"];
+				if (NJB_WINDOWS) $t->fixSSLcertificate();
+				$conn = $t->connect();
+				
+				if ($conn === true){
+					$trackURL = $t->getStreamURL(getTidalId($track_id));
+				}
+				else {
+					return 'add_error';
+				}
+				if ($trackURL) {
+					$query = mysqli_query($db,'SELECT CONCAT("' . mysqli_real_escape_string($db,$trackURL['url']) . '&track_id=", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
+				}
+			}
+			elseif ($cfg['upmpdcli_tidal']) {
 				$query = mysqli_query($db,'SELECT CONCAT("' . mysqli_real_escape_string($db,$cfg['upmpdcli_tidal']) . '", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
 			}
 			else {
@@ -700,7 +757,25 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 			//track not added to DB yet (e.g. result of search)
 			if (mysqli_num_rows($query) == 0) {
 				$tidal_tracks_tmp = getTracksFromTidalAlbum(getTidalId($album_id));
-				if ($cfg['upmpdcli_tidal'] != "") {
+				if ($cfg['tidal_direct']) {
+					$t = new TidalAPI;
+					$t->username = $cfg["tidal_username"];
+					$t->password = $cfg["tidal_password"];
+					$t->token = $cfg["tidal_token"];
+					if (NJB_WINDOWS) $t->fixSSLcertificate();
+					$conn = $t->connect();
+					
+					if ($conn === true){
+						$trackURL = $t->getStreamURL(getTidalId($track_id));
+					}
+					else {
+						return 'add_error';
+					}
+					if ($trackURL) {
+						$query = mysqli_query($db,'SELECT CONCAT("' . mysqli_real_escape_string($db,$trackURL['url']) . '&track_id=", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
+					}
+				}
+				elseif ($cfg['upmpdcli_tidal']) {
 					$query = mysqli_query($db,'SELECT CONCAT("' . mysqli_real_escape_string($db,$cfg['upmpdcli_tidal']) . '", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
 				}
 				else {
@@ -846,16 +921,37 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	//only whole albums, not single tracks from e.g. search results
 	if (isTidal($album_id) && !isTidal($track_id)) {
 		if ($tidal_tracks) {
+			if ($cfg['tidal_direct']) {
+				$t = new TidalAPI;
+				$t->username = $cfg["tidal_username"];
+				$t->password = $cfg["tidal_password"];
+				$t->token = $cfg["tidal_token"];
+				if (NJB_WINDOWS) $t->fixSSLcertificate();
+				$conn = $t->connect();
+			}
+			
 			$tidal_tracks = json_decode($tidal_tracks, true);
 			foreach ($tidal_tracks as $tidal_track) {
-				if ($cfg['upmpdcli_tidal'] != "") {
+				if ($cfg['tidal_direct']) {
+					$trackURL = "";
+					if ($conn === true){
+						$trackURL = $t->getStreamURL($tidal_track['id']);
+					}
+					else {
+						$mpdCommand = 'TIDAL_CONNECT_ERROR';
+					}
+					if ($trackURL) {
+						$mpdCommand = mpd('addid ' . $trackURL['url'] . '&track_id=' . $tidal_track['id'] . ' ' . $insPos);
+					}
+				}
+				elseif ($cfg['upmpdcli_tidal']) {
 					$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $tidal_track['id'] . '" ' . $insPos);
 					}
 				else {
 					$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['id'] . ' ' . $insPos);
 				}
 				//if (strpos($mpdCommand,'ACK') !== false) {
-				if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST') {
+				if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST' || $mpdCommand == 'TIDAL_CONNECT_ERROR') {
 					return 'add_error';
 				}
 			}

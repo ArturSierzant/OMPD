@@ -2220,6 +2220,61 @@ h1 {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.artist_bio_pic {
+  background-size: 2000% 2000%;
+  height: 270px;
+  margin-bottom: 5px;
+  padding: 10px 0;
+  text-align: center;
+}
+.artist_bio_pic img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 250px;
+  border-radius: 10%;
+}
+.artist_bio_pic_not_found {
+  font-size: 210px;
+  width: 260px;
+  border-radius: 10px;
+  background-color: #585858;
+  display: inline-block;
+  max-height: 260px;
+  color: #ffffff;
+}
+.artist_bio_related {
+  overflow: hidden;
+  /* max-height: 100px; */
+  height: 9em;
+  white-space: nowrap;
+  overflow-x: scroll;
+}
+.artist_bio_related img {
+  width: 6em;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  /* border-radius: 10%; */
+}
+.artist_related {
+  display: inline-block;
+  margin: 0 1em;
+  width: 6em;
+}
+.artist_related div {
+  white-space: nowrap;
+  text-align: center;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin-top: 3px;
+}
+.artist_related .artist_container_small {
+  border-radius: 10px;
+  background-color: #585858;
+  color: #ffffff;
+}
 #timebar_mini {
   width: 0px;
   height: 2px;

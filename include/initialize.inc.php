@@ -46,8 +46,11 @@ define('NJB_SCRIPT', basename($_SERVER['SCRIPT_NAME']));
 define('NJB_HTTPS', (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) != 'off') ? true : false);
 //define('NJB_HTTPS', ($_SERVER['HTTPS'] == 'off' ? false : true));
 
+define('TIDAL_RESOURCES_URL','https://resources.tidal.com/images/');
 define('TIDAL_ALBUM_URL','https://listen.tidal.com/album/');
+define('TIDAL_ARTIST_URL','https://listen.tidal.com/artist/');
 define('TIDAL_TRACK_URL','https://tidal.com/browse/track/');
+define('TIDAL_TRACK_STREAM_URL','audio.tidal.com');
 define('TIDAL_APP_ALBUM_URL','https://tidal.com/album/');
 define('TIDAL_APP_TRACK_URL','https://tidal.com/track/');
 define('TIDAL_MAX_CACHE_TIME', 600); //10min in [s]

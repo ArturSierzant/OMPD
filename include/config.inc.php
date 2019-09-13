@@ -54,42 +54,33 @@ $cfg['media_dir']                   = '/share/HDA_DATA/ompd/';
 
 
 
-//  +------------------- NEW IN O!MPD 1.05 ----------------------------------+
-
-//  +------------------------------------------------------------------------+
-//  | Track dynamic range                                                    |
-//  +------------------------------------------------------------------------+
-//  | Show DR colum for track in Now Playing, album view and search results. |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_DR'] = false;
-
-
-//  +------------------------------------------------------------------------+
-//  | Track composer                                                         |
-//  +------------------------------------------------------------------------+
-//  | Show track composer in Now Playing.                                    |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_composer'] = false;
-
+//  +------------------- NEW IN O!MPD 1.06 ----------------------------------+
 
 //  +------------------------------------------------------------------------+
 //  | Tidal                                                                  |
 //  +------------------------------------------------------------------------+
-//  | Token is required. You can find instruction how to get it from         |
+//  | Tidal account is required (username and password below).               |
+//  | Token is also required. You can find instruction how to get it here:   |
 //  | https://github.com/lucaslg26/TidalAPI                                  |
 //  |                                                                        |
-//  | And mpd must have Tidal plugin properly configured:                    |
+//  | You can play music from Tidal using mpd's Tidal plugin. This requires: |
 //  |  - mpd version >=0.21                                                  |
 //  |  - plugin 'tidal' in mpd.conf with valid username/password/token fields|
-//  | Or instead of mpd's Tidal plugin you can use upmpdcli-tidal - see      |
-//  | section 'Tidal via upmpdcli' below                                     |
+//  |                                                                        |
+//  | If your mpd doesn't support Tidal, you can set 'tidal_direct' to true. |
+//  | It will force O!MPD to get stream from Tidal and pass it to mpd.       |
+//  | In this case mpd must support https:// protocol.                       |
+//  |                                                                        |
+//  | Third method is using upmpdcli-tidal - see section 'Tidal via upmpdcli'|
+//  | below.                                                                 |
 //  +------------------------------------------------------------------------+
 
 $cfg['tidal_username'] = "";
 $cfg['tidal_password'] = "";
 $cfg['tidal_token'] = "";
+$cfg['tidal_direct'] = false;
+
+//  +------------------- END OF NEW IN O!MPD 1.06 ---------------------------+
 
 
 
@@ -115,8 +106,23 @@ $cfg['upmpdcli_tidal'] = "";
 
 
 
-//  +------------------- END OF NEW IN O!MPD 1.05 ---------------------------+
+//  +------------------------------------------------------------------------+
+//  | Track dynamic range                                                    |
+//  +------------------------------------------------------------------------+
+//  | Show DR colum for track in Now Playing, album view and search results. |
+//  +------------------------------------------------------------------------+
 
+$cfg['show_DR'] = false;
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Track composer                                                         |
+//  +------------------------------------------------------------------------+
+//  | Show track composer in Now Playing.                                    |
+//  +------------------------------------------------------------------------+
+
+$cfg['show_composer'] = false;
 
 
 

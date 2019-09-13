@@ -23,6 +23,7 @@ class TidalAPI {
 	public $username;
 	public $password;
 	public $token;
+	public $audioQuality = "HIGH";
 	public $curl;
 	public $fixSSLcertificate = false;
 	protected $sessionId;
@@ -31,6 +32,7 @@ class TidalAPI {
 	
 	const AUTH_URL = "https://api.tidalhifi.com/v1/login/username";
 	const API_URL = "https://api.tidalhifi.com/v1/";
+	const RESOURCES_URL = "https://resources.tidal.com/images/";
 	
 	public function __construct(){
 		$this->curl = curl_init();
@@ -107,9 +109,48 @@ class TidalAPI {
 		return $this->request();
 	}
 	
+	function getArtistAll($artist_id) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/artist?artistId=" . $artist_id . "&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&deviceType=BROWSER");
+		return $this->request();
+	}
+	
 	function getArtistAlbums($artist_id, $limit = 50) {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
 		return $this->request();
+	}
+	
+	function getArtistBio($artist_id) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/bio?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
+		return $this->request();
+	}
+	
+	function getRelatedArtists($artist_id) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/artist?artistId=" . $artist_id . "&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&deviceType=BROWSER");
+		$artistAll = $this->request();
+		foreach ($artistAll["rows"] as $module){
+			if ($module["modules"][0]["type"]=='ARTIST_LIST') {
+				return $module["modules"][0]["pagedList"]["items"];
+			};
+		}
+	}
+	
+	function getStreamURL($track_id) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "tracks/" . $track_id . "/streamUrl?soundQuality=" . $this->audioQuality . "&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
+		return $this->request();
+	}
+	
+	static function artistPictureToURL($pic) {
+		$pic = str_replace("-","/",$pic);
+		$pic = self::RESOURCES_URL . $pic . '/480x480.jpg';
+		//$pic = self::RESOURCES_URL . $pic . '/640x428.jpg';
+		return $pic;
+	}
+	
+	static function artistPictureWToURL($pic) {
+		$pic = str_replace("-","/",$pic);
+		//$pic = self::RESOURCES_URL . $pic . '/480x480.jpg';
+		$pic = self::RESOURCES_URL . $pic . '/640x428.jpg';
+		return $pic;
 	}
 	
 	function request() {

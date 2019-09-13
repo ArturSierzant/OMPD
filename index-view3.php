@@ -282,24 +282,51 @@ if ($cfg['show_discography_browser'] == true && !in_array($album['artist'],$cfg[
 	
 	$exploded = multiexplode($cfg['artist_separator'],$album['artist']);
 	$l = count($exploded);
-	$search_str = 'artist = "' .  mysqli_real_escape_string($db,$album['artist']) . '"';
+	if (hasThe($album['artist'])){
+		$search_str = 'artist = "' .  mysqli_real_escape_string($db,moveTheToBegining($album['artist'])) . '" OR artist = "' .  mysqli_real_escape_string($db,moveTheToEnd($album['artist'])) . '"';
+	}
+	else {
+		$search_str = 'artist = "' .  mysqli_real_escape_string($db,$album['artist']) . '"';
+	}
 	
 	for ($j=0; $j<$l; $j++) {
 		$art =  mysqli_real_escape_string($db,$exploded[$j]);
+		$art = replaceAnds($art);
 		$as = $cfg['artist_separator'];
 		$count = count($as);
 		$i=0;
 		
 		for($i=0; $i<$count; $i++) {
-		$search_str .= ' OR artist = "' . $art . '" OR artist LIKE "' . $art . '' . $as[$i] . '%" 
+		/* $search_str .= ' OR artist = "' . $art . '" OR artist LIKE "' . $art . '' . $as[$i] . '%" 
 		OR artist LIKE "%' . $as[$i] . '' . $art . '" 
 		OR artist LIKE "%' . $as[$i] . '' . $art . '' . $as[$i] . '%" 
 		OR artist LIKE "% & ' . $art . '' . $as[$i] . '%" 
 		OR artist LIKE "%' . $as[$i] . '' . $art . ' & %"';
-		//last 2 lines above for artist like 'Mitch & Mitch' in 'Zbigniew Wodecki; Mitch & Mitch; Orchestra and Choir'
+		//last 2 lines above for artist like 'Mitch & Mitch' in 'Zbigniew Wodecki; Mitch & Mitch; Orchestra and Choir' */
+		
+		if (hasThe($art)){
+					$search_str .= ' OR artist LIKE "' . moveTheToEnd($art) . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . '" 
+					OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . $as[$i] . '%" 
+					OR artist LIKE "% & ' . moveTheToEnd($art) . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . ' & %"';
+					$search_str .= ' OR artist LIKE "' . moveTheToBegining($art) . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . '" 
+					OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . $as[$i] . '%" 
+					OR artist LIKE "% & ' . moveTheToBegining($art) . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . ' & %"';
+				}
+				else {
+					$search_str .= ' OR artist LIKE "' . $art . '' . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . '' . $art . '" 
+					OR artist LIKE "%' . $as[$i] . '' . $art . '' . $as[$i] . '%" 
+					OR artist LIKE "% & ' . $art . '' . $as[$i] . '%" 
+					OR artist LIKE "%' . $as[$i] . '' . $art . ' & %"';
+					//last 2 lines above for artist like 'Mitch & Mitch' in 'Zbigniew Wodecki; Mitch & Mitch; Orchestra and Choir'
+				}
 		}
 	}
-	
+	//echo $search_str;
 	$queryStr = 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id, album_dr FROM album WHERE (' . $search_str . '
 		) ORDER BY year, month, artist_alphabetic, album';
 	$query = mysqli_query($db, $queryStr);
