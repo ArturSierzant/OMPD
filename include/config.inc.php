@@ -69,7 +69,13 @@ $cfg['media_dir']                   = '/share/HDA_DATA/ompd/';
 //  |                                                                        |
 //  | If your mpd doesn't support Tidal, you can set 'tidal_direct' to true. |
 //  | It will force O!MPD to get stream from Tidal and pass it to mpd.       |
-//  | In this case mpd must support https:// protocol.                       |
+//  | In this case you can choose 'tidal_audio_quality', which can be one of:|
+//  | "LOW" - 96kbps, AAC                                                    |
+//  | "HIGH" - 320kbps, AAC                                                  |
+//  | "LOSSLESS" - lossless codec: FLAC or ALAC, depending on token          |
+//  |   - LOSSLESS requires right token: for some tokens audio stream is     |
+//  |   encrypted and will not play in mpd. Best are tokens from Android     |
+//  |   or iOS. They can be found in the Internet)                           |
 //  |                                                                        |
 //  | Third method is using upmpdcli-tidal - see section 'Tidal via upmpdcli'|
 //  | below.                                                                 |
@@ -78,6 +84,7 @@ $cfg['media_dir']                   = '/share/HDA_DATA/ompd/';
 $cfg['tidal_username'] = "";
 $cfg['tidal_password'] = "";
 $cfg['tidal_token'] = "";
+$cfg['tidal_audio_quality'] = "HIGH";
 $cfg['tidal_direct'] = false;
 
 //  +------------------- END OF NEW IN O!MPD 1.06 ---------------------------+

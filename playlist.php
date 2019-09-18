@@ -266,18 +266,6 @@ for ($i=0; $i < $listlength; $i++) {
 	
 	$album_genres = parseMultiGenre($table_track['genre']);
 	
-	/* $genres = explode(';',$table_track['genre_id']);
-	$where = '';
-	foreach ($genres as $g){
-		$where = ($where == '') ? ' genre_id LIKE "' . $g . '"' : $where . ' OR genre_id LIKE "' . $g . '"';
-	}
-	$query = mysqli_query($db,'SELECT genre, genre_id FROM genre WHERE ' . $where);
-	while ($genre = mysqli_fetch_assoc($query)){
-		$album_genres[$genre['genre_id']] = $genre['genre'];
-		//$album['album_genre'] = $album['album_genre'] . '; ' . $genre['genre'];
-	} */
-	
-	//$genre_id[] = (string) $table_track['genre_id'];
 	$number[] = (string) $table_track['number'];
 	
 	$is_file_stream = false;
@@ -298,7 +286,7 @@ for ($i=0; $i < $listlength; $i++) {
 			$playlistinfo['Time'] = (int)urldecode($query['ompd_duration']);
 			$table_track['track_artist'] = "";
 		}
-		elseif (strpos($playlistinfo['file'],'tidal://') !== false || strpos($playlistinfo['file'],$cfg['upmpdcli_tidal']) !== false || strpos($playlistinfo['file'],TIDAL_TRACK_STREAM_URL) !== false) {
+		elseif (strpos($playlistinfo['file'],'tidal://') !== false || strpos($playlistinfo['file'],$cfg['upmpdcli_tidal']) !== false || strpos($playlistinfo['file'],TIDAL_TRACK_STREAM_URL) !== false || strpos($playlistinfo['file'],'action=streamTidal') !== false) {
 			//stream from Tidal unrecognized by mpd
 			/* $split = explode("/", $playlistinfo['file']);
 			$tidalTrackId = $split[count($split)-1]; */

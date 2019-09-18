@@ -1032,8 +1032,10 @@ function getTidalId($id){
 	elseif (strpos($id,'tidal://') !== false || strpos($id,'tidal.com/') !== false) {
 		return end(explode('/',$id));
 	}
-	elseif (strpos($id,$cfg['upmpdcli_tidal']) !== false)
-	{
+	elseif (strpos($id,'action=streamTidal') !== false) {
+		return end(explode('=',$id));
+	}
+	elseif (strpos($id,$cfg['upmpdcli_tidal']) !== false) {
 		return end(explode('=',$id));
 	}
 	else {

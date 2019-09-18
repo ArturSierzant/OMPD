@@ -119,6 +119,13 @@ class TidalAPI {
 		return $this->request();
 	}
 	
+	function getNewAlbums($limit = 100) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/show_more_featured_albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&deviceType=BROWSER");
+		$res = $this->request();
+		$s = array_search("featured-new",array_column($res["rows"][0]["modules"][0]["tabs"],"key"));
+		return $res["rows"][0]["modules"][0]["tabs"][$s]["pagedList"]["items"];
+	}
+	
 	function getArtistBio($artist_id) {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/bio?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
 		return $this->request();

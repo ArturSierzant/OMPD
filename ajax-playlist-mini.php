@@ -76,7 +76,7 @@ if ($cfg['player_type'] == NJB_MPD) {
 				$table_track['album'] = urldecode($query['ompd_webpage']);
 				$playlistinfo['Time'] = (int)urldecode($query['ompd_duration']);
 			}
-			elseif (strpos($playlistinfo['file'],'tidal://') !== false || strpos($playlistinfo['file'],$cfg['upmpdcli_tidal']) !== false || strpos($playlistinfo['file'],TIDAL_TRACK_STREAM_URL) !== false) {
+			elseif (strpos($playlistinfo['file'],'tidal://') !== false || strpos($playlistinfo['file'],$cfg['upmpdcli_tidal']) !== false || strpos($playlistinfo['file'],TIDAL_TRACK_STREAM_URL) !== false || strpos($playlistinfo['file'],'action=streamTidal') !== false) {
 				//stream from Tidal unrecognized by mpd
 				/* $split = explode("/", $playlistinfo['file']);
 				$tidalTrackId = $split[count($split)-1]; */

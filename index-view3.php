@@ -297,33 +297,29 @@ if ($cfg['show_discography_browser'] == true && !in_array($album['artist'],$cfg[
 		$i=0;
 		
 		for($i=0; $i<$count; $i++) {
-		/* $search_str .= ' OR artist = "' . $art . '" OR artist LIKE "' . $art . '' . $as[$i] . '%" 
-		OR artist LIKE "%' . $as[$i] . '' . $art . '" 
-		OR artist LIKE "%' . $as[$i] . '' . $art . '' . $as[$i] . '%" 
-		OR artist LIKE "% & ' . $art . '' . $as[$i] . '%" 
-		OR artist LIKE "%' . $as[$i] . '' . $art . ' & %"';
-		//last 2 lines above for artist like 'Mitch & Mitch' in 'Zbigniew Wodecki; Mitch & Mitch; Orchestra and Choir' */
-		
-		if (hasThe($art)){
-					$search_str .= ' OR artist LIKE "' . moveTheToEnd($art) . $as[$i] . '%" 
-					OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . '" 
-					OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . $as[$i] . '%" 
-					OR artist LIKE "% & ' . moveTheToEnd($art) . $as[$i] . '%" 
-					OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . ' & %"';
-					$search_str .= ' OR artist LIKE "' . moveTheToBegining($art) . $as[$i] . '%" 
-					OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . '" 
-					OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . $as[$i] . '%" 
-					OR artist LIKE "% & ' . moveTheToBegining($art) . $as[$i] . '%" 
-					OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . ' & %"';
-				}
-				else {
-					$search_str .= ' OR artist LIKE "' . $art . '' . $as[$i] . '%" 
-					OR artist LIKE "%' . $as[$i] . '' . $art . '" 
-					OR artist LIKE "%' . $as[$i] . '' . $art . '' . $as[$i] . '%" 
-					OR artist LIKE "% & ' . $art . '' . $as[$i] . '%" 
-					OR artist LIKE "%' . $as[$i] . '' . $art . ' & %"';
-					//last 2 lines above for artist like 'Mitch & Mitch' in 'Zbigniew Wodecki; Mitch & Mitch; Orchestra and Choir'
-				}
+			if (hasThe($art)){
+				$search_str .= ' OR artist LIKE "' . moveTheToEnd($art) . '" 
+				OR artist LIKE "' . moveTheToEnd($art) . $as[$i] . '%" 
+				OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . '" 
+				OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . $as[$i] . '%" 
+				OR artist LIKE "% & ' . moveTheToEnd($art) . $as[$i] . '%" 
+				OR artist LIKE "%' . $as[$i] . moveTheToEnd($art) . ' & %"';
+				$search_str .= ' OR artist LIKE "' . moveTheToBegining($art) . '" 
+				OR artist LIKE "' . moveTheToBegining($art) . $as[$i] . '%" 
+				OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . '" 
+				OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . $as[$i] . '%" 
+				OR artist LIKE "% & ' . moveTheToBegining($art) . $as[$i] . '%" 
+				OR artist LIKE "%' . $as[$i] . moveTheToBegining($art) . ' & %"';
+			}
+			else {
+				$search_str .= ' OR artist LIKE "' . $art .'" 
+				OR artist LIKE "' . $art . '' . $as[$i] . '%" 
+				OR artist LIKE "%' . $as[$i] . '' . $art . '" 
+				OR artist LIKE "%' . $as[$i] . '' . $art . '' . $as[$i] . '%" 
+				OR artist LIKE "% & ' . $art . '' . $as[$i] . '%" 
+				OR artist LIKE "%' . $as[$i] . '' . $art . ' & %"';
+				//last 2 lines above for artist like 'Mitch & Mitch' in 'Zbigniew Wodecki; Mitch & Mitch; Orchestra and Choir'
+			}
 		}
 	}
 	//echo $search_str;
