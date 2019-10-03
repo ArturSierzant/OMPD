@@ -414,6 +414,7 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 		if ($conn === true){
 			if ($tidalArtistId) {
 				$results = $t->getArtistAlbums($tidalArtistId,999);
+				$resultsEPs = $t->getArtistEPsAndSingles($tidalArtistId,999);
 			}
 			else if ($artist) {
 				$artist = tidalEscapeChar(strtolower($artist));
@@ -431,17 +432,13 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 				}
 				else {
 					foreach($results["items"] as $res) {
-						/* if (strtolower($res["name"]) == strtolower($artist)){
-							$tidalArtistId = $res["id"];
-							break;
-						} */
-						//if (tidalEscapeChar(strtolower($res["name"])) == tidalEscapeChar(strtolower($artist))) {
 						if (tidalEscapeChar(strtolower($res["name"])) == $artist) {
 							$tidalArtistId = $res["id"];
 							break;
 						}
 					}
 					$results = $t->getArtistAlbums($tidalArtistId,999);
+					$resultsEPs = $t->getArtistEPsAndSingles($tidalArtistId,999);
 				}
 			}
 		}
@@ -452,7 +449,7 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 			return;
 		}
 
-		if ($results['totalNumberOfItems'] === 0) {
+		if ($results['totalNumberOfItems'] === 0 && $resultsEPs['totalNumberOfItems'] === 0) {
 			if ($ajax) {
 				$data['results'] = 0;
 				echo safe_json_encode($data);
@@ -464,42 +461,45 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 			}
 		}
 
-		if ($results['items']) {
+		if ($results['items'] || $resultsEPs['items']) {
 			$sql = "DELETE FROM tidal_album WHERE artist_id = '" . mysqli_real_escape_string($db,$tidalArtistId) . "'";
 			mysqli_query($db, $sql);
-			$albums = $results['items'];
-			usort($albums, function ($a, $b) {
-				return $a['releaseDate'] <=> $b['releaseDate'];
-			});
-			foreach ($albums as $album) {
-				
-				$artists = '';
-				foreach ($album["artists"] as $a){
-					if ($artists == ''){
-						$artists = $a["name"];
-					}
-					else {
-						$artists = $artists . " & " . $a["name"];
-					}
+			for($i=0;$i<2;$i++) {
+				if ($i == 0) {
+					$albums = $results['items'];
 				}
-				if ($artists == '') $artists = $album["artist"]["name"];
-				
-				$sql = "REPLACE INTO tidal_album 
-				(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time)
-				VALUES (
-				'" . $album["id"] . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . $album["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$album["title"]) . "', '" . $album["releaseDate"] . "', '', 1, '" . $album["duration"] . "','" . time() . "')";
-				
-				/* $sql = "REPLACE INTO tidal_album 
-				(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time)
-				VALUES (
-				'" . $album["id"] . "', '" . mysqli_real_escape_string($db,$album["artist"]["name"]) . "', '" . mysqli_real_escape_string($db,$album["artist"]["name"]) . "', '" . $album["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$album["title"]) . "', '" . $album["releaseDate"] . "', '', 1, '" . $album["duration"] . "','" . time() . "')"; */
-				
-				mysqli_query($db, $sql);
-				
-				$tidalAlbum["album_id"] = 'tidal_' . $album["id"];
-				$tidalAlbum["album"] = $album["title"];
-				$tidalAlbum["artist_alphabetic"] = $artists;
-				draw_tile($size, $tidalAlbum);
+				else {
+					$albums = $resultsEPs['items'];
+					echo ('<h1>EPs and Singles</h1>');
+				}
+				usort($albums, function ($a, $b) {
+					return $a['releaseDate'] <=> $b['releaseDate'];
+				});
+				foreach ($albums as $album) {
+					
+					$artists = '';
+					foreach ($album["artists"] as $a){
+						if ($artists == ''){
+							$artists = $a["name"];
+						}
+						else {
+							$artists = $artists . " & " . $a["name"];
+						}
+					}
+					if ($artists == '') $artists = $album["artist"]["name"];
+					
+					$sql = "REPLACE INTO tidal_album 
+					(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time, cover, type)
+					VALUES (
+					'" . $album["id"] . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . $album["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$album["title"]) . "', '" . $album["releaseDate"] . "', '', 1, '" . $album["duration"] . "','" . time() . "', '" .$album['cover'] . "','" . $album['type'] . "')";
+					
+					mysqli_query($db, $sql);
+					
+					$tidalAlbum["album_id"] = 'tidal_' . $album["id"];
+					$tidalAlbum["album"] = $album["title"];
+					$tidalAlbum["artist_alphabetic"] = $artists;
+					draw_tile($size, $tidalAlbum);
+				}
 			}
 		}
 		else {
@@ -548,21 +548,30 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 		}
 		
 		if (hasThe($artist)){
-			$filter_query = 'WHERE (
+			$filter_query = '(
 			artist = "' .  mysqli_real_escape_string($db,moveTheToBegining($artist)) . '" OR artist LIKE "' .mysqli_real_escape_string($db,moveTheToBegining($art)) . '" OR artist = "' .  mysqli_real_escape_string($db,moveTheToEnd($artist)) . '" OR artist LIKE "' .mysqli_real_escape_string($db,moveTheToEnd($art)) . '"' . $search_str . ')';
 		}
 		else {
-			$filter_query = 'WHERE (
+			$filter_query = '(
 			artist = "' .  mysqli_real_escape_string($db,$artist) . '" OR artist LIKE "' .mysqli_real_escape_string($db,$art) . '"' . $search_str . ') ORDER BY album_date';
 		}
+		for ($j=0;$j<2;$j++){
+			if ($j==0) {
+				$filter_query1 = 'WHERE type="album" AND ' . $filter_query;
+			}
+			else {
+				$filter_query1 = 'WHERE type != "album" AND ' . $filter_query;
+				echo ('<h1>EPs and Singles</h1>');
+			}
 		
-		$sql = "SELECT album_id, album, artist, album_date FROM tidal_album " . $filter_query;
-		$query = mysqli_query($db,$sql);
-		while($album = mysqli_fetch_assoc($query)) {
-			$tidalAlbum["album_id"] = 'tidal_' . $album["album_id"];
-			$tidalAlbum["album"] = $album["album"];
-			$tidalAlbum["artist_alphabetic"] = $album["artist"];
-			draw_tile($size, $tidalAlbum);
+			$sql = "SELECT album_id, album, artist, album_date FROM tidal_album " . $filter_query1;
+			$query = mysqli_query($db,$sql);
+			while($album = mysqli_fetch_assoc($query)) {
+				$tidalAlbum["album_id"] = 'tidal_' . $album["album_id"];
+				$tidalAlbum["album"] = $album["album"];
+				$tidalAlbum["artist_alphabetic"] = $album["artist"];
+				draw_tile($size, $tidalAlbum);
+			}
 		}
 	}
 }
@@ -609,14 +618,9 @@ function getAlbumFromTidal($album_id) {
 	if ($artists == '') $artists = $results["artist"]["name"];
 	
 	$sql = "REPLACE INTO tidal_album 
-	(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time)
+	(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time, cover, type)
 	VALUES (
-	'" . $results["id"] . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . $results["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$results["title"]) . "', '" . $results["releaseDate"] . "', '', 1, '" . $results["duration"] . "','0')";
-	
-	/* $sql = "REPLACE INTO tidal_album 
-	(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time)
-	VALUES (
-	'" . $results["id"] . "', '" . mysqli_real_escape_string($db,$results["artist"]["name"]) . "', '" . mysqli_real_escape_string($db,$results["artist"]["name"]) . "', '" . $results["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$results["title"]) . "', '" . $results["releaseDate"] . "', '', 1, '" . $results["duration"] . "','0')"; */
+	'" . $results["id"] . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . $results["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$results["title"]) . "', '" . $results["releaseDate"] . "', '', 1, '" . $results["duration"] . "','0','" . $results["cover"] . "','" . $results['type'] . "')";
 	
 	mysqli_query($db, $sql);
 	$data['results'] = 1;

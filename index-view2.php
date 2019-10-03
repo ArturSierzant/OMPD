@@ -41,6 +41,7 @@ if ($genre_id)
 
 $title	 	= get('title');
 $artist	 	= get('artist');
+$tidalArtistId	 	= get('tidalArtistId');
 $tag		= get('tag');
 $year		= (get('year') == 'Unknown' ? get('year'): (int) get('year'));
 $dr		= (get('dr') == 'Unknown' ? get('dr'): (int) get('dr'));
@@ -441,7 +442,7 @@ $i			= 0;
 $sort_url	= $url;
 $size_url	= $url . '&amp;order=' . $order . '&amp;sort=' . $sort;
 
-if ($cfg['use_tidal']) {
+if ($cfg['use_tidal'] && $artist && !$qsType && !$tag) {
 ?>
 
 
@@ -467,7 +468,7 @@ else {
 if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
 	var size = <?php echo $size; ?>;
 	console.log ('$tileSize: ' + $tileSize);
-	var artist = '<?php echo tidalEscapeChar($artist); ?>';
+	var artist = "<?php echo str_replace('"','',$artist); ?>";
 	var request = $.ajax({  
 		url: "ajax-tidal-search.php",  
 		type: "POST",  
@@ -479,9 +480,17 @@ if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
 		if (data["artist_count"] > 0) { //check if any artist recieved
 			//$("[id='suggested']").show();
 			var bio = data["text"];
+			var source = data["source"];
 			var img = "";
 			var pic = "";
 			var related_artists = "";
+			
+			if (source) {
+				source = '<div class="total-time">Source: ' + source + '</div>';
+			}
+			else {
+				source = "";
+			}
 			if(data["picture"]) {
 				//pic = '<?php echo TIDAL_RESOURCES_URL; ?>' + data["picture"] + '/480x480.jpg';
 				pic = data["picture"];
@@ -490,9 +499,9 @@ if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
 			else {
 				img='<div class="artist_bio_pic_not_found"><i class="fa fa-user"></i></div>';
 			}
-			var artist_bio = '<div style="background-image: url(' + pic + '); background-position: 0 -80px;" class="artist_bio_pic">' + img + '</div><div>' + bio + '</div>';
+			var artist_bio = '<div style="background-image: url(' + pic + '); background-position: 0 -80px;" class="artist_bio_pic">' + img + '</div><div>' + bio + '</div>' + source + '<br/><br/>';
 			if (data["related_artists"]) {
-				related_artists = '<div style="text-transform: uppercase;">Related artists:<br><br></div><div class="artist_bio_related">';
+				related_artists = '<div style="text-transform: uppercase;"><h1>Related artists:</h1></div><br/><div class="artist_bio_related">';
 				$.each(data["related_artists"], function(index, value){
 					img = '<i class="fa fa-user" style="font-size: 6em;"></i>';
 					if (value["picture"]) {
@@ -643,7 +652,7 @@ if ($cfg['use_tidal'] && $artist && $artist != 'All albums') {
 <h1 onclick='toggleSearchResults("TI");' class="pointer" id="tidalAlbums"><i id="iconSearchResultsTI" class="fa fa-chevron-circle-down icon-anchor"></i> Albums from Tidal</h1>
 <div id="searchResultsTI" class="albums_container">
 <span id="albumsLoadingIndicator">
-	<i class="fa fa-cog fa-spin icon-small"></i> Loading albums...
+	<i class="fa fa-cog fa-spin icon-small"></i> Loading albums, EPs and singles...
 </span>
 </div>
 </div>
@@ -664,12 +673,14 @@ else {
 //var size = $tileSize;
 var size = <?php echo $size; ?>;
 console.log ('$tileSize: ' + $tileSize);
-var artist = '<?php echo str_replace("'","\'", $artist); ?>';
+var artist = "<?php echo str_replace('"','', $artist); ?>";
+var tidalArtistId = "<?php echo $tidalArtistId; ?>";
+
 //var artist = '<?php echo ($artist); ?>';
 var request = $.ajax({  
 	url: "ajax-tidal-search.php",  
 	type: "POST",  
-	data: { search: "albums", tileSize : size, searchStr : artist, ajax : true },  
+	data: { search: "albums", tileSize : size, searchStr : artist, ajax : true, tidalArtistId: tidalArtistId },  
 	dataType: "html"
 }); 
 

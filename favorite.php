@@ -34,11 +34,13 @@ $cfg['menu'] = 'favorite';
 
 $action 		= getpost('action');
 $favorite_id	= getpost('favorite_id');
+$favorite_name	= getpost('plName');
 
 
 if		($action == '')							home();
 elseif	($action == 'editFavorite')				editFavorite($favorite_id);
 elseif	($action == 'editFavoriteMPD')		editFavoriteMPD($favorite_id);
+elseif	($action == 'viewTidalPlaylist')		viewTidalPlaylist($favorite_id, $favorite_name);
 elseif	($action == 'addFavorite')	 			addFavorite();
 elseif	($action == 'saveFavorite') 			saveFavorite($favorite_id);
 elseif	($action == 'importPlaylist')			importFavorite($favorite_id, 'import');
@@ -208,6 +210,69 @@ function home() {
 		<?php	
 		}
 	}
+	
+	
+	if ($cfg['use_tidal']) {
+		$t = new TidalAPI;
+		$t->username = $cfg["tidal_username"];
+		$t->password = $cfg["tidal_password"];
+		$t->token = $cfg["tidal_token"];
+		if (NJB_WINDOWS) $t->fixSSLcertificate();
+		$conn = $t->connect();
+		if ($conn === true){
+			$playlists = $t->getUserPlaylists();
+			if ($playlists['totalNumberOfItems'] > 0) {
+?>
+		<tr class="header">
+			
+			<td class="icon"></td><!-- optional play -->
+			<td class="icon"></td><!-- optional add -->
+			<td class="icon"></td><!-- optional stream -->
+			<td>Playlists from Tidal</td>
+			<td></td>
+			<td class="icon"></td><!-- optional delete -->
+			<td class="icon"></td>
+			<td class="space"></td>
+		</tr>
+
+		<?php
+				for ($j = 0; $j < $playlists['totalNumberOfItems']; $j++) {
+					$plName = $playlists['items'][$j]['title'];
+					$plId = $playlists['items'][$j]['uuid'];
+					//$plLastMod = $playlists['Last-Modified'][$j];
+				?>		
+					<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
+						
+						<td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalPlaylist&amp;favorite_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();"><i id="play_' . $plId . '" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
+						
+						<td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=addTidalPlaylist&amp;favorite_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Add to playlist\');" onMouseOut="return nd();"><i id="add_' . $plId . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>'; ?></td>
+						
+						<td>
+						</td>
+						
+						<td><?php if ($cfg['access_play'])	echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalPlaylist&amp;favorite_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();">' . html($plName) . '</a>';
+								else 													echo html($plName); ?>
+						</td>
+						
+						<td>
+							<?php echo $playlists['items'][$j]['description']; ?></td>
+						<td>
+						</td>
+						
+						<td>
+							<?php if ($cfg['access_admin']) echo '<a href="favorite.php?action=viewTidalPlaylist&amp;favorite_id=' . $plId . '&plName=' . $plName . '" onMouseOver="return overlib(\'See tracks\');" onMouseOut="return nd();"><i class="fa fa-list fa-fw icon-small"></i></a>'; ?>
+						</td>
+						
+						<td></td>
+					</tr>
+				<?php	
+				}
+			}
+		}
+	}
+	
+	
+	
 	echo '</table>' . "\n";
 	require_once('include/footer.inc.php');
 }
@@ -478,6 +543,121 @@ function editFavoriteMPD($favorite_id) {
 $(document).ready(function() {
 	var request = $.ajax({  
 		url: "ajax-favorite-arrange-MPD.php",  
+		type: "POST",  
+		data: { action : 'display',
+				favorite_id : '<?php echo $favorite_id; ?>'
+			  },  
+		dataType: "html"
+	}); 
+
+	request.done(function( data ) {  
+		$( "#favoriteList" ).html( data );
+		//calcTileSize();
+	}); 
+
+	request.fail(function( jqXHR, textStatus ) {  
+		alert( "Request failed: " + textStatus );	
+	}); 
+});
+
+function importPlaylist() {
+	document.favorite.action.value='importPlaylist'; 
+	$('#favorite').submit();
+}
+
+function addPlaylist() {
+	document.favorite.action.value='addPlaylist'; 
+	$('#favorite').submit();
+}
+
+function importPlaylistUrl() {
+	document.favorite.action.value='importPlaylistUrl'; 
+	$('#favorite').submit();
+}
+
+function addPlaylistUrl() {
+	document.favorite.action.value='addPlaylistUrl'; 
+	$('#favorite').submit();
+}
+
+//-->
+</script>
+
+<?php
+	require_once('include/footer.inc.php');
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | View Tidal playlist                                                    |
+//  +------------------------------------------------------------------------+
+function viewTidalPlaylist($favorite_id, $favorite_name) {
+	global $cfg, $db;
+	authenticate('access_admin');
+	
+	require_once('include/play.inc.php');
+	
+	// formattedNavigator
+	$nav			= array();
+	$nav['name'][]	= 'Favorites';
+	$nav['url'][]	= 'favorite.php';
+	$nav['name'][]	= 'View';
+	require_once('include/header.inc.php');
+	
+?>	
+<form action="favorite.php" method="post" name="favorite" id="favorite">
+	<input type="hidden" name="action" value="saveFavorite">
+	<input type="hidden" name="favorite_id" value="<?php echo $favorite_id; ?>">
+	<input type="hidden" name="sign" value="<?php echo $cfg['sign']; ?>">
+<table cellspacing="0" cellpadding="0" id="favoriteTable">
+<tr class="header">
+	<td colspan="3">&nbsp;Playlist info:</td>
+</tr>
+</tr>
+<tr class="textspace"><td colspan="3"></td></tr>
+<tr>
+<tr>
+	<td id="favoriteTableFirstCol">Name:</td>
+	<td class="textspace">&nbsp;</td>
+	<td class="fullscreen"><?php echo $favorite_name; ?></td>
+</tr>
+
+<tr class="space"><td colspan="3"></td></tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td>
+	</td>
+</tr>
+
+<tr class="textspace"><td colspan="3"></td></tr>
+
+<tr class="header">
+	<td colspan="3">&nbsp;Tracks in this playlist:</td>
+</tr>		
+<tr class="line"><td colspan="9"></td></tr>
+<tr>
+	<td colspan="3">
+	<!-- begin indent -->
+<div id="favoriteList">
+<div style="text-align: center; padding: 1em;">
+ <i class="fa fa-cog fa-spin icon-small"></i> Loading track list...
+</div>
+ </div>
+	<!-- end indent -->
+	</td>
+</tr>
+</table>
+</form>
+
+<script type="text/javascript">
+<!--
+
+$(document).ready(function() {
+	var request = $.ajax({  
+		url: "ajax-favorite-arrange-Tidal.php",  
 		type: "POST",  
 		data: { action : 'display',
 				favorite_id : '<?php echo $favorite_id; ?>'

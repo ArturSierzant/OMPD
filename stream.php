@@ -523,7 +523,7 @@ function streamTo() {
 //  +------------------------------------------------------------------------+
 function streamTidal($id) {
 	global $cfg, $db;
-	
+
 	$t = new TidalAPI;
 	$t->username = $cfg["tidal_username"];
 	$t->password = $cfg["tidal_password"];
@@ -533,6 +533,16 @@ function streamTidal($id) {
 	$conn = $t->connect();
 	if ($conn === true){
 		$trackURL = $t->getStreamURL($id);
+		for ($i=0;$i<4;$i++) {
+			//get 8 bytes of stream to make sure that stream is ready
+			$stream = file_get_contents($trackURL["url"], NULL, NULL, 0, 8);
+			if (strlen($stream) > 0) {
+				cliLog('stream: ' . $stream . ' iteration: ' . $i);
+				break;
+			}
+		}
+		
+		cliLog('Tidal track URL for ' . $id . ': ' . 	$trackURL["url"]);
 		header("Location: " . $trackURL["url"]);
 	}
 	else {

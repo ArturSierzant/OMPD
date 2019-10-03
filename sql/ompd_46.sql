@@ -360,6 +360,8 @@ CREATE TABLE IF NOT EXISTS `tidal_album` (
   `discs` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `seconds` int(7) unsigned NOT NULL DEFAULT '0',
   `last_update_time` int(10) unsigned NOT NULL DEFAULT '0',
+  `cover` varchar(255) NOT NULL DEFAULT '',
+  `type` tinytext NOT NULL DEFAULT '',
   UNIQUE KEY `album_id` (`album_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -709,7 +711,7 @@ INSERT INTO `user` VALUES ('anonymous', 'adf8efe68157cf37503f86d602bec6d593750c3
 -- Default server
 --
 
-INSERT INTO `server` VALUES ('database_version', '45');
+INSERT INTO `server` VALUES ('database_version', '46');
 INSERT INTO `server` VALUES ('escape_char_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('getid3_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('image_quality', '0');

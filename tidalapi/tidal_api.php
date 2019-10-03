@@ -119,6 +119,11 @@ class TidalAPI {
 		return $this->request();
 	}
 	
+	function getArtistEPsAndSingles($artist_id, $limit = 50) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/albums?filter=EPSANDSINGLES&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
+		return $this->request();
+	}
+	
 	function getNewAlbums($limit = 100) {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/show_more_featured_albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&deviceType=BROWSER");
 		$res = $this->request();
@@ -143,6 +148,16 @@ class TidalAPI {
 	
 	function getStreamURL($track_id) {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "tracks/" . $track_id . "/streamUrl?soundQuality=" . $this->audioQuality . "&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
+		return $this->request();
+	}
+	
+	function getUserPlaylists() {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "users/" . $this->userId . "/playlists?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
+		return $this->request();
+	}
+	
+	function getUserPlaylistTracks($playlist_id, $limit = 1000) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "playlists/" . $playlist_id . "/tracks?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
 		return $this->request();
 	}
 	

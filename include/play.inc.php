@@ -545,26 +545,6 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 			AND favorite_id = "' . mysqli_real_escape_string($db,$favorite_id) . '"
 			ORDER BY position');
 	}
-	/* elseif ($random == 'database') {
-		$query = mysqli_query($db,'SELECT artist, title, relative_file, miliseconds, audio_bitrate, track.track_id
-			FROM track, random
-			WHERE random.sid	= "' . mysqli_real_escape_string($db,$cfg['sid']) . '" AND
-			random.track_id		= track.track_id
-			ORDER BY position');
-	}
-	elseif ($random == 'new') {
-		//$query = mysqli_query($db,'SELECT artist, title, relative_file, miliseconds, audio_bitrate, track_id FROM track WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
-		$blacklist = explode(',', $cfg['random_blacklist']);
-		$blacklist = '"' . implode('","', $blacklist) . '"';
-		$query = mysqli_query($db,'SELECT track.artist, title, relative_file, miliseconds, audio_bitrate, track_id
-			FROM track, album
-			WHERE (genre_id = "" OR genre_id NOT IN (' . $blacklist . ')) AND
-			audio_dataformat != "" AND
-			video_dataformat = "" AND
-			track.album_id = album.album_id
-			ORDER BY RAND()
-			LIMIT 1');
-	} */
 	
 	elseif ($filepath) {
 		$filepath = str_replace('ompd_ampersand_ompd','&',$filepath);
@@ -627,6 +607,27 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 		//updateCounter($album_id, NJB_COUNTER_STREAM);
 	}
 	
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | mpdAddTidalTrack                                                       |
+//  +------------------------------------------------------------------------+
+
+function mpdAddTidalTrack($id, $insPos = '') {
+	global $cfg, $db;
+	$mpdCommand = 'ACK_ERROR_UNKNOWN';
+	if ($cfg['tidal_direct']) {
+		$mpdCommand = mpd('addid "' . NJB_HOME_URL . 'stream.php?action=streamTidal&track_id=' . $id . '" ' . $insPos);
+	}
+	elseif ($cfg['upmpdcli_tidal']) {
+	$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $id . '" ' . $insPos);
+	}
+	else {
+		$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $id . ' ' . $insPos);
+	}
+	return $mpdCommand;
 }
 
 ?>

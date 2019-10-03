@@ -31,10 +31,11 @@ $size = $_POST["tileSize"];
 $search = $_POST["search"];
 $searchStr = $_POST["searchStr"];
 $ajax = $_POST["ajax"];
+$artistId = $_POST["tidalArtistId"];
 
 if ($search == 'albums') {
 	$searchStr = moveTheToBegining($searchStr);
-	showAlbumsFromTidal($searchStr, $size, $ajax, '');
+	showAlbumsFromTidal($searchStr, $size, $ajax, $artistId);
 }
 elseif ($search == 'artists') {
 	showArtistsFromTidal($searchStr, $size);

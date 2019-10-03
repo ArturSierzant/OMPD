@@ -45,7 +45,8 @@ authenticate('access_media');
 if (strpos($album_id, 'tidal_') !== false) {
 	$query = mysqli_query($db, 'SELECT *, REPLACE(album_date," 00:00:00","") as year
 	FROM tidal_album
-	WHERE album_id = "' .  mysqli_real_escape_string($db,getTidalId($album_id)) . '"');
+	WHERE album_id = "' .  mysqli_real_escape_string($db,getTidalId($album_id)) . '" AND artist !=""'); //artist != "" for albums added from tidal playlists
+	
 	//$albumType = 'tidal';
 	//album already in OMPD database
 	if (mysqli_num_rows($query) > 0) {

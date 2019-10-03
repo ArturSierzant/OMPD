@@ -1183,7 +1183,8 @@ $('#tidalTracks').click(function() {
 
 function tidalSearchAll(){	
 	var size = $tileSize;
-	var searchStr = "<?php echo tidalEscapeChar($search_string);?>";
+	//var searchStr = "<?php echo tidalEscapeChar($search_string);?>";
+	var searchStr = "<?php echo str_replace('"','',$search_string);?>";
 	var request = $.ajax({  
 		url: "ajax-tidal-search.php",  
 		type: "POST",  

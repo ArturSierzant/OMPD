@@ -63,7 +63,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 		ORDER BY disc, number";
 		$query = mysqli_query($db,$queryStr);
 		$track_count = mysqli_num_rows($query);
-		if ($track_count == 0){
+		if ($track_count < 2){ //0 - no tracks found; 1 - album added from tidal playlist or has only one track
 			getTracksFromTidalAlbum(str_replace('tidal_','',$album_id));
 			$query = mysqli_query($db,$queryStr);
 		}

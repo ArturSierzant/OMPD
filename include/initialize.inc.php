@@ -30,7 +30,7 @@
 //  | Initialize                                                             |
 //  +------------------------------------------------------------------------+
 error_reporting(E_ALL ^ E_NOTICE);
-@ini_set('display_errors', 0);
+@ini_set('display_errors', 'Off');
 
 //prevent buffering for nginx
 header('X-Accel-Buffering: no');
@@ -38,7 +38,7 @@ header('X-Accel-Buffering: no');
 define('NJB_START_TIME', microtime(true));
 
 define('NJB_VERSION', '1.05');
-define('NJB_DATABASE_VERSION', 45);
+define('NJB_DATABASE_VERSION', 46);
 define('NJB_IMAGE_SIZE', 300);
 define('NJB_IMAGE_QUALITY', 85);
 define('NJB_WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');

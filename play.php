@@ -60,6 +60,8 @@ elseif	($action == 'beginOfTrack')		beginOfTrack();
 elseif	($action == 'next')				next_();
 elseif	($action == 'playMPDplaylist')	playMPDplaylist();
 elseif	($action == 'addMPDplaylist')	addMPDplaylist();
+elseif	($action == 'playTidalPlaylist')	playTidalPlaylist();
+elseif	($action == 'addTidalPlaylist')	addTidalPlaylist();
 elseif	($action == 'playSelect')		playSelect();
 elseif	($action == 'addSelect')		addSelect();
 elseif	($action == 'addSelectUrl')		addSelectUrl();
@@ -432,6 +434,130 @@ function addMPDplaylist() {
 
 
 //  +------------------------------------------------------------------------+
+//  | Play Tidal playlist                                                    |
+//  +------------------------------------------------------------------------+
+function playTidalPlaylist() {
+	global $cfg, $db;
+	authenticate('access_play');
+	require_once('include/play.inc.php');
+	$favorite_id	= get('favorite_id');
+	$data = array();
+	$playResult = 'play_error';
+	
+	mpd('stop');
+	if ($cfg['play_queue'] == false) {
+		mpd('clear');
+	}
+	
+	$playResult = loadTidalPlaylist($favorite_id);
+	
+	mpd('play');
+	if (strpos((string)$playResult,'ACK') !== false) {
+		$playResult = 'play_error';
+	}
+	else {
+		$playResult = 'play_OK';
+	}
+	$data['playResult'] = $playResult;
+	$data['favorite_id'] = $favorite_id;
+	ob_start();
+	echo safe_json_encode($data);
+	header('Connection: close');
+	header('Content-Length: ' . ob_get_length());
+	ob_end_flush();
+	ob_flush();
+	flush();
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Add Tidal playlist                                                     |
+//  +------------------------------------------------------------------------+
+
+function addTidalPlaylist() {
+	global $cfg, $db;
+	authenticate('access_play');
+	require_once('include/play.inc.php');
+	$favorite_id	= get('favorite_id');
+	$data = array();
+	$playResult = 'add_error';
+	
+	$playResult = loadTidalPlaylist($favorite_id);
+	
+	if (strpos((string)$playResult,'ACK') !== false) {
+		$playResult = 'add_error';
+	}
+	else {
+		$playResult = 'add_OK';
+	}
+	$data['addResult'] = $playResult;
+	$data['favorite_id'] = $favorite_id;
+	ob_start();
+	echo safe_json_encode($data);
+	header('Connection: close');
+	header('Content-Length: ' . ob_get_length());
+	ob_end_flush();
+	ob_flush();
+	flush();
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Load Tidal playlist                                                    |
+//  +------------------------------------------------------------------------+
+
+function loadTidalPlaylist($favorite_id) {
+	global $cfg, $db;
+	$t = new TidalAPI;
+	$t->username = $cfg["tidal_username"];
+	$t->password = $cfg["tidal_password"];
+	$t->token = $cfg["tidal_token"];
+	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	$conn = $t->connect();
+
+	if ($conn === true){
+		$trackList = $t->getUserPlaylistTracks($favorite_id);
+		
+		for ($i = 0; $i < $trackList['totalNumberOfItems']; $i++) {
+				$artist	= $trackList['items'][$i]['artist']['name'];
+				$title	= $trackList['items'][$i]['title'];
+				$id	= $trackList['items'][$i]['id'];
+				$volumeNumber	= $trackList['items'][$i]['volumeNumber'];
+				$duration	= $trackList['items'][$i]['duration'];
+				$trackNumber	= $trackList['items'][$i]['trackNumber'];
+				$album_id	= $trackList['items'][$i]['album']['id'];
+				$album	= $trackList['items'][$i]['album']['title'];
+				$cover	= $trackList['items'][$i]['album']['cover'];
+				$releaseDate	= $trackList['items'][$i]['album']['releaseDate'];
+				
+				$sql = "SELECT album_id FROM tidal_album WHERE album_id = '" . $album_id . "'";
+				$rows = mysqli_num_rows($sql);
+				if ($rows == 0) {
+					$sql = "INSERT INTO tidal_album 
+					(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time, cover, type)
+					VALUES (
+					'" . $album_id . "', '', '', '', '" . mysqli_real_escape_string($db,$album) . "', '" . $releaseDate . "', '', 1, '','" . time() . "','" . $cover . "','playlist')";
+					$query2=mysqli_query($db,$sql);
+				}
+				$sql = "REPLACE INTO tidal_track 
+				(track_id, title, artist, artist_alphabetic, genre_id, disc, seconds, number, album_id)
+				VALUES (
+				'" . $id . "', '" . mysqli_real_escape_string($db,$title) . "', '" . mysqli_real_escape_string($db,$artist) . "', '" . mysqli_real_escape_string($db,$artist) . "', '', '" . $volumeNumber . "', '" . $duration . "', '" . $trackNumber . "', '" . $album_id . "')";
+				
+				mysqli_query($db, $sql);
+				$playResult = mpdAddTidalTrack($id);
+		}
+	}
+	return $playResult;
+}
+
+
+
+//  +------------------------------------------------------------------------+
 //  | Add select                                                             |
 //  +------------------------------------------------------------------------+
 function addSelect() {
@@ -558,7 +684,8 @@ function addSelectUrl() {
 				}
 				
 				$tidal_tracks['track_id'] = $id;
-				if ($cfg['tidal_direct']) {
+				$mpdCommand = mpdAddTidalTrack($id);
+				/* if ($cfg['tidal_direct']) {
 					$mpdCommand = mpd('addid "' . NJB_HOME_URL . 'stream.php?action=streamTidal&track_id=' . $id . '"');
 				}
 				elseif ($cfg['upmpdcli_tidal'] && strpos($url, TIDAL_TRACK_STREAM_URL) === false) {
@@ -566,7 +693,8 @@ function addSelectUrl() {
 				}
 				else {
 					$mpdCommand = mpd('addid ' . $url);
-				}
+				} */
+				
 				if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST' || $mpdCommand == 'TIDAL_CONNECT_ERROR') {
 					return 'add_error';
 				}
@@ -578,7 +706,8 @@ function addSelectUrl() {
 				$tidal_tracks = json_decode($tidal_tracks, true);
 				
 				foreach ($tidal_tracks as $tidal_track) {
-					if ($cfg['tidal_direct']) {
+					$mpdCommand = mpdAddTidalTrack($tidal_track['id']);
+					/* if ($cfg['tidal_direct']) {
 						$mpdCommand = mpd('addid "' . NJB_HOME_URL . 'stream.php?action=streamTidal&track_id=' . $tidal_track['id'] . '"');
 					}
 					elseif ($cfg['upmpdcli_tidal']) {
@@ -586,7 +715,7 @@ function addSelectUrl() {
 					}
 					else {
 						$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['id']);
-					}
+					} */
 					//if (strpos($mpdCommand,'ACK') !== false) {
 					if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST' || $mpdCommand == 'TIDAL_CONNECT_ERROR') {
 						return 'add_error';
@@ -860,7 +989,9 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 		if ($tidal_tracks) {
 			$tidal_tracks = json_decode($tidal_tracks, true);
 			foreach ($tidal_tracks as $tidal_track) {
-				if ($cfg['tidal_direct']) {
+				$mpdCommand = mpdAddTidalTrack($tidal_track['id'], $insPos);
+				
+				/* if ($cfg['tidal_direct']) {
 					$mpdCommand = mpd('addid "' . NJB_HOME_URL . 'stream.php?action=streamTidal&track_id=' . $tidal_track['id'] . '" ' . $insPos);
 				}
 				elseif ($cfg['upmpdcli_tidal']) {
@@ -868,7 +999,8 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 				}
 				else {
 					$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['id'] . ' ' . $insPos);
-				}
+				} */
+				
 				//if (strpos($mpdCommand,'ACK') !== false) {
 				if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST' || $mpdCommand == 'TIDAL_CONNECT_ERROR') {
 					return 'add_error';
@@ -921,6 +1053,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 		if ($playAfterInsert) {mpd('play ' . $insPos);}
 		if ($first && $mode == 'play') mpd('play ' . $index);
 	}
+
 	else {
 		while ($track = mysqli_fetch_assoc($query)) {
 			
@@ -2141,6 +2274,5 @@ function updateAddPlay() {
 
 	echo safe_json_encode($data);
 }
-
 
 ?>
