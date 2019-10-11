@@ -1682,7 +1682,7 @@ $(document).ready(function () {
 if (!isset($cfg['show_last_played'])) $cfg['show_last_played'] = true;
 if ($cfg['show_last_played'] == true) {
 	if ($cfg['use_tidal']) {
-		$query = mysqli_query($db, "SELECT * FROM
+		/* $query = mysqli_query($db, "SELECT * FROM
 		((SELECT DISTINCT album.album_id, album.image_id, album.album, album.artist_alphabetic, c.m_time
 		FROM album RIGHT JOIN 
 		(SELECT album_id, MAX(time) AS m_time FROM counter WHERE album_id not like 'tidal_%' GROUP BY album_id) as c
@@ -1698,7 +1698,20 @@ if ($cfg['show_last_played'] == true) {
 		ON d.album_id = t.album_id
 		ORDER BY d.m_time DESC, t.album DESC
 		LIMIT 10)) s
-		ORDER BY s.m_time DESC, s.album DESC");
+		ORDER BY s.m_time DESC, s.album DESC"); */
+		$query = mysqli_query($db, "SELECT * FROM (
+		SELECT c1.album_id, c1.album_id as image_id, album, artist_alphabetic, c1.time 
+		FROM (SELECT * FROM (SELECT album_id, time FROM counter WHERE album_id like 'tidal_%' ORDER BY time DESC) c GROUP BY c.album_id
+		ORDER BY c.time  DESC LIMIT 10) c1
+		INNER JOIN tidal_album ON REPLACE(c1.album_id, 'tidal_','') = tidal_album.album_id
+
+		UNION
+		SELECT c2.album_id, image_id, album, artist_alphabetic, c2.time 
+		FROM (SELECT * FROM (SELECT album_id, time FROM counter WHERE album_id not like 'tidal_%' ORDER BY time DESC) c GROUP BY c.album_id
+		ORDER BY c.time  DESC LIMIT 10) c2
+		INNER JOIN album ON c2.album_id = album.album_id
+		) w
+		ORDER BY w.time DESC");
 	} else {
 		$query = mysqli_query($db, '
 		SELECT DISTINCT album.album_id, album.image_id, album.album, album.artist_alphabetic

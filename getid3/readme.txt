@@ -145,9 +145,10 @@ Writes:
 Requirements
 ===========================================================================
 
-* PHP 4.2.0 up to 5.2.x for getID3() 1.7.x (and earlier)
-* PHP 5.0.5 (or higher) for getID3() 1.8.x (and up)
-* PHP 5.0.5 (or higher) for getID3() 2.0.x (and up)
+* PHP 4.2.0 up to 5.2.x for getID3() 1.7.x  (and earlier)
+* PHP 5.0.5 (or higher) for getID3() 1.8.x  (and up)
+* PHP 5.3.0 (or higher) for getID3() 1.9.17 (and up)
+* PHP 5.3.0 (or higher) for getID3() 2.0.x  (and up)
 * at least 4MB memory for PHP. 8MB or more is highly recommended.
   12MB is required with all modules loaded.
 
@@ -177,22 +178,25 @@ like this:
 // Copy remote file locally to scan with getID3()
 $remotefilename = 'http://www.example.com/filename.mp3';
 if ($fp_remote = fopen($remotefilename, 'rb')) {
-    $localtempfilename = tempnam('/tmp', 'getID3');
-    if ($fp_local = fopen($localtempfilename, 'wb')) {
-        while ($buffer = fread($fp_remote, 8192)) {
-            fwrite($fp_local, $buffer);
-        }
-        fclose($fp_local);
+	$localtempfilename = tempnam('/tmp', 'getID3');
+	if ($fp_local = fopen($localtempfilename, 'wb')) {
+		while ($buffer = fread($fp_remote, 32768)) {
+			fwrite($fp_local, $buffer);
+		}
+		fclose($fp_local);
+
+		$remote_headers = array_change_key_case(get_headers($remotefilename, 1), CASE_LOWER);
+		$remote_filesize = (isset($remote_headers['content-length']) ? (is_array($remote_headers['content-length']) ? $remote_headers['content-length'][count($remote_headers['content-length']) - 1] : $remote_headers['content-length']) : null);
 
 		// Initialize getID3 engine
 		$getID3 = new getID3;
 
-		$ThisFileInfo = $getID3->analyze($localtempfilename);
+		$ThisFileInfo = $getID3->analyze($localtempfilename, $remote_filesize, basename($remotefilename));
 
-        // Delete temporary file
-        unlink($localtempfilename);
-    }
-    fclose($fp_remote);
+		// Delete temporary file
+		unlink($localtempfilename);
+	}
+	fclose($fp_remote);
 }
 
 Note: since v1.9.9-20150212 it is possible a second and third parameter

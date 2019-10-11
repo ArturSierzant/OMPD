@@ -345,7 +345,7 @@ class getid3_write_id3v2
 	public function GenerateID3v2FrameFlags($TagAlter=false, $FileAlter=false, $ReadOnly=false, $Compression=false, $Encryption=false, $GroupingIdentity=false, $Unsynchronisation=false, $DataLengthIndicator=false) {
 		$flag1 = null;
 		$flag2 = null;
-	    switch ($this->majorversion) {
+		switch ($this->majorversion) {
 			case 4:
 				// %0abc0000 %0h00kmnp
 				$flag1  = '0';
@@ -1235,7 +1235,7 @@ class getid3_write_id3v2
 				default:
 					if ((($this->majorversion == 2) && (strlen($frame_name) != 3)) || (($this->majorversion > 2) && (strlen($frame_name) != 4))) {
 						$this->errors[] = 'Invalid frame name "'.$frame_name.'" for ID3v2.'.$this->majorversion;
-					} elseif ($frame_name{0} == 'T') {
+					} elseif ($frame_name[0] == 'T') {
 						// 4.2. T???  Text information frames
 						// Text encoding                $xx
 						// Information                  <text string(s) according to encoding>
@@ -1246,7 +1246,7 @@ class getid3_write_id3v2
 							$framedata .= chr($source_data_array['encodingid']);
 							$framedata .= $source_data_array['data'];
 						}
-					} elseif ($frame_name{0} == 'W') {
+					} elseif ($frame_name[0] == 'W') {
 						// 4.3. W???  URL link frames
 						// URL              <text string>
 						if (!$this->IsValidURL($source_data_array['data'], false)) {
@@ -1402,7 +1402,7 @@ class getid3_write_id3v2
 					break;
 
 				default:
-					if (($frame_name{0} != 'T') && ($frame_name{0} != 'W')) {
+					if (($frame_name[0] != 'T') && ($frame_name[0] != 'W')) {
 						$this->errors[] = 'Frame not allowed in ID3v2.'.$this->majorversion.': '.$frame_name;
 					}
 					break;
@@ -1525,7 +1525,7 @@ class getid3_write_id3v2
 					break;
 
 				default:
-					if (($frame_name{0} != 'T') && ($frame_name{0} != 'W')) {
+					if (($frame_name[0] != 'T') && ($frame_name[0] != 'W')) {
 						$this->errors[] = 'Frame not allowed in ID3v2.'.$this->majorversion.': '.$frame_name;
 					}
 					break;
@@ -1617,7 +1617,7 @@ class getid3_write_id3v2
 					break;
 
 				default:
-					if (($frame_name{0} != 'T') && ($frame_name{0} != 'W')) {
+					if (($frame_name[0] != 'T') && ($frame_name[0] != 'W')) {
 						$this->errors[] = 'Frame not allowed in ID3v2.'.$this->majorversion.': '.$frame_name;
 					}
 					break;
@@ -1958,10 +1958,10 @@ class getid3_write_id3v2
 		$unsyncheddata = '';
 		$datalength = strlen($data);
 		for ($i = 0; $i < $datalength; $i++) {
-			$thischar = $data{$i};
+			$thischar = $data[$i];
 			$unsyncheddata .= $thischar;
 			if ($thischar == "\xFF") {
-				$nextchar = ord($data{$i + 1});
+				$nextchar = ord($data[$i + 1]);
 				if (($nextchar & 0xE0) == 0xE0) {
 					// previous byte = 11111111, this byte = 111?????
 					$unsyncheddata .= "\x00";
@@ -2316,6 +2316,7 @@ class getid3_write_id3v2
 			$ID3v2ShortFrameNameLookup[4]['performer_sort_order']              = 'TSOP';
 			$ID3v2ShortFrameNameLookup[4]['title_sort_order']                  = 'TSOT';
 			$ID3v2ShortFrameNameLookup[4]['set_subtitle']                      = 'TSST';
+			$ID3v2ShortFrameNameLookup[4]['year']                              = 'TDRC'; // subset of ISO 8601: valid timestamps are yyyy, yyyy-MM, yyyy-MM-dd, yyyy-MM-ddTHH, yyyy-MM-ddTHH:mm and yyyy-MM-ddTHH:mm:ss. All time stamps are UTC
 		}
 		return (isset($ID3v2ShortFrameNameLookup[$majorversion][strtolower($long_description)]) ? $ID3v2ShortFrameNameLookup[$majorversion][strtolower($long_description)] : '');
 
