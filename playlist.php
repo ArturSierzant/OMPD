@@ -285,6 +285,7 @@ for ($i=0; $i < $listlength; $i++) {
 			$table_track['album'] = urldecode($query['ompd_webpage']);
 			$playlistinfo['Time'] = (int)urldecode($query['ompd_duration']);
 			$table_track['track_artist'] = "";
+			$table_track['cover'] = urldecode($query['ompd_thumbnail']);
 		}
 		elseif (strpos($playlistinfo['file'],'tidal://') !== false || strpos($playlistinfo['file'],$cfg['upmpdcli_tidal']) !== false || strpos($playlistinfo['file'],TIDAL_TRACK_STREAM_URL) !== false || strpos($playlistinfo['file'],'action=streamTidal') !== false) {
 			//stream from Tidal unrecognized by mpd
@@ -348,13 +349,28 @@ for ($i=0; $i < $listlength; $i++) {
 		$pos = strpos($filepath, $table_track['title']);
 		$table_track['album'] = substr($filepath, 0, $pos);
 	}
-	$query2 = mysqli_query($db,'SELECT album, year, image_id FROM album WHERE album_id="' . $table_track['album_id'] . '"');
-	$image_id = mysqli_fetch_assoc($query2);
+	if ($table_track['cover']) { //for youtube streams
+		$src = "image_crop.php?thumbnail=" . $table_track['cover'];
+	}
+	else {
+		$query2 = mysqli_query($db,'SELECT album, year, image_id FROM album WHERE album_id="' . $table_track['album_id'] . '"');
+		$image_id = mysqli_fetch_assoc($query2);
+		$src = "image.php?image_id=" . $image_id['image_id'] . "&track_id=" . $table_track['track_id'];
+		if (!$image_id['image_id']) {
+			$imageFile = $cfg['stream_covers_dir'] . parse_url($file[$i], PHP_URL_HOST);
+			if (file_exists($imageFile . '.jpg')) {
+				$src = $imageFile . '.jpg';
+			}
+			elseif (file_exists($imageFile . '.png')) {
+				$src = $imageFile . '.png';
+			}
+		}
+	}
 ?>
 <tr class="<?php if ($i == $listpos) echo 'select'; else echo ($i & 1) ? 'even mouseover' : 'odd mouseover'; ?>" id="track<?php echo $i; ?>" style="display:table-row;">
 	
 	<td class="small_cover">
-	<a id="track<?php echo $i; ?>_image" href="javascript:ajaxRequest('play.php?action=playIndex&amp;index=<?php echo $i ?>&amp;menu=playlist',evaluateListpos);"><img src="image.php?image_id=<?php echo $image_id['image_id'] ?>&track_id=<?php echo $table_track['track_id'] ?>" alt="" width="100%"></a></td>
+	<a id="track<?php echo $i; ?>_image" href="javascript:ajaxRequest('play.php?action=playIndex&amp;index=<?php echo $i ?>&amp;menu=playlist',evaluateListpos);"><img src="<?php echo $src; ?>" alt="" width="100%"></a></td>
 	
 	<td class="play-indicator">
 	<div id="track<?php echo $i; ?>_play" style="<?php if ($i == $listpos) echo 'visibility: visible;'; else echo 'visibility: hidden;'; ?>" onclick="javascript:ajaxRequest('play.php?action=playIndex&amp;index=<?php echo $i ?>&amp;menu=playlist',evaluateListpos);">
@@ -1161,6 +1177,10 @@ function evaluateTrack(data) {
 		$("#image_in").attr("src","image_crop.php?thumbnail=" + encodeURIComponent(data.thumbnail));
 		//$("#image_in").attr("src",data.thumbnail);
 		$("#image a").attr("href",data.thumbnail);
+	}
+	else if (data.imageFile) {
+		//image for e.g. radio stations
+		$("#image_in").attr("src",data.imageFile);
 	}
 	else {
 		document.getElementById('image').innerHTML = '<a href="#"><img id="image_in" src="<?php echo 'image/'; ?>large_file_not_found.png" alt=""></a>';

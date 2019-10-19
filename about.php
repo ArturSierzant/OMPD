@@ -159,6 +159,22 @@ function about() {
 <tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
+	<td style="vertical-align: top;">v1.06 <br>20??.??.??</td>
+	<td></td>
+	<td>
+	<ul style="padding-left: 1em;">
+	<li> added support for TIDAL direct play (play TIDAL with any version of MPD)</li>
+	<li> added support for TIDAL user playlists</li>
+	<li> added support for internet radio covers (settable in config.inc.php)</li>
+	<li> improved TIDAL support (python API replaced with PHP - works much faster)</li>
+	<li> fixed bugs</li>
+	</ul>
+	<br>
+	</td>
+	<td></td>
+</tr>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td>&nbsp;</td>
 	<td style="vertical-align: top;">v1.05 <br>2019.07.31</td>
 	<td></td>
 	<td>

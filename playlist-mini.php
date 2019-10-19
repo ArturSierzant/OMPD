@@ -260,9 +260,9 @@ function evaluateTrack(data) {
 			}
 		} 
 		else if (l>0) {
-			//if (data.track_artist[0] != '&nbsp;') {
+			if (data.track_artist[0] != '&nbsp;') {
 			artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[0]) + '">' + data.track_artist[0] + '</a>';
-			//}
+			}
 		}
 	}
 	/* else if (typeof data.track_artist == 'undefined') {
@@ -299,9 +299,12 @@ function evaluateTrack(data) {
 		document.getElementById('artist_mini').innerHTML = albumLink;
 		}
 	//else if (data.album != '&nbsp;' && artist != '' && data.totalTracks > 0) {
-	else if (data.album != '&nbsp;' && artist != '' && artist != '<a href="index.php?action=view2&order=year&sort=asc&artist="></a>') {
+	else if (data.album != '&nbsp;' && artist != '' && artist != '&nbsp;' && artist != '<a href="index.php?action=view2&order=year&sort=asc&artist="></a>') {
 		document.getElementById('artist_mini').innerHTML = 'by ' + artist + ' from ' + data.album;
 	}
+	/* else if (data.album != '&nbsp;' && (artist == '' || artist == '&nbsp;')) {
+		document.getElementById('artist_mini').innerHTML = data.album;
+	} */
 	else if (data.album != '&nbsp;') {
 		document.getElementById('artist_mini').innerHTML = data.album;
 	}
@@ -318,6 +321,10 @@ function evaluateTrack(data) {
 	else if (data.thumbnail) {
 		//thumbnail e.g. from Youtube
 		$("#image_in_mini").attr("src","image_crop.php?thumbnail=" + encodeURIComponent(data.thumbnail));
+	}
+	else if (data.imageFile) {
+		//image for e.g. radio stations
+		$("#image_in_mini").attr("src",data.imageFile);
 	}
 	else {
 		document.getElementById('image_container_mini').innerHTML = '<a href="playlist.php"><img id="image_in_mini" src="<?php echo 'image/'; ?>large_file_not_found.png" alt=""></a>';

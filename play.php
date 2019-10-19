@@ -2127,6 +2127,14 @@ function playlistTrack() {
 		$data['isStream'] = 'false';
 		if (strpos($currentsong['file'],"://") !== false) {
 			$data['isStream'] = (string) 'true';
+			//image for e.g. radio stations
+			$imageFile = $cfg['stream_covers_dir'] . parse_url($currentsong['file'], PHP_URL_HOST);
+			if (file_exists($imageFile . '.jpg')) {
+				$data['imageFile'] = $imageFile . '.jpg';
+			}
+			elseif (file_exists($imageFile . '.png')) {
+				$data['imageFile'] = $imageFile . '.png';
+			}
 			if (strpos($currentsong['file'],'filepath=') !== false){
 				$pos = strpos($currentsong['file'],'filepath=');
 				$filepath = substr($currentsong['file'],$pos + 9, strlen($currentsong['file']) - $pos);

@@ -87,6 +87,22 @@ $cfg['tidal_token'] = "";
 $cfg['tidal_audio_quality'] = "HIGH";
 $cfg['tidal_direct'] = false;
 
+
+
+//  +------------------------------------------------------------------------+
+//  | Internet stations image                                                |
+//  +------------------------------------------------------------------------+
+//  | Path to images for radio stations and other streams.                   |
+//  | jpg and png files are supported.                                       |
+//  | Use host name as name for image file, e.g. for stream:                 |
+//  | http://stream14.shoutcastsolutions.com:8057/256stream                  |
+//  | copy to this dir file named:                                           |
+//  | stream14.shoutcastsolutions.com.png                                    |
+//  +------------------------------------------------------------------------+
+
+$cfg['stream_covers_dir'] = 'covers/';
+
+
 //  +------------------- END OF NEW IN O!MPD 1.06 ---------------------------+
 
 
