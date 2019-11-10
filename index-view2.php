@@ -442,7 +442,7 @@ $i			= 0;
 $sort_url	= $url;
 $size_url	= $url . '&amp;order=' . $order . '&amp;sort=' . $sort;
 
-if ($cfg['use_tidal'] && $artist && !$qsType && !$tag) {
+if ($cfg['use_tidal'] && $artist && !$qsType && !$tag && !in_array($artist,$cfg['VA']) ) {
 ?>
 
 
@@ -499,7 +499,7 @@ if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
 			else {
 				img='<div class="artist_bio_pic_not_found"><i class="fa fa-user"></i></div>';
 			}
-			var artist_bio = '<div style="background-image: url(' + pic + '); background-position: 0 -100px;" class="artist_bio_pic">' + img + '</div><div>' + bio + '</div>' + source + '<br/><br/>';
+			var artist_bio = '<div style="background-image: url(' + pic + '); background-position: -100000px -100000px;" class="artist_bio_pic">' + img + '</div><div>' + bio + '</div>' + source + '<br/><br/>';
 			if (data["related_artists"]) {
 				related_artists = '<div style="text-transform: uppercase;"><h1>Related artists:</h1></div><br/><div class="artist_bio_related">';
 				$.each(data["related_artists"], function(index, value){
@@ -644,9 +644,9 @@ foreach (array_slice($album_multidisc,($page - 1) * $max_item_per_page, $max_ite
 
 
 //  +------------------------------------------------------------------------+
-//  | albums from Tidal                                                      |
+//  | albums and top tracks from Tidal                                       |
 //  +------------------------------------------------------------------------+
-if ($cfg['use_tidal'] && $artist && $artist != 'All albums') {
+if ($cfg['use_tidal'] && $artist && $artist != 'All albums' && !in_array($artist,$cfg['VA'])) {
 ?>
 <div>
 <h1 onclick='toggleSearchResults("TI");' class="pointer" id="tidalAlbums"><i id="iconSearchResultsTI" class="fa fa-chevron-circle-down icon-anchor"></i> Albums from Tidal</h1>
@@ -656,6 +656,16 @@ if ($cfg['use_tidal'] && $artist && $artist != 'All albums') {
 </span>
 </div>
 </div>
+
+<div>
+<h1 onclick='toggleSearchResults("TOPT");' class="pointer" id="tidalTopTracks"><i id="iconSearchResultsTOPT" class="fa fa-chevron-circle-down icon-anchor"></i> Top 10 tracks from Tidal</h1>
+<div id="searchResultsTOPT">
+<span id="topTracksLoadingIndicator">
+	<i class="fa fa-cog fa-spin icon-small"></i> Loading top tracks...
+</span>
+</div>
+</div>
+
 <script>
 
 $('#tidalAlbums').click(function() {	
@@ -680,7 +690,7 @@ var tidalArtistId = "<?php echo $tidalArtistId; ?>";
 var request = $.ajax({  
 	url: "ajax-tidal-search.php",  
 	type: "POST",  
-	data: { search: "albums", tileSize : size, searchStr : artist, ajax : true, tidalArtistId: tidalArtistId },  
+	data: { search : "albums", tileSize : size, searchStr : artist, ajax : true, tidalArtistId : tidalArtistId },  
 	dataType: "html"
 }); 
 
@@ -744,6 +754,51 @@ $('#tidalAlbums').click();
 <?php
 	}
 ?>
+
+$('#tidalTopTracks').click(function() {	
+var artist = "<?php echo str_replace('"','', $artist); ?>";
+var tidalArtistId = "<?php echo $tidalArtistId; ?>";
+
+var request = $.ajax({  
+	url: "ajax-tidal-search.php",  
+	type: "POST",  
+	data: { search : "topTracks", searchStr : artist, tidalArtistId : tidalArtistId },
+	dataType: "json"
+}); 
+
+request.done(function( data ) {  
+	if (data.tracks_results > 0) { //check if any album recieved
+		$( "#searchResultsTOPT" ).html( data.top_tracks );
+	}
+	else {
+		if (data.return == 1) {
+			$("#topTracksLoadingIndicator").hide();
+			$("#searchResultsTOPT").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Tidal request.<br>Error message:<br><br>' + data.response + '</div>');
+		}
+		else {
+			$("#topTracksLoadingIndicator").hide();
+			$("#searchResultsTOPT").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
+		}
+	}
+	setAnchorClick();
+}); 
+
+request.fail(function( jqXHR, textStatus ) {  
+	//alert( "Request failed: " + textStatus );	
+}); 
+
+request.always(function() {
+	$('[id^="add_tidal"]').click(function(){
+		$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
+	});
+
+	$('[id^="play_tidal"]').click(function(){
+		$(this).removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
+	});
+	
+});
+
+});
 </script>
 
 
@@ -1443,7 +1498,7 @@ if ($group_found != 'none') {
 
 
 
-if ($resultsFound == false && $group_found == 'none') echo 'No results found in local DB.';
+if ($resultsFound == false && $group_found == 'none') echo '<h1>No results found in local DB.</h1>';
 
 } //if ($filter == 'whole')
 

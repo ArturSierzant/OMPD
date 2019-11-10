@@ -32,6 +32,7 @@
 
 
 ini_set('max_execution_time', '0');
+//ini_set('memory_limit', '-1');
 //$updateStage = $_GET["updateStage"];
 require_once('include/initialize.inc.php');
 require_once('include/cache.inc.php');

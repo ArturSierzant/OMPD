@@ -279,6 +279,7 @@ for ($i=0; $i < $listlength; $i++) {
 		$playlistinfo = mpd('playlistinfo ' . $i);
 		if (strpos($playlistinfo['file'],'ompd_title=') !== false){
 			//stream from Youtube
+			$table_track['youtube'] = true;
 			$parts = parse_url($playlistinfo['file']);
 			parse_str($parts['query'], $query);
 			$table_track['title'] = urldecode($query['ompd_title']);
@@ -349,7 +350,8 @@ for ($i=0; $i < $listlength; $i++) {
 		$pos = strpos($filepath, $table_track['title']);
 		$table_track['album'] = substr($filepath, 0, $pos);
 	}
-	if ($table_track['cover']) { //for youtube streams
+	//if ($table_track['cover']) { //for youtube streams
+	if ($table_track['youtube']) { //for youtube streams
 		$src = "image_crop.php?thumbnail=" . $table_track['cover'];
 	}
 	else {
@@ -395,7 +397,7 @@ for ($i=0; $i < $listlength; $i++) {
 	?>
 	<td class="time"><a href="javascript:ajaxRequest('play.php?action=playIndex&amp;index=<?php echo $i ?>&amp;menu=playlist',evaluateListpos);" id="track<?php echo $i; ?>_title"><div class="playlist_title <?php echo $break_method; ?>"><?php echo html($table_track['title']) ?></div>
 		<?php 
-		if ($image_id['album']) {
+		if ($image_id['album'] && !$table_track['youtube']) {
 			$album_name = $image_id['album'];
 		} 
 		else { 
@@ -1191,6 +1193,7 @@ function evaluateTrack(data) {
 	
 	changeTileSizeInfo();
 	resizeImgContainer();
+	getFavoritesList(current_track_id);
 	
 	/* spinnerImg.stop();
 	$('#image').css('position', 'relative');*/

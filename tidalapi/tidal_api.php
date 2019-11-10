@@ -124,6 +124,11 @@ class TidalAPI {
 		return $this->request();
 	}
 	
+	function getArtistTopTracks($artist_id, $limit = 10) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/toptracks?filter=ALL&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
+		return $this->request();
+	}
+	
 	function getArtistBio($artist_id) {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/bio?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
 		return $this->request();

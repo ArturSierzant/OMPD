@@ -258,6 +258,20 @@ $(document).ready(function () {
 		$("#waitIndicatorImg").hide();
 	});
 	
+	$(window).scroll(function() {     
+		var scroll = $(window).scrollTop();
+		//var toScroll = $( "table[class='menu_middle']" ).height();
+		var toScroll = 0;
+		if (scroll > toScroll) {
+			$("#miniplayer").addClass("shadow-up");
+			$("#fixedMenu").addClass("shadow-down");
+		}
+		else {
+			$("#miniplayer").removeClass("shadow-up");
+			$("#fixedMenu").removeClass("shadow-down");
+		}
+	});
+	
 	$(window).resize(function() {
 		setMaxWidth();
     $tileSizeArr = calcTileSize();
@@ -303,9 +317,11 @@ $(document).ready(function () {
 		$(this).find('i').removeClass("fa-circle-o").addClass("fa-check-circle-o");
 		if ($(this).attr('id') == 'saveCurrentTrack') {
 			$("#trackOptions").slideDown( "slow", function() {});
+			getFavoritesList(current_track_id);
 		}
 		else {
 			$("#trackOptions").slideUp( "slow", function() {});
+			getFavoritesList();
 		}
 		//$('#savePlaylistAsName').focus();
 	});

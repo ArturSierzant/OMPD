@@ -18,38 +18,24 @@
 //  | along with this program.  If not, see <http://www.gnu.org/licenses/>.  |
 //  +------------------------------------------------------------------------+
 
-
+global $cfg, $db;
 require_once('include/initialize.inc.php');
 require_once('include/library.inc.php');
+require_once('include/play.inc.php');
 
-global $cfg, $db;
-global $base_size, $spaces, $scroll_bar_correction;
+$file = $_GET['file'];
+$stream = $_GET['stream'];
+$track_id = $_GET['track_id'];
 
-authenticate('access_media');
+$file == 'true' ? $file = true : $file = false;
+$stream == 'true' ? $stream = true : $stream = false;
 
-$size = $_POST["tileSize"];
-$search = $_POST["search"];
-$searchStr = $_POST["searchStr"];
-$ajax = $_POST["ajax"];
-$artistId = $_POST["tidalArtistId"];
+//if (!$file && !$stream) {
+	$file = true;
+	$stream = true;
+//}
 
-if ($search == 'albums') {
-	$searchStr = moveTheToBegining($searchStr);
-	showAlbumsFromTidal($searchStr, $size, $ajax, $artistId);
-}
-elseif ($search == 'artists') {
-	showArtistsFromTidal($searchStr, $size);
-}
-elseif ($search == 'all') {
-	showAllFromTidal($searchStr, $size);
-}
-elseif ($search == 'bio') {
-	showArtistBio($searchStr);
-}
-elseif ($search == 'topTracks') {
-	$searchStr = moveTheToBegining($searchStr);
-	showTopTracksFromTidal($searchStr, $artistId);
-}
+echo listOfFavorites($file, $stream, $track_id);
+
 ?>
-
 	

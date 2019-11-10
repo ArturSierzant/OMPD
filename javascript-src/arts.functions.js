@@ -635,9 +635,11 @@ function toggleSubMiddle(id,showTrackOptions) {
 	if ($( '#menuSubMiddleMedia' + id ).css("display")=="none"){
 		if(showTrackOptions) {
 			showSaveCurrentTrack();
+			//getFavoritesList(current_track_id);
 		}
 		else {
 			hideSaveCurrentTrack();
+			//getFavoritesList();
 		}
 		$( '#menuSubMiddleMedia' + id ).slideDown( "slow", function() {});
 		$( '#iconmenuSubMiddleMedia' + id ).addClass("icon-selected");
@@ -998,6 +1000,7 @@ function playlistSave(action, id, saveTrackId, host, port) {
 						}
 						break;
 				}
+				//getFavoritesList(saveTrackId);
 	});
 };
 
@@ -1148,4 +1151,20 @@ function setAnchorClick() {
 		$(this).find('> i[id^="randomPlay"]').removeClass('fa-random').addClass('fa-cog fa-spin icon-selected');
 		
 	})
+};
+
+function getFavoritesList(track_id){
+	var request = $.ajax({  
+	url: "ajax-favorite-list.php",  
+	type: "GET",  
+	data: { 
+		file : 'true',
+		track_id : track_id
+	},  
+	dataType: "html"
+	}); 
+
+	request.done(function(data) {  
+	$("#savePlaylistAddTo").html(data);
+	}); 
 };

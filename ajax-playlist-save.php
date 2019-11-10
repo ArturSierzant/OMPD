@@ -52,7 +52,7 @@ if ($action == 'SaveAs') {
 		else
 			importFavorite($favorite_id, $host, $port, 'import');
 		$data['action_status'] = true;
-		$data['select_options']= listOfFavorites();
+		$data['select_options']= listOfFavorites(true,false,$saveTrackId);
 		
 	}	
 }
@@ -62,6 +62,7 @@ elseif ($action == 'AddTo') {
 		if ($saveTrack == 'true') {
 			if ($saveAs > 0) {//add track only if playlist is file playlist
 				importTrack($saveAs, $saveTrackId);
+				$data['select_options']= listOfFavorites(true,false,$saveTrackId);
 			}
 			else {
 				$data['not_compatible'] = true;

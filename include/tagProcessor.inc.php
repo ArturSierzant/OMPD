@@ -38,6 +38,9 @@ function parseTrackArtist($data) {
 function parseAlbumTitle($data) {
     if(isset($data['comments']['album'][0])) {
         return $data['comments']['album'][0];
+    } 
+    if(isset($data['cue']['title'])) {
+        return $data['cue']['title'];
     }
     return 'Unknown Album Title';
 }
@@ -234,6 +237,10 @@ function parseYear($data) {
 	if (isset($data['comments']['original_release_time'][0])) {
         return postProcessYear($data['comments']['original_release_time'][0]);
     }
+	//for cue:
+	if (isset($data['cue']['comments'][0]['date'])) {
+        return postProcessYear($data['cue']['comments'][0]['date']);
+    }
 	//common:
 	if (isset($data['comments']['year'][0])) {
         return postProcessYear($data['comments']['year'][0]);
@@ -286,6 +293,9 @@ function parseAlbumArtist($data) {
     }
     if (isset($data['comments']['band'][0])) {
         return $data['comments']['band'][0];
+    }
+		if (isset($data['cue']['performer'])) {
+        return $data['cue']['performer'];
     }
     return 'Unknown AlbumArtist';
 }
