@@ -18,7 +18,6 @@
 //  | along with this program.  If not, see <http://www.gnu.org/licenses/>.  |
 //  +------------------------------------------------------------------------+
 
-
 global $cfg, $db;
 require_once('include/initialize.inc.php');
 require_once('include/play.inc.php');

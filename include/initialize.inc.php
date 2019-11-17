@@ -266,7 +266,7 @@ function authenticate($access, $cache = false, $validate_sign = false, $disable_
 		
 		if ($session['ip'] == '')
 			//message(__FILE__, __LINE__,'test',$session['ip']);
-			message(__FILE__, __LINE__, 'error', '[b]Login failed[/b][br]O!MPD requires cookies to login.[br]Enable cookies in your browser and try again.[br][url=index.php][img]small_login.png[/img]login[/url]');
+			message(__FILE__, __LINE__, 'error', '[b]Login failed[/b][br]O!MPD requires cookies to login.[br]Enable cookies or remove all cookies from this site in your browser and try again.[br][url=index.php][img]small_login.png[/img]login[/url]');
 			
 		if ($session['ip'] != $_SERVER['REMOTE_ADDR'])
 			message(__FILE__, __LINE__, 'error', '[b]Login failed[/b][br]Unexpected IP address[br][url=index.php][img]small_login.png[/img]login[/url]');
@@ -312,7 +312,8 @@ function authenticate($access, $cache = false, $validate_sign = false, $disable_
 				visit_counter	= visit_counter + ' . (time() > $session['idle_time'] + 3600 ? 1 : 0) . '
 				WHERE sid		= BINARY "' . mysqli_real_escape_string($db, cookie('netjukebox_sid')) . '"');
 			
-			setcookie('netjukebox_sid', $sid, time() + 31536000, null, null, NJB_HTTPS, true);
+			//setcookie('netjukebox_sid', $sid, time() + 31536000, null, null, NJB_HTTPS, true);
+			header('Set-Cookie: netjukebox_sid = ' . $sid . '; Path=/; Max-Age = 31536000; samesite=strict');
 			@ob_flush();
 			flush();
 		}
@@ -502,7 +503,8 @@ function logoutSession() {
 			"' . mysqli_real_escape_string($db, $sign) . '",
 			"' . mysqli_real_escape_string($db, $session_seed) . '")');
 		
-		setcookie('netjukebox_sid', $sid, time() + 31536000, null, null, NJB_HTTPS, true);
+		header('Set-Cookie: netjukebox_sid = ' . $sid . '; Path=/; Max-Age = 31536000; samesite=strict');
+		//setcookie('netjukebox_sid', $sid, time() + 31536000, null, null, NJB_HTTPS, true);
 		@ob_flush();
 		flush();
 	}

@@ -61,7 +61,7 @@ else {
 			$dir_to_update = $dir_to_update . "/";
 		}
 	//setcookie('update_dir', rtrim($dir_to_update,'/'), time() + (86400 * 30 * 365), "/");
-	setcookie('update_dir', $dir_to_update, time() + (86400 * 30 * 365), "/");
+	setcookie('update_dir', $dir_to_update, time() + 31536000, "/");
 	$cfg['force_filename_update'] = true;
 }
 

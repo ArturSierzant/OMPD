@@ -51,7 +51,6 @@ function css() {
 	$content = @file_get_contents('skin/' . $skin . '/styles.css') or exit('/* cache css error */');
 	$content = str_replace('img/', 'skin/' . rawurlencode($skin) . '/img/', $content);
 	$content = str_replace('flag/', 'skin/' . rawurlencode($skin) . '/flag/', $content);
-
 	header('Cache-Control: max-age=31536000');
 	streamData($content, 'text/css', false, false, '"never_expire"');
 }

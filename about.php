@@ -51,7 +51,7 @@ function versionCheck($ttl) {
 	global $cfg, $db;
 	
 	if ($cfg['latest_version_idle_time'] < time() - $ttl) {
-		if ($cfg['latest_version'] = @file_get_contents('http://www.ompd.pl/version.txt')) {
+		if ($cfg['latest_version'] = @file_get_contents('https://ompd.pl/version.txt')) {
 			$cfg['latest_version_idle_time'] = time();
 			mysqli_query($db,'UPDATE server SET value = "' . mysqli_real_escape_string($db,$cfg['latest_version']) . '" WHERE name = "latest_version"');
 			mysqli_query($db,'UPDATE server SET value = "' . (int) $cfg['latest_version_idle_time']  . '" WHERE name = "latest_version_idle_time"');
@@ -94,7 +94,7 @@ function about() {
 <tr class="odd">
 	<td></td>
 	<td colspan="3">
-	<i class="fa fa-globe fa-fw"></i>&nbsp;&nbsp;<a href="http://www.ompd.pl">http://www.ompd.pl</a><br>
+	<i class="fa fa-globe fa-fw"></i>&nbsp;&nbsp;<a href="https://ompd.pl">https://ompd.pl</a><br>
 	<i class="fa fa-envelope-o fa-fw"></i>&nbsp;&nbsp;<a href="mailto:info@ompd.pl">info@ompd.pl</a><br><br>
 	This program comes with <a href="about.php?action=license#nowarranty">ABSOLUTELY NO WARRANTY</a>.<br>
 	This is free software, and you are welcome to redistribute it<br>

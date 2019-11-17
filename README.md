@@ -33,7 +33,7 @@ While netjukebox also supports VideoLAN and Winamp/httpQ, O!MPD supports O!nly M
 
 ## Installation
 
-The installation instruction can be found on http://www.ompd.pl
+The installation instruction can be found on https://ompd.pl
 
 ## Configuration
 

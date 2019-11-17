@@ -1168,7 +1168,7 @@ function showTopTracksFromTidal($artist, $tidalArtistId = "") {
 
 function isTidal($id) {
 	global $cfg;
-	if (strpos($id,"tidal_") !== false || strpos($id,'tidal.com/') !== false || strpos($id,MPD_TIDAL_URL) !== false || strpos($id,$cfg['upmpdcli_tidal']) !== false) {
+	if (strpos($id,"tidal_") !== false || strpos($id,'tidal.com/') !== false || strpos($id,MPD_TIDAL_URL) !== false || ($cfg['upmpdcli_tidal'] && strpos($id,$cfg['upmpdcli_tidal']) !== false)) {
 		return true;
 	}
 	return false;
@@ -1193,7 +1193,7 @@ function getTidalId($id){
 	elseif (strpos($id,'action=streamTidal') !== false) {
 		return end(explode('=',$id));
 	}
-	elseif (strpos($id,$cfg['upmpdcli_tidal']) !== false) {
+	elseif ($cfg['upmpdcli_tidal'] && strpos($id,$cfg['upmpdcli_tidal']) !== false) {
 		return end(explode('=',$id));
 	}
 	else {

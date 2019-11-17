@@ -22,7 +22,7 @@ require_once('include/play.inc.php');
 <script type="text/javascript" src="javascript-src/spin.min.js"></script>
 <script type="text/javascript" src="javascript-src/arts.functions.js"></script>
 <script type="text/javascript" src="javascript-src/jquery.longpress.js"></script>
- 
+
 <?php
 $query1=mysqli_query($db,'SELECT player.player_name as pl, player.player_host as host, player.player_port as port FROM player, session WHERE (sid = BINARY "' . cookie('netjukebox_sid') . '") and player.player_id=session.player_id');
 $session1 = mysqli_fetch_assoc($query1);

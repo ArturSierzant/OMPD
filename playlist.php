@@ -288,7 +288,7 @@ for ($i=0; $i < $listlength; $i++) {
 			$table_track['track_artist'] = "";
 			$table_track['cover'] = urldecode($query['ompd_thumbnail']);
 		}
-		elseif (strpos($playlistinfo['file'],'tidal://') !== false || strpos($playlistinfo['file'],$cfg['upmpdcli_tidal']) !== false || strpos($playlistinfo['file'],TIDAL_TRACK_STREAM_URL) !== false || strpos($playlistinfo['file'],'action=streamTidal') !== false) {
+		elseif (strpos($playlistinfo['file'],'tidal://') !== false || ($cfg['upmpdcli_tidal'] && strpos($playlistinfo['file'],$cfg['upmpdcli_tidal']) !== false) || strpos($playlistinfo['file'],TIDAL_TRACK_STREAM_URL) !== false || strpos($playlistinfo['file'],'action=streamTidal') !== false) {
 			//stream from Tidal unrecognized by mpd
 			/* $split = explode("/", $playlistinfo['file']);
 			$tidalTrackId = $split[count($split)-1]; */

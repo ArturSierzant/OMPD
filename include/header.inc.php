@@ -100,8 +100,7 @@ else
 $header['head'] .= "\t" . '<link rel="stylesheet" type="text/css" href="fonts/typicons/typicons.css">' . "\n";
 $header['head'] .= "\t" . '<link rel="stylesheet" type="text/css" href="cache.php?action=css&amp;skin=' . rawurlencode($cfg['skin']) . '&amp;hash=' . css_hash() . '">' . "\n";
 $header['head'] .= "\t" . '<script src="cache.php?action=javascript&amp;hash=' . javascript_hash() . '" type="text/javascript"></script>' . "\n";
-
-//$header['head'] .= "\t" . '<script src="jquery/jquery.js"></script>' . "\n";
+$header['head'] .= '</head>' . "\n";
 
 
 $header['body'] = 'onload="javascript: if (window.initialize) initialize(); cookie(); "';

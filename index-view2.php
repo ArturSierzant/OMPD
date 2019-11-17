@@ -499,7 +499,7 @@ if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
 			else {
 				img='<div class="artist_bio_pic_not_found"><i class="fa fa-user"></i></div>';
 			}
-			var artist_bio = '<div style="background-image: url(' + pic + '); background-position: -100000px -100000px;" class="artist_bio_pic">' + img + '</div><div>' + bio + '</div>' + source + '<br/><br/>';
+			var artist_bio = '<div style="background-image: url(' + pic + '); background-position: -1000px -1000px;" class="artist_bio_pic">' + img + '</div><div>' + bio + '</div>' + source + '<br/><br/>';
 			if (data["related_artists"]) {
 				related_artists = '<div style="text-transform: uppercase;"><h1>Related artists:</h1></div><br/><div class="artist_bio_related">';
 				$.each(data["related_artists"], function(index, value){

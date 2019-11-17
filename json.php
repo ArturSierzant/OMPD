@@ -156,8 +156,11 @@ function loginStage1() {
 	header('Cache-Control: no-store, no-cache, must-revalidate');
 		
 	$sid		= cookie('netjukebox_sid');
+	//$sid		= "";
 	$username	= post('username');
 	$sign		= post('sign');
+	//$sign		= "";
+	//$sign = randomKey();
 	
 	$query		= mysqli_query($db, 'SELECT seed FROM user WHERE username = "' . mysqli_real_escape_string($db, $username) . '"');
 	$user 		= mysqli_fetch_assoc($query);
@@ -166,7 +169,7 @@ function loginStage1() {
 	$session	= mysqli_fetch_assoc($query);
 	
 	if ($session['ip'] == '')
-		message(__FILE__, __LINE__, 'error', '[b]Login failed[/b][br]netjukebox requires cookies to login.[br]Enable cookies in your browser and try again.[br][url=index.php][img]small_login.png[/img]login[/url]');
+		message(__FILE__, __LINE__, 'error', '[b]Login failed[/b][br]O!MPD requires cookies to login.[br]Enable cookies or remove all cookies from this site in your browser and try again.[br][url=index.php][img]small_login.png[/img]login[/url]');
 	
 	if ($session['ip'] != $_SERVER['REMOTE_ADDR'])
 		message(__FILE__, __LINE__, 'error', '[b]Login failed[/b][br]Unexpected IP address[br][url=index.php][img]small_login.png[/img]login[/url]');
