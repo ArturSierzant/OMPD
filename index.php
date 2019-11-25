@@ -35,8 +35,6 @@
 
 
 require_once('include/initialize.inc.php');
-require_once('include/library.inc.php');
-
 
 
 if (cookie('netjukebox_width')<385) {$base_size = 90;}

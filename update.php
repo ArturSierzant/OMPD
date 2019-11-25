@@ -228,32 +228,24 @@ function update($dir_to_update = '') {
 	require('include/footer.inc.php');
 	
 	
-	$getID3 = new getID3;
+	/* $getID3 = new getID3;
 	//initial settings for getID3:
 	include 'include/getID3init.inc.php';
-	
+	 */
 	
 	$result = mysqli_query($db,'SELECT * FROM update_progress');
 	
-	if (mysqli_num_rows($result)==0) {	
-			mysqli_query($db,'INSERT INTO update_progress (update_status, structure_image, file_info, cleanup, update_time, last_update)
-						VALUES ("0", "", "", "", "", "")');
-			$update_status = 0;
-		} 
-		else {
-			$row=mysqli_fetch_assoc($result);
-			$update_status=$row["update_status"];
-		}
+	if (mysqli_num_rows($result)==0) {
+		mysqli_query($db,'INSERT INTO update_progress (update_status, structure_image, file_info, cleanup, update_time, last_update)
+					VALUES ("0", "", "", "", "", "")');
+		$update_status = 0;
+	} 
+	else {
+		$row=mysqli_fetch_assoc($result);
+		$update_status=$row["update_status"];
+	}
 	
-	if ($update_status <> 1) {
-		
-		//redirect back to update.php to use ajax status update 
-		$cfg['footer'] = 'close';	
-		echo ('<script>window.location.href="update.php?action=update&sign=' . $cfg['sign'] . '"</script>');
-		
-		@ob_flush();
-		flush();
-	
+	if ($update_status == 0) {
 		mysqli_query($db,"update update_progress set 
 			update_status = 1,
 			structure_image = '',
@@ -261,9 +253,13 @@ function update($dir_to_update = '') {
 			cleanup = '',
 			update_time = '',
 			last_update = 'Update in progress..'");
+		sleep(1);
+		//redirect back to update.php to use ajax status update 
+		$cfg['footer'] = 'close';	
+		echo ('<script>window.location.href="update.php?action=update&sign=' . $cfg['sign'] . '"</script>');
 		
-		//@ob_flush();
-		//flush();
+		@ob_flush();
+		flush();
 		
 		mysqli_query($db,"update update_progress set 
 			structure_image = 'Requesting MPD update...'");
@@ -271,7 +267,10 @@ function update($dir_to_update = '') {
 		$rel_file = str_replace($cfg['media_dir'],'',$dir_to_update);
 		$rel_file_mpd = rtrim($rel_file,'/');
 		
-		
+		$getID3 = new getID3;
+		//initial settings for getID3:
+		include 'include/getID3init.inc.php';
+	
 		
 		mpdUpdate($rel_file_mpd);
 		
@@ -301,7 +300,14 @@ function update($dir_to_update = '') {
 		}
 		
 		
-		if ($dir_to_update != '') {
+		if ($dir_to_update) {
+			//set all to updated due to prevent deleting all DB in case of previous update failure
+			mysqli_query($db,'UPDATE album SET updated = 1');
+			mysqli_query($db,'UPDATE track SET updated = 1');
+			mysqli_query($db,'UPDATE bitmap SET updated = 1');
+			mysqli_query($db,'UPDATE album_id SET updated = 1');
+			
+			//mark only requested dir to be updated
 			mysqli_query($db,'UPDATE album_id SET updated = 0 WHERE path LIKE "' . mysqli_real_escape_string($db,$dir_to_update) . '%"');
 			mysqli_query($db,'UPDATE album SET updated = 0 WHERE album_id IN
 			(SELECT album_id FROM album_id WHERE path LIKE "' . mysqli_real_escape_string($db,$dir_to_update) . '%" )');
@@ -325,7 +331,7 @@ function update($dir_to_update = '') {
 		clearstatcache();
 		$dir_to_scan = $cfg['media_dir'];
 		
-		if ($dir_to_update != '') {
+		if ($dir_to_update) {
 			$dir_to_scan = $dir_to_update;
 		}
 		$mediaDirs = array();

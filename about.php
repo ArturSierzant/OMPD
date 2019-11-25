@@ -166,6 +166,8 @@ function about() {
 	<li> added support for TIDAL direct play (play TIDAL with any version of MPD)</li>
 	<li> added support for TIDAL user playlists</li>
 	<li> added support for internet radio covers (settable in config.inc.php)</li>
+	<li> added default login option</li>
+	<li> added possibility to login using URL (login.php)</li>
 	<li> improved TIDAL support (python API replaced with PHP - works much faster)</li>
 	<li> fixed bugs</li>
 	</ul>

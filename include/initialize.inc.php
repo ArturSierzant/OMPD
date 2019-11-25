@@ -74,6 +74,7 @@ $cfg['skin']				= 'ompd_default';
 $cfg['img']					= 'skin/ompd_default/img/';
 $cfg['username']			= '';
 $cfg['sign_validated']		= false;
+//$cfg['sign_validated']		= true;
 $cfg['align']				= false;
 
 //  +------------------------------------------------------------------------+
@@ -238,15 +239,22 @@ function simpleAuthenticate($access) {
 //  +------------------------------------------------------------------------+
 function authenticate($access, $cache = false, $validate_sign = false, $disable_counter = false) {
 	global $cfg, $db;
-	
+
 	//checkDefaultFavorites();
-	
+	//cliLog("auth 1");
 	if ($cache == false && headers_sent() == false)	{
+		//cliLog("auth 2");
 		header('Expires: Mon, 9 Oct 2000 18:00:00 GMT');
 		header('Cache-Control: no-store, no-cache, must-revalidate');
 	}
 	
 	$sid 			= cookie('netjukebox_sid');
+	if (!$sid) {
+		$sid = randomKey();
+		header('Set-Cookie: netjukebox_sid = ' . $sid . '; Path=/; Max-Age = 31536000; samesite=strict');
+		//logoutSession();
+	}
+	
 	$authenticate	= getpost('authenticate');
 	
 	$query			= mysqli_query($db, 'SELECT logged_in, user_id, idle_time, ip, user_agent, sign, seed, skin,
@@ -259,10 +267,12 @@ function authenticate($access, $cache = false, $validate_sign = false, $disable_
 	//message(__FILE__, __LINE__,'test',$session['ip']);
 	// Validate login
 	if ($authenticate == 'validate') {
-		$username	= post('username');
-		$hash1		= post('hash1');
-		$hash2		= post('hash2');
-		$sign		= post('sign');
+		//cliLog("auth validate");
+		$username	= getpost('username');
+		$hash1		= getpost('hash1');
+		$hash2		= getpost('hash2');
+		$sign		= getpost('sign');
+		$player_id = getpost('player_id');
 		
 		if ($session['ip'] == '')
 			//message(__FILE__, __LINE__,'test',$session['ip']);
@@ -277,6 +287,13 @@ function authenticate($access, $cache = false, $validate_sign = false, $disable_
 		$query		= mysqli_query($db, 'SELECT password, seed, version, user_id FROM user WHERE username = "' . mysqli_real_escape_string($db, $username) . '"');
 		$user		= mysqli_fetch_assoc($query);
 		$user_id	= $user['user_id'];
+
+		//cliLog("auth validate pass login_delay: " . $ip['login_delay']);
+		//cliLog("auth validate pass cfg-login_delay: " . $cfg['login_delay']);
+		//cliLog("auth validate pass session_sign: " . $session['sign']);
+		//cliLog("auth validate pass sign: " . $sign);
+		//cliLog("auth validate pass user_pass: " . $user['password']);
+		//cliLog("auth validate pass user_pass from hash1: " . hmacsha1($hash1, $user['seed']));
 		
 		if (// validate password
 			($user['version'] == 0 && $user['password'] == sha1($hash1) ||
@@ -291,51 +308,79 @@ function authenticate($access, $cache = false, $validate_sign = false, $disable_
 			$ip['login_delay'] > $cfg['login_delay'] &&
 			$session['user_agent'] == substr($_SERVER['HTTP_USER_AGENT'], 0, 255) &&
 			$session['sign'] == $sign) {
+				//cliLog("auth validate pass");
 			
-			mysqli_query($db, 'UPDATE user SET
-				password		= "' . mysqli_real_escape_string($db, $hash2) . '",
-				seed			= "' . mysqli_real_escape_string($db, $session['seed']) . '",
-				version			= 1
-				WHERE username	= "' . mysqli_real_escape_string($db, $username) . '"');
-			
-			$sign = randomKey();
-			$sid = randomKey();
-			
-			mysqli_query($db, 'UPDATE session SET
-				logged_in		= 1,
-				user_id			= ' . (int) $user_id . ',
-				login_time		= ' . (int) time() . ',
-				idle_time		= ' . (int) time() . ',
-				sid				= "' . mysqli_real_escape_string($db, $sid) . '",
-				sign			= "' . mysqli_real_escape_string($db, $sign) . '",
-				hit_counter		= hit_counter + ' . ($disable_counter ? 0 : 1) . ',
-				visit_counter	= visit_counter + ' . (time() > $session['idle_time'] + 3600 ? 1 : 0) . '
-				WHERE sid		= BINARY "' . mysqli_real_escape_string($db, cookie('netjukebox_sid')) . '"');
-			
-			//setcookie('netjukebox_sid', $sid, time() + 31536000, null, null, NJB_HTTPS, true);
-			header('Set-Cookie: netjukebox_sid = ' . $sid . '; Path=/; Max-Age = 31536000; samesite=strict');
-			@ob_flush();
-			flush();
+			/* 	mysqli_query($db, 'UPDATE user SET
+					password		= "' . mysqli_real_escape_string($db, $hash2) . '",
+					seed			= "' . mysqli_real_escape_string($db, $session['seed']) . '",
+					version			= 1
+					WHERE username	= "' . mysqli_real_escape_string($db, $username) . '"'); */
+				//$sign = randomKey();
+				//cliLog("auth validate pass new sign: " . $sign);
+				//cliLog("auth validate pass sid: " . $sid);
+				
+				/* if(!$sid) {
+					$sid = randomKey();
+				} */
+				
+				//cliLog("auth validate pass new sid: " . $sid);
+				
+				if($player_id) {
+					mysqli_query($db, 'UPDATE session SET
+						logged_in		= 1,
+						user_id			= ' . (int) $user_id . ',
+						login_time		= ' . (int) time() . ',
+						idle_time		= ' . (int) time() . ',
+						sid				= "' . mysqli_real_escape_string($db, $sid) . '",
+						sign			= "' . mysqli_real_escape_string($db, $sign) . '",
+						player_id			= "' . mysqli_real_escape_string($db, $player_id) . '",
+						hit_counter		= hit_counter + ' . ($disable_counter ? 0 : 1) . ',
+						visit_counter	= visit_counter + ' . (time() > $session['idle_time'] + 3600 ? 1 : 0) . '
+						WHERE sid		= BINARY "' . mysqli_real_escape_string($db, $sid) . '"');
+				}
+				else {
+					mysqli_query($db, 'UPDATE session SET
+						logged_in		= 1,
+						user_id			= ' . (int) $user_id . ',
+						login_time		= ' . (int) time() . ',
+						idle_time		= ' . (int) time() . ',
+						sid				= "' . mysqli_real_escape_string($db, $sid) . '",
+						sign			= "' . mysqli_real_escape_string($db, $sign) . '",
+						hit_counter		= hit_counter + ' . ($disable_counter ? 0 : 1) . ',
+						visit_counter	= visit_counter + ' . (time() > $session['idle_time'] + 3600 ? 1 : 0) . '
+						WHERE sid		= BINARY "' . mysqli_real_escape_string($db, $sid) . '"');
+				}
+				//cliLog("auth validate pass b4 header set");
+				//setcookie('netjukebox_sid', $sid, time() + 31536000, null, null, NJB_HTTPS, true);
+				//header('Cache-Control: no-store, no-cache, must-revalidate');
+				header('Set-Cookie: netjukebox_sid = ' . $sid . '; Path=/; Max-Age = 31536000; samesite=strict');
+				@ob_flush();
+				flush();
+				header('Location: index.php');
 		}
-		else
+		else {
+			//cliLog("auth validate pass going to logoutSession");
 			logoutSession();
+		}
 	}
 	else {
 		// Validate current session
+		//cliLog("auth validate session");
 		$user_id = $session['user_id'];
-		
 		if ($session['logged_in'] &&
 			$session['ip']			== $_SERVER['REMOTE_ADDR'] &&
 			$session['user_agent']	== substr($_SERVER['HTTP_USER_AGENT'], 0, 255) &&
 			$session['idle_time'] + $cfg['session_lifetime'] > time()) {
-			
-			mysqli_query($db, 'UPDATE session SET
+				//cliLog("auth validate session idle_time: " . $session['idle_time']);
+				//cliLog("auth validate session logged_in: " . $session['logged_in']);
+				mysqli_query($db, 'UPDATE session SET
 				idle_time		= ' . (int) time() . ',
 				hit_counter		= hit_counter + ' . ($disable_counter ? 0 : 1) . ',
 				visit_counter	= visit_counter + ' . (time() > $session['idle_time'] + 3600 ? 1 : 0) . '
 				WHERE sid		= BINARY "' . mysqli_real_escape_string($db, $sid) . '"');
 		}
 		elseif ($access == 'access_always')	{
+			//cliLog("auth validate access_always");
 			$cfg['access_media']		= false;
 			$cfg['access_popular']		= false;
 			$cfg['access_favorite']		= false;
@@ -350,11 +395,23 @@ function authenticate($access, $cache = false, $validate_sign = false, $disable_
 			$cfg['access_admin']		= false;
 			return true;
 		}
-		else
+		else {
+			//cliLog("auth validate session going to logoutSession");
 			logoutSession();
+		}
+		/* else{
+			if ($cfg['default_username'] != '') {
+				$url = 'login.php?username=' . $cfg['default_username'] . '&password=' . $cfg['default_username'];
+				header('Location: '.$url);
+			}
+			else {
+				logoutSession();
+			}
+		} */
 	}
 	
 	// Username & user privalages
+	//cliLog("auth user priv");
 	unset($cfg['username']);
 	$query = mysqli_query($db, 'SELECT
 		username,
@@ -391,38 +448,63 @@ function authenticate($access, $cache = false, $validate_sign = false, $disable_
 		($validate_sign ||
 		$authenticate == 'logoutAllSessions' ||
 		$authenticate == 'logoutSession')) {
-		
+		//cliLog("auth validate signature");
 		$cfg['sign'] = randomKey();
 		mysqli_query($db, 'UPDATE session
 			SET	sign		= "' . mysqli_real_escape_string($db, $cfg['sign']) . '"
 			WHERE sid		= BINARY "' . mysqli_real_escape_string($db, $sid) . '"');
-		if ($session['sign'] == getpost('sign'))
+		if ($session['sign'] == getpost('sign')) {
+			//cliLog("auth validate signature OK");
 			$cfg['sign_validated'] = true;
-		else
+		}
+		else {
+			/* echo "ok";
+			if ($cfg['sign_validated']) {
+			echo("cfg['sign_validated']: true<br>");
+			}
+			else {
+				echo("cfg['sign_validated']: false<br>");
+			}
+			echo("cfg['sign']:" . $cfg['sign'] . "<br>");
+			echo("getpost('sign'):" . getpost('sign') . "<br>");
+			exit(); */
 			message(__FILE__, __LINE__, 'error', '[b]Signature expired[/b]');
+		}
 	}
-	else
+	else {
+		//cliLog("auth validate signature sign: " . $session['sign']);
 		$cfg['sign'] = $session['sign'];
-	
+	}
 	// Logout
 	if ($authenticate == 'logout' && $cfg['username'] != $cfg['anonymous_user']) {
+		//cliLog("auth logout");
 		$query = mysqli_query($db, 'SELECT user_id FROM session
 			WHERE logged_in
 			AND user_id		= ' . (int) $user_id . '
 			AND idle_time	> ' . (int) (time() - $cfg['session_lifetime']) );
 		
-		if (mysqli_affected_rows($db) > 1)	logoutMenu();
-		else								logoutSession();	
+		if (mysqli_affected_rows($db) > 1){
+		//cliLog("auth logout goingto logoutMenu");
+		logoutMenu();
+		}
+		else {
+			//cliLog("auth logout goingto logoutMenu");
+			logoutSession();
+		}
 	}
 	elseif ($authenticate == 'logoutAllSessions' && $cfg['username'] != $cfg['anonymous_user']) {
+		//cliLog("auth logoutAllSessions");
 		mysqli_query($db, 'UPDATE session
 			SET logged_in	= 0
 			WHERE user_id	= ' . (int) $user_id);
+		//cliLog("auth logoutAllSessions going to logoutSession");
 		logoutSession();
 	}
-	elseif ($authenticate == 'logoutSession' || $authenticate == 'logout')
+	elseif ($authenticate == 'logoutSession' || $authenticate == 'logout'){
+		//cliLog("auth logout going to logoutSession");
 		logoutSession();
-	
+	}
+	//cliLog("auth end - setting cfg");
 	$cfg['user_id']				= $user_id;
 	$cfg['sid']					= $sid;
 	$cfg['session_seed']		= $session['seed'];
@@ -452,8 +534,8 @@ function logoutMenu() {
 <table cellspacing="10" cellpadding="0" class="warning">
 <tr>
 	<td rowspan="2" valign="top"><img src="<?php echo $cfg['img']; ?>medium_online.png" alt=""></td>
-	<td><input type="radio" name="authenticate" value="logoutSession" checked class="space">Logout this session only<br>
-	<input type="radio" name="authenticate" value="logoutAllSessions" class="space">Logout all sessions</td>
+	<td><input type="radio" name="authenticate" value="logoutSession" checked>&nbsp;Logout this session only<br>
+	<input type="radio" name="authenticate" value="logoutAllSessions">&nbsp;Logout all sessions</td>
 </tr>
 <tr>
 	<td align="right"><input type="submit" value="logout" class="button"></td>
@@ -474,13 +556,18 @@ function logoutMenu() {
 //  +------------------------------------------------------------------------+
 function logoutSession() {
 	global $cfg, $db;
-	
 	$cfg['username'] = ''; // Footer
 	$cfg['access_media'] = ''; // Header opensearch
+	
+	//cliLog("logoutSession");
 	
 	$sid			= cookie('netjukebox_sid');
 	$sign			= randomKey();
 	$session_seed	= randomKey();
+	
+	//cliLog("logoutSession sid from cookie: " . $sid);
+	//cliLog("logoutSession sign: " . $sign);
+	//cliLog("logoutSession session_seed: " . $session_seed);
 	
 	// Update current session
 	mysqli_query($db, 'UPDATE session SET
@@ -490,9 +577,11 @@ function logoutSession() {
 		sign				= "' . mysqli_real_escape_string($db, $sign) . '",
 		seed				= "' . mysqli_real_escape_string($db, $session_seed) . '"
 		WHERE sid			= BINARY "' . mysqli_real_escape_string($db, $sid) . '"');
-	if (mysqli_affected_rows($db) == 0) {
+	if (mysqli_affected_rows($db) == 0 || !$sid) {
 		// Create new session
-		$sid = randomKey();
+		//cliLog("logoutSession new session");
+		if (!$sid) $sid = randomKey();
+		//cliLog("logoutSession new session new sid: " . $sid);
 		
 		mysqli_query($db, 'INSERT INTO session (logged_in, create_time, ip, user_agent, sid, sign, seed) VALUES (
 			0,
@@ -502,7 +591,7 @@ function logoutSession() {
 			"' . mysqli_real_escape_string($db, $sid) . '",
 			"' . mysqli_real_escape_string($db, $sign) . '",
 			"' . mysqli_real_escape_string($db, $session_seed) . '")');
-		
+		//cliLog("logoutSession end - setting cookie");
 		header('Set-Cookie: netjukebox_sid = ' . $sid . '; Path=/; Max-Age = 31536000; samesite=strict');
 		//setcookie('netjukebox_sid', $sid, time() + 31536000, null, null, NJB_HTTPS, true);
 		@ob_flush();
@@ -510,15 +599,14 @@ function logoutSession() {
 	}
 
 
-
-
 //  +------------------------------------------------------------------------+
 //  | Login                                                                  |
 //  +------------------------------------------------------------------------+
+	//cliLog("login");
+	//cliLog("");
 	$query		= mysqli_query($db, 'SELECT username FROM user WHERE username = "' . mysqli_real_escape_string($db, $cfg['anonymous_user']) . '"');
 	$user		= mysqli_fetch_assoc($query);
 	$anonymous	= $user['username'];
-	
 	$action = get('action');
 	if (NJB_SCRIPT == 'index.php' && substr($action, 0, 4) == 'view') {
 		$url = 'index.php?';
@@ -565,7 +653,8 @@ else {
 	document.write('	<td class="space"><\/td>');
 	document.write('	<td>Username:<\/td>');
 	document.write('	<td class="space"><\/td>');
-	document.write('	<td><input type="text" name="username" value="<?php echo addslashes(html($anonymous)); ?>" maxlength="255" class="login" onKeyUp="anonymousPassword();"><\/td>');
+	//document.write('	<td><input type="text" name="username" value="<?php echo addslashes(html($anonymous)); ?>" maxlength="255" class="login" onKeyUp="anonymousPassword();"><\/td>');
+	document.write('	<td><input type="text" name="username" value="<?php echo addslashes(html($anonymous)); ?>" maxlength="255" class="login"><\/td>');
 	document.write('	<td class="space"><\/td>');
 	document.write('<\/tr>');
 	document.write('<tr>');
@@ -623,7 +712,14 @@ function initialize() {
 
 
 function anonymousPassword() {
-	if (<?php echo ($anonymous) ? 'true' : 'false'; ?> && document.loginform.username.value == '<?php echo addslashes(html($anonymous)); ?>') {
+	if (<?php echo ($cfg['default_username'] != '') ? 'true' : 'false'; ?>) {
+		document.loginform.username.value = '<?php echo $cfg['default_username']; ?>';
+		document.loginform.password.value = '<?php echo $cfg['default_password']; ?>';
+		document.loginform.username.className = 'login';
+		document.loginform.password.className = 'login';
+		document.loginform.password.disabled = false;
+	}
+	else if (<?php echo ($anonymous) ? 'true' : 'false'; ?> && document.loginform.username.value == '<?php echo addslashes(html($anonymous)); ?>') {
 		document.loginform.password.value = '';
 		document.loginform.password.className = 'login readonly';
 		// document.loginform.password.disabled = true;
@@ -721,7 +817,7 @@ function message($file, $line, $type, $message)	{
 		}
 		exit();
 	}
-	elseif (NJB_SCRIPT == 'update.php') {
+	elseif (NJB_SCRIPT == 'update.php' && $message <> '[b]Signature expired[/b]') {
 		mysqli_query($db,"UPDATE update_progress SET update_time = '" . mysqli_real_escape_string($db, bbcode($message) . "<br><a href='config.php?update=cancel'><i class='fa fa-times-circle pointer icon-selected'></i>&nbsp;&nbsp;Cancel update</a>") . "'");
 		exit();
 	}
@@ -792,7 +888,7 @@ function checkDefaultFavorites() {
 
 
 //  +------------------------------------------------------------------------+
-//  | Check if default blacklist is created									 |
+//  | Check if default blacklist is created                                  |
 //  +------------------------------------------------------------------------+
 function checkDefaultBlacklist() {
 	global $cfg, $db;

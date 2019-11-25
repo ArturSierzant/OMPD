@@ -1688,7 +1688,7 @@ function bbcode($string) {
 		'<br>',
 		'<strong>$1</strong>',
 		'<em>$1</em>',
-		'<img src="' . $cfg['img'] . '$1" alt="" class="small space">',
+		'<img src="' . $cfg['img'] . '$1" alt="" class="small">',
 		'<a href="$1">$2</a>',
 		'<a href="$1">$1</a>',
 		'<a href="$1">$2</a>',

@@ -222,11 +222,28 @@ function config() {
 <?php
 	}
 */
-	if ($update == 'cancel') 
-		mysqli_query($db, "UPDATE update_progress 
-		SET update_status = 0,
-		last_update = 'canceled',
-		update_time = '" . date('Y-m-d, H:i') . "'");
+	if ($update == 'cancel') {
+		$result = mysqli_query($db, "SELECT * FROM update_progress");
+		$row=mysqli_fetch_assoc($result);
+		if ($row["update_status"] == 1 && mysqli_num_rows($result)>0) {
+			mysqli_query($db, "UPDATE update_progress 
+			SET update_status = 0,
+			last_update = 'canceled',
+			update_time = '" . date('Y-m-d, H:i') . "'");
+			mysqli_query($db, "UPDATE album 
+				SET updated = 1
+				WHERE 1");
+			mysqli_query($db, "UPDATE album_id 
+				SET updated = 1
+				WHERE 1");
+			mysqli_query($db, "UPDATE bitmap 
+				SET updated = 1
+				WHERE 1");
+			mysqli_query($db, "UPDATE track 
+				SET updated = 1
+				WHERE 1");
+		}
+	}
 	if ($cfg['access_admin']) { 
 		$update_info = '';
 		$result = mysqli_query($db, "SELECT * FROM update_progress");

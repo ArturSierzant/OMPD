@@ -90,13 +90,27 @@ $cfg['tidal_direct'] = false;
 
 
 //  +------------------------------------------------------------------------+
+//  | Default login                                                          |
+//  +------------------------------------------------------------------------+
+//  | Default username/password that will be automatically entered           |
+//  | into login form. If empty, $cfg['anonymous_user'] will be used         |
+//  | as username                                                            |
+//  +------------------------------------------------------------------------+
+
+$cfg['default_username'] = '';
+$cfg['default_password'] = '';
+
+
+
+
+//  +------------------------------------------------------------------------+
 //  | Internet stations image                                                |
 //  +------------------------------------------------------------------------+
 //  | Path to images for radio stations and other streams.                   |
 //  | jpg and png files are supported.                                       |
 //  | Use host name as name for image file, e.g. for stream:                 |
 //  | http://stream14.shoutcastsolutions.com:8057/256stream                  |
-//  | copy to this dir file named:                                           |
+//  | copy to dir defined in $cfg['stream_covers_dir'] file named:           |
 //  | stream14.shoutcastsolutions.com.png                                    |
 //  +------------------------------------------------------------------------+
 
