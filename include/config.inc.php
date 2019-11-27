@@ -182,7 +182,7 @@ unset($cfg['youtube_indicator']);
 $cfg['python_path'] = '';
 $cfg['youtube-dl_path'] = 'youtube-dl';
 $cfg['youtube-dl_options'] = '-j --no-check-certificate --prefer-insecure';
-$cfg['youtube_audio_format_name'] = '140 - audio only (DASH audio)';
+$cfg['youtube_audio_format_name'] = '140 - audio only (tiny)';
 $cfg['youtube_indicator'][] = 'www.youtube.';
 $cfg['youtube_indicator'][] = 'youtu.be/';
 $cfg['youtube_indicator'][] = 'm.youtube.';

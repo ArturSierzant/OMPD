@@ -511,7 +511,7 @@ function recursiveScan($dir) {
         }
         if ($extension == 'id') {
             $album_id = substr($entry, 0, -3);
-			$isIdFromFile = true;
+            $isIdFromFile = true;
         }
 	}
 

@@ -1155,8 +1155,10 @@ function addUrl($mode = 'play') {
 			if ($ret == 0) {
 				$js = json_decode($output[0],true);
 				$f = $cfg['youtube_audio_format_name'];
-				$format = array_find_deep($js, $f);
-				$yt_url = $js[$format[0]][$format[1]]['url'];
+				//$format = array_find_deep($js, $f);
+				//$yt_url = $js[$format[0]][$format[1]]['url'];
+				$format = array_search($f, array_column($js['formats'], 'format'));
+				$yt_url = $js['formats'][$format]['url'];
 				$is_yt_url_query = strpos($yt_url,'?');
 				if ($is_yt_url_query === false) {
 					$yt_url = $yt_url . '?';
