@@ -385,7 +385,10 @@ function parseAudioDataformat($data) {
 }
 
 function parseAudioEncoder($data) {
-    if(isset($data['audio']['encoder'])) {
+    if(isset($data['mpeg']['audio']['LAME']['short_version'])) {
+        return $data['mpeg']['audio']['LAME']['short_version'];
+    }
+		if(isset($data['audio']['encoder'])) {
         return $data['audio']['encoder'];
     }
     return 'Unknown encoder';
