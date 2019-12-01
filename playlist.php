@@ -619,6 +619,7 @@ function initialize() {
 
 
 function evaluateStatus(data) {
+	
 	// data.hash, data.miliseconds, data.listpos, data.volume
 	// data.isplaying, data.repeat, data.shuffle, data.gain
 	
@@ -673,8 +674,6 @@ function evaluateStatus(data) {
 	evaluateVolume(data.volume);
 	evaluateGain(data.gain);
 	evaluateConsume(data);
-	 
-	
 }
 
 
@@ -1227,8 +1226,6 @@ function msToTime(s) {
 }
 
 $(document).ready(function() {
-	
-				resizeImgContainer();
 				
 				$('.showPL').click(function(){
 
@@ -1265,8 +1262,9 @@ $(document).ready(function() {
 				/* //proper display cover when using spin.js as spinner
 				$('#image').css('position', 'absolute');
 				$('#image').css('top', '0'); */
+				
+				resizeImgContainer();
 });
-
 
 
 </script>

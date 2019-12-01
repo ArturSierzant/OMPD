@@ -91,6 +91,7 @@ i:active {
     width: 100%;
     clear: both;
     padding-left: 5px;
+    min-height: 164px;
   }
   .pl-track-info {
     clear: both;

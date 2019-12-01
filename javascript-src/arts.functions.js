@@ -348,15 +348,15 @@ function resizeFormSettings(containerWidth, myCodeMirror) {
 }
 
 function resizeImgContainer() {
-	
 	var winW = $(window).width();
 	
 	miniplayerW = $("#miniplayer").width();
-	console.log("miniplayerW: " + miniplayerW);
-	if (miniplayerW > winW) miniplayerW = winW;
-	$("#file-info-mini").css("min-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));
-	$("#file-info-mini").css("max-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));
-	
+	if (miniplayerW){
+		console.log("miniplayerW: " + miniplayerW);
+		if (miniplayerW > winW) miniplayerW = winW;
+		$("#file-info-mini").css("min-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));
+		$("#file-info-mini").css("max-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));
+	}
 	$("#media_control_mini").css("display","table-cell");
 	
 	//prevent resizing when virtual keybord is visible on mobile devices 
