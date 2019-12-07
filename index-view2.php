@@ -486,7 +486,7 @@ if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
 			var related_artists = "";
 			
 			if (source) {
-				source = '<div class="total-time">Source: ' + source + '</div>';
+				source = '<div class="total-time artist_bio_source">Source: ' + source + '</div>';
 			}
 			else {
 				source = "";
@@ -499,7 +499,11 @@ if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
 			else {
 				img='<div class="artist_bio_pic_not_found"><i class="fa fa-user"></i></div>';
 			}
-			var artist_bio = '<div style="background-image: url(' + pic + '); background-position: -1000px -1000px;" class="artist_bio_pic">' + img + '</div><div>' + bio + '</div>' + source + '<br/><br/>';
+			var artist_bio = '<div style="background-image: url(' + pic + '); background-position: -1000px -1000px;" class="artist_bio_pic">' + img + '</div>';
+			if (bio) {
+				artist_bio += '<div class="artist_bio_text">' + bio + '</div>';
+			}
+			artist_bio += source;
 			if (data["related_artists"]) {
 				related_artists = '<div style="text-transform: uppercase;"><h1>Related artists:</h1></div><br/><div class="artist_bio_related">';
 				$.each(data["related_artists"], function(index, value){

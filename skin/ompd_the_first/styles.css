@@ -2139,6 +2139,8 @@ iframe.full {
 #waitIndicatorImg {
 	background-color:rgba(50,50,50,0.6);
 	z-index: 1000000000;
+	position: absolute;
+	top: 0;
 }
 
 

@@ -625,7 +625,8 @@ function evaluateStatus(data) {
 	
 	if (previous_hash != data.hash) {
 		//window.location.href="<?php echo NJB_HOME_URL ?>playlist.php";
-		location.reload(false);
+		window.location.href = "playlist.php?scrollTo=" + $(window).scrollTop();
+		//location.reload(false);
 		//window.location.href = window.location.href;
 		//history.go();
 	}
@@ -1228,11 +1229,9 @@ function msToTime(s) {
 $(document).ready(function() {
 				
 				$('.showPL').click(function(){
-
 					$('html, body').animate({
 						scrollTop: ($(".select").offset().top - $("#fixedMenu").height())
 					}, 1000);
-
 				 });
 
 				$('.hidePL').click(function(){
@@ -1264,6 +1263,13 @@ $(document).ready(function() {
 				$('#image').css('top', '0'); */
 				
 				resizeImgContainer();
+				
+				<?php if (get('scrollTo')){
+				?>
+					var scrollTo = <?php echo get('scrollTo') ?>;
+					$(window).scrollTop(scrollTo);
+				<?php
+				} ?>
 });
 
 

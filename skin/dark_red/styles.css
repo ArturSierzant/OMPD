@@ -2227,7 +2227,6 @@ h1 {
 .artist_bio_pic {
   background-size: 200000% 200000%;
   height: 270px;
-  margin-bottom: 5px;
   padding: 10px 0;
   text-align: center;
 }
@@ -2247,6 +2246,12 @@ h1 {
   display: inline-block;
   max-height: 260px;
   color: #ffffff;
+}
+.artist_bio_text {
+  margin-top: 5px;
+}
+.artist_bio_source {
+  margin-bottom: 5px;
 }
 .artist_bio_related {
   overflow: hidden;

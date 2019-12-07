@@ -361,7 +361,7 @@ CREATE TABLE IF NOT EXISTS `tidal_album` (
   `seconds` int(7) unsigned NOT NULL DEFAULT '0',
   `last_update_time` int(10) unsigned NOT NULL DEFAULT '0',
   `cover` varchar(255) NOT NULL DEFAULT '',
-  `type` tinytext NOT NULL DEFAULT '',
+  `type` tinytext NOT NULL,
   UNIQUE KEY `album_id` (`album_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

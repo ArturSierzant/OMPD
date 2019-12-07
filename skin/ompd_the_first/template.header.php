@@ -18,11 +18,11 @@ require_once('include/play.inc.php');
 <link rel="icon" type="image/png" sizes="196x196" href="image/favicon.png?v=2">
 
 
-<script type="text/javascript" src="jquery/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="jquery/jquery-3.4.1.min.js"></script>
 <script type="text/javascript" src="javascript-src/spin.min.js"></script>
 <script type="text/javascript" src="javascript-src/arts.functions.js"></script>
 <script type="text/javascript" src="javascript-src/jquery.longpress.js"></script>
- 
+
 <?php
 $query1=mysqli_query($db,'SELECT player.player_name as pl, player.player_host as host, player.player_port as port FROM player, session WHERE (sid = BINARY "' . cookie('netjukebox_sid') . '") and player.player_id=session.player_id');
 $session1 = mysqli_fetch_assoc($query1);
@@ -226,8 +226,8 @@ $(document).ready(function () {
 	resizeSuggested($tileSizeArr[0],$tileSizeArr[1]);
 	resizeUsersTab($tileSizeArr[0],$tileSizeArr[1]);
 	changeTileSizeInfo();
-	resizeImgContainer();
 	addFavSubmenuActions();
+	resizeImgContainer();
 	<?php
 	$action = $_GET['action'];
 	if (NJB_SCRIPT != 'playlist.php' && strpos($action,'layerProfile') === false && $action != 'license' && NJB_SCRIPT != 'message.php' && $cfg['username'] != '' && $cfg['show_miniplayer']) {
@@ -254,7 +254,7 @@ $(document).ready(function () {
 		if(this.complete) $(this).load();
 	}); */
 	
-	$("#image_in").load(function() {
+	$("#image_in").on("load",function() {
 		$("#waitIndicatorImg").hide();
 	});
 	
@@ -287,7 +287,8 @@ $(document).ready(function () {
     });
 	
 
-	var offset = 0.6 * $(window).height();
+		//var offset = 0.6 * $(window).height();
+		var offset = 0.6 * window.innerHeight;
     var duration = 500;
     $(window).scroll(function() {
         if ($(this).scrollTop() > offset) {

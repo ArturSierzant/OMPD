@@ -474,8 +474,9 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 					$albums = $results['items'];
 				}
 				else {
-					$albums = $resultsEPs['items'];
-					echo ('<h1>EPs and Singles</h1>');
+					if($albums = $resultsEPs['items']){;
+						echo ('<h1>EPs and Singles</h1>');
+					}
 				}
 				usort($albums, function ($a, $b) {
 					return $a['releaseDate'] <=> $b['releaseDate'];
@@ -563,14 +564,19 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 		for ($j=0;$j<2;$j++){
 			if ($j==0) {
 				$filter_query1 = 'WHERE type="album" AND ' . $filter_query;
+				$sql = "SELECT album_id, album, artist, album_date FROM tidal_album " . $filter_query1;
+				$query = mysqli_query($db,$sql);
 			}
 			else {
 				$filter_query1 = 'WHERE type != "album" AND ' . $filter_query;
-				echo ('<h1>EPs and Singles</h1>');
+				$sql = "SELECT album_id, album, artist, album_date FROM tidal_album " . $filter_query1;
+				$query = mysqli_query($db,$sql);
+				if (mysqli_num_rows($query) > 0) {
+					echo ('<h1>EPs and Singles</h1>');
+				}
 			}
 		
-			$sql = "SELECT album_id, album, artist, album_date FROM tidal_album " . $filter_query1;
-			$query = mysqli_query($db,$sql);
+			
 			while($album = mysqli_fetch_assoc($query)) {
 				$tidalAlbum["album_id"] = 'tidal_' . $album["album_id"];
 				$tidalAlbum["album"] = $album["album"];
@@ -755,7 +761,7 @@ function formatBio($bio) {
 	$bio = str_replace('[wimpLink artistId="','<a target="_blank" href="' . TIDAL_ARTIST_URL,$bio);
 	$bio = str_replace('[wimpLink albumId="','<a target="_blank" href="' . TIDAL_ALBUM_URL,$bio);
 	$bio = str_replace('"]','">',$bio);
-	$bio = $bio . "<br/><br/>";
+	//$bio = $bio . "<br/><br/>";
 	return $bio;
 	
 }
