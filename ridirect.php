@@ -31,7 +31,7 @@
 //  +------------------------------------------------------------------------+
 
 require_once('include/initialize.inc.php');
-authenticate('access_media');
+//authenticate('access_media');
 
 if ($_GET["query_type"] === 'lyrics') {
 				header('Location: ' . 'https://www.google.com/search?q=' . rawurlencode($_GET["q"]) . ' ' . $cfg['lyrics_search']);
@@ -109,12 +109,12 @@ if ($cfg['search_method'] == 'get') {
 ini_set('default_charset', $cfg['search_charset']);
 list($url, $query) = explode('?', $url, 2);
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE HTML>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo html($cfg['search_charset']); ?>">
 	<meta name="generator" content="netjukebox, Copyright (C) 2001-2012 Willem Bartels">
-	<title>netjukebox &bull; Ridirect</title>
+	<title>O!MPD &bull; Redirect</title>
 	<link rel="shortcut icon" type="image/png" href="image/favicon.png">
 	<style type=text/css>
 	span.large {font-size: 32px; font-family: "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;}

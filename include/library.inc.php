@@ -68,6 +68,8 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo") {
 
 function getInbetweenStrings($start, $end, $str){
 		global $cfg;
+		$start = preg_quote($start);
+		$end = preg_quote($end);
     $matches = array();
     $regex = "/$start(.*?)$end/";
     preg_match_all($regex, $str, $matches);
@@ -203,7 +205,7 @@ function trackSubMenu($i, $track, $album_id = '', $type = 'echo') {
 	<div><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playSelect' . $tidalAlbumId .'&amp;track_id=' . $track['track_id'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Play track ' . $track['number'] . '\');" onMouseOut="return nd();"><i id="play_' . $track['track_id'] . '" class="fa fa-play-circle-o fa-fw icon-small"></i>Remove all from playlist and play track</a>'; ?>
 	</div>
 	<?php
-	if (!isTidal($album_id)) {
+	if (!isTidal($album_id) && !isYoutube($track['track_id'])) {
 	?>
 	<div><?php if ($cfg['access_stream']) echo '<a href="stream.php?action=playlist&amp;track_id=' . $track['track_id'] . '&amp;stream_id=' . $cfg['stream_id'] . '" onMouseOver="return overlib(\'Stream track ' . $track['number'] . '\');" onMouseOut="return nd();"><i class="fa fa-rss fa-fw icon-small"></i>Stream track</a>'; ?>
 	</div>
@@ -961,7 +963,7 @@ function showAllFromTidal($searchStr, $size) {
 			<td class="space right"></td>
 		</tr>';
 		
-		$i=20000;
+		$i=40000;
 		$TT_ids = ''; 
 		foreach ($results['tracks']['items'] as $track) {
 			$track['track_id'] = 'tidal_' . $track['id'];
@@ -1206,6 +1208,120 @@ function getTidalId($id){
 		return str_replace('tidal_','',$id);
 	}
 }
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Check if album/track is from Youtube                                   |
+//  +------------------------------------------------------------------------+
+
+function isYoutube($id) {
+	global $cfg;
+	if (strpos($id,"youtube_") !== false) {
+		return true;
+	}
+	return false;
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Get pure Youtube id of item                                            |
+//  +------------------------------------------------------------------------+
+
+function getYoutubeId($id){
+	global $cfg;
+	// /watch?v=tK1MqYLinQI" 
+	if (strpos($id,'?v=') !== false) {
+		return end(explode('?v=',$id));
+	}
+	else {
+		return str_replace('youtube_','',$id);
+	}
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Get Youtube stream params                                              |
+//  +------------------------------------------------------------------------+
+
+function getYoutubeStreamUrl($url, $title){
+	global $cfg;
+	$cmd = trim($cfg['python_path'] . ' ' . $cfg['youtube-dl_path'] . ' ' . $cfg['youtube-dl_options'] . ' ' . ($url));
+	exec($cmd, $output, $ret);
+	if ($ret == 0) {
+		$js = json_decode($output[0],true);
+		$f = $cfg['youtube_audio_format_name'];
+		$format = array_search($f, array_column($js['formats'], 'format'));
+		$yt_url = $js['formats'][$format]['url'];
+		$is_yt_url_query = strpos($yt_url,'?');
+		if ($is_yt_url_query === false) {
+			$yt_url = $yt_url . '?';
+		}
+		$ytArtist = "";
+		if ($js['artist']) {
+			$ytArtist = $js['artist'];
+		}
+		$ytTitle = "YouTube audio";
+		if ($title){
+			$ytTitle = $title;
+		}
+		
+		if ($js['track'] && $js['track'] != '_') {
+			$ytTitle = $js['track'];
+		}
+		elseif ($js['title'] && $js['title'] != '_') {
+			$ytTitle = $js['title'];
+		}
+		elseif ($js['fulltitle'] && $js['fulltitle'] != '_') {
+			$ytTitle = $js['fulltitle'];
+		}
+		elseif ($js['alt_title'] && $js['alt_title'] != '_') {
+			$ytTitle = $js['alt_title'];
+		}
+		
+		if (strpos($ytTitle," - ") !== false && !$ytArtist){
+			$t = explode(" - ",$ytTitle);
+			$ytArtist = $t[0];
+		}
+		if (strpos($js['title']," - ") !== false){
+			//for 'title - artist' and when 'track' is defined but != then in 'title'
+			//e.g.: https://www.youtube.com/watch?v=IeDMnyQzS88
+			if (strpos($js['title'],$ytArtist) !== false){
+				$ytTitle = str_replace($ytArtist,"",$js['title']);
+				$ytTitle = str_replace(" - ","",$ytTitle);
+			}
+			else { 
+				$t = explode(" - ",$js['title']);
+				if ($ytTitle != $t[1]){
+					$ytTitle = $t[1];
+				}
+			}
+		}
+		
+		$ompd_title = $ytTitle;
+		if ($ytArtist && strpos($ompd_title,$ytArtist) !== false){
+			$ompd_title = str_replace($ytArtist . " - ","",$ytTitle);
+		}
+		
+		$ytYear = "";
+		if ($js['release_year']) {
+			$ytYear = $js['release_year'];
+		}
+		else {
+			$ytYear = substr($js['upload_date'],0,4);
+		}
+		$ytStreamUrl = $yt_url . '&ompd_title=' . urlencode($ompd_title) . '&ompd_duration=' . urlencode($js['duration']) . '&ompd_artist=' . urlencode($ytArtist) . '&ompd_thumbnail=' . urlencode($js['thumbnail']) . '&ompd_year=' . urlencode($ytYear) . '&ompd_webpage=' . urlencode($js['webpage_url']);
+	}
+	else {
+		$ytStreamUrl = false;
+	}
+	return $ytStreamUrl;
+}
+
+
+
 
 //  +------------------------------------------------------------------------+
 //  | onMouseOver download album                                             |

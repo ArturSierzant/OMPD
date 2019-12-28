@@ -251,7 +251,7 @@ function evaluateTrack(data) {
 			for (i=0; i<l; i++) {
 				artist = artist + '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[i]) + '">' + data.track_artist[i] + '</a>';
 				if (i!=l-1) {
-					var delimiter = data.track_artist_all.match(data.track_artist_url[i] + "(.*)" + data.track_artist_url[i+1]);
+					var delimiter = data.track_artist_all.match(escapeRegExp(data.track_artist_url[i]) + "(.*)" + escapeRegExp(data.track_artist_url[i+1]));
 					if (testing == 'on') {
 						delimiter[1] = delimiter[1].replace(';','&');
 					}
@@ -286,8 +286,13 @@ function evaluateTrack(data) {
 		document.getElementById('artist_mini').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : 'by ' + document.getElementById('artist_mini').innerHTML + ' from ' + albumLink; 
 	}
 	else if (al.indexOf("://") > 0 && al.indexOf("://") < 6) {
-		//e.g. stream from youtube 
-		var albumLink = '<a href="' + data.album + '" target="_new">' + data.album + '</a>';
+		//e.g. stream from youtube
+		if (artist != '' && artist != '&nbsp;') {
+			var albumLink = 'by ' + artist + ' from <a href="' + data.album + '" target="_new">' + data.album + '</a>';
+		}
+		else {
+			var albumLink = '<a href="' + data.album + '" target="_new">' + data.album + '</a>';
+		}
 		document.getElementById('artist_mini').innerHTML = albumLink;
 	}
 	else if (data.relative_file && artist != '') {
@@ -313,7 +318,7 @@ function evaluateTrack(data) {
 	}
 	//$("#artist_mini").show();
 	//console.table (data);
-	console.log ("artist: " + artist);
+	//console.log ("artist: " + artist);
 	
 	if (data.album_id) {
 		$("#image_in_mini").attr("src","image.php?image_id=" + data.image_id + "&track_id=" + data.track_id);

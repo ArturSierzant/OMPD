@@ -69,10 +69,16 @@ function image($image_id, $quality, $track_id) {
 		
 		header('Cache-Control: max-age=31536000');
 		if ($quality == 'hq') {
-			streamData(file_get_contents("http://images.osl.wimpmusic.com/im/im?w=1000&h=1000&albumid=" . $album_id), false, false, '"never_expire"');
+			$data = file_get_contents("http://images.osl.wimpmusic.com/im/im?w=1000&h=1000&albumid=" . $album_id);
 		}
-		else {		
-			streamData(file_get_contents("http://images.osl.wimpmusic.com/im/im?w=300&h=300&albumid=" . $album_id), false, false, '"never_expire"');	
+		else {
+			$data = file_get_contents("http://images.osl.wimpmusic.com/im/im?w=300&h=300&albumid=" . $album_id);
+		}
+		if ($data) {
+			streamData($data, false, false, '"never_expire"');
+		}
+		else {
+			imageError();
 		}
 		exit();
 	}

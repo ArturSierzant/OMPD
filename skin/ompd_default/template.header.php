@@ -204,7 +204,9 @@ function playlistAction(action) {
 
 
 
-$(document).ready(function () {
+//$(document).ready(function () {}) - since jQuery 3.0 is deprecated. 
+//$(function () {}) is recommended
+$(function () {
 	<?php 
 	// to prevent recursive call: issue#5
 	if (NJB_SCRIPT != 'message.php') { 
@@ -254,7 +256,7 @@ $(document).ready(function () {
 		if(this.complete) $(this).load();
 	}); */
 	
-	$("#image_in").on("load",function() {
+	$("#image_in").ready(function() {
 		$("#waitIndicatorImg").hide();
 	});
 	

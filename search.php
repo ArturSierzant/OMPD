@@ -89,6 +89,11 @@ function search_all() {
 	track_title();
 	track_composer();
 	if (!$match_found) echo "No match found in local DB.";
+	if ($cfg['show_youtube_results']) {
+		echo '<span class="nav_tree">Results from YouTube:</span>';
+		youtube_tracks();
+		youtube_scripts();
+	}
 	if ($cfg['use_tidal']) {
 		echo '<span class="nav_tree">Results from TIDAL:</span>';
 		tidal_artist();
@@ -183,34 +188,6 @@ function album_artist() {
 	else {
 				
 		$query = mysqli_query($db,'SELECT * FROM album WHERE artist_alphabetic like "%' . mysqli_real_escape_string($db,$search_string) . '%" ORDER BY year, album');
-		/* $mdTab = array();
-		while ($album = mysqli_fetch_assoc($query)) {		
-			$multidisc_count = 0;		
-			if ($cfg['group_multidisc'] == true) {
-					$md_indicator = striposa($album['album'], $cfg['multidisk_indicator']);
-					if ($md_indicator !== false) {
-						$md_ind_pos = stripos($album['album'], $md_indicator);
-						$md_title = substr($album['album'], 0,  $md_ind_pos);
-						$query_md = mysqli_query($db, 'SELECT album, image_id, album_id 
-						FROM album 
-						WHERE album LIKE "' . mysqli_real_escape_string($db, $md_title) . '%" AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '" AND album <> "' . mysqli_real_escape_string($db, $album['album']) . '"
-						ORDER BY album');
-						$multidisc_count = mysqli_num_rows($query_md);
-					}
-			}
-			if ($multidisc_count > 0) {
-				if (!in_array($md_title, $mdTab)) {
-					$mdTab[] = $md_title;
-					draw_tile($size,$album);
-				}
-			}
-			else {
-				draw_tile($size,$album);
-			}		
-					
-					//draw_tile($size,$album);
-					
-			} */
 		if ($tileSizePHP) $size = $tileSizePHP;
 		$album_multidisc = albumMultidisc($query);
 		foreach (array_slice($album_multidisc,0,$cfg['max_items_per_page']) as $album_m) {
@@ -551,16 +528,6 @@ function track_title() {
 <?php
 	$i=10000;
 	$TT_ids = ''; 
-	/* $query = mysqli_query($db,'SELECT * FROM 
-	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, album.image_id, album.album, album.artist
-	FROM track
-	INNER JOIN album ON track.album_id = album.album_id
-	WHERE track.title LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%") as a
-	LEFT JOIN 
-	(SELECT track_id, favorite_id FROM favoriteitem WHERE favorite_id = "' . $cfg['favorite_id'] . '") as b ON b.track_id = a.tid
-	ORDER BY a.title, a.artist, a.album');
-	 */
-	 
 	 $query = mysqli_query($db,'SELECT * FROM 
 	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist 
 	FROM track
@@ -758,7 +725,7 @@ function track_composer() {
 	</tr>
 
 	<?php
-	$i=10000000;
+	$i=20000;
 	$TC_ids = '';
 	
 	$query = mysqli_query($db,'SELECT * FROM
@@ -1009,7 +976,7 @@ function fav4genre($genre) {
 </tr>
 
 <?php
-	$i=10000;
+	$i=30000;
 	$TT_ids = ''; 
 	
 	$query = mysqli_query($db,'SELECT * FROM 
@@ -1327,7 +1294,95 @@ function tidal_tracks(){
 }
 
 
+//  +------------------------------------------------------------------------+
+//  | Java scripts for Youtube part                                          |
+//  +------------------------------------------------------------------------+
+
+function youtube_scripts(){
+
+global $search_string;
+?>
+<script>
+
+$('#ytTracks').click(function() {
+	ytSearch();
+});
+
+function ytSearch(){	
+	var size = $tileSize;
+	//var searchStr = "<?php echo tidalEscapeChar($search_string);?>";
+	var searchStr = "<?php echo str_replace('"','',$search_string);?>";
+	var request = $.ajax({  
+		url: "ajax-yt-search.php",  
+		type: "GET",  
+		data: { search : "all", tileSize : size, searchStr : searchStr },  
+		dataType: "json"
+	}); 
+	
+	request.done(function( data ) {
+		if (data['return'] == 1) {
+			$("[id='youtubeLoadingIndicator']").hide();
+			$("[id='searchResultsYT']").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Youtube request.<br><br>' + data['response'] + '<br><br></div>');
+			return;
+		}
+		
+		if (data['tracks_results'] > 0) {
+			$( "#searchResultsYT" ).html( data['tracks'] );	
+		}
+		else {
+			$("#youtubeLoadingIndicator").hide();
+			$("#searchResultsYT").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on Youtube.</span>');
+		}
+		
+		setAnchorClick();
+		//console.log (data.length);
+	}); 
+	
+	request.fail(function( jqXHR, textStatus ) {  
+		//alert( "Request failed: " + textStatus );	
+	}); 
+
+	request.always(function() {
+		// $('#iframeRefresh').addClass("icon-anchor");
+		// $('#iframeRefresh').removeClass("icon-selected fa-spin");
+		$('[id^="add_youtube"]').click(function(){
+			$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
+		});
+
+		$('[id^="play_youtube"]').click(function(){
+			$(this).removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
+		});
+		
+	});
+};
+
+</script>
+<?php
+
+}
 
 
-//End of Artists from Tidal
+//  +------------------------------------------------------------------------+
+//  | Results from Youtube                                                   |
+//  +------------------------------------------------------------------------+
+
+function youtube_tracks(){
+	global $cfg, $db, $size, $search_string;
+?>
+<div>
+<h1 onclick='toggleSearchResults("YT");' class="pointer" id="ytTracks"><i id="iconSearchResultsYT" class="fa fa-chevron-circle-down icon-anchor"></i> Tracks from YouTube</h1>
+<div id="searchResultsYT">
+<span id="youtubeLoadingIndicator">
+		<i class="fa fa-cog fa-spin icon-small"></i> Loading YouTube results...
+</span>
+<?php 
+//if ($tileSizePHP) $size = $tileSizePHP;
+
+?>
+</div>
+</div>
+
+<?php
+}
+
 ?>

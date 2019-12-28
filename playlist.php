@@ -249,6 +249,7 @@ $playtime = array();
 $track_id = array();
 $playlistTT = 0;
 for ($i=0; $i < $listlength; $i++) {
+	$image_id = array();
 	//streaming track outside of mpd library	
 	$pos = strpos($file[$i],'track_id=');	
 	if ($pos === false) {
@@ -285,8 +286,9 @@ for ($i=0; $i < $listlength; $i++) {
 			$table_track['title'] = urldecode($query['ompd_title']);
 			$table_track['album'] = urldecode($query['ompd_webpage']);
 			$playlistinfo['Time'] = (int)urldecode($query['ompd_duration']);
-			$table_track['track_artist'] = "";
+			$table_track['track_artist'] = urldecode($query['ompd_artist']);
 			$table_track['cover'] = urldecode($query['ompd_thumbnail']);
+			$table_track['trackYear'] = urldecode($query['ompd_year']);
 		}
 		elseif (strpos($playlistinfo['file'],'tidal://') !== false || ($cfg['upmpdcli_tidal'] && strpos($playlistinfo['file'],$cfg['upmpdcli_tidal']) !== false) || strpos($playlistinfo['file'],TIDAL_TRACK_STREAM_URL) !== false || strpos($playlistinfo['file'],'action=streamTidal') !== false) {
 			//stream from Tidal unrecognized by mpd
@@ -333,7 +335,7 @@ for ($i=0; $i < $listlength; $i++) {
 		}
 		if (!$tidalTrack) {
 			$table_track['number'] = $playlistinfo['Pos'] + 1;
-			$table_track['trackYear'] = $playlistinfo['Date'];
+			if (!$table_track['trackYear']) $table_track['trackYear'] = $playlistinfo['Date'];
 			$table_track['genre'] = $playlistinfo['Genre'];
 			$album_genres = parseMultiGenre($table_track['genre']);
 			$table_track['miliseconds'] = $playlistinfo['Time'] * 1000;
@@ -988,7 +990,7 @@ function evaluateTrack(data) {
 			for (i=0; i<l; i++) {
 				artist = artist + '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[i]) + '">' + data.track_artist[i] + '</a>';
 				if (i!=l-1) {
-					var delimiter = data.track_artist_all.match(data.track_artist_url[i] + "(.*)" + data.track_artist_url[i+1]);
+					var delimiter = data.track_artist_all.match(escapeRegExp(data.track_artist_url[i]) + "(.*)" + escapeRegExp(data.track_artist_url[i+1]));
 					if (testing == 'on') {
 						delimiter[1] = delimiter[1].replace(';','&');
 					}

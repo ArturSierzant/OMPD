@@ -1180,3 +1180,8 @@ function getFavoritesList(track_id){
 	$("#savePlaylistAddTo").html(data);
 	}); 
 };
+
+//escapeRegExp() from https://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
+function escapeRegExp(string) {
+	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}

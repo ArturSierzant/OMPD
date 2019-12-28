@@ -165,6 +165,7 @@ function about() {
 	<ul style="padding-left: 1em;">
 	<li> added support for TIDAL direct play (play TIDAL with any version of MPD)</li>
 	<li> added support for TIDAL user playlists</li>
+	<li> added YouTube results in artist view and search (settable in config.inc.php)</li>
 	<li> added support for internet radio covers (settable in config.inc.php)</li>
 	<li> added default login option</li>
 	<li> added possibility to login using URL (login.php)</li>
@@ -175,6 +176,7 @@ function about() {
 	</td>
 	<td></td>
 </tr>
+<tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
 	<td style="vertical-align: top;">v1.05 <br>2019.07.31</td>
@@ -201,7 +203,7 @@ function about() {
 	<td></td>
 	<td>
 	<ul style="padding-left: 1em;">
-	<li> added ability to play audio streams from Youtube movies (requires <a href="https://github.com/rg3/youtube-dl" target="_new">youtube-dl</a>)</li>
+	<li> added ability to play audio streams from YouTube movies (requires <a href="https://github.com/rg3/youtube-dl" target="_blank">youtube-dl</a>)</li>
 	<li> added new skins (skins are now based on <a href="http://lesscss.org/">{less}</a>)</li>
 	<li> added miniplayer (settable in config.inc.php)</li>
 	<li> added support for mpd playlists</li>
@@ -248,6 +250,7 @@ function about() {
 	</td>
 	<td></td>
 </tr>
+<tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
 	<td style="vertical-align: top;">v1.02 <br>2016.09.19</td>
@@ -272,6 +275,7 @@ function about() {
 	</td>
 	<td></td>
 </tr>
+<tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
 	<td style="vertical-align: top;">v1.01 <br>2016.02.07</td>
@@ -297,6 +301,7 @@ function about() {
 	</td>
 	<td></td>
 </tr>
+<tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td>v1.0 <br>2015.07.10</td>
@@ -316,42 +321,42 @@ function about() {
 	<td></td>
 	<td>Google fonts</td>
 	<td></td>
-	<td><a href="http://www.google.com/fonts/" target="_new">http://www.google.com/fonts/</a></td>
+	<td><a href="http://www.google.com/fonts/" target="_blank">http://www.google.com/fonts/</a></td>
 	<td></td>
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td>Font Awesome</td>
 	<td></td>
-	<td><a href="http://fontawesome.io/" target="_new">http://fontawesome.io/</a></td>
+	<td><a href="http://fontawesome.io/" target="_blank">http://fontawesome.io/</a></td>
 	<td></td>
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td>Typicons</td>
 	<td></td>
-	<td><a href="http://typicons.com/" target="_new">http://typicons.com/</a></td>
+	<td><a href="http://typicons.com/" target="_blank">http://typicons.com/</a></td>
 	<td></td>
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td>jQuery</td>
 	<td></td>
-	<td><a href="http://jquery.com/" target="_new">http://jquery.com/</a></td>
+	<td><a href="http://jquery.com/" target="_blank">http://jquery.com/</a></td>
 	<td></td>
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td>spin.js</td>
 	<td></td>
-	<td><a href="http://fgnass.github.io/spin.js/" target="_new">http://fgnass.github.io/spin.js/</a></td>
+	<td><a href="http://fgnass.github.io/spin.js/" target="_blank">http://fgnass.github.io/spin.js/</a></td>
 	<td></td>
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td>getID3() <?php $getID3 = new getID3; echo $getID3->version(); ?></td>
 	<td></td>
-	<td><a href="http://www.getid3.org" target="_new">http://www.getid3.org</a></td>
+	<td><a href="http://www.getid3.org" target="_blank">http://www.getid3.org</a></td>
 	<td></td>
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
@@ -362,63 +367,63 @@ function about() {
 	//-->
 	</script></td>
 	<td></td>
-	<td><a href="http://www.bosrup.com/web/overlib/" target="_new">http://www.bosrup.com/web/overlib/</a></td>
+	<td><a href="http://www.bosrup.com/web/overlib/" target="_blank">http://www.bosrup.com/web/overlib/</a></td>
 	<td></td>
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td>SHA-1</td>
 	<td></td>
-	<td><a href="http://www.pajhome.org.uk/crypt/md5/" target="_new">http://www.pajhome.org.uk/crypt/md5/</a></td>
+	<td><a href="http://www.pajhome.org.uk/crypt/md5/" target="_blank">http://www.pajhome.org.uk/crypt/md5/</a></td>
 	<td></td>
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td>PHP Paginator Class</td>
 	<td></td>
-	<td><a href="https://gist.github.com/daslicht/c319e18a1c8761f360ad" target="_new">https://gist.github.com/daslicht</a></td>
+	<td><a href="https://gist.github.com/daslicht/c319e18a1c8761f360ad" target="_blank">https://gist.github.com/daslicht</a></td>
 	<td></td>
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td>TouchSwipe</td>
 	<td></td>
-	<td><a href="http://labs.rampinteractive.co.uk/touchSwipe/" target="_new">http://labs.rampinteractive.co.uk/touchSwipe/</a></td>
+	<td><a href="http://labs.rampinteractive.co.uk/touchSwipe/" target="_blank">http://labs.rampinteractive.co.uk/touchSwipe/</a></td>
 	<td></td>
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td>Browser</td>
 	<td></td>
-	<td><a href="http://tomicki.net/" target="_new">http://tomicki.net/</a></td>
+	<td><a href="http://tomicki.net/" target="_blank">http://tomicki.net/</a></td>
 	<td></td>
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td>CodeMirror</td>
 	<td></td>
-	<td><a href="http://codemirror.net/" target="_new">http://codemirror.net/</a></td>
+	<td><a href="http://codemirror.net/" target="_blank">http://codemirror.net/</a></td>
 	<td></td>
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td>Longpress</td>
 	<td></td>
-	<td><a href="http://github.com/vaidik/jquery-longpress/" target="_new">http://github.com/vaidik/jquery-longpress/</a></td>
+	<td><a href="http://github.com/vaidik/jquery-longpress/" target="_blank">http://github.com/vaidik/jquery-longpress/</a></td>
 	<td></td>
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td>{less}</td>
 	<td></td>
-	<td><a href="http://lesscss.org/">http://lesscss.org/</a></td>
+	<td><a href="http://lesscss.org/" target="_blank">http://lesscss.org/</a></td>
 	<td></td>
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td>tidalapi</td>
+	<td>PHP Simple HTML DOM Parser</td>
 	<td></td>
-	<td><a href="https://github.com/tamland/python-tidal">https://github.com/tamland/python-tidal</a></td>
+	<td><a href="https://simplehtmldom.sourceforge.io/" target="_blank">https://simplehtmldom.sourceforge.io/</a></td>
 	<td></td>
 </tr>
 

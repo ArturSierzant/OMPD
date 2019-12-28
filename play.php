@@ -822,7 +822,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	$insertType		= get('insertType');
 	//$md					= isset(get('md')) ? get('md') : '';
 	$md						= get('md');
-	
+	$isYoutube 		= false;
 	
 	if ($track_id) {
 		if (isTidal($track_id)) {
@@ -849,6 +849,9 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 				}
 			}
 
+		}
+		elseif (isYoutube($track_id)){
+			$isYoutube = true;
 		}
 		else {
 			$query = mysqli_query($db,'SELECT relative_file, track_id FROM track WHERE track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
@@ -1017,6 +1020,12 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 			return 'add_error';
 		}
 	} 
+	elseif($isYoutube){
+		$url = getYoutubeStreamUrl(getYoutubeId($track_id));
+		$mpdCommand = mpd('addid "' . mpdEscapeChar($url) . '" ' . $insPos);
+		if ($playAfterInsert) {mpd('play ' . $insPos);}
+		if ($first && $mode == 'play') mpd('play ' . $index);
+	}
 	elseif ($filepath){
 		$filepath = str_replace('ompd_ampersand_ompd','&',$filepath);
 		$filepath = str_replace('ompd_plus_ompd','+',$filepath);
@@ -1149,8 +1158,14 @@ function addUrl($mode = 'play') {
 	if (count($file) == 1) {
 		$yt = striposa($url, $cfg['youtube_indicator']);
 		if ($yt !== false) {
-			
-			$cmd = trim($cfg['python_path'] . ' ' . $cfg['youtube-dl_path'] . ' ' . $cfg['youtube-dl_options'] . ' ' . ($url));
+			if ($ytUrl = getYoutubeStreamUrl($url)) {
+				$file[0] = $ytUrl;
+			}
+			else {
+				$addURLresult = 'add_error';
+				return $addURLresult;
+			}
+			/* $cmd = trim($cfg['python_path'] . ' ' . $cfg['youtube-dl_path'] . ' ' . $cfg['youtube-dl_options'] . ' ' . ($url));
 			exec($cmd, $output, $ret);
 			if ($ret == 0) {
 				$js = json_decode($output[0],true);
@@ -1176,19 +1191,11 @@ function addUrl($mode = 'play') {
 				}
 				$ompd_title = $ytArtist . $ytTtitle;
 				$file[0] = $yt_url . '&ompd_title=' . urlencode($ompd_title) . '&ompd_duration=' . urlencode($js['duration']) . '&ompd_thumbnail=' . urlencode($js['thumbnail']) . '&ompd_webpage=' . urlencode($js['webpage_url']);
-				/* echo $ret . "\n";
-				echo $url . "\n";
-				echo $cmd . "\n";
-				echo var_dump($format);
-				echo var_dump($js) . "\n";
-				echo $file1 . "\n"; */
-				//echo $file[0] . "\n";
-				//exit();
 			}
 			else {
 				$addURLresult = 'add_error';
 				return $addURLresult;
-			}
+			} */
 		}
 	}
 	if ($cfg['play_queue'] == false)
@@ -1917,6 +1924,8 @@ function playlistStatus() {
 			$parts = parse_url($currentsong['file']);
 			parse_str($parts['query'], $query);
 			$data['title'] = urldecode($query['ompd_title']);
+			$data['track_artist'] = urldecode($query['ompd_artist']);
+			$data['year'] = urldecode($query['ompd_year']);
 		}
 		else {
 			if (isset($currentsong['Name'])) {
@@ -1940,7 +1949,7 @@ function playlistStatus() {
 				$data['title']	= basename($currentsong['file']);
 			}
 		}
-		$data['track_artist']	= $currentsong['Artist'];
+		if (!$data['track_artist']) $data['track_artist']	= $currentsong['Artist'];
 		$data['relative_file'] = $currentsong['file'];
 		
 		//$data['Time'] = $currentsong['Time'] * 1000;
@@ -2020,6 +2029,7 @@ function playlistTrack() {
 	$data = array();
 	$title = '';
 	$currentsong	= mpd('currentsong');
+	$track_artist = array();
 	
 	if ($track_id !='') {
 		if (isTidal($track_id)) {
@@ -2113,7 +2123,7 @@ function playlistTrack() {
 	else { //track not found in OMPD DB - read info from MPD
 		//require_once('include/play.inc.php');
 		$status 		= mpd('status');
-		if ($status['time'] == '0:0') {
+		if ($status['time'] == '0:00') {
 			//wait 1s to mpd reads info from stream
 			sleep(1);
 			$status = mpd('status');
@@ -2162,7 +2172,10 @@ function playlistTrack() {
 			$parts = parse_url($currentsong['file']);
 			parse_str($parts['query'], $query);
 			$title = urldecode($query['ompd_title']);
+			//$track_artist = urldecode($query['ompd_artist']);
+			$currentsong['Artist'] = urldecode($query['ompd_artist']);
 			$album = urldecode($query['ompd_webpage']);
+			$currentsong['Date'] = urldecode($query['ompd_year']);
 			$times[1] = (int)urldecode($query['ompd_duration']);
 			$data['thumbnail'] = urldecode($query['ompd_thumbnail']);
 			$currentsong['Genre'] = '&nbsp;';
@@ -2194,9 +2207,11 @@ function playlistTrack() {
 			$table_track['title']	= $currentsong['file']; */
 		
 		$data['album_artist'] = (string) ($currentsong['AlbumArtist']);
-		$track_artist = array();
-		$track_artist[] = $currentsong['Artist'];
-		$exploded = multiexplode($cfg['artist_separator'],$currentsong['Artist']);
+		//$track_artist = array();
+		//$track_artist[] = $currentsong['Artist'];
+		//if (!$track_artist) $track_artist = $currentsong['Artist'];
+		$track_artist = $currentsong['Artist'];
+		$exploded = multiexplode($cfg['artist_separator'],$track_artist);
 		if (($exploded[0]) == '') $exploded[0] = '&nbsp;';
 		$data['track_artist']	= $exploded;
 		$data['track_artist_url']	= $exploded;
