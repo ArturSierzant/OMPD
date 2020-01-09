@@ -47,6 +47,56 @@ i:active {
     font-weight: 300;
   }
 }
+
+/* Test XZoom */
+
+/* div#image {
+  -webkit-transition: all 0.7s ease;
+  -moz-transition: all 1s ease;
+  position: relative;
+}
+
+div#image:hover {
+  -webkit-transform: rotate(-1deg); -moz-transform: rotate(1deg);
+  -webkit-box-shadow: 0 3px 10px #666; -moz-box-shadow: 0 3px 10px #666;
+}
+
+div#image:hover {
+  outline: none;
+  -webkit-transform: rotate(-3deg) scale(2.5); -moz-transform: rotate(-3deg) scale(2.5);
+   -webkit-box-shadow: 0 3px 10px #666; -moz-box-shadow: 0 3px 10px #666;
+  z-index: 9999;
+}
+*/
+
+.xzoom-thumbs a {
+    text-decoration: none;
+}
+/* Preview */
+.xzoom-preview {
+    border: 1px solid #888;
+    background: #2f4f4f;
+    box-shadow: -0px -0px 10px rgba(0, 0, 0, 0.50);
+}
+/* Lens */
+.xzoom-lens {
+    border: 1px solid #555;
+    box-shadow: -0px -0px 10px rgba(0, 0, 0, 0.50);
+    cursor: crosshair;
+}
+/* Loading */
+.xzoom-loading {
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 100%;
+    opacity: .7;
+    background: url(image/xloading.gif);
+    width: 48px;
+    height: 48px;
+}
+
+/* Test XZoom END */
+
 @media all and (max-width: 529px) {
   td.side-margin {
     width: 0px;
