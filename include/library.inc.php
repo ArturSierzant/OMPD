@@ -1469,7 +1469,7 @@ function getYouTubeMPDUrl($url, $title = ''){
 //  | Get Youtube stream URL                                                 |
 //  +------------------------------------------------------------------------+
 
-function getYouTubeStreamUrl($url, $title){
+function getYouTubeStreamUrl($url, $title = ''){
 	global $cfg;
 	$cmd = trim($cfg['python_path'] . ' ' . $cfg['youtube-dl_path'] . ' ' . $cfg['youtube-dl_options'] . ' ' . ($url));
 	exec($cmd, $output, $ret);
