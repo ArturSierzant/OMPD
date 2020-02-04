@@ -159,7 +159,7 @@ function about() {
 <tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
-	<td style="vertical-align: top;">v1.06 <br>20??.??.??</td>
+	<td style="vertical-align: top;">v1.06 <br>2020.??.??</td>
 	<td></td>
 	<td>
 	<ul style="padding-left: 1em;">
@@ -170,6 +170,8 @@ function about() {
 	<li> added default login option</li>
 	<li> added possibility to login using URL (login.php)</li>
 	<li> improved TIDAL support (python API replaced with PHP - works much faster)</li>
+	<li> improved Favorites - mixed lists (streams and local files) are allowed</li>
+	<li> improved Favorites - tracks from Tidal and YouTube now can be added to Favorites</li>
 	<li> fixed bugs</li>
 	</ul>
 	<br>
@@ -340,6 +342,13 @@ function about() {
 </tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
+	<td>525icons</td>
+	<td></td>
+	<td><a href="https://525icons.com/index.html" target="_blank">https://525icons.com/index.html</a></td>
+	<td></td>
+</tr>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
 	<td>jQuery</td>
 	<td></td>
 	<td><a href="http://jquery.com/" target="_blank">http://jquery.com/</a></td>
@@ -426,6 +435,7 @@ function about() {
 	<td><a href="https://simplehtmldom.sourceforge.io/" target="_blank">https://simplehtmldom.sourceforge.io/</a></td>
 	<td></td>
 </tr>
+
 
 
 

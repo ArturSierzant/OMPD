@@ -647,77 +647,6 @@ foreach (array_slice($album_multidisc,($page - 1) * $max_item_per_page, $max_ite
 }; //if $rows > 0
 
 
-//  +------------------------------------------------------------------------+
-//  | tracks from Youtube                                                    |
-//  +------------------------------------------------------------------------+
-
-if ($cfg['show_youtube_results']) {
-?>
-<div>
-<h1 onclick='toggleSearchResults("YT");' class="pointer" id="ytTracks"><i id="iconSearchResultsYT" class="fa fa-chevron-circle-down icon-anchor"></i> Results from YouTube</h1>
-<div id="searchResultsYT">
-<span id="youtubeLoadingIndicator">
-		<i class="fa fa-cog fa-spin icon-small"></i> Loading YouTube results...
-</span>
-</div>
-</div>
-
-<script>
-
-$('#ytTracks').click(function() {
-	ytSearch();
-});
-
-function ytSearch(){	
-	var size = $tileSize;
-	var searchStr = "<?php echo str_replace('"','', $artist); ?>";
-	var request = $.ajax({  
-		url: "ajax-yt-search.php",  
-		type: "GET",  
-		data: { search : "all", tileSize : size, searchStr : searchStr },  
-		dataType: "json"
-	}); 
-	
-	request.done(function( data ) {
-		if (data['return'] == 1) {
-			$("[id='youtubeLoadingIndicator']").hide();
-			$("[id='searchResultsYT']").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Youtube request.<br><br>' + data['response'] + '<br><br></div>');
-			return;
-		}
-		
-		if (data['tracks_results'] > 0) {
-			$( "#searchResultsYT" ).html( data['tracks'] );	
-		}
-		else {
-			$("#youtubeLoadingIndicator").hide();
-			$("#searchResultsYT").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on Youtube.</span>');
-		}
-		
-		setAnchorClick();
-		//console.log (data.length);
-	}); 
-	
-	request.fail(function( jqXHR, textStatus ) {  
-		//alert( "Request failed: " + textStatus );	
-	}); 
-
-	request.always(function() {
-		// $('#iframeRefresh').addClass("icon-anchor");
-		// $('#iframeRefresh').removeClass("icon-selected fa-spin");
-		$('[id^="add_youtube"]').click(function(){
-			$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
-		});
-
-		$('[id^="play_youtube"]').click(function(){
-			$(this).removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
-		});
-		
-	});
-};
-
-</script>
-<?php
-}
 
 //  +------------------------------------------------------------------------+
 //  | albums and top tracks from Tidal                                       |
@@ -857,6 +786,7 @@ request.done(function( data ) {
 		}
 	}
 	setAnchorClick();
+	addFavSubmenuActions();
 }); 
 
 request.fail(function( jqXHR, textStatus ) {  
@@ -884,6 +814,78 @@ request.always(function() {
 } //use_tidal
 
 
+//  +------------------------------------------------------------------------+
+//  | tracks from Youtube                                                    |
+//  +------------------------------------------------------------------------+
+
+if ($cfg['show_youtube_results']) {
+?>
+<div>
+<h1 onclick='toggleSearchResults("YT");' class="pointer" id="ytTracks"><i id="iconSearchResultsYT" class="fa fa-chevron-circle-down icon-anchor"></i> Results from YouTube</h1>
+<div id="searchResultsYT">
+<span id="youtubeLoadingIndicator">
+		<i class="fa fa-cog fa-spin icon-small"></i> Loading YouTube results...
+</span>
+</div>
+</div>
+
+<script>
+
+$('#ytTracks').click(function() {
+	ytSearch();
+});
+
+function ytSearch(){	
+	var size = $tileSize;
+	var searchStr = "<?php echo str_replace('"','', $artist); ?>";
+	var request = $.ajax({  
+		url: "ajax-yt-search.php",  
+		type: "GET",  
+		data: { search : "all", tileSize : size, searchStr : searchStr },  
+		dataType: "json"
+	}); 
+	
+	request.done(function( data ) {
+		if (data['return'] == 1) {
+			$("[id='youtubeLoadingIndicator']").hide();
+			$("[id='searchResultsYT']").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Youtube request.<br><br>' + data['response'] + '<br><br></div>');
+			return;
+		}
+		
+		if (data['tracks_results'] > 0) {
+			$( "#searchResultsYT" ).html( data['tracks'] );	
+		}
+		else {
+			$("#youtubeLoadingIndicator").hide();
+			$("#searchResultsYT").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on Youtube.</span>');
+		}
+		
+		setAnchorClick();
+		addFavSubmenuActions();
+		//console.log (data.length);
+	}); 
+	
+	request.fail(function( jqXHR, textStatus ) {  
+		//alert( "Request failed: " + textStatus );	
+	}); 
+
+	request.always(function() {
+		// $('#iframeRefresh').addClass("icon-anchor");
+		// $('#iframeRefresh').removeClass("icon-selected fa-spin");
+		$('[id^="add_youtube"]').click(function(){
+			$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
+		});
+
+		$('[id^="play_youtube"]').click(function(){
+			$(this).removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
+		});
+		
+	});
+};
+
+</script>
+<?php
+}
 
 if ($filter == 'whole' && !$genre_id && !$year && !$isVA) {
 //  +------------------------------------------------------------------------+

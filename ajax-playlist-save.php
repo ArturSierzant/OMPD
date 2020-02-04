@@ -34,6 +34,11 @@ $comment = $_GET['comment'];
 $host = $_GET['host'];
 $port = $_GET['port'];
 $saveTrackId = $_GET['saveTrackId'];
+$saveTrackMpdUrl = getTrackMpdUrl($_GET['track_mpd_url']);
+//add to/save as from track submenu for streams (Tidal/YT)
+if (!$saveTrackMpdUrl){
+	$saveTrackMpdUrl = createStreamUrlMpd($saveTrackId);
+}
 $saveTrack = $_GET['saveTrack'];
 
 /* if ($cfg['username'] == '') {
@@ -48,11 +53,11 @@ if ($action == 'SaveAs') {
 		mysqli_query($db,'INSERT INTO favorite (name,comment) VALUES ("' . mysqli_real_escape_string($db,$name) . '","' . mysqli_real_escape_string($db,$comment) . '")');
 		$favorite_id = mysqli_insert_id($db);
 		if ($saveTrack == 'true')
-			importTrack($favorite_id, $saveTrackId);
+			importTrack($favorite_id, $saveTrackId, $saveTrackMpdUrl);
 		else
 			importFavorite($favorite_id, $host, $port, 'import');
 		$data['action_status'] = true;
-		$data['select_options']= listOfFavorites(true,false,$saveTrackId);
+		$data['select_options']= listOfFavorites(true,true,$saveTrackId);
 		
 	}	
 }
@@ -61,8 +66,8 @@ elseif ($action == 'AddTo') {
 		authenticate('access_admin');
 		if ($saveTrack == 'true') {
 			if ($saveAs > 0) {//add track only if playlist is file playlist
-				importTrack($saveAs, $saveTrackId);
-				$data['select_options']= listOfFavorites(true,false,$saveTrackId);
+				importTrack($saveAs, $saveTrackId, $saveTrackMpdUrl);
+				$data['select_options']= listOfFavorites(true,true,$saveTrackId);
 			}
 			else {
 				$data['not_compatible'] = true;
@@ -80,22 +85,51 @@ elseif ($action == 'AddTo') {
 echo safe_json_encode($data);	
 
 
-function importTrack($favorite_id, $track_id) {
+function importTrack($favorite_id, $track_id, $track_mpd_url) {
 	global $cfg, $db, $data;
-	
+	$track_id = $track_id ? $track_id :  '';
+	$track_mpd_url = $track_mpd_url ? $track_mpd_url :  '';
+	if ($track_id) {
+		//from Tidal album view or search results
+		if (isTidal($track_id)){
+			$tidal_track_id = getTidalId($track_id);
+			$quertT = mysqli_query($db,"SELECT track_id FROM tidal_track WHERE track_id = '" . $tidal_track_id . "'");
+			if (mysqli_affected_rows($db) == 0) {
+				//track not in DB, e.g. result of search - get album and add it to DB
+				$album_id = getTrackAlbumFromTidal($tidal_track_id);
+				$get_album_tracks = getTracksFromTidalAlbum($album_id);
+			}
+			$track_mpd_url = createStreamUrlMpd($track_id);
+			$track_id = '';
+			$addTidalPrefix = true;
+		}
+		else {
+			//check if track_id is from local files indexed by DB
+			$query = mysqli_query($db,"SELECT track_id FROM track WHERE track_id = '" .$track_id . "'");
+			if (mysqli_num_rows($query) == 0) {
+				//if not then use $track_mpd_url as stream source
+				$track_id = '';
+			}
+			else {
+				$track_mpd_url = '';
+			}
+		}
+	}
 	$query = mysqli_query($db,"SELECT MAX(position) as maxPosition FROM favoriteitem WHERE favorite_id = '" .$favorite_id . "'");
 	$favoriteitem = mysqli_fetch_assoc($query);
 	$maxPosition = (int) $favoriteitem['maxPosition'];
 	$maxPosition++;
 	mysqli_query($db,"INSERT INTO favoriteitem (track_id, stream_url, position, favorite_id) VALUES(
 	'" . $track_id . "',
-	'',
+	'" . $track_mpd_url . "',
 	'" . $maxPosition . "',
 	'" . $favorite_id . "'
 	)");
 	$data['affRows'] = mysqli_affected_rows($db);
 	$data['favorite_id'] = $favorite_id;
-	//if (mysqli_affected_rows($db) > 0) $data['action'] = "add";
+
+	// Update favorite stream status
+	updateFavoriteStreamStatus($favorite_id);
 };
 
 function importFavorite($favorite_id, $host, $port, $mode) {
@@ -106,8 +140,6 @@ function importFavorite($favorite_id, $host, $port, $mode) {
 	
 	$favorite_id = abs($favorite_id);
 	
-	
-
 	if ($cfg['player_type'] == NJB_MPD) {
 		$file = mpd('playlist',$host, $port);
 		$file = implode('<seperation>', $file);
@@ -121,14 +153,18 @@ function importFavorite($favorite_id, $host, $port, $mode) {
 	$stream = 0;
 	$streamCount = 0;
 	for ($i = 0; $i < count($file); $i++) {
-		if (preg_match('#^(ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://#', $file[$i])) {
-				$stream = 1;
+		if (preg_match('#^(tidal|ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://#', $file[$i])) {
+				//$stream = 1;
 				$streamCount = $streamCount + 1 ;
 		}
 	}
 	
 	
 	if (count($file) > 0) {
+		/* $query = mysqli_query($db,'SELECT stream FROM favorite WHERE favorite_id = ' . (int) $favorite_id);
+		$favType = mysqli_fetch_assoc($query);
+		$isFavStream = $favType['stream']; */
+		
 		if ($mode == 'import') {
 			mysqli_query($db,'DELETE FROM favoriteitem WHERE favorite_id = ' . (int) $favorite_id);
 			$offset = 0;
@@ -139,31 +175,17 @@ function importFavorite($favorite_id, $host, $port, $mode) {
 			$track = mysqli_fetch_assoc($query);
 			$offset = $track['position'];
 		}	
-		
-		//if playlist contains only streams
-		if ($streamCount == count($file) && $mode == 'import'){
-			$isStreamPlaylist = 1;
-			// Update favorite stream status
-			mysqli_query($db,'UPDATE favorite
-						SET stream			= "' . (int) $stream . '"
-						WHERE favorite_id	= ' . (int) $favorite_id);
-			
-			// Don't allow stream_url and track_id in the same playlist!
-			if ($stream)	mysqli_query($db,'DELETE FROM favoriteitem WHERE favorite_id = ' . (int) $favorite_id . ' AND track_id != ""');
-			else			mysqli_query($db,'DELETE FROM favoriteitem WHERE favorite_id = ' . (int) $favorite_id . ' AND stream_url != ""');
-		}
 	}
-	
 			
 	for ($i = 0; $i < count($file); $i++) {
 		$query = mysqli_query($db,'SELECT track_id FROM track WHERE relative_file = "' . mysqli_real_escape_string($db,$file[$i]) . '"');
 		$track = mysqli_fetch_assoc($query);
 		$isStream = 0;
-		if (preg_match('#^(ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://#', $file[$i])) {
+		if (preg_match('#^(tidal|ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://#', $file[$i])) {
 			$isStream = 1;
 		}
 		
-		if ($isStream == 0 && $track['track_id'] && $isStreamPlaylist == 0) {
+		if ($isStream == 0 && $track['track_id']) {
 			$position = $i + $offset + 1;
 			mysqli_query($db,'INSERT INTO favoriteitem (track_id, position, favorite_id)
 				VALUES ("' . mysqli_real_escape_string($db,$track['track_id']) . '",
@@ -172,18 +194,19 @@ function importFavorite($favorite_id, $host, $port, $mode) {
 		}
 	
 		
-		elseif ($isStream == 1 && $isStreamPlaylist == 1) {
+		if ($isStream == 1) {
 			$position = $i + $offset + 1;
 			mysqli_query($db,'INSERT INTO favoriteitem (stream_url, position, favorite_id)
-				VALUES ("' . mysqli_real_escape_string($db,$file[$i]) . '",
+				VALUES ("' . mysqli_real_escape_string($db,getTrackMpdUrl($file[$i])) . '",
 				' . (int) $position . ',
 				' . (int) $favorite_id . ')');
 		}
 		
-		else { //trying to add file to stream playlist or stream to file playlist
+		/* else { //trying to add file to stream playlist or stream to file playlist
 			$data['not_compatible'] = true;
-		}
+		} */
 	}
+	updateFavoriteStreamStatus($favorite_id);
 }
 ?>
 	

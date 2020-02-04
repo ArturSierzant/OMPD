@@ -99,41 +99,111 @@ if ($action == 'moveItem') {
 }
 elseif ($action == 'removeItem') {
 	mysqli_query($db,'DELETE FROM favoriteitem WHERE
-				position = "' . $fromPosition . '"
-				AND favorite_id = "' . $favorite_id . '"');
+				position = "' . mysqli_real_escape_string($db,$fromPosition) . '"
+				AND favorite_id = "' . mysqli_real_escape_string($db,$favorite_id) . '"');
+	
+	/* $query = mysqli_query($db,'SELECT track_id FROM favoriteitem WHERE track_id <> "" AND favorite_id = "' . mysqli_real_escape_string($db,$favorite_id) . '"');
+	//if favorite contains files, change stream to 0
+	if (mysqli_num_rows($query) > 0) {
+		$stream = 0;
+	}
+	else {
+		$query = mysqli_query($db,'SELECT stream_url FROM favoriteitem WHERE stream_url <> "" AND favorite_id = "' . mysqli_real_escape_string($db,$favorite_id) . '"');
+		//if favorite contains only streams, change stream to 1
+		if (mysqli_num_rows($query) > 0) {
+			$stream = 1;
+		}
+	}
+	mysqli_query($db,'UPDATE favorite
+				SET stream			= "' . (int) $stream . '"
+				WHERE favorite_id	= ' . (int) $favorite_id); */
+	updateFavoriteStreamStatus($favorite_id);
 }
 
 ?>
 <script type="text/javascript">
-$('[id^="add_"]').click(function(){
+/* $('[id^="add_"]').click(function(){
 		addClick();
-	});
+	}); */
 </script>
 <table width="100%" cellspacing="0" cellpadding="0" class="border">
 <tr class="header">
 	
 	<td class="icon"></td><!-- optional play -->
 	<td<?php if ($cfg['access_play'] && $favorite['stream'] == false) echo' class="space"'; ?>></td>
-	<td><?php echo $favorite['stream'] ? 'Stream' : 'Artist' ?></td>
+	<td><?php echo $favorite['stream'] ? 'Stream/title' : 'Title' ?></td>
 	<td<?php if ($favorite['stream'] == false) echo ' class="textspace"'; ?>></td>
-	<td><?php echo $favorite['stream'] ? '' : 'Title' ?></td>
+	<td class="_delArtist"><?php echo $favorite['stream'] ? 'Artist' : 'Artist' ?></td>
+	<td class="_delSource">Source</td>
+	<td class="_delFrom">Album</td>
 	<td></td><!-- delete -->
 </tr>
 <?php
 	//$cfg['access_play'] = true;
 	$i = 0;
+	$delArtist = true;
+	$delSource = true;
+	$delFrom = true;
 	$query1 = mysqli_query($db,'SELECT track_id, stream_url, position FROM favoriteitem WHERE favorite_id = ' . (int) $favorite_id . ' ORDER BY position');
 	while ($favoriteitem = mysqli_fetch_assoc($query1)) {
+		$extUrl = '';
+		$album = '';
+		$album_id = '';
+		$title = '';
 		if ($favoriteitem['track_id']) {
 			
-			$query2	= mysqli_query($db,'SELECT artist, title FROM track WHERE track_id = "' . mysqli_real_escape_string($db,$favoriteitem['track_id']) . '"');
+			$query2	= mysqli_query($db,'SELECT track.artist, track.title, album.album, album.album_id FROM track LEFT JOIN album ON track.album_id = album.album_id WHERE track_id = "' . mysqli_real_escape_string($db,$favoriteitem['track_id']) . '"');
 			$track	= mysqli_fetch_assoc($query2);
 			$artist	= $track['artist'];
 			$title	= $track['title'];
+			$album	= $track['album'];
+			$album_id	= $track['album_id'];
+			$delArtist = false;
+			$delFrom = false;
 		}
 		elseif ($favoriteitem['stream_url']) {
 			$artist	= $favoriteitem['stream_url'];
-			$title	= '';
+			$parts = parse_url($artist);
+			parse_str($parts['query'], $queryUrl);
+			$a = $queryUrl['action'];
+			if ($a == 'streamYouTube') {
+				$artist = $queryUrl['ompd_artist'];
+				$title = $queryUrl['ompd_title'];
+				$extUrl = $queryUrl['ompd_webpage'];
+				$delArtist = false;
+				$delSource = false;
+			}
+			elseif ($a == 'streamTidal' || isTidal($favoriteitem['stream_url'])){
+				if (isTidal($favoriteitem['stream_url'])){ //Tidal by mpd or upmpdcli
+					$tid = getTidalId($favoriteitem['stream_url']);
+				}
+				else { //Tidal direct
+					$tid = $queryUrl['track_id'];
+				}
+				$queryT = mysqli_query($db,"SELECT tidal_track.artist, tidal_track.title, tidal_track.album_id, album FROM tidal_track LEFT JOIN tidal_album ON tidal_track.album_id = tidal_album.album_id WHERE track_id = '" . (int) $tid . "'");
+				$tidalItem = mysqli_fetch_assoc($queryT);
+				$artist = $tidalItem['artist'];
+				$title = $tidalItem['title'];
+				$album = $tidalItem['album'];
+				$extUrl = NJB_HOME_URL . "index.php?action=view3&album_id=tidal_". $tidalItem['album_id'];
+				$extUrlSource = TIDAL_ALBUM_URL . $tidalItem['album_id'];
+				$delArtist = false;
+				$delSource = false;
+				$delFrom = false;
+			}
+			elseif ($a == 'streamTo'){ //local files played as streams
+				$tid = $queryUrl['track_id'];
+				$query2	= mysqli_query($db,'SELECT track.artist, track.title, album.album, album.album_id FROM track LEFT JOIN album ON track.album_id = album.album_id WHERE track_id = "' . mysqli_real_escape_string($db,$tid) . '"');
+				$track	= mysqli_fetch_assoc($query2);
+				$artist	= $track['artist'];
+				$title	= $track['title'];
+				$album	= $track['album'];
+				$album_id	= $track['album_id'];
+			}
+			else {
+				$artist = '';
+				$title = $favoriteitem['stream_url'];
+			}
 		}
 		
 		$bottom = mysqli_num_rows($query1);
@@ -150,6 +220,26 @@ $('[id^="add_"]').click(function(){
 	?></td>
 	<td><?php //echo 'acc pl: ' . print_r($cfg); ?></td>
 	<?php 
+	$title_array = explode(" ", $title);
+	$lengths = array_map('strlen', $title_array);
+	if (max($lengths) > 30) {
+		$break_method = 'break-all';
+	} 
+	else {
+		$break_method = 'break-word';
+	}
+	?>
+	<td class="<?php echo $break_method;?>"><?php 
+	if ($cfg['access_play'] && $favoriteitem['track_id']) {
+		echo '<a id="fav_play_track' . $favoriteitem['track_id'] . '" href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id=' . $favoriteitem['track_id'] . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'play track\');" onMouseOut="return nd();">' . html($title) . '</a>';
+	}
+	elseif ($cfg['access_play'] && $favoriteitem['stream_url']) {
+		echo '<a id="fav_play_track' . $favoriteitem['position'] . '" href="javascript:ajaxRequest(\'play.php?action=playStreamDirect&amp;playAfterInsert=yes&amp;position=' . $favoriteitem['position'] . '&amp;favorite_id=' . $favorite_id . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play stream\');" onMouseOut="return nd();">' . html($title) . '</a>';
+	}
+	else echo html($title); ?>
+	</td>
+	<td></td>
+	<?php 
 	$artist_array = explode(" ", $artist);
 	$lengths = array_map('strlen', $artist_array);
 	if (max($lengths) > 30) {
@@ -159,18 +249,31 @@ $('[id^="add_"]').click(function(){
 		$break_method = 'break-word';
 	}
 	?>
-	<td class="<?php echo $break_method;?>"><?php 
-	
-	if ($cfg['access_play'] && $favoriteitem['stream_url']) {
-		echo '<a href="javascript:ajaxRequest(\'play.php?action=playStreamDirect&amp;playAfterInsert=yes&amp;position=' . $favoriteitem['position'] . '&amp;favorite_id=' . $favorite_id . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play stream\');" onMouseOut="return nd();">' . html($artist) . '</a>';
+	<td class="<?php echo $break_method;?> _delArtist"><?php 
+	echo html($artist); ?></td>
+	<td class="_delSource">
+	<?php
+		if ($extUrl && $a == 'streamYouTube') {
+		echo '<a href="' . $extUrl . '" target="_blank"><i class="fa fa-youtube-play fa-fw icon-small"></i></a>';
 	}
-	else echo html($artist); ?></td>
-	<td></td>
-	<td><?php 
-	if ($cfg['access_play'] && $favoriteitem['track_id']) {
-		echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id=' . $favoriteitem['track_id'] . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'play track\');" onMouseOut="return nd();">' . html($title) . '</a>';
+	elseif ($extUrl && ($a == 'streamTidal' || isTidal($favoriteitem['stream_url']))) {
+		echo '<a href="' . $extUrlSource . '" target="_blank"><i class="ux ico-tidal icon-small fa-fw"></i></a>';
 	}
-	else echo html($title); ?></td>
+	?>
+	</td>
+	<td class="_delFrom">
+	<?php
+		if ($extUrl && $a == 'streamYouTube') {
+		echo '';
+	}
+	elseif ($extUrl && ($a == 'streamTidal' || isTidal($favoriteitem['stream_url']))) {
+		echo '<a href="' . $extUrl . '">' . $album . '</a>';
+	}
+	else {
+		echo '<a href="index.php?action=view3&album_id=' . $album_id . '">' . $album . '</a>';
+	}
+	?>
+	</td>
 	<td align="right" class="iconDel" style="position: relative">
 		<div  id="menu-icon-div<?php echo $i ?>" <?php echo 'onclick="toggleMenuSub(' . $i . ');"'; ?>>
 			<i id="menu-icon<?php echo $i ?>" class="fa fa-fw fa-bars sign"></i>
@@ -203,7 +306,23 @@ $('[id^="add_"]').click(function(){
 	</td>
 </tr>
 <?php
-	} ?>
+	//if ($artist) $delArtist = false;
+	//if ($extUrl) $delFrom = false;
+	} 
+	?>
 </table>
-
+<script>
+<?php
+if ($delArtist) {
+	echo ("$('._delArtist').hide();");
+}
+if ($delSource) {
+	echo ("$('._delSource').hide();");
+}
+if ($delFrom) {
+	echo ("$('._delFrom').hide();");
+}
+?>
+setAnchorClick();
+</script>
 	

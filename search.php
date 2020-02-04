@@ -89,11 +89,7 @@ function search_all() {
 	track_title();
 	track_composer();
 	if (!$match_found) echo "No match found in local DB.";
-	if ($cfg['show_youtube_results']) {
-		echo '<span class="nav_tree">Results from YouTube:</span>';
-		youtube_tracks();
-		youtube_scripts();
-	}
+	
 	if ($cfg['use_tidal']) {
 		echo '<span class="nav_tree">Results from TIDAL:</span>';
 		tidal_artist();
@@ -101,7 +97,11 @@ function search_all() {
 		tidal_tracks();
 		tidal_scripts();
 	}
-	
+	if ($cfg['show_youtube_results']) {
+		echo '<span class="nav_tree">Results from YouTube:</span>';
+		youtube_tracks();
+		youtube_scripts();
+	}
 	echo '<script type="text/javascript">';
 	//echo 'hideSpinner();';
 	if ($group_found != 'none') { echo 'toggleSearchResults("' . $group_found . '")';}
@@ -1193,6 +1193,7 @@ function tidalSearchAll(){
 		calcTileSize();
 		changeTileSizeInfo();
 		setAnchorClick();
+		addFavSubmenuActions();
 		requestDone = true;
 		//console.log (data.length);
 	}); 
@@ -1335,6 +1336,7 @@ function ytSearch(){
 		}
 		
 		setAnchorClick();
+		addFavSubmenuActions();
 		//console.log (data.length);
 	}); 
 	

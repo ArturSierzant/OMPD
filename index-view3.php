@@ -473,7 +473,7 @@ if (isTidal($album_id)) {
 
 <div class="line">
 	<div class="add-info-left">Source:</div>
-	<div class="add-info-right"><a href="<?php echo TIDAL_ALBUM_URL . getTidalId($album_id) ?>" target="new">TIDAL</a>
+	<div class="add-info-right"><a href="<?php echo TIDAL_ALBUM_URL . getTidalId($album_id) ?>" target="new"><i class="ux ico-tidal icon-small fa-fw"></i></a>
 	</div>
 </div>
 <?php

@@ -97,6 +97,7 @@ if ($cfg['download_font_awesome'])
 else
 	$header['head'] .= "\t" . '<link rel="stylesheet" href="fonts/font-awesome-4.5.0/css/font-awesome.min.css">' . "\n";
 
+$header['head'] .= "\t" . '<link rel="stylesheet" type="text/css" href="fonts/525icons/525icons.css">' . "\n";
 $header['head'] .= "\t" . '<link rel="stylesheet" type="text/css" href="fonts/typicons/typicons.css">' . "\n";
 $header['head'] .= "\t" . '<link rel="stylesheet" type="text/css" href="cache.php?action=css&amp;skin=' . rawurlencode($cfg['skin']) . '&amp;hash=' . css_hash() . '">' . "\n";
 $header['head'] .= "\t" . '<script src="cache.php?action=javascript&amp;hash=' . javascript_hash() . '" type="text/javascript"></script>' . "\n";

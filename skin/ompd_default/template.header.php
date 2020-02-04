@@ -351,11 +351,11 @@ $(function () {
 	});
 	
 	$('#playlistAddTo').click(function(){
-		playlistSave('AddTo','',current_track_id,'<?php echo $player1_host; ?>','<?php echo $player1_port; ?>');
+		playlistSave('AddTo','',current_track_id,'<?php echo $player1_host; ?>','<?php echo $player1_port; ?>',current_track_mpd_url);
 	});
 	
 	$('#playlistSaveAs').click(function(){
-		playlistSave('SaveAs','',current_track_id,'<?php echo $player1_host; ?>','<?php echo $player1_port; ?>');
+		playlistSave('SaveAs','',current_track_id,'<?php echo $player1_host; ?>','<?php echo $player1_port; ?>',current_track_mpd_url);
 	});
 	
 	$('#addUrlAddress').keypress(function(event) {

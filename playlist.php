@@ -157,9 +157,9 @@ if (count($file) == 0) {
 		<span class="pl-track-artist" id="album1">&nbsp;</span>
 	</div>
 	<div id="fileInfoForDbTracks" class="pl-file-info">
-		<span class="pl-track-artist" id="genre1">&nbsp;</span> &bull; 
-		<span class="pl-track-artist" id="year1">&nbsp;</span> &bull; 
-		<span class="pl-track-artist"><span id="lyrics1">&nbsp;</span></span> &bull;
+		<span class="pl-track-artist" id="genre1">&nbsp;</span>  
+		<span class="pl-track-artist" id="year1">&nbsp;</span>  
+		<span class="pl-track-artist"><span id="lyrics1">&nbsp;</span></span> 
 		<span class="pl-track-favorites"><span id="favorites1">&nbsp;</span></span> 
 	</div>
 	
@@ -361,7 +361,11 @@ for ($i=0; $i < $listlength; $i++) {
 		$image_id = mysqli_fetch_assoc($query2);
 		$src = "image.php?image_id=" . $image_id['image_id'] . "&track_id=" . $table_track['track_id'];
 		if (!$image_id['image_id']) {
-			$imageFile = $cfg['stream_covers_dir'] . parse_url($file[$i], PHP_URL_HOST);
+			$url_path = '';
+			if ($url_path = parse_url($file[$i], PHP_URL_PATH)) {
+				$url_path = str_replace('/','__',$url_path);
+			}
+			$imageFile = $cfg['stream_covers_dir'] . parse_url($file[$i], PHP_URL_HOST) . $url_path;
 			if (file_exists($imageFile . '.jpg')) {
 				$src = $imageFile . '.jpg';
 			}
@@ -545,6 +549,7 @@ var previous_track_id		= 'ff';
 var playtime				= <?php echo safe_json_encode($playtime); ?>;
 var track_id				= <?php echo safe_json_encode($track_id); ?>;
 var current_track_id		= '';
+var current_track_mpd_url		= '';
 var timer_id				= 0;
 var timer_function			= 'ajaxRequest("play.php?action=playlistStatus&menu=playlist", evaluateStatus)';
 var timer_delay				= 1000;
@@ -641,7 +646,8 @@ function evaluateStatus(data) {
 			if (data.track_artist) {
 				query_artist = data.track_artist;
 			}
-			document.getElementById('lyrics1').innerHTML = document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>';
+			document.getElementById('lyrics1').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>' + '&nbsp;&bull;';
+			document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>';
 		}
 		data.max = data.Time;
 		/* if (title.indexOf("action=streamTo") != -1) {
@@ -649,17 +655,21 @@ function evaluateStatus(data) {
 		} */
 		var rel_file = encodeURIComponent(data.relative_file);
 		//console.log ("rel_file=" + rel_file);
-		var params = data.audio_dataformat + '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + 'bit - ' + data.audio_sample_rate/1000 + 'kHz&nbsp;&bull;&nbsp;' + data.audio_profile;
+		var params = data.audio_dataformat + '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + 'bit - ' + data.audio_sample_rate/1000 + 'kHz&nbsp;&bull;&nbsp;<div style="width: 6em; display: inline-flex;">' + data.audio_profile + '</div>';
 		document.getElementById('parameters').innerHTML = params;
 		
 		
-		$('#favorites').html('&nbsp;');
-		$('#favorites1').html('&nbsp;');
+		/* $('#favorites').html('&nbsp;');
+		$('#favorites1').html('&nbsp;'); */
+		
+		
 		//$("#saveCurrentPlaylist").click();
-		$("#saveCurrentTrack").hide();
+		
+		/* $("#saveCurrentTrack").hide();
 		$("#trackOptions").hide();
 		$('#saveCurrentPlaylist i').removeClass("fa-circle-o fa-check-circle-o").addClass("fa-check-circle-o");
-		$('#saveCurrentTrack i').removeClass("fa-check-circle-o fa-circle-o").addClass("fa-circle-o");
+		$('#saveCurrentTrack i').removeClass("fa-check-circle-o fa-circle-o").addClass("fa-circle-o"); */
+		
 		/* if (data.isStream == 'true') {
 			$('#lyrics').html('&nbsp;');
 			$('#lyrics1').html('&nbsp;');
@@ -863,6 +873,7 @@ function evaluateGain(gain) {
 
 function setFavoriteSubMiddle(data) {
 	if (data.action == "add") {
+		
 		$("i[id^='favorite_star']").removeClass("fa-star-o").addClass("fa-star");
 		$("#save_favorite_star").removeClass("fa-star-o").addClass("fa-star");
 		$("#addToFav_txt").html(" Remove from ");
@@ -942,6 +953,7 @@ function evaluateTrack(data) {
 	$('#title_wait_indicator').hide();
 	$('#fileInfoForDbTracks').css('visibility', 'visible');
 	current_track_id = data.track_id;
+	current_track_mpd_url = data.track_mpd_url;
 	if (previous_track_id != data.track_id && data.track_id != null) {
 		//console.log('previous_track_id=' + previous_track_id);
 		$('#title1').removeClass('icon-anchor');
@@ -951,15 +963,15 @@ function evaluateTrack(data) {
 		$('#title1_wait_indicator').show();
 		$('#title_wait_indicator').show();
 		//console.log('track_id=' + data.track_id);
-		ajaxRequest('ajax-track-version.php?track_id=' + data.track_id + '&menu=playlist', evaluateTrackVersion);
+		ajaxRequest('ajax-track-version.php?track_id=' + data.track_id + '&track_title=' + data.title + '&menu=playlist', evaluateTrackVersion);
 		previous_track_id = data.track_id;
 	} 
 	
-	if (data.isStream == 'true' && (!data.genre || !data.year)) {
+	/* if (data.isStream == 'true' && (!data.genre || !data.year)) {
 			$('#lyrics').html('&nbsp;');
 			$('#lyrics1').html('&nbsp;');
 			$('#fileInfoForDbTracks').css('visibility', 'hidden');
-	}
+	} */
 	
 	//stream from Youtube
 	var yt_album = data.album;
@@ -999,11 +1011,19 @@ function evaluateTrack(data) {
 			}
 		} 
 		else if (l>0) {
-			artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[0]) + '">' + data.track_artist[0] + '</a>';
+			if (data.track_artist[0] != '&nbsp;') {
+				artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[0]) + '">' + data.track_artist[0] + '</a>';
+			}
+			else {
+				artist = '-';
+			}
 		}
 	}
-	else {
+	else if (data.track_artist != '&nbsp;') {
 		artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + data.track_artist_url_all + '">' + data.track_artist + '</a>';
+	}
+	else {
+		artist = '-';
 	}
 	
 	document.getElementById('artist1').innerHTML = (data.track_artist[0] == '&nbsp;') ? '&nbsp;' : 'by ' + artist;
@@ -1064,8 +1084,14 @@ function evaluateTrack(data) {
 		document.getElementById('album1').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : 'from ' + data.album;
 		document.getElementById('album').innerHTML = (data.album == '&nbsp;') ? '&nbsp' : data.album;
 	}
-	if (data.year) document.getElementById('year1').innerHTML = document.getElementById('year').innerHTML = '<a href="index.php?action=view2&order=artist&sort=asc&year=' + data.year + '">' + data.year + '</a>';
-	else document.getElementById('year1').innerHTML = document.getElementById('year').innerHTML = '&nbsp;';
+	if (data.year) {
+		document.getElementById('year1').innerHTML = '<a href="index.php?action=view2&order=artist&sort=asc&year=' + data.year + '">' + data.year + '</a>' + '&nbsp;&bull;';
+		document.getElementById('year').innerHTML = '<a href="index.php?action=view2&order=artist&sort=asc&year=' + data.year + '">' + data.year + '</a>';
+	}
+	else {
+		document.getElementById('year1').innerHTML = '&nbsp;';
+		document.getElementById('year').innerHTML = '-';
+	}
 	
 	/* if (data.genre && data.genre_id != '-1') document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = '<a href="index.php?action=view2&order=artist&sort=asc&&genre_id=' + data.genre_id + '">' + data.genre + '</a>';
 	else if(data.genre) document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = data.genre;
@@ -1083,9 +1109,13 @@ function evaluateTrack(data) {
 				inner_html = inner_html + ', <a href="index.php?action=view2&order=artist&sort=asc&&genre_id=' + key + '">' + value + '</a>'
 			}
 		});
-		document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = inner_html;
+		document.getElementById('genre1').innerHTML = inner_html + '&nbsp;&bull;';
+		document.getElementById('genre').innerHTML = inner_html;
 	} 
-	else if(data.genre_id == '-1') document.getElementById('genre1').innerHTML = document.getElementById('genre').innerHTML = data.genre;
+	else if (data.genre_id == '-1' && data.genre != '&nbsp;') {
+		document.getElementById('genre1').innerHTML = data.genre + '&nbsp;&bull;';
+		document.getElementById('genre').innerHTML = data.genre;
+	}
 	else {
 		document.getElementById('genre1').innerHTML = '';
 		document.getElementById('genre').innerHTML = '-';
@@ -1105,7 +1135,8 @@ function evaluateTrack(data) {
 	if (data.track_artist) {
 		query_artist = data.track_artist;
 	}
-	document.getElementById('lyrics1').innerHTML = document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + query_artist + '+' + data.title_core + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>'; 
+	document.getElementById('lyrics1').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + query_artist + '+' + data.title_core + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>' + '&nbsp;&bull;'; 
+	document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + query_artist + '+' + data.title_core + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>'; 
 	
 	if (data.inFavorite) {
 		document.getElementById('favorites').innerHTML  = '<i id="favorite_star" class="fa fa-star fa-fw"></i>'; 
@@ -1143,7 +1174,7 @@ function evaluateTrack(data) {
 		else {
 			action = 'add';
 		}
-		ajaxRequest('ajax-blacklist.php?action=' + action + '&track_id=' + data.track_id, setBlacklistSubMiddle);
+		ajaxRequest('ajax-blacklist.php?action=' + action + '&track_id=' + data.track_id + '&track_mpd_url=' + encodeURIComponent(data.track_mpd_url), setBlacklistSubMiddle);
 		
 	});
 	
@@ -1158,7 +1189,7 @@ function evaluateTrack(data) {
 		else {
 			action = 'remove';
 		}
-		ajaxRequest('ajax-favorite.php?action=' + action + '&track_id=' + data.track_id, setFavoriteSubMiddle);
+		ajaxRequest('ajax-favorite.php?action=' + action + '&track_id=' + data.track_id + '&track_mpd_url=' + encodeURIComponent(data.track_mpd_url), setFavoriteSubMiddle);
 		
 	});
 	

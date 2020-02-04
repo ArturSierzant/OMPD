@@ -90,8 +90,10 @@ var previous_shuffle		= -1;
 var previous_gain			= -1;
 var previous_miliseconds	= -1;
 var previous_track_id		= 'ff';
+var previous_track_title		= 'ff';
 var track_id				= '';
 var current_track_id		= '';
+var current_track_title		= '';
 var timer_id				= 0;
 var timer_function			= 'ajaxRequest("play.php?action=playlistStatus&menu=playlist", evaluateStatus)';
 var timer_delay				= 1000;
@@ -133,12 +135,14 @@ function evaluateTrackIDs(data) {
 function evaluateStatus(data) {
 	// data.hash, data.miliseconds, data.listpos, data.volume
 	// data.isplaying, data.repeat, data.shuffle, data.gain
-	
-	if (previous_hash != data.hash) {
+	current_track_title = data.title;
+	if (previous_hash != data.hash || previous_track_title != current_track_title) {
 		getTrackIDs();
 
 		ajaxRequest('play.php?action=playlistTrack&track_id=' + track_id[previous_listpos] + '&menu=playlist', evaluateTrack);
 	}
+	
+	previous_track_title = current_track_title;
 	
 	if (data.totalTracks > 0) {
 		document.getElementById('track_number').innerHTML =  (data.listpos + 1) + "/" + data.totalTracks + ". ";
@@ -233,7 +237,8 @@ function evaluateTrack(data) {
 		$('#title').removeClass('icon-anchor');
 		$('#track_title_mini').off('click');
 		$('#title').off('click');
-		ajaxRequest('ajax-track-version.php?track_id=' + data.track_id + '&menu=playlist', evaluateTrackVersion);
+		//ajaxRequest('ajax-track-version.php?track_id=' + data.track_id + '&menu=playlist', evaluateTrackVersion);
+		ajaxRequest('ajax-track-version.php?track_id=' + data.track_id + '&track_title=' + data.title + '&menu=playlist', evaluateTrackVersion);
 		previous_track_id = data.track_id;
 	} 
 	

@@ -29,6 +29,7 @@
 //  +------------------------------------------------------------------------+
 //  | play.inc.php                                                           |
 //  +------------------------------------------------------------------------+
+
 if (PHP_SAPI == 'cli' && isset($cfg['player_id']) == false)
 	$cfg['player_id'] = 0;
 
@@ -618,7 +619,8 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 function mpdAddTidalTrack($id, $insPos = '') {
 	global $cfg, $db;
 	$mpdCommand = 'ACK_ERROR_UNKNOWN';
-	if ($cfg['tidal_direct']) {
+	$mpdCommand = mpd('addid "' . createStreamUrlMpd($id) . '" ' . $insPos);
+	/* if ($cfg['tidal_direct']) {
 		$mpdCommand = mpd('addid "' . NJB_HOME_URL . 'stream.php?action=streamTidal&track_id=' . $id . '" ' . $insPos);
 	}
 	elseif ($cfg['upmpdcli_tidal']) {
@@ -626,7 +628,7 @@ function mpdAddTidalTrack($id, $insPos = '') {
 	}
 	else {
 		$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $id . ' ' . $insPos);
-	}
+	} */
 	return $mpdCommand;
 }
 

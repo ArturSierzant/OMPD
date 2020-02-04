@@ -43,6 +43,7 @@ if		($action == 'playlist')		playlist();
 elseif	($action == 'stream')		stream();
 elseif	($action == 'streamTo')		streamTo();
 elseif	($action == 'streamTidal')		streamTidal($track_id);
+elseif	($action == 'streamYouTube')		streamYouTube($track_id);
 elseif	($action == 'shareAlbum')	shareAlbum($album_id);
 else	message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]action');
 exit();
@@ -548,6 +549,35 @@ function streamTidal($id) {
 	else {
 		echo 'TIDAL_CONNECT_ERROR';
 		var_dump($conn);
+	}
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Stream YouTube track                                                   |
+//  +------------------------------------------------------------------------+
+function streamYouTube($id) {
+	global $cfg, $db;
+	$streamUrl	= get('streamUrl');
+	$parts = parse_url($streamUrl);
+	parse_str($parts['query'], $query);
+	$expire = (int) $query['expire'];
+	if ($expire > time()){
+		$url = $streamUrl;
+	}
+	else {
+		$url = getYouTubeStreamUrl($id);
+	}
+	if ($url){
+			//$stream = file_get_contents($trackURL["url"], NULL, NULL, 0, 8);
+			cliLog('YouTube track URL for ' . $id . ': ' . 	$url);
+			header("Location: " . $url);
+	}
+	else {
+		echo 'YOUTUBE_CONNECT_ERROR';
+		var_dump($url);
 	}
 }
 

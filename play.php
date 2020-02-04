@@ -35,19 +35,6 @@ require_once('include/library.inc.php');
 
 header('Content-type: application/json');
 
-/* global $cfg, $db;
-
-if ($cfg['player_type'] == NJB_MPD) {
-	$query1=mysqli_query($db,'SELECT player.player_name as pl, player_host, player_port, player_pass FROM player, session WHERE (sid = BINARY "' . cookie('netjukebox_sid') . '") and player.player_id=session.player_id');
-	$session1 = mysqli_fetch_assoc($query1);
-	$data['player'] = $session1['pl'];
-	//$data['host'] = $session1['player_host'];
-	$cfg['player_host'] = $data['host'] = $session1['player_host'];
-	$cfg['player_port'] = $session1['player_port'];
-	$cfg['player_pass'] = $session1['player_pass'];
-} */
-
-
 $action	= get('action');
 
 if		($action == 'play')				play();
@@ -671,6 +658,9 @@ function addSelectUrl() {
 	if ($url!="") {
 		if (isTidal($url)) {
 			$id = getTidalId($url);
+			
+			
+			
 			//TIDAL track
 			if (strpos($url, MPD_TIDAL_URL) !== false || strpos($url, TIDAL_APP_TRACK_URL) !== false || strpos($url, TIDAL_TRACK_URL) !== false || strpos($url, TIDAL_TRACK_STREAM_URL) !== false) {
 				//check if album is in OMPD DB:
@@ -684,16 +674,7 @@ function addSelectUrl() {
 				}
 				
 				$tidal_tracks['track_id'] = $id;
-				$mpdCommand = mpdAddTidalTrack($id);
-				/* if ($cfg['tidal_direct']) {
-					$mpdCommand = mpd('addid "' . NJB_HOME_URL . 'stream.php?action=streamTidal&track_id=' . $id . '"');
-				}
-				elseif ($cfg['upmpdcli_tidal'] && strpos($url, TIDAL_TRACK_STREAM_URL) === false) {
-					$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $id . '"');
-				}
-				else {
-					$mpdCommand = mpd('addid ' . $url);
-				} */
+				$mpdCommand = mpdAddTidalTrack('tidal_' . $id);
 				
 				if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST' || $mpdCommand == 'TIDAL_CONNECT_ERROR') {
 					return 'add_error';
@@ -706,17 +687,7 @@ function addSelectUrl() {
 				$tidal_tracks = json_decode($tidal_tracks, true);
 				
 				foreach ($tidal_tracks as $tidal_track) {
-					$mpdCommand = mpdAddTidalTrack($tidal_track['id']);
-					/* if ($cfg['tidal_direct']) {
-						$mpdCommand = mpd('addid "' . NJB_HOME_URL . 'stream.php?action=streamTidal&track_id=' . $tidal_track['id'] . '"');
-					}
-					elseif ($cfg['upmpdcli_tidal']) {
-						$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $tidal_track['id'] . '"');
-					}
-					else {
-						$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['id']);
-					} */
-					//if (strpos($mpdCommand,'ACK') !== false) {
+					$mpdCommand = mpdAddTidalTrack('tidal_' . $tidal_track['id']);
 					if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST' || $mpdCommand == 'TIDAL_CONNECT_ERROR') {
 						return 'add_error';
 					}
@@ -730,10 +701,10 @@ function addSelectUrl() {
 		}
 		else {
 			$status = mpd('status');
-			if ($cfg['add_autoplay'] && $status['playlistlength'] == 0)	
+			if ($cfg['add_autoplay'] && $status['playlistlength'] == 0)
 				$addResult = addUrl('play');
-			else														
-				$addResult = addUrl('add');		
+			else
+				$addResult = addUrl('add');
 		}
 	}
 	$data['addResult'] = $addResult; 
@@ -744,8 +715,6 @@ function addSelectUrl() {
 	ob_end_flush();
 	ob_flush();
 	flush();
-	
-	//return 'add_OK';
 }
 
 
@@ -936,7 +905,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 		}
 	}
 	elseif ($favorite_id) {
-		$query = mysqli_query($db,'SELECT stream FROM favorite WHERE favorite_id = ' . (int) $favorite_id . ' AND stream = 1');
+		/* $query = mysqli_query($db,'SELECT stream FROM favorite WHERE favorite_id = ' . (int) $favorite_id . ' AND stream = 1');
 		if (mysqli_fetch_row($query)) {	
 			playStream($favorite_id);
 		}
@@ -945,6 +914,11 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 			FROM track, favoriteitem
 			WHERE favoriteitem.track_id = track.track_id 
 			AND favorite_id = "' . mysqli_real_escape_string($db,$favorite_id) . '"
+			ORDER BY position');
+			*/
+		$query	= mysqli_query($db,'SELECT relative_file, track.track_id, stream_url, position
+			FROM track RIGHT JOIN favoriteitem ON favoriteitem.track_id = track.track_id
+			WHERE favorite_id = "' . mysqli_real_escape_string($db,$favorite_id) . '"
 			ORDER BY position');
 	}
 	elseif ($random == 'database') {
@@ -992,24 +966,14 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 		if ($tidal_tracks) {
 			$tidal_tracks = json_decode($tidal_tracks, true);
 			foreach ($tidal_tracks as $tidal_track) {
-				$mpdCommand = mpdAddTidalTrack($tidal_track['id'], $insPos);
-				
-				/* if ($cfg['tidal_direct']) {
-					$mpdCommand = mpd('addid "' . NJB_HOME_URL . 'stream.php?action=streamTidal&track_id=' . $tidal_track['id'] . '" ' . $insPos);
-				}
-				elseif ($cfg['upmpdcli_tidal']) {
-				$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $tidal_track['id'] . '" ' . $insPos);
-				}
-				else {
-					$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $tidal_track['id'] . ' ' . $insPos);
-				} */
-				
-				//if (strpos($mpdCommand,'ACK') !== false) {
-				if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST' || $mpdCommand == 'TIDAL_CONNECT_ERROR') {
-					return 'add_error';
+				if (!isInFavorite('tidal_' . $tidal_track['id'],$cfg['blacklist_id'])){
+					$mpdCommand = mpdAddTidalTrack('tidal_' . $tidal_track['id'], $insPos);
+					if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST' || $mpdCommand == 'TIDAL_CONNECT_ERROR') {
+						return 'add_error';
+					}
+					$n++;
 				}
 			}
-			$n++;
 			if ($playAfterInsert) {mpd('play ' . $insPos);}
 			if ($first && $mode == 'play') {
 				mpd('play ' . $index);
@@ -1021,7 +985,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 		}
 	} 
 	elseif($isYoutube){
-		$url = getYoutubeStreamUrl(getYoutubeId($track_id));
+		$url = getYouTubeMPDUrl(getYouTubeId($track_id));
 		$mpdCommand = mpd('addid "' . mpdEscapeChar($url) . '" ' . $insPos);
 		if ($playAfterInsert) {mpd('play ' . $insPos);}
 		if ($first && $mode == 'play') mpd('play ' . $index);
@@ -1065,29 +1029,26 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 
 	else {
 		while ($track = mysqli_fetch_assoc($query)) {
-			
-				$file = $track['relative_file'];
+			if ($file = $track['relative_file']){
 				$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
-				$mpdCommand = mpd('addid "' . mpdEscapeChar($file) . '" ' . $insPos);
-				//mpd('addid "' . $file . '" ' . $insPos);
-				if ($mpdCommand == 'ACK_ERROR_NO_EXIST') {
-					//file not found in MPD database - add stream
-					playTo($insPos, $track['track_id']);
-					
-					/* if ($playAfterInsert) {mpd('play ' . $insPos);}
-					if ($first && $mode == 'play')
-						mpd('play ' . $index);
-					break; */
-				}
-				elseif ($mpdCommand == 'ACK_ERROR_UNKNOWN') {
-					return 'add_error';
-				}
 			}
-			$n++;
-			if ($playAfterInsert) {mpd('play ' . $insPos);}
-			if ($first && $mode == 'play') {
-				mpd('play ' . $index);
+			elseif ($file = $track['stream_url']){
+				$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
 			}
+			$mpdCommand = mpd('addid "' . mpdEscapeChar($file) . '" ' . $insPos);
+			if ($mpdCommand == 'ACK_ERROR_NO_EXIST') {
+				//file not found in MPD database - add stream
+				playTo($insPos, $track['track_id']);
+			}
+			elseif ($mpdCommand == 'ACK_ERROR_UNKNOWN') {
+				return 'add_error';
+			}
+		}
+		$n++;
+		if ($playAfterInsert) {mpd('play ' . $insPos);}
+		if ($first && $mode == 'play') {
+			mpd('play ' . $index);
+		}
 			$first = false;
 		
 	}
@@ -1142,7 +1103,7 @@ function addUrl($mode = 'play') {
 				// File1=http://example.com:80
 				// m3u:
 				// http://example.com:80
-				if (preg_match('#^(?:File[0-9]{1,3}=|)((?:ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://.+)#', $item, $match))
+				if (preg_match('#^(?:File[0-9]{1,3}=|)((?:tidal|ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://.+)#', $item, $match))
 					$file[] = $match[1];
 				//print_r($item) . '<br>';
 			}
@@ -1158,44 +1119,13 @@ function addUrl($mode = 'play') {
 	if (count($file) == 1) {
 		$yt = striposa($url, $cfg['youtube_indicator']);
 		if ($yt !== false) {
-			if ($ytUrl = getYoutubeStreamUrl($url)) {
+			if ($ytUrl = getYouTubeMPDUrl($url)) {
 				$file[0] = $ytUrl;
 			}
 			else {
 				$addURLresult = 'add_error';
 				return $addURLresult;
 			}
-			/* $cmd = trim($cfg['python_path'] . ' ' . $cfg['youtube-dl_path'] . ' ' . $cfg['youtube-dl_options'] . ' ' . ($url));
-			exec($cmd, $output, $ret);
-			if ($ret == 0) {
-				$js = json_decode($output[0],true);
-				$f = $cfg['youtube_audio_format_name'];
-				//$format = array_find_deep($js, $f);
-				//$yt_url = $js[$format[0]][$format[1]]['url'];
-				$format = array_search($f, array_column($js['formats'], 'format'));
-				$yt_url = $js['formats'][$format]['url'];
-				$is_yt_url_query = strpos($yt_url,'?');
-				if ($is_yt_url_query === false) {
-					$yt_url = $yt_url . '?';
-				}
-				$ytArtist = "";
-				if ($js['artist']) {
-					$ytArtist = urlencode($js['artist']  . " - ");
-				}
-				$ytTtitle = "YouTube audio";
-				if ($js['title'] && $js['title'] != '_') {
-					$ytTtitle = $js['title'];
-				}
-				elseif ($js['alt_title'] && $js['alt_title'] != '_') {
-					$ytTtitle = $js['alt_title'];
-				}
-				$ompd_title = $ytArtist . $ytTtitle;
-				$file[0] = $yt_url . '&ompd_title=' . urlencode($ompd_title) . '&ompd_duration=' . urlencode($js['duration']) . '&ompd_thumbnail=' . urlencode($js['thumbnail']) . '&ompd_webpage=' . urlencode($js['webpage_url']);
-			}
-			else {
-				$addURLresult = 'add_error';
-				return $addURLresult;
-			} */
 		}
 	}
 	if ($cfg['play_queue'] == false)
@@ -1247,7 +1177,7 @@ function addUrl($mode = 'play') {
 //  +------------------------------------------------------------------------+
 //  | Play Stream                                                            |
 //  +------------------------------------------------------------------------+
-function playStream($favorite_id) {
+function DEL_playStream($favorite_id) {
 	global $db, $cfg;
 
 	$first = true;
@@ -1306,7 +1236,8 @@ function playStreamDirect() {
 	mpd('play ' . $insPos);
 	
 	$data['album_id'] = $position;
-	$data['playResult'] = 'add_OK'; 
+	$data['playResult'] = 'play_OK'; 
+	$data['addResult'] = 'add_OK'; 
 	$data['insPos'] = $insPos; 
 	
 	echo safe_json_encode($data);
@@ -1899,7 +1830,7 @@ function playlistStatus() {
 	if ($cfg['player_type'] == NJB_MPD) {
 		
 		$playlist	= mpd('playlist');
-		$hasStream = preg_grep('#^(ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://#', $playlist);
+		$hasStream = preg_grep('#^(tidal|ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://#', $playlist);
 		
 		if (count($hasStream) == 0) $hasStream = 'false';
 		else $hasStream = 'true';
@@ -2030,6 +1961,7 @@ function playlistTrack() {
 	$title = '';
 	$currentsong	= mpd('currentsong');
 	$track_artist = array();
+	$data['track_mpd_url'] = getTrackMpdUrl($currentsong['file']);
 	
 	if ($track_id !='') {
 		if (isTidal($track_id)) {
@@ -2063,7 +1995,7 @@ function playlistTrack() {
 		}
 		$explodedComposer = multiexplode($cfg['artist_separator'],$track['track_composer']);
 		
-		$inFavorite = false;
+		/* $inFavorite = false;
 		if (isset($cfg['favorite_id'])) {
 			$query = mysqli_query($db,"SELECT track_id FROM favoriteitem WHERE track_id = '" . $track_id . "' AND favorite_id = '" . $cfg['favorite_id'] . "' LIMIT 1");
 			if (mysqli_num_rows($query) > 0) $inFavorite = true;
@@ -2073,7 +2005,7 @@ function playlistTrack() {
 		if (isset($cfg['blacklist_id'])) {
 			$query = mysqli_query($db,"SELECT track_id FROM favoriteitem WHERE track_id = '" . $track_id . "' AND favorite_id = '" . $cfg['blacklist_id'] . "' LIMIT 1");
 			if (mysqli_num_rows($query) > 0) $onBlacklist = true;
-		}
+		} */
 		
 		$isStream = false;
 		if (strpos($currentsong['file'],"://") !== false) $isStream = true;
@@ -2114,8 +2046,8 @@ function playlistTrack() {
 		$data['comment']	= (string) $track['comment'];
 		$data['track_id']	= (string) $track['track_id'];
 		$data['relative_file']	= (string) $track['relative_file'];
-		$data['inFavorite'] = (boolean) $inFavorite;
-		$data['onBlacklist'] = (boolean) $onBlacklist;
+		/* $data['inFavorite'] = (boolean) $inFavorite;
+		$data['onBlacklist'] = (boolean) $onBlacklist; */
 		$data['dr']	= (string) $track['dr'];
 		$data['album_dr']	= (string) $track['album_dr'];
 		$data['title_core'] = $title;
@@ -2140,7 +2072,11 @@ function playlistTrack() {
 		if (strpos($currentsong['file'],"://") !== false) {
 			$data['isStream'] = (string) 'true';
 			//image for e.g. radio stations
-			$imageFile = $cfg['stream_covers_dir'] . parse_url($currentsong['file'], PHP_URL_HOST);
+			$url_path = '';
+			if ($url_path = parse_url($currentsong['file'], PHP_URL_PATH)) {
+				$url_path = str_replace('/','__',$url_path);
+			}
+			$imageFile = $cfg['stream_covers_dir'] . parse_url($currentsong['file'], PHP_URL_HOST) . $url_path;
 			if (file_exists($imageFile . '.jpg')) {
 				$data['imageFile'] = $imageFile . '.jpg';
 			}
@@ -2253,15 +2189,57 @@ function playlistTrack() {
 		$data['comment']	= (string) '';
 		$data['track_id']	= (string) '';
 		$data['relative_file']	= (string) $relative_file;
-		$data['inFavorite'] = (boolean) '';
-		$data['onBlacklist'] = (boolean) '';
+		/* $data['inFavorite'] = (boolean) '';
+		$data['onBlacklist'] = (boolean) ''; */
 		$data['dr']	= (string) '';
 		$data['album_dr']	= (string) '';
 		//$data['title_core'] = $title;
-		
-		
-		
 	}
+	
+	$track_id_url = getTrackIdFromUrl($currentsong['file']);
+	$inFavorite = false;
+	$track_id = get('track_id'); //redefine because $track_id can be changed above
+	if (isset($cfg['favorite_id'])) {
+		if ($track_id) { //track_id is set only for local files and Tidal streams
+			if (isTidal($track_id)) {
+				$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE (stream_url LIKE '%track_id=" . mysqli_real_escape_string($db, getTidalId($track_id)) . "%' OR stream_url = '" . $cfg['upmpdcli_tidal'] . mysqli_real_escape_string($db,getTidalId($track_id)) . "' OR stream_url = '" . MPD_TIDAL_URL . mysqli_real_escape_string($db,getTidalId($track_id)) . "') AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['favorite_id']) . "' LIMIT 1");
+			}
+			else { //local files
+				$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE track_id = '" . $track_id . "' AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['favorite_id']) . "' LIMIT 1");
+			}
+		}
+		elseif ($track_id_url) { //streams from e.g. YouTube
+			$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE stream_url LIKE '%track_id=" . mysqli_real_escape_string($db, $track_id_url) . "%' AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['favorite_id']) . "' LIMIT 1");
+		}
+		else { //other streams
+			$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE stream_url = '" . mysqli_real_escape_string($db, $currentsong['file']) . "' AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['favorite_id']) . "' LIMIT 1");
+		}
+		if (mysqli_num_rows($query) > 0) $inFavorite = true;
+	}
+	
+	$onBlacklist = false;
+	if (isset($cfg['blacklist_id'])) {
+		if ($track_id) { //track_id is set only for local files and Tidal streams
+			if (isTidal($track_id)) {
+				$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE (stream_url LIKE '%track_id=" . mysqli_real_escape_string($db, getTidalId($track_id)) . "%' OR stream_url = '" . $cfg['upmpdcli_tidal'] . mysqli_real_escape_string($db,getTidalId($track_id)) . "' OR stream_url = '" . MPD_TIDAL_URL . mysqli_real_escape_string($db,getTidalId($track_id)) . "') AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['blacklist_id']) . "' LIMIT 1");
+			}
+			else { //local files
+				$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE track_id = '" . $track_id . "' AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['blacklist_id']) . "' LIMIT 1");
+			}
+		}
+		elseif ($track_id_url) { //streams from e.g. YouTube
+			$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE stream_url LIKE '%track_id=" . mysqli_real_escape_string($db, $track_id_url) . "%' AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['blacklist_id']) . "' LIMIT 1");
+		}
+		else { //other streams
+			$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE stream_url = '" . mysqli_real_escape_string($db, $currentsong['file']) . "' AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['blacklist_id']) . "' LIMIT 1");
+		}
+		if (mysqli_num_rows($query) > 0) $onBlacklist = true;
+	}
+	
+	$data['inFavorite'] = (boolean) $inFavorite;
+	$data['onBlacklist'] = (boolean) $onBlacklist;
+	
+	
 	echo safe_json_encode($data);
 }
 

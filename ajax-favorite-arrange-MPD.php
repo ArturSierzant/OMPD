@@ -59,18 +59,18 @@ $playlist = mpd('listplaylistinfo "' . $favorite_id . '"');
 
 ?>
 <script type="text/javascript">
-$('[id^="add_"]').click(function(){
+/* $('[id^="add_"]').click(function(){
 		addClick();
-	});
+	}); */
 </script>
 <table width="100%" cellspacing="0" cellpadding="0" class="border">
 <tr class="header">
 	
 	<td class="icon"></td><!-- optional play -->
 	<td<?php if ($cfg['access_play']) echo' class="space"'; ?>></td>
-	<td>Artist</td>
-	<td class="textspace"></td>
 	<td>Title/file</td>
+	<td class="textspace"></td>
+	<td>Artist</td>
 	<td></td><!-- delete -->
 </tr>
 <?php
@@ -93,6 +93,12 @@ $('[id^="add_"]').click(function(){
 	
 	?></td>
 	<td><?php // echo $artist; ?></td>
+	<td><?php 
+	if ($cfg['access_play']) {
+		echo '<a id="fav_play_track' . $i . '" href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;filepath=' . myUrlencode($playlist['file'][$i]) . '&amp;menu=favorite&amp;track_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'play track\');" onMouseOut="return nd();">' . html($title) . '</a>';
+	}
+	else echo html($title); ?>
+	</td>
 	<?php 
 	$artist_array = explode(" ", $artist);
 	$lengths = array_map('strlen', $artist_array);
@@ -103,13 +109,8 @@ $('[id^="add_"]').click(function(){
 		$break_method = 'break-word';
 	}
 	?>
-	<td class="<?php echo $break_method;?>"><?php echo html($artist); ?></td>
 	<td></td>
-	<td><?php 
-	if ($cfg['access_play']) {
-		echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;filepath=' . myUrlencode($playlist['file'][$i]) . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'play track\');" onMouseOut="return nd();">' . html($title) . '</a>';
-	}
-	else echo html($title); ?></td>
+	<td class="<?php echo $break_method;?>"><?php echo html($artist); ?></td>
 	<td align="right" class="iconDel" style="position: relative">
 		<div  id="menu-icon-div<?php echo $i ?>" <?php echo 'onclick="toggleMenuSub(' . $i . ');"'; ?>>
 			<i id="menu-icon<?php echo $i ?>" class="fa fa-fw fa-bars sign"></i>
@@ -144,5 +145,6 @@ $('[id^="add_"]').click(function(){
 <?php
 	} ?>
 </table>
-
-	
+<script>
+setAnchorClick();
+</script>

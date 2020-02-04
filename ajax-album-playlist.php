@@ -129,13 +129,16 @@ for ($disc; $disc <= $max_disc; $disc++) {
 		<?php
 		
 		$i = 0;
-		while ($track = mysqli_fetch_assoc($query)) { ?>
+		while ($track = mysqli_fetch_assoc($query)) { 
+		?>
 			<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
-				
+				<?php 
+				$position_id = $i + $disc * 100;
+				?>
 				<td class="icon">
-				<span id="menu-track<?php echo $i + $disc * 100 ?>">
-				<div onclick='toggleMenuSub(<?php echo $i + $disc * 100 ?>);'>
-					<i id="menu-icon<?php echo $i + $disc * 100 ?>" class="fa fa-bars icon-small"></i>
+				<span id="menu-track<?php echo $position_id; ?>">
+				<div onclick='toggleMenuSub(<?php echo $position_id; ?>);'>
+					<i id="menu-icon<?php echo $position_id; ?>" class="fa fa-bars icon-small"></i>
 				</div>
 				</span>
 				</td>
@@ -148,7 +151,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 				</td>
 				
 				<td class="trackNumber"><?php if ($cfg['access_play']) 		echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id=' . $track['track_id'] . '\');" onMouseOver="return overlib(\'Play track ' . $track['number'] . '\');" onMouseOut="return nd();">' . html($track['number']) . '.</a>';?></td>
-				<td><?php if ($cfg['access_play']) 		echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id=' . $track['track_id'] . '\');" onMouseOver="return overlib(\'Play track ' . $track['number'] . '\');" onMouseOut="return nd();">' . html($track['title']) . '</a>';
+				<td><?php if ($cfg['access_play']) 		echo '<a id="a_play_track'. $position_id .'" href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id=' . $track['track_id'] . '&amp;position_id=' . $position_id . '\',evaluateAdd);" onMouseOver="return overlib(\'Play track ' . $track['number'] . '\');" onMouseOut="return nd();">' . html($track['title']) . '</a>';
 						elseif ($cfg['access_add'])		echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;track_id=' . $track['track_id'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . $track['number'] . '\');" onMouseOut="return nd();">' . html($track['title']) . '</a>';
 						elseif ($cfg['access_stream'])	echo '<a href="stream.php?action=playlist&amp;track_id=' . $track['track_id'] . '&amp;stream_id=' . $cfg['stream_id'] . '" onMouseOver="return overlib(\'Stream track ' . $track['number'] . '\');" onMouseOut="return nd();">' . html($track['title']) . '</a>';
 						else 							echo html($track['title']); ?>
@@ -194,11 +197,25 @@ for ($disc; $disc <= $max_disc; $disc++) {
 				
 				$isFavorite = false;
 				$isBlacklist = false;
-				if ($track['favorite_pos']) $isFavorite = true;
-				if ($track['blacklist_pos']) $isBlacklist = true;
 				$tid = $track['track_id'];
-				
-				if (!isTidal($album_id)) { 
+				if (isTidal($tid)){
+					$track_id = getTidalId($tid);
+					//check if in favorite/blacklist - do it here, because it's easier then creating SQL query
+					/* $query1 = mysqli_query($db,"SELECT position FROM favoriteitem WHERE favorite_id = '" . $cfg['favorite_id'] . "' AND (stream_url LIKE '%action=streamTidal&track_id=" . $track_id . "' OR stream_url = '" . mysqli_real_escape_string($db,$cfg['upmpdcli_tidal']) . $track_id . "' OR stream_url LIKE '" .mysqli_real_escape_string($db,MPD_TIDAL_URL) . $track_id . "')");
+					if (mysqli_num_rows($query1) > 0) $isFavorite = true;
+					
+					$query2 = mysqli_query($db,"SELECT position FROM favoriteitem WHERE favorite_id = '" . $cfg['blacklist_id'] . "' AND (stream_url LIKE '%action=streamTidal&track_id=" . $track_id . "' OR stream_url = '" . mysqli_real_escape_string($db,$cfg['upmpdcli_tidal']) . $track_id . "' OR stream_url LIKE '" .mysqli_real_escape_string($db,MPD_TIDAL_URL) . $track_id . "')");
+					if (mysqli_num_rows($query2) > 0) $isBlacklist = true; */
+					
+					$isFavorite = isInFavorite($tid, $cfg['favorite_id']);
+					$isBlacklist = isInFavorite($tid, $cfg['blacklist_id']);
+					
+				}
+				else {
+					if ($track['favorite_pos']) $isFavorite = true;
+					if ($track['blacklist_pos']) $isBlacklist = true;
+				}
+				 
 				?>
 					<td onclick="toggleStarSub(<?php echo $i + $disc * 100 ?>,'<?php echo $tid ?>');" class="pl-favorites">
 						<span id="blacklist-star-bg<?php echo $tid ?>" class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
@@ -206,12 +223,6 @@ for ($disc; $disc <= $max_disc; $disc++) {
 						</span>
 					</td>
 				<?php 
-				}
-				else {
-				?>
-				<td></td>
-				<?php
-				}
 				
 				if ($cfg['show_DR']){ ?>
 				<td class="pl-tdr">
@@ -232,7 +243,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 
 			<tr>
 			<td colspan="10">
-			<?php if (!isTidal($album_id)) starSubMenu($i + $disc * 100, $isFavorite, $isBlacklist, $tid);?>
+			<?php starSubMenu($i + $disc * 100, $isFavorite, $isBlacklist, $tid);?>
 			</td>
 			</tr>
 

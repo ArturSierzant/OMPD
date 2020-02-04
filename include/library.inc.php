@@ -122,14 +122,15 @@ function findCoreTrackTitle($title) {
 //  | Draws sub menu for add/remove to/from favorite                            |
 //  +---------------------------------------------------------------------------+
 
-function starSubMenu($i, $isFavorite, $isBlacklist, $track_id) {
+function starSubMenu($i, $isFavorite, $isBlacklist, $track_id, $type = 'echo') {
 	global $cfg, $db;
+	if ($type == 'string'){
+		ob_start();
+	}
 	$addFavorite_txt = ($isFavorite ? 'Remove from ' : 'Add to ');
 	$addBlacklist_txt = ($isBlacklist ? 'Remove from ' : 'Add to ');
 	?>
 <div class="menuSubRight" id="menu-star-track<?php echo $i; ?>">
-
-	
 	<div>
 		<span id="track_addToFavorite-<?php echo $track_id; ?>" class="icon-anchor">
 			<span id="addToFavorite_txt-<?php echo $track_id; ?>"><?php echo $addFavorite_txt ?></span><?php echo $cfg['favorite_name'];?>
@@ -140,7 +141,7 @@ function starSubMenu($i, $isFavorite, $isBlacklist, $track_id) {
 	<div>
 		<span id="track_addToBlacklist-<?php echo $track_id; ?>" class="icon-anchor">
 			<span id="addToBlacklist_txt-<?php echo $track_id; ?>"><?php echo $addBlacklist_txt ?></span><?php echo $cfg['blacklist_name'];?>
-				<span id="blacklist-star-bg-sub<?php echo $track_id; ?>" class="larger blackstar<?php if ($isBlacklist) echo ' blackstar-selected'; ?>"><i id="blacklist_star-<?php echo $i; ?>" class="fa fa-star-o fa-fw"></i></span>
+				<span id="blacklist-star-bg-sub<?php echo $track_id; ?>" class="larger blackstar<?php if ($isBlacklist) echo ' blackstar-selected'; ?>"><i id="blacklist_star-<?php echo $track_id; ?>" class="fa fa-star-o fa-fw"></i></span>
 		</span>
 	</div>
 	
@@ -155,7 +156,7 @@ function starSubMenu($i, $isFavorite, $isBlacklist, $track_id) {
 	Add to&nbsp;
 		<select id="savePlaylistAddTo-<?php echo $track_id; ?>">
 	<?php 
-		echo listOfFavorites(true, false, $track_id);
+		echo listOfFavorites(true, true, $track_id);
 	?>
 		</select>
 		<span id="playlistAddTo-<?php echo $track_id; ?>"><i class="fa fa-plus-circle fa-fw"></i> Add</span>
@@ -164,6 +165,11 @@ function starSubMenu($i, $isFavorite, $isBlacklist, $track_id) {
 
 </div>
 <?php 
+	if ($type == 'string'){
+		$out = ob_get_contents();
+		ob_end_clean();
+		return $out;
+	}
 }
 	
 
@@ -352,10 +358,23 @@ global $cfg, $db;
 
 function listOfFavorites($file = true, $stream = true, $track_id = "") {
 	global $cfg, $db;
+	/* if ($file) {
+		$listOfFavorites = "
+		<option class='listDivider' value='' selected disabled style='display: none;'>--- Select playlist ---</option>";
+		if ($track_id) {
+			$query2 = mysqli_query($db,'SELECT name, favorite.favorite_id FROM favorite join favoriteitem on favorite.favorite_id = favoriteitem.favorite_id WHERE name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" AND favorite.favorite_id not in (SELECT favorite_id FROM favoriteitem WHERE track_id = "' . $track_id . '") GROUP BY favorite.favorite_id ORDER BY name');
+		}
+		else {
+			$query2 = mysqli_query($db,'SELECT name, favorite_id FROM favorite WHERE name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" ORDER BY name');
+		}
+		while ($player = mysqli_fetch_assoc($query2)) {
+			$listOfFavorites .= "<option value=" . $player['favorite_id'] . ">" . html($player['name']) . "</option>";
+		}
+	} */
 	if ($file) {
-	$listOfFavorites = "
-	<option class='listDivider' value='' selected disabled style='display: none;'>--- Select playlist ---</option>
-	<option class='listDivider' value='' disabled>--- File playlists ---</option>";
+		$listOfFavorites = "
+		<option class='listDivider' value='' selected disabled style='display: none;'>--- Select playlist ---</option>
+		<option class='listDivider' value='' disabled>--- File and mixed playlists ---</option>";
 		if ($track_id) {
 			$query2 = mysqli_query($db,'SELECT name, favorite.favorite_id FROM favorite join favoriteitem on favorite.favorite_id = favoriteitem.favorite_id WHERE stream = 0 AND name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" AND favorite.favorite_id not in (SELECT favorite_id FROM favoriteitem WHERE track_id = "' . $track_id . '") GROUP BY favorite.favorite_id ORDER BY name');
 		}
@@ -367,11 +386,11 @@ function listOfFavorites($file = true, $stream = true, $track_id = "") {
 		}
 	}
 	if ($stream) {
-		$query2 = mysqli_query($db,'SELECT name, favorite_id FROM favorite WHERE stream = 1 ORDER BY name');
+		$query2 = mysqli_query($db,'SELECT name, favorite_id FROM favorite WHERE stream = 1 AND name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" ORDER BY name');
 		if ($query2) {
 			$listOfFavorites .= "<option class='listDivider' value='' disabled>--- Streams ---</option>";
 			while ($player = mysqli_fetch_assoc($query2)) {
-				$listOfFavorites .= "<option value='-" . $player['favorite_id'] . "'>" . html($player['name']) . "</option>";
+				$listOfFavorites .= "<option value='" . $player['favorite_id'] . "'>" . html($player['name']) . "</option>";
 			}
 		}
 	}
@@ -840,45 +859,6 @@ function getTracksFromTidalAlbum($album_id, $order = '') {
 	return false;
 }
 
-/* 
-//  +------------------------------------------------------------------------+
-//  | Artists from Tidal                                                     |
-//  +------------------------------------------------------------------------+
-function showArtistsFromTidal($artist, $size) {
-	global $cfg, $db;
-	$field = 'artists';
-	$value = $artist;
-	
-	$command = tidalSearchCommand($field, $value);
-	
-	exec($command, $output, $ret);
-	
-	if ($ret == 1) { //error in execution python script
-		$data['return'] = $ret;
-		$data['response'] = $output;
-		echo safe_json_encode($data);
-		return;
-	}
-
-	$artists = json_decode($output[0], true);
-	if (count($artists['artists']) == 0) {
-		$data['results'] = 0;
-		echo safe_json_encode($data);
-		return;
-	}
-	
-	if ($artists['artists']) {
-		//$artists = json_decode($output[0], true);
-		//echo ('<div id="searchResultsTIA" style="line-height: initial;">');
-		echo ('<table class="border" cellspacing="0" cellpadding="0">');
-		foreach ($artists['artists'] as $art) {
-			echo '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=viewTidalAlbums&amp;tidalArtist=' . rawurlencode($art['artist']) . '&amp;tidalArtistId=' . rawurlencode($art['artist_id']). '&amp;order=year">' . html($art['artist']) . '</a></td></tr>';
-			}
-		echo ('</table>');
-		//echo ('</div>');
-	}
-}
- */
 
 //  +------------------------------------------------------------------------+
 //  | All from Tidal                                                         |
@@ -907,8 +887,6 @@ function showAllFromTidal($searchStr, $size) {
 		return;
 	}
 	
-	
-	
 	if (count($results['artists']['items']) == 0) {
 		$data['artists_results'] = 0;
 	}
@@ -934,7 +912,6 @@ function showAllFromTidal($searchStr, $size) {
 			$album['artist_alphabetic'] = $art['artists'][0]['name'];
 			$album['album'] = $art['title'];
 			$albumsList .= draw_tile($size, $album, '', 'string');
-			/* $albumsList .= '<tr class="artist_list"><td class="small_cover"><img src="http://images.osl.wimpmusic.com/im/im?w=150&h=150&albumid=' . rawurlencode($art['id']) . '" alt="" width="100%" height="100%></td><td class="space"></td><td><a href="index.php?action=view3&album_id=tidal_' . rawurlencode($art['id']) . '">' . '&nbsp;' . html($art['artists'][0]['name']) . ' - ' . html($art['title']) . '</a></td></tr>'; */
 			}
 		$albumsList .= '</table>';
 		$data['albums'] = $albumsList;
@@ -945,7 +922,8 @@ function showAllFromTidal($searchStr, $size) {
 	}
 	if ($results['tracks']['items']) {
 		$data['tracks_results'] = count($results['tracks']['items']);
-		$tracksList = '<table class="border" cellspacing="0" cellpadding="0">';
+		$tracksList = tidalTracksList($results['tracks']);
+		/* $tracksList = '<table class="border" cellspacing="0" cellpadding="0">';
 		$tracksList .= '
 		<tr class="header">
 			<td class="icon"></td><!-- track menu -->
@@ -959,6 +937,7 @@ function showAllFromTidal($searchStr, $size) {
 			<td>Title&nbsp;</td>
 			<td>Album&nbsp;</td>
 			<td></td>
+			<td></td>
 			<td align="right" class="time time_w">Time</td>
 			<td class="space right"></td>
 		</tr>';
@@ -967,6 +946,8 @@ function showAllFromTidal($searchStr, $size) {
 		$TT_ids = ''; 
 		foreach ($results['tracks']['items'] as $track) {
 			$track['track_id'] = 'tidal_' . $track['id'];
+			$isFavorite = isInFavorite($track['track_id'], $cfg['favorite_id']);
+			$isBlacklist = isInFavorite($track['track_id'], $cfg['blacklist_id']);
 			$even_odd = ($i++ & 1) ? 'even' : 'odd';
 			$tracksList .= '
 			
@@ -1004,10 +985,24 @@ function showAllFromTidal($searchStr, $size) {
 						$tracksList .= ' & ' . html($TOPT_art['name']);
 					}
 				}
+				$o = "";
+				if (!$isFavorite) {
+					$o = "-o";
+				}
+				$starClass = "";
+				if ($isBlacklist) {
+					$starClass = " blackstar blackstar-selected";
+				}
 				$tracksList .= '</span>
 				</td>
 				
 				<td><a id="a_album' . $i . '" href="index.php?action=view3&amp;album_id=tidal_' . $track['album']['id'] . '">' . $track['album']['title'] . '</a>
+				</td>
+				
+				<td onclick="toggleStarSub(' . $i . ',\'' . $track['track_id'] . '\');" class="pl-favorites">
+				<span id="blacklist-star-bg' . $track['track_id'] . '" class="' . $starClass . '">
+				<i class="fa fa-star' . $o . ' fa-fw" id="favorite_star-' . $track['track_id'] . '"></i>
+				</span>
 				</td>
 				
 				<td></td>
@@ -1018,14 +1013,19 @@ function showAllFromTidal($searchStr, $size) {
 			';
 			$tracksList .= '
 				<tr>
+					<td colspan="20">
+					' . starSubMenu($i, $isFavorite, $isBlacklist, $track['track_id'], 'string') . '
+					</td>
+				</tr>';
+			
+			$tracksList .= '
+				<tr>
 				<td colspan="20">
 				' . trackSubMenu($i, $track, 'tidal_' . $track['album']['id'], 'string') . '
 				</td>
 				</tr>';
-			
-			//$tracksList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=viewTidalAlbums&amp;tidalArtist=' . rawurlencode($track['title']) . '&amp;tidalArtistId=' . rawurlencode($track['id']). '&amp;order=year">' . html($track['title']) . '</a></td></tr>';
 			}
-		$tracksList .= '</table>';
+		$tracksList .= '</table>'; */
 		$data['tracks'] = $tracksList;
 	}
 	echo safe_json_encode($data);
@@ -1083,7 +1083,8 @@ function showTopTracksFromTidal($artist, $tidalArtistId = "") {
 	}
 	if ($results['items']) {
 		$data['tracks_results'] = $results['totalNumberOfItems'];
-		$tracksList = '<table class="border" cellspacing="0" cellpadding="0">';
+		$tracksList = tidalTracksList($results);
+		/* $tracksList = '<table class="border" cellspacing="0" cellpadding="0">';
 		$tracksList .= '
 		<tr class="header">
 			<td class="icon"></td><!-- track menu -->
@@ -1097,6 +1098,7 @@ function showTopTracksFromTidal($artist, $tidalArtistId = "") {
 			<td>Title&nbsp;</td>
 			<td>Album&nbsp;</td>
 			<td></td>
+			<td></td>
 			<td align="right" class="time time_w">Time</td>
 			<td class="space right"></td>
 		</tr>';
@@ -1105,6 +1107,8 @@ function showTopTracksFromTidal($artist, $tidalArtistId = "") {
 		$TOPT_ids = ''; 
 		foreach ($results['items'] as $track) {
 			$track['track_id'] = 'tidal_' . $track['id'];
+			$isFavorite = isInFavorite($track['track_id'], $cfg['favorite_id']);
+			$isBlacklist = isInFavorite($track['track_id'], $cfg['blacklist_id']);
 			$even_odd = ($i++ & 1) ? 'even' : 'odd';
 			$tracksList .= '
 			
@@ -1142,10 +1146,24 @@ function showTopTracksFromTidal($artist, $tidalArtistId = "") {
 						$tracksList .= ' & ' . html($TOPT_art['name']);
 					}
 				}
+				$o = "";
+				if (!$isFavorite) {
+					$o = "-o";
+				}
+				$starClass = "";
+				if ($isBlacklist) {
+					$starClass = " blackstar blackstar-selected";
+				}
 				$tracksList .= '</span>
 				</td>
 				
 				<td><a id="a_album' . $i . '" href="index.php?action=view3&amp;album_id=tidal_' . $track['album']['id'] . '">' . $track['album']['title'] . '</a>
+				</td>
+				
+				<td onclick="toggleStarSub(' . $i . ',\'' . $track['track_id'] . '\');" class="pl-favorites">
+				<span id="blacklist-star-bg' . $track['track_id'] . '" class="' . $starClass . '">
+				<i class="fa fa-star' . $o . ' fa-fw" id="favorite_star-' . $track['track_id'] . '"></i>
+				</span>
 				</td>
 				
 				<td></td>
@@ -1156,19 +1174,137 @@ function showTopTracksFromTidal($artist, $tidalArtistId = "") {
 			';
 			$tracksList .= '
 				<tr>
+					<td colspan="20">
+					' . starSubMenu($i, $isFavorite, $isBlacklist, $track['track_id'], 'string') . '
+					</td>
+				</tr>';
+			
+			$tracksList .= '
+				<tr>
 				<td colspan="20">
 				' . trackSubMenu($i, $track, 'tidal_' . $track['album']['id'], 'string') . '
 				</td>
 				</tr>';
-			
-			//$tracksList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=viewTidalAlbums&amp;tidalArtist=' . rawurlencode($track['title']) . '&amp;tidalArtistId=' . rawurlencode($track['id']). '&amp;order=year">' . html($track['title']) . '</a></td></tr>';
 			}
-		$tracksList .= '</table>';
+		$tracksList .= '</table>'; */
 		$data['top_tracks'] = $tracksList;
 	}
 	echo safe_json_encode($data);
 }
 
+
+//  +------------------------------------------------------------------------+
+//  | Draws list of tracks from Tidal                                        |
+//  +------------------------------------------------------------------------+
+
+function tidalTracksList($tracks) {
+	global $cfg;
+	$tracksList = '<table class="border" cellspacing="0" cellpadding="0">';
+		$tracksList .= '
+		<tr class="header">
+			<td class="icon"></td><!-- track menu -->
+			<td class="icon">';
+		if ($cfg["access_add"] && false) {  
+			$tracksList .= '<span onMouseOver="return overlib(\'Add all tracks\');" onMouseOut="return nd();"><i id="add_all_TOPT" class="fa fa-plus-circle fa-fw icon-small pointer"></i></span>';
+		}
+		$tracksList .= '
+			</td><!-- add track -->
+			<td class="track-list-artist">Track artist&nbsp;</td>
+			<td>Title&nbsp;</td>
+			<td>Album&nbsp;</td>
+			<td></td>
+			<td></td>
+			<td align="right" class="time time_w">Time</td>
+			<td class="space right"></td>
+		</tr>';
+		
+		$i=40000;
+		$TOPT_ids = ''; 
+		foreach ($tracks['items'] as $track) {
+			$track['track_id'] = 'tidal_' . $track['id'];
+			$isFavorite = isInFavorite($track['track_id'], $cfg['favorite_id']);
+			$isBlacklist = isInFavorite($track['track_id'], $cfg['blacklist_id']);
+			$even_odd = ($i++ & 1) ? 'even' : 'odd';
+			$tracksList .= '
+			
+			<tr class="' . $even_odd . ' mouseover">
+				<td class="icon">
+				<span id="menu-track'. $i .'">
+				<div onclick="toggleMenuSub(' . $i . ');">
+					<i id="menu-icon' . $i .'" class="fa fa-bars icon-small"></i>
+				</div>
+				</span>
+				</td>
+				
+				<td class="icon">
+				<span>';
+			if ($cfg['access_add']) {
+				$tracksList .= '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;album_id=tidal_' . $track['album']['id'] .'&amp;track_id=' . $track['track_id'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . addslashes($track['title']) . '\');" onMouseOut="return nd();"><i id="add_tidal_' . $track['id'] . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';
+			}
+			$tracksList .= '
+				</span>
+				</td>
+				<td class="track-list-artist">
+				<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['artists'][0]['name']) . '&amp;order=year">' . html($track['artists'][0]['name']) . '</a>';
+				if (count($track['artists']) > 1) {
+					foreach ($track['artists'] as $key => $TOPT_art)
+					if ($key > 0) {
+						$tracksList .= ' & <a href="index.php?action=view2&amp;artist=' . rawurlencode($TOPT_art['name']) . '&amp;order=year">' . html($TOPT_art['name']) . '</a>';
+					}
+				}
+				$tracksList .= '</td>
+				<td><a id="a_play_track' . $i . '" href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;album_id=tidal_' . $track['album']['id'] .'&amp;track_id=' . $track['track_id'] . '&amp;position_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'Play track ' . $track['number'] . '\');" onMouseOut="return nd();">' . $track['title'] . '</a>
+				<span class="track-list-artist-narrow">by ' . html($track['artists'][0]['name']);
+				if (count($track['artists']) > 1) {
+					foreach ($track['artists'] as $key => $TOPT_art)
+					if ($key > 0) {
+						$tracksList .= ' & ' . html($TOPT_art['name']);
+					}
+				}
+				$o = "";
+				if (!$isFavorite) {
+					$o = "-o";
+				}
+				$starClass = "";
+				if ($isBlacklist) {
+					$starClass = " blackstar blackstar-selected";
+				}
+				$tracksList .= '</span>
+				</td>
+				
+				<td><a id="a_album' . $i . '" href="index.php?action=view3&amp;album_id=tidal_' . $track['album']['id'] . '">' . $track['album']['title'] . '</a>
+				</td>
+				
+				<td onclick="toggleStarSub(' . $i . ',\'' . $track['track_id'] . '\');" class="pl-favorites">
+				<span id="blacklist-star-bg' . $track['track_id'] . '" class="' . $starClass . '">
+				<i class="fa fa-star' . $o . ' fa-fw" id="favorite_star-' . $track['track_id'] . '"></i>
+				</span>
+				</td>
+				
+				<td></td>
+				<td>' . formattedTime($track['duration'] * 1000) . '</td>
+				<td></td>
+				</tr>
+			
+			';
+			$tracksList .= '
+				<tr>
+					<td colspan="20">
+					' . starSubMenu($i, $isFavorite, $isBlacklist, $track['track_id'], 'string') . '
+					</td>
+				</tr>';
+			
+			$tracksList .= '
+				<tr>
+				<td colspan="20">
+				' . trackSubMenu($i, $track, 'tidal_' . $track['album']['id'], 'string') . '
+				</td>
+				</tr>';
+			}
+		$tracksList .= '</table>';
+		
+		return $tracksList;
+}
 
 //  +------------------------------------------------------------------------+
 //  | Check if album/track is from Tidal                                     |
@@ -1194,7 +1330,7 @@ function getTidalId($id){
 		$id = end(explode('&',$id));
 		return end(explode('=',$id));
 	}
-	//for tidal://track/ or tidal://album/, etc
+	//for tidal://track/ or tidal://album/, https://tidal.com/browse/track/120884236 etc
 	elseif (strpos($id,'tidal://') !== false || strpos($id,'tidal.com/') !== false) {
 		return end(explode('/',$id));
 	}
@@ -1228,15 +1364,20 @@ function isYoutube($id) {
 //  | Get pure Youtube id of item                                            |
 //  +------------------------------------------------------------------------+
 
-function getYoutubeId($id){
+function getYouTubeId($id){
 	global $cfg;
 	// /watch?v=tK1MqYLinQI" 
 	if (strpos($id,'?v=') !== false) {
 		return end(explode('?v=',$id));
 	}
+	//https://youtu.be/nrCf_ciAftM
+	elseif (strpos($id,'youtu.be/') !== false) {
+		return end(explode('youtu.be/',$id));
+	}
 	else {
 		return str_replace('youtube_','',$id);
 	}
+	return false;
 }
 
 
@@ -1246,19 +1387,20 @@ function getYoutubeId($id){
 //  | Get Youtube stream params                                              |
 //  +------------------------------------------------------------------------+
 
-function getYoutubeStreamUrl($url, $title){
+function getYouTubeMPDUrl($url, $title = ''){
 	global $cfg;
 	$cmd = trim($cfg['python_path'] . ' ' . $cfg['youtube-dl_path'] . ' ' . $cfg['youtube-dl_options'] . ' ' . ($url));
 	exec($cmd, $output, $ret);
 	if ($ret == 0) {
 		$js = json_decode($output[0],true);
+		$id = $js['id'];
 		$f = $cfg['youtube_audio_format_name'];
 		$format = array_search($f, array_column($js['formats'], 'format'));
 		$yt_url = $js['formats'][$format]['url'];
-		$is_yt_url_query = strpos($yt_url,'?');
+		/* $is_yt_url_query = strpos($yt_url,'?');
 		if ($is_yt_url_query === false) {
 			$yt_url = $yt_url . '?';
-		}
+		} */
 		$ytArtist = "";
 		if ($js['artist']) {
 			$ytArtist = $js['artist'];
@@ -1312,7 +1454,35 @@ function getYoutubeStreamUrl($url, $title){
 		else {
 			$ytYear = substr($js['upload_date'],0,4);
 		}
-		$ytStreamUrl = $yt_url . '&ompd_title=' . urlencode($ompd_title) . '&ompd_duration=' . urlencode($js['duration']) . '&ompd_artist=' . urlencode($ytArtist) . '&ompd_thumbnail=' . urlencode($js['thumbnail']) . '&ompd_year=' . urlencode($ytYear) . '&ompd_webpage=' . urlencode($js['webpage_url']);
+		//streamUrl MUST always be last in url!
+		$ytStreamUrl = NJB_HOME_URL . 'stream.php?action=streamYouTube&track_id=' . $id . '&ompd_title=' . urlencode($ompd_title) . '&ompd_duration=' . urlencode($js['duration']) . '&ompd_artist=' . urlencode($ytArtist) . '&ompd_thumbnail=' . urlencode($js['thumbnail']) . '&ompd_year=' . urlencode($ytYear) . '&ompd_webpage=' . urlencode($js['webpage_url']) . '&streamUrl=' . urlencode($yt_url);
+	}
+	else {
+		$ytStreamUrl = false;
+	}
+	return $ytStreamUrl;
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Get Youtube stream URL                                                 |
+//  +------------------------------------------------------------------------+
+
+function getYouTubeStreamUrl($url, $title){
+	global $cfg;
+	$cmd = trim($cfg['python_path'] . ' ' . $cfg['youtube-dl_path'] . ' ' . $cfg['youtube-dl_options'] . ' ' . ($url));
+	exec($cmd, $output, $ret);
+	if ($ret == 0) {
+		$js = json_decode($output[0],true);
+		$f = $cfg['youtube_audio_format_name'];
+		$format = array_search($f, array_column($js['formats'], 'format'));
+		$yt_url = $js['formats'][$format]['url'];
+		/* $is_yt_url_query = strpos($yt_url,'?');
+		if ($is_yt_url_query === false) {
+			$yt_url = $yt_url . '?';
+		} */
+		$ytStreamUrl = $yt_url;
 	}
 	else {
 		$ytStreamUrl = false;
@@ -2705,4 +2875,113 @@ function getAverageColor($img) {
 
 
 
+//  +------------------------------------------------------------------------+
+//  | Update favorite stream status                                          |
+//  +------------------------------------------------------------------------+
+
+function updateFavoriteStreamStatus($favorite_id) {
+	global $cfg, $db;
+	$files = false;
+	$streams = false;
+	$stream = 0;
+	$query = mysqli_query($db,"SELECT track_id FROM favoriteitem WHERE favorite_id = '" . $favorite_id . "' AND track_id <> ''");
+	if (mysqli_num_rows($query) > 0) {
+		$files = true;
+	}
+	$query = mysqli_query($db,"SELECT stream_url FROM favoriteitem WHERE favorite_id = '" . $favorite_id . "' AND stream_url <> ''");
+	if (mysqli_num_rows($query) > 0) {
+		$streams = true;
+	}
+	if ($files) {
+		$stream = 0;
+	}
+	if (!$files && $streams) {
+		$stream = 1;
+	}
+
+	mysqli_query($db,'UPDATE favorite
+					SET stream			= "' . (int) $stream . '"
+					WHERE favorite_id	= ' . (int) $favorite_id);
+	
+	return $stream;
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Get minimal required url from long mpd 'file' field                    |
+//  +------------------------------------------------------------------------+
+
+function getTrackMpdUrl($track_mpd_url) {
+	
+	$parts = parse_url($track_mpd_url);
+	parse_str($parts['query'], $query);
+	$action = urldecode($query['action']);
+	if ($action == 'streamYouTube' && strpos($track_mpd_url,"&streamUrl=") !== false) {
+		$track_mpd_url = substr($track_mpd_url, 0, strpos($track_mpd_url, "&streamUrl="));
+	}
+	return $track_mpd_url;
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Get track_id from url                                                  |
+//  +------------------------------------------------------------------------+
+
+function getTrackIdFromUrl($track_mpd_url) {
+	$parts = parse_url($track_mpd_url);
+	parse_str($parts['query'], $query);
+	$track_id = urldecode($query['track_id']);
+	if ($track_id) {
+		return $track_id;
+	}
+	return '';
+}
+
+//  +------------------------------------------------------------------------+
+//  | Create stream url for Tidal/YT for playing in mpd                      |
+//  +------------------------------------------------------------------------+
+
+function createStreamUrlMpd($track_id) {
+	global $cfg, $db;
+	$stream_url_mpd = '';
+	if (isTidal($track_id)){
+		if ($cfg['tidal_direct']) {
+			$stream_url_mpd = NJB_HOME_URL . 'stream.php?action=streamTidal&track_id=' . getTidalId($track_id);
+		}
+		elseif ($cfg['upmpdcli_tidal']) {
+			$stream_url_mpd = $cfg['upmpdcli_tidal'] .  getTidalId($track_id);
+		}
+		else {
+			$stream_url_mpd = MPD_TIDAL_URL . getTidalId($track_id);
+		}
+	}
+	elseif (isYoutube($track_id)){
+		$stream_url_mpd = getYouTubeMPDUrl(getYouTubeId($track_id));
+		$stream_url_mpd = getTrackMpdUrl($stream_url_mpd);
+	}
+	
+	return $stream_url_mpd;
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Check if track is in favorite                                          |
+//  +------------------------------------------------------------------------+
+
+function isInFavorite($track_id, $favorite_id) {
+	global $cfg, $db;
+	$inFavorite = false;
+	if (isTidal($track_id)){
+		$track_id = getTidalId($track_id);
+		$query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE favorite_id = '" . $favorite_id . "' AND (stream_url LIKE '%action=streamTidal&track_id=" . $track_id . "' OR stream_url = '" . mysqli_real_escape_string($db,$cfg['upmpdcli_tidal']) . $track_id . "' OR stream_url LIKE '" .mysqli_real_escape_string($db,MPD_TIDAL_URL) . $track_id . "')");
+		if (mysqli_num_rows($query) > 0) $inFavorite = true;
+	}
+	elseif (isYoutube($track_id)){
+		$track_id = getYouTubeId($track_id);
+		$query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE favorite_id = '" . $favorite_id . "' AND stream_url LIKE '%action=streamYouTube&track_id=" . $track_id . "%'");
+		if (mysqli_num_rows($query) > 0) $inFavorite = true;
+	}
+	
+	return $inFavorite;
+}
 ?>

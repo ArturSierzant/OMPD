@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS `favorite` (
 
 CREATE TABLE IF NOT EXISTS `favoriteitem` (
   `track_id` varchar(20) NOT NULL DEFAULT '',
-  `stream_url` varchar(255) NOT NULL DEFAULT '',
+  `stream_url` text NOT NULL DEFAULT '',
   `position` smallint(5) unsigned NOT NULL DEFAULT '0',
   `favorite_id` int(10) unsigned NOT NULL DEFAULT '0',
   KEY `favorite_id` (`favorite_id`,`position`)
@@ -711,7 +711,7 @@ INSERT INTO `user` VALUES ('anonymous', 'adf8efe68157cf37503f86d602bec6d593750c3
 -- Default server
 --
 
-INSERT INTO `server` VALUES ('database_version', '46');
+INSERT INTO `server` VALUES ('database_version', '47');
 INSERT INTO `server` VALUES ('escape_char_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('getid3_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('image_quality', '0');

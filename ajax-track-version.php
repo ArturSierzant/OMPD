@@ -23,6 +23,7 @@ require_once('include/initialize.inc.php');
 
 global $cfg, $db;
 $track_id = get('track_id');
+$track_title = get('track_title');
 $data = array();
 
 if (isTidal($track_id)){
@@ -34,7 +35,9 @@ else {
 $track = mysqli_fetch_assoc($query);
 
 $title = $track['title'];
-
+if (!$track_id && $track_title) {
+	$title = $track_title;
+}
 $title = findCoreTrackTitle($title);
 $title = mysqli_real_escape_like($title);
 //$title = strtolower($title);
@@ -72,7 +75,8 @@ $query = mysqli_query($db,$q);
 
 if (strlen($title) > 0) {
 	$num_rows = mysqli_num_rows($query);
-	if ($num_rows > 1 || ($num_rows == 1 && isTidal($track_id))) {
+	//other versions found || one other version found and track is from Tidal || one other version found and track is from e.g. YouTube
+	if ($num_rows > 1 || ($num_rows == 1 && isTidal($track_id)) || ($num_rows == 1 && !$track_id)) {
 		$other_track_version = true;
 	}
 }

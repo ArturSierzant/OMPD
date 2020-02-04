@@ -85,7 +85,7 @@ $cfg['tidal_username'] = "";
 $cfg['tidal_password'] = "";
 $cfg['tidal_token'] = "";
 $cfg['tidal_audio_quality'] = "HIGH";
-$cfg['tidal_direct'] = false;
+$cfg['tidal_direct'] = true;
 
 
 
@@ -108,10 +108,16 @@ $cfg['default_password'] = '';
 //  +------------------------------------------------------------------------+
 //  | Path to images for radio stations and other streams.                   |
 //  | jpg and png files are supported.                                       |
+//  |                                                                        |
 //  | Use host name as name for image file, e.g. for stream:                 |
 //  | http://stream14.shoutcastsolutions.com:8057/256stream                  |
 //  | copy to dir defined in $cfg['stream_covers_dir'] file named:           |
 //  | stream14.shoutcastsolutions.com.png                                    |
+//  |                                                                        |
+//  | For URLs with path replace '/' with double undersoce '__', e.g. for:   |
+//  | http://ice3.somafm.com/seventies-128-aac                               |
+//  | use:                                                                   |
+//  | ice3.somafm.com__seventies-128-aac.jpg                                 |
 //  +------------------------------------------------------------------------+
 
 $cfg['stream_covers_dir'] = 'covers/';
@@ -273,6 +279,7 @@ $cfg['multidisk_indicator'][] = "CD ";
 $cfg['multidisk_indicator'][] = "CD#";
 $cfg['multidisk_indicator'][] = " CD";
 $cfg['multidisk_indicator'][] = " Vol.";
+$cfg['multidisk_indicator'][] = " Part ";
 
 
 
@@ -545,6 +552,7 @@ $cfg['artist_separator'][] = 	" and ";
 $cfg['artist_separator'][] = 	" with ";
 $cfg['artist_separator'][] = 	" feat. ";
 $cfg['artist_separator'][] = 	" ft. ";
+$cfg['artist_separator'][] = 	" Featuring ";
 $cfg['artist_separator'][] = 	" + ";
 //$cfg['artist_separator'][] = 	", ";
 

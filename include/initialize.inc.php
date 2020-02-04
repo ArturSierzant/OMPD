@@ -38,7 +38,7 @@ header('X-Accel-Buffering: no');
 define('NJB_START_TIME', microtime(true));
 
 define('NJB_VERSION', '1.05');
-define('NJB_DATABASE_VERSION', 46);
+define('NJB_DATABASE_VERSION', 47);
 define('NJB_IMAGE_SIZE', 300);
 define('NJB_IMAGE_QUALITY', 85);
 define('NJB_WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
@@ -53,7 +53,7 @@ define('TIDAL_TRACK_URL','https://tidal.com/browse/track/');
 define('TIDAL_TRACK_STREAM_URL','audio.tidal.com');
 define('TIDAL_APP_ALBUM_URL','https://tidal.com/album/');
 define('TIDAL_APP_TRACK_URL','https://tidal.com/track/');
-define('TIDAL_MAX_CACHE_TIME', 600); //10min in [s]
+define('TIDAL_MAX_CACHE_TIME', 21600); //6h in [s]
 define('MPD_TIDAL_URL','tidal://track/');
 
 

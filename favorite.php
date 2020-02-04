@@ -743,6 +743,7 @@ function saveFavorite($favorite_id) {
 //  +------------------------------------------------------------------------+
 //  | Import favorite                                                        |
 //  +------------------------------------------------------------------------+
+
 function importFavorite($favorite_id, $mode) {
 	global $cfg, $db;
 	authenticate('access_admin', false, true, true);
@@ -755,10 +756,12 @@ function importFavorite($favorite_id, $mode) {
 		$player_port = $cfg['player_port'];
 	}
 	
-	$name					= post('name');
-	$comment				= post('comment');
-	$url					= strtolower(post('url'));
-	$selectPlaylistFrom		= post('selectPlaylistFrom');
+	$name = post('name');
+	$comment = post('comment');
+	//fix #114
+	//$url = strtolower(post('url'));
+	$url = post('url');
+	$selectPlaylistFrom = post('selectPlaylistFrom');
 	
 	$query = mysqli_query($db,'SELECT player_host, player_port	FROM player WHERE player_id = ' . mysqli_real_escape_string($db,$selectPlaylistFrom) . '');
 
@@ -780,7 +783,7 @@ function importFavorite($favorite_id, $mode) {
 						// File1=http://example.com:80
 						// m3u:
 						// http://example.com:80
-						if (preg_match('#^(?:File[0-9]{1,3}=|)((?:ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://.+)#', $item, $match))
+						if (preg_match('#^(?:File[0-9]{1,3}=|)((?:tidal|ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://.+)#', $item, $match))
 							$file[] = $match[1];
 						//print_r($item) . '<br>';
 					}
@@ -801,8 +804,6 @@ function importFavorite($favorite_id, $mode) {
 	elseif ($mode == 'addUrl' || $mode == 'importUrl'){
 		editFavorite($favorite_id);
 	}
-	
-	
 	elseif ($cfg['player_type'] == NJB_MPD) {
 		$file = mpd('playlist',$player_host,$player_port);
 		$file = implode('<seperation>', $file);
@@ -818,14 +819,14 @@ function importFavorite($favorite_id, $mode) {
 	$hasFiles = 0;
 	$isFavStream = 0;
 	
-	for ($i = 0; $i < count($file); $i++) {
+	/* for ($i = 0; $i < count($file); $i++) {
 		if (preg_match('#^(ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://#', $file[$i])) {
 			$hasStream = 1;
 		}
 		else {
 			$hasFiles = 1;
 		}
-	}
+	} */
 	
 	
 	if (count($file) > 0) {
@@ -840,63 +841,26 @@ function importFavorite($favorite_id, $mode) {
 		}
 		
 		if ($mode == 'add' || $mode == 'addUrl') {
-			//$query = mysqli_query($db,'SELECT position FROM favoriteitem WHERE favorite_id = ' . (int) $favorite_id . ' ORDER BY position DESC');
 			$query = mysqli_query($db,'SELECT max(position) as pos FROM favoriteitem WHERE favorite_id = ' . (int) $favorite_id);
 			$track = mysqli_fetch_assoc($query);
 			if (is_null($track['pos']))
 				$offset = 0;
 			else
 				$offset = $track['pos'];
-		}	
-		
-		if ($isFavStream == 0 && $hasStream == 0 && $hasFiles == 0) {
-			$stream = 0;
 		}
-		elseif ($isFavStream == 0 && $hasStream == 0 && $hasFiles == 1) {
-			$stream = 0;
-		}
-		elseif ($isFavStream == 0 && $hasStream == 1 && $hasFiles == 0) {
-			if ($offset == 0)
-				$stream = 1;
-			else
-				$stream = 0;
-		}
-		elseif ($isFavStream == 0 && $hasStream == 1 && $hasFiles == 1) {
-			$stream = 0;
-		}
-		elseif ($isFavStream == 1 && $hasStream == 0 && $hasFiles == 0) {
-			$stream = 1;
-		}
-		elseif ($isFavStream == 1 && $hasStream == 0 && $hasFiles == 1) {
-			if ($offset == 0)
-				$stream = 0;
-			else
-				$stream = 1;
-		}
-		elseif ($isFavStream == 1 && $hasStream == 1 && $hasFiles == 0) {
-			$stream = 1;
-		}
-		elseif ($isFavStream == 1 && $hasStream == 1 && $hasFiles == 1) {
-			$stream = 1;
-		}
-		
-		
-		// Update favorite stream status
-		mysqli_query($db,'UPDATE favorite
-					SET stream			= "' . (int) $stream . '"
-					WHERE favorite_id	= ' . (int) $favorite_id);
-		
-		// Don't allow stream_url and track_id in the same playlist!
-		if ($stream == 1)	mysqli_query($db,'DELETE FROM favoriteitem WHERE favorite_id = ' . (int) $favorite_id . ' AND track_id != ""');
-		else			mysqli_query($db,'DELETE FROM favoriteitem WHERE favorite_id = ' . (int) $favorite_id . ' AND stream_url != ""');
 	}
 	
 			
 	for ($i = 0; $i < count($file); $i++) {
 		$query = mysqli_query($db,'SELECT track_id FROM track WHERE relative_file = "' . mysqli_real_escape_string($db,$file[$i]) . '"');
 		$track = mysqli_fetch_assoc($query);
+		$isStream = 0;
+		if (preg_match('#^(tidal|ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://#', strtolower($file[$i]))) {
+			$isStream = 1;
+		}
 		
-		if ($stream == 0 && $track['track_id']) {
+		if ($isStream == 0 && $track['track_id']) {
+			$hasFiles = 1;
 			$position = $i + $offset + 1;
 			mysqli_query($db,'INSERT INTO favoriteitem (track_id, position, favorite_id)
 				VALUES ("' . mysqli_real_escape_string($db,$track['track_id']) . '",
@@ -904,15 +868,17 @@ function importFavorite($favorite_id, $mode) {
 				' . (int) $favorite_id . ')');
 		}
 		
-		if ($stream == 1 && preg_match('#^(ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://#', $file[$i])) {
+		if ($isStream == 1) {
+			$hasStream = 1;
 			$position = $i + $offset + 1;
 			mysqli_query($db,'INSERT INTO favoriteitem (stream_url, position, favorite_id)
-				VALUES ("' . mysqli_real_escape_string($db,$file[$i]) . '",
+				VALUES ("' . mysqli_real_escape_string($db, getTrackMpdUrl($file[$i])) . '",
 				' . (int) $position . ',
 				' . (int) $favorite_id . ')');
 		}
 	}
-	
+	updateFavoriteStreamStatus($favorite_id);
+
 	editFavorite($favorite_id);
 }
 

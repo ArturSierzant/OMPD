@@ -26,26 +26,115 @@ require_once('include/library.inc.php');
 $data = array();
 $data['action'] = "";
 $track_id = $_GET['track_id'];
+$track_mpd_url = $_GET['track_mpd_url'];
 $action = $_GET['action'];
-$data['track_id'] = $track_id;
 $data['group_type'] = $_GET['group_type']; //used in search.php
+
+$addTidalPrefix = false;
+$addYouTubePrefix = false;
+$track_id = $track_id ? $track_id :  '';
+$track_mpd_url = $track_mpd_url ? $track_mpd_url :  '';
+if ($track_id) {
+	//from Tidal album view or search results
+	if (isTidal($track_id)){
+		$tidal_track_id = getTidalId($track_id);
+		$quertT = mysqli_query($db,"SELECT track_id FROM tidal_track WHERE track_id = '" . $tidal_track_id . "'");
+		if (mysqli_affected_rows($db) == 0) {
+			//track not in DB, e.g. result of search - get album and add it to DB
+			$album_id = getTrackAlbumFromTidal($tidal_track_id);
+			$get_album_tracks = getTracksFromTidalAlbum($album_id);
+		}
+		$track_mpd_url = createStreamUrlMpd($track_id);
+		$track_id = '';
+		$addTidalPrefix = true;
+	}
+	elseif (isYouTube($track_id)){
+		$yt_track_id = getYouTubeId($track_id);
+		//create fake url to get track_id from it later in action == remove
+		$track_mpd_url = "http://test.it/test.php?track_id=" . $yt_track_id;
+		if ($action == 'add') {
+			$track_mpd_url = createStreamUrlMpd($track_id);
+		}
+		$track_id = '';
+		$addYouTubePrefix = true;
+	}
+	else {
+		//check if track_id is from local files indexed by DB
+		$query = mysqli_query($db,"SELECT track_id FROM track WHERE track_id = '" .$track_id . "'");
+		if (mysqli_num_rows($query) == 0) {
+			$track_id = '';
+		}
+		else {
+			$track_mpd_url = '';
+		}
+	}
+}
+
 if ($action == 'add') {
-	$query = mysqli_query($db,"SELECT MAX(position) as maxPosition FROM favoriteitem WHERE favorite_id = '" .$cfg['blacklist_id'] . "'");
+	//checking if track already in fav because of strange behavior in Android Chrome: multiple adding tracks to fav 
+	if ($track_id){
+		$query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE 
+		track_id='" . mysqli_real_escape_string($db, $track_id) . "'
+		AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['blacklist_id']) . "'");
+	}
+	if ($track_mpd_url){
+		$query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE 
+		stream_url='" . mysqli_real_escape_string($db, $track_mpd_url) . "'
+		AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['blacklist_id']) . "'");
+	}
+	if (mysqli_num_rows($query) == 0) {
+		$query = mysqli_query($db,"SELECT MAX(position) as maxPosition FROM favoriteitem WHERE favorite_id = '" .$cfg['blacklist_id'] . "'");
+		$favoriteitem = mysqli_fetch_assoc($query);
+		$maxPosition = (int) $favoriteitem['maxPosition'];
+		$maxPosition++;
+		mysqli_query($db,"INSERT INTO favoriteitem (track_id, stream_url, position, favorite_id) VALUES(
+		'" . mysqli_real_escape_string($db, $track_id) . "',
+		'" . mysqli_real_escape_string($db, $track_mpd_url) . "',
+		'" . $maxPosition . "',
+		'" . mysqli_real_escape_string($db, $cfg['blacklist_id']) . "'
+		)");
+		if (mysqli_affected_rows($db) > 0) $data['action'] = "add";
+	}	
+	
+	
+	
+	/* $query = mysqli_query($db,"SELECT MAX(position) as maxPosition FROM favoriteitem WHERE favorite_id = '" .$cfg['blacklist_id'] . "'");
 	$favoriteitem = mysqli_fetch_assoc($query);
 	$maxPosition = (int) $favoriteitem['maxPosition'];
 	$maxPosition++;
 	mysqli_query($db,"INSERT INTO favoriteitem (track_id, stream_url, position, favorite_id) VALUES(
-	'" . $track_id . "',
-	'',
+	'" . mysqli_real_escape_string($db, $track_id) . "',
+	'" . mysqli_real_escape_string($db, $track_mpd_url) . "',
 	'" . $maxPosition . "',
-	'" . $cfg['blacklist_id'] . "'
+	'" . mysqli_real_escape_string($db, $cfg['blacklist_id']) . "'
 	)");
-	if (mysqli_affected_rows($db) > 0) $data['action'] = "add";
+	if (mysqli_affected_rows($db) > 0) $data['action'] = "add"; */
 }
+
 elseif ($action == 'remove') {
-	mysqli_query($db,"DELETE FROM favoriteitem WHERE track_id='" . $track_id . "' and favorite_id='" . $cfg['blacklist_id'] . "'");
+	if ($track_id){
+		mysqli_query($db,"DELETE FROM favoriteitem WHERE track_id='" . mysqli_real_escape_string($db, $track_id) . "' and favorite_id='" . mysqli_real_escape_string($db, $cfg['blacklist_id']) . "'");
+	}
+	else{
+		$track_id_url = getTrackIdFromUrl($track_mpd_url);
+		if ($track_id_url) {
+			mysqli_query($db,"DELETE FROM favoriteitem WHERE stream_url LIKE '%track_id=" . mysqli_real_escape_string($db, $track_id_url) . "%' and favorite_id='" . mysqli_real_escape_string($db, $cfg['blacklist_id']) . "'");
+		}
+		else {
+			mysqli_query($db,"DELETE FROM favoriteitem WHERE stream_url = '" . mysqli_real_escape_string($db, $track_mpd_url) . "' and favorite_id='" . mysqli_real_escape_string($db, $cfg['blacklist_id']) . "'");
+		}
+	}
 	if (mysqli_affected_rows($db) > 0) $data['action'] = "remove";
 }
+
+if (!$track_id) {
+	$track_id = getTrackIdFromUrl($track_mpd_url);
+	if ($addTidalPrefix) $track_id = "tidal_" . $track_id;
+	if ($addYouTubePrefix) $track_id = "youtube_" . $track_id;
+}
+$data['track_id'] = $track_id;
+
+$data['favorite_type'] = updateFavoriteStreamStatus($cfg['blacklist_id']);
 
 echo safe_json_encode($data);	
 ?>

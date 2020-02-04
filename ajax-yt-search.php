@@ -41,7 +41,7 @@ foreach($html->find('ol.item-section') as $ol){
 				foreach($d->find('span.video-time') as $vt){
 					if($vt->innertext){
 						foreach($d->find('div.yt-lockup-content h3 a') as $a){
-							$results['items'][$i]['id'] = getYoutubeId($a->href);
+							$results['items'][$i]['id'] = getYouTubeId($a->href);
 							$results['items'][$i]['title'] = $a->innertext;
 							$results['items'][$i]['url'] = $a->href;
 							$results['items'][$i]['time'] = $vt->innertext;
@@ -67,7 +67,7 @@ if ($i > 0) {
 	$tracksList .= '
 		</td><!-- add track -->
 		<td>Title&nbsp;</td>
-		<td>Open in Youtube</td>
+		<td>Source</td>
 		<td></td>
 		<td align="right" class="time time_w">Time</td>
 		<td class="space right"></td>
@@ -77,6 +77,8 @@ if ($i > 0) {
 	$YT_ids = ''; 
 	foreach ($results['items'] as $track) {
 		$track['track_id'] = 'youtube_' . $track['id'];
+		$isFavorite = isInFavorite($track['track_id'], $cfg['favorite_id']);
+		$isBlacklist = isInFavorite($track['track_id'], $cfg['blacklist_id']);
 		$even_odd = ($i++ & 1) ? 'even' : 'odd';
 		$tracksList .= '
 		
@@ -94,6 +96,16 @@ if ($i > 0) {
 		if ($cfg['access_add']) {
 			$tracksList .= '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;track_id=' . $track['track_id'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . addslashes($track['title']) . '\');" onMouseOut="return nd();"><i id="add_youtube_' . $track['id'] . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';
 		}
+		
+		$o = "";
+		if (!$isFavorite) {
+			$o = "-o";
+		}
+		$starClass = "";
+		if ($isBlacklist) {
+			$starClass = " blackstar blackstar-selected";
+		}
+		
 		$tracksList .= '
 			</span>
 			</td>
@@ -103,12 +115,22 @@ if ($i > 0) {
 			<td class="icon"><a href="https://youtube.com' . $track['url'] . '" target="_blank"><i class="fa fa-youtube-play fa-fw icon-small"></i></a>
 			</td>
 			
-			<td></td>
+			<td onclick="toggleStarSub(' . $i . ',\'' . $track['track_id'] . '\');" class="pl-favorites">
+				<span id="blacklist-star-bg' . $track['track_id'] . '" class="' . $starClass . '">
+				<i class="fa fa-star' . $o . ' fa-fw" id="favorite_star-' . $track['track_id'] . '"></i>
+				</span>
+				</td>
+			
 			<td align="right">' . $track['time'] . '</td>
 			<td></td>
-			</tr>
-		
-		';
+			</tr>';
+		$tracksList .= '
+			<tr>
+				<td colspan="20">
+				' . starSubMenu($i, $isFavorite, $isBlacklist, $track['track_id'], 'string') . '
+				</td>
+			</tr>';
+				
 		$tracksList .= '
 			<tr>
 			<td colspan="20">
