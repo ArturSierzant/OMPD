@@ -306,7 +306,8 @@ function editFavorite($favorite_id) {
 		$disabled = '';
 	//$disabled_favorite = ($favorite_id == $cfg['favorite_id'] ? ' disabled' : '');
 	//$disabled = ($favorite_id == $cfg['blacklist_id'] ? ' disabled' : '');
-?>	
+?>
+
 <form action="favorite.php" method="post" name="favorite" id="favorite">
 	<input type="hidden" name="action" value="saveFavorite">
 	<input type="hidden" name="favorite_id" value="<?php echo $favorite_id; ?>">
@@ -440,21 +441,25 @@ $(document).ready(function() {
 });
 
 function importPlaylist() {
+	showSpinner();
 	document.favorite.action.value='importPlaylist'; 
 	$('#favorite').submit();
 }
 
 function addPlaylist() {
+	showSpinner();
 	document.favorite.action.value='addPlaylist'; 
 	$('#favorite').submit();
 }
 
 function importPlaylistUrl() {
+	showSpinner();
 	document.favorite.action.value='importPlaylistUrl'; 
 	$('#favorite').submit();
 }
 
 function addPlaylistUrl() {
+	showSpinner();
 	document.favorite.action.value='addPlaylistUrl'; 
 	$('#favorite').submit();
 }
@@ -561,21 +566,25 @@ $(document).ready(function() {
 });
 
 function importPlaylist() {
+	showSpinner();
 	document.favorite.action.value='importPlaylist'; 
 	$('#favorite').submit();
 }
 
 function addPlaylist() {
+	showSpinner();
 	document.favorite.action.value='addPlaylist'; 
 	$('#favorite').submit();
 }
 
 function importPlaylistUrl() {
+	showSpinner();
 	document.favorite.action.value='importPlaylistUrl'; 
 	$('#favorite').submit();
 }
 
 function addPlaylistUrl() {
+	showSpinner();
 	document.favorite.action.value='addPlaylistUrl'; 
 	$('#favorite').submit();
 }
@@ -676,21 +685,25 @@ $(document).ready(function() {
 });
 
 function importPlaylist() {
+	showSpinner();
 	document.favorite.action.value='importPlaylist'; 
 	$('#favorite').submit();
 }
 
 function addPlaylist() {
+	showSpinner();
 	document.favorite.action.value='addPlaylist'; 
 	$('#favorite').submit();
 }
 
 function importPlaylistUrl() {
+	showSpinner();
 	document.favorite.action.value='importPlaylistUrl'; 
 	$('#favorite').submit();
 }
 
 function addPlaylistUrl() {
+	showSpinner();
 	document.favorite.action.value='addPlaylistUrl'; 
 	$('#favorite').submit();
 }
@@ -748,9 +761,7 @@ function importFavorite($favorite_id, $mode) {
 	global $cfg, $db;
 	authenticate('access_admin', false, true, true);
 	require_once('include/play.inc.php');
-	
-	
-	
+
 	if ($player_host=="" && $player_port==""){
 		$player_host = $cfg['player_host'];
 		$player_port = $cfg['player_port'];
@@ -791,6 +802,38 @@ function importFavorite($favorite_id, $mode) {
 				else {
 					$addURLresult = 'add_error';
 					return $addURLresult;
+				}
+			}
+			elseif (isTidal($url)) {
+				$id = getTidalId($url);
+				//TIDAL track
+				if (strpos($url, MPD_TIDAL_URL) !== false || strpos($url, TIDAL_APP_TRACK_URL) !== false || strpos($url, TIDAL_TRACK_URL) !== false || strpos($url, TIDAL_TRACK_STREAM_URL) !== false) {
+					//check if album is in OMPD DB:
+					$query = mysqli_query($db,'SELECT track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,$id) . '"');
+					if (mysqli_num_rows($query) == 0) {
+						$album_id = getTrackAlbumFromTidal($id);
+						if (!$album_id) {
+							$addURLresult = 'add_error';
+							return $addURLresult;
+						}
+						$tidal_tracks = getTracksFromTidalAlbum($album_id);
+					}
+					$file[] = createStreamUrlMpd('tidal_' . $id);
+				}
+				//TIDAL album
+				elseif (strpos($url,TIDAL_ALBUM_URL) !== false || strpos($url,TIDAL_APP_ALBUM_URL) !== false || strpos($url,TIDAL_ALBUM_URL) !== false) {
+					$tidal_tracks = getTracksFromTidalAlbum($id);
+					$tidal_tracks = json_decode($tidal_tracks, true);
+					
+					foreach ($tidal_tracks as $tidal_track) {
+						$file[] = createStreamUrlMpd('tidal_' . $tidal_track['id']);
+						//$mpdCommand = mpdAddTidalTrack('tidal_' . $tidal_track['id']);
+					}
+				}
+			}
+			elseif (isYoutube($url)){
+				if ($ytUrl = getYouTubeMPDUrl($url)) {
+					$file[] = mpdEscapeChar($ytUrl);
 				}
 			}
 			else {

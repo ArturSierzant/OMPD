@@ -153,6 +153,7 @@ elseif ($cfg['menu'] == 'about') {
 //  +------------------------------------------------------------------------+
 //  | Header template                                                        |
 //  +------------------------------------------------------------------------+
+//require_once(NJB_HOME_DIR . 'skin/template.header.php');
 require_once(NJB_HOME_DIR . 'skin/' . $cfg['skin'] . '/template.header.php');
 $header = null;
 

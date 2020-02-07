@@ -658,9 +658,6 @@ function addSelectUrl() {
 	if ($url!="") {
 		if (isTidal($url)) {
 			$id = getTidalId($url);
-			
-			
-			
 			//TIDAL track
 			if (strpos($url, MPD_TIDAL_URL) !== false || strpos($url, TIDAL_APP_TRACK_URL) !== false || strpos($url, TIDAL_TRACK_URL) !== false || strpos($url, TIDAL_TRACK_STREAM_URL) !== false) {
 				//check if album is in OMPD DB:
@@ -698,6 +695,12 @@ function addSelectUrl() {
 				mpd('play ' . $index);
 			}
 			$addResult = 'add_OK';
+		}
+		elseif (isYoutube($url)){
+			if ($ytUrl = getYouTubeMPDUrl($url)) {
+				mpd('add "' . mpdEscapeChar($ytUrl) . '"');
+				$addResult = 'add_OK';
+			}
 		}
 		else {
 			$status = mpd('status');
@@ -1116,9 +1119,11 @@ function addUrl($mode = 'play') {
 	else {
 		$file[] = $url;
 	}
-	if (count($file) == 1) {
-		$yt = striposa($url, $cfg['youtube_indicator']);
-		if ($yt !== false) {
+//moved to addSelectUrl()
+/* 	if (count($file) == 1) {
+		//$yt = striposa($url, $cfg['youtube_indicator']);
+		//if ($yt !== false) {
+		if (isYoutube($url)) {
 			if ($ytUrl = getYouTubeMPDUrl($url)) {
 				$file[0] = $ytUrl;
 			}
@@ -1127,7 +1132,7 @@ function addUrl($mode = 'play') {
 				return $addURLresult;
 			}
 		}
-	}
+	} */
 	if ($cfg['play_queue'] == false)
 		$index = 0;
 	elseif ($cfg['player_type'] == NJB_MPD) {
@@ -1915,11 +1920,16 @@ function playlistStatus() {
 				$data['total_time'] = gmdate('H:i:s', $totalPlaylistTime);
 			}
 			$audio = array();
-			$audio = explode(':',$status['audio']);
-			if ($audio[1] == 'f') $audio[1] = '16';
+			if ($status['audio']){
+				$audio = explode(':',$status['audio']);
+				if ($audio[1] == 'f') $audio[1] = '16';
+			}
+			else {
+				$audio[0] = $audio[1] = '0 ';
+			}
 			$data['audio_bits_per_sample']	= (string) $audio[1];
 			$data['audio_sample_rate']	= (string) $audio[0];
-			$data['audio_profile']	= (string) $status['bitrate'] . ' kbps';
+			$data['audio_profile']	= (string) ($status['bitrate'] ? $status['bitrate'] . ' kbps' : '0 kbps');
 		//}
 		$data['isplaying'] = 0;
 		if ($status['state'] == 'stop')		$data['isplaying'] = 0;
@@ -1958,8 +1968,32 @@ function playlistTrack() {
 	
 	$track_id = get('track_id');
 	$data = array();
+	$data['audio_sample_rate'] = '---';
 	$title = '';
 	$currentsong	= mpd('currentsong');
+/*
+	if (!$currentsong['file']) { //mpd in unknown state
+		$data['album_artist'] = '&nbsp;';
+		$data['track_artist'] = '&nbsp;';
+		$data['track_composer'] = '-';
+		$data['title'] = '-';
+		$data['album'] = '-';
+		$data['by'] = '-';
+		$data['year'] = '&nbsp;';
+		$data['genre'] = '-';
+		$data['audio_dataformat'] = '---';
+		$data['audio_bits_per_sample'] = '---';
+		$data['audio_sample_rate'] = '---';
+		$data['audio_profile'] = '---';
+		$data['number'] = '';
+		$data['miliseconds'] = '---'; 
+		$data['inFavorite'] = false;
+		$data['onBlacklist'] = false;
+		//echo safe_json_encode($data);
+		//return;
+	}
+*/
+	
 	$track_artist = array();
 	$data['track_mpd_url'] = getTrackMpdUrl($currentsong['file']);
 	
@@ -2067,7 +2101,7 @@ function playlistTrack() {
 		$audio = array();
 		$audio = explode(':',$status['audio']);
 		if ($audio[1] == 'f') $audio[1] = '16';
-		
+			
 		$data['isStream'] = 'false';
 		if (strpos($currentsong['file'],"://") !== false) {
 			$data['isStream'] = (string) 'true';
@@ -2181,7 +2215,12 @@ function playlistTrack() {
 		$data['audio_bits_per_sample']	= (string) $audio[1];
 		$data['audio_sample_rate']	= (string) $audio[0];
 		$data['audio_profile']	= (string) $status['bitrate'] . ' kbps';
-		$data['number']	= (string) ($currentsong['Pos'] + 1 . '. ');
+		//if ($currentsong['Pos']) {
+			$data['number']	= (string) ($currentsong['Pos'] + 1 . '. ');
+		//}
+		//else {
+		//	$data['number']	= '';
+		//}
 		//$times = explode(":",$status['time']);
 		$data['miliseconds']	= $times[1] * 1000;
 		//$data['miliseconds']	= ($currentsong['Time'] * 1000);
@@ -2212,7 +2251,12 @@ function playlistTrack() {
 			$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE stream_url LIKE '%track_id=" . mysqli_real_escape_string($db, $track_id_url) . "%' AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['favorite_id']) . "' LIMIT 1");
 		}
 		else { //other streams
-			$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE stream_url = '" . mysqli_real_escape_string($db, $currentsong['file']) . "' AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['favorite_id']) . "' LIMIT 1");
+			if ($currentsong['file']) {
+				$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE stream_url = '" . mysqli_real_escape_string($db, $currentsong['file']) . "' AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['favorite_id']) . "' LIMIT 1");
+			}
+			else {//create fake query to avoid displaying favorite star in NowPlaying
+				$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE stream_url = 'fake_stream'");
+			}
 		}
 		if (mysqli_num_rows($query) > 0) $inFavorite = true;
 	}
@@ -2231,7 +2275,12 @@ function playlistTrack() {
 			$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE stream_url LIKE '%track_id=" . mysqli_real_escape_string($db, $track_id_url) . "%' AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['blacklist_id']) . "' LIMIT 1");
 		}
 		else { //other streams
-			$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE stream_url = '" . mysqli_real_escape_string($db, $currentsong['file']) . "' AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['blacklist_id']) . "' LIMIT 1");
+			if ($currentsong['file']) {
+				$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE stream_url = '" . mysqli_real_escape_string($db, $currentsong['file']) . "' AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['blacklist_id']) . "' LIMIT 1");
+			}
+			else {//create fake query to avoid displaying blacklist star in NowPlaying
+				$query = mysqli_query($db,"SELECT track_id, stream_url FROM favoriteitem WHERE stream_url = 'fake_stream'");
+			}
 		}
 		if (mysqli_num_rows($query) > 0) $onBlacklist = true;
 	}

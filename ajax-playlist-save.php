@@ -41,6 +41,13 @@ if (!$saveTrackMpdUrl){
 }
 $saveTrack = $_GET['saveTrack'];
 
+//avoid adding empty record when mpd is in unknown state
+if ($saveTrack == 'true' && !$saveTrackMpdUrl && !$saveTrackId) {
+	$data['not_compatible'] = true;
+	echo safe_json_encode($data);
+	return;
+}
+
 /* if ($cfg['username'] == '') {
 	$data['user'] = $cfg;
 	echo safe_json_encode($data);
@@ -82,7 +89,7 @@ elseif ($action == 'AddTo') {
 	
 }
 
-echo safe_json_encode($data);	
+echo safe_json_encode($data);
 
 
 function importTrack($favorite_id, $track_id, $track_mpd_url) {
@@ -115,6 +122,7 @@ function importTrack($favorite_id, $track_id, $track_mpd_url) {
 			}
 		}
 	}
+	
 	$query = mysqli_query($db,"SELECT MAX(position) as maxPosition FROM favoriteitem WHERE favorite_id = '" .$favorite_id . "'");
 	$favoriteitem = mysqli_fetch_assoc($query);
 	$maxPosition = (int) $favoriteitem['maxPosition'];

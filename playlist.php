@@ -655,7 +655,7 @@ function evaluateStatus(data) {
 		} */
 		var rel_file = encodeURIComponent(data.relative_file);
 		//console.log ("rel_file=" + rel_file);
-		var params = data.audio_dataformat + '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + 'bit - ' + data.audio_sample_rate/1000 + 'kHz&nbsp;&bull;&nbsp;<div style="width: 6em; display: inline-flex;">' + data.audio_profile + '</div>';
+		var params = data.audio_dataformat + '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + '&nbsp;bit - ' + data.audio_sample_rate/1000 + '&nbsp;kHz&nbsp;&bull;&nbsp;<div style="width: 6em; display: inline-flex;">' + data.audio_profile + '</div>';
 		document.getElementById('parameters').innerHTML = params;
 		
 		
@@ -1126,7 +1126,7 @@ function evaluateTrack(data) {
 	//var rel_file = encodeURIComponent(data.relative_file);
 	var rel_file = encodeURIComponent(data.relative_file);
 	//console.log ("rel_file=" + rel_file);
-	var params = data.audio_dataformat + '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + 'bit - ' + data.audio_sample_rate/1000 + 'kHz&nbsp;&bull;&nbsp;' + data.audio_profile;
+	var params = data.audio_dataformat + '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + '&nbsp;bit - ' + data.audio_sample_rate/1000 + '&nbsp;kHz&nbsp;&bull;&nbsp;' + data.audio_profile;
 	if (data.dr) params = params + '&nbsp;&bull;&nbsp;DR=' + data.dr;
 	params = params + '&nbsp;&bull;<a href="getid3/demos/demo.browse.php?filename=<?php echo $cfg['media_dir']; ?>' + rel_file + '">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;file details</a>';
 	

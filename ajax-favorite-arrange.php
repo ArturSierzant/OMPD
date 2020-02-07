@@ -191,14 +191,19 @@ elseif ($action == 'removeItem') {
 				$delSource = false;
 				$delFrom = false;
 			}
-			elseif ($a == 'streamTo'){ //local files played as streams
-				$tid = $queryUrl['track_id'];
-				$query2	= mysqli_query($db,'SELECT track.artist, track.title, album.album, album.album_id FROM track LEFT JOIN album ON track.album_id = album.album_id WHERE track_id = "' . mysqli_real_escape_string($db,$tid) . '"');
-				$track	= mysqli_fetch_assoc($query2);
-				$artist	= $track['artist'];
-				$title	= $track['title'];
-				$album	= $track['album'];
-				$album_id	= $track['album_id'];
+			elseif ($a == 'streamTo'){
+				if ($tid = $queryUrl['track_id']){ //local files played as streams
+					$query2	= mysqli_query($db,'SELECT track.artist, track.title, album.album, album.album_id FROM track LEFT JOIN album ON track.album_id = album.album_id WHERE track_id = "' . mysqli_real_escape_string($db,$tid) . '"');
+					$track	= mysqli_fetch_assoc($query2);
+					$artist	= $track['artist'];
+					$title	= $track['title'];
+					$album	= $track['album'];
+					$album_id	= $track['album_id'];
+				}
+				elseif ($filePath = $queryUrl['filepath']){ //local files not added to DB
+					$artist = '';
+					$title = $filePath;
+				}
 			}
 			else {
 				$artist = '';
@@ -249,8 +254,11 @@ elseif ($action == 'removeItem') {
 		$break_method = 'break-word';
 	}
 	?>
-	<td class="<?php echo $break_method;?> _delArtist"><?php 
-	echo html($artist); ?></td>
+	<td class="<?php echo $break_method;?> _delArtist">
+	<a href="index.php?action=view2&artist=<?php echo rawurlencode($artist); ?>">
+	<?php echo html($artist); ?>
+	</a>
+	</td>
 	<td class="_delSource">
 	<?php
 		if ($extUrl && $a == 'streamYouTube') {

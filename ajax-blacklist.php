@@ -29,6 +29,15 @@ $track_id = $_GET['track_id'];
 $track_mpd_url = $_GET['track_mpd_url'];
 $action = $_GET['action'];
 $data['group_type'] = $_GET['group_type']; //used in search.php
+//$data['track_id_'] = var_dump($track_id);
+//$data['track_mpd_url_'] = var_dump($track_mpd_url);
+
+//avoid adding empty record when mpd is in unknown state
+if (!$track_id && $track_mpd_url == 'null') {
+	$data['not_compatible'] = true;
+	echo safe_json_encode($data);
+	return;
+}
 
 $addTidalPrefix = false;
 $addYouTubePrefix = false;

@@ -376,13 +376,18 @@ function listOfFavorites($file = true, $stream = true, $track_id = "") {
 		<option class='listDivider' value='' selected disabled style='display: none;'>--- Select playlist ---</option>
 		<option class='listDivider' value='' disabled>--- File and mixed playlists ---</option>";
 		if ($track_id) {
-			$query2 = mysqli_query($db,'SELECT name, favorite.favorite_id FROM favorite join favoriteitem on favorite.favorite_id = favoriteitem.favorite_id WHERE stream = 0 AND name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" AND favorite.favorite_id not in (SELECT favorite_id FROM favoriteitem WHERE track_id = "' . $track_id . '") GROUP BY favorite.favorite_id ORDER BY name');
+			//$query2 = mysqli_query($db,'SELECT name, favorite.favorite_id FROM favorite JOIN favoriteitem ON favorite.favorite_id = favoriteitem.favorite_id WHERE stream = 0 AND name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" AND favorite.favorite_id not in (SELECT favorite_id FROM favoriteitem WHERE track_id = "' . $track_id . '") GROUP BY favorite.favorite_id ORDER BY name');
+			$query2 = mysqli_query($db,'SELECT name, favorite.favorite_id, f.track_id FROM favorite LEFT JOIN favoriteitem ON favorite.favorite_id = favoriteitem.favorite_id LEFT JOIN (SELECT favorite_id, track_id FROM favoriteitem WHERE track_id = "' . $track_id . '") f ON favorite.favorite_id = f.favorite_id WHERE stream = 0 AND name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" GROUP BY favorite.favorite_id ORDER BY name');
 		}
 		else {
 			$query2 = mysqli_query($db,'SELECT name, favorite_id FROM favorite WHERE stream = 0 AND name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" ORDER BY name');
 		}
 		while ($player = mysqli_fetch_assoc($query2)) {
-			$listOfFavorites .= "<option value=" . $player['favorite_id'] . ">" . html($player['name']) . "</option>";
+			$inPlaylist = '';
+			if ($player['track_id']) {
+				$inPlaylist = ' [&#9673;]';
+			}
+			$listOfFavorites .= "<option value=" . $player['favorite_id'] . ">" . html($player['name']) . $inPlaylist . "</option>";
 		}
 	}
 	if ($stream) {
@@ -1356,6 +1361,12 @@ function isYoutube($id) {
 	if (strpos($id,"youtube_") !== false) {
 		return true;
 	}
+	else {
+		$yt = striposa($id, $cfg['youtube_indicator']);
+		if ($yt !== false) {
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -1395,7 +1406,9 @@ function getYouTubeMPDUrl($url, $title = ''){
 		$js = json_decode($output[0],true);
 		$id = $js['id'];
 		$f = $cfg['youtube_audio_format_name'];
-		$format = array_search($f, array_column($js['formats'], 'format'));
+		preg_match_all('!\d+!', $f, $matches_f);
+		
+		$format = array_search($matches_f[0], array_column($js['formats'], 'format_id'));
 		$yt_url = $js['formats'][$format]['url'];
 		/* $is_yt_url_query = strpos($yt_url,'?');
 		if ($is_yt_url_query === false) {
@@ -1476,8 +1489,13 @@ function getYouTubeStreamUrl($url, $title = ''){
 	if ($ret == 0) {
 		$js = json_decode($output[0],true);
 		$f = $cfg['youtube_audio_format_name'];
-		$format = array_search($f, array_column($js['formats'], 'format'));
-		$yt_url = $js['formats'][$format]['url'];
+		preg_match_all('!\d+!', $f, $matches_f);
+		$format = array_search($matches_f[0], array_column($js['formats'], 'format_id'));
+		if (isset($js['formats'][$format]['fragment_base_url'])){
+			$yt_url = $js['formats'][$format]['fragment_base_url'];
+		}else {
+			$yt_url = $js['formats'][$format]['url'];
+		}
 		/* $is_yt_url_query = strpos($yt_url,'?');
 		if ($is_yt_url_query === false) {
 			$yt_url = $yt_url . '?';
@@ -2912,12 +2930,13 @@ function updateFavoriteStreamStatus($favorite_id) {
 //  +------------------------------------------------------------------------+
 
 function getTrackMpdUrl($track_mpd_url) {
-	
-	$parts = parse_url($track_mpd_url);
-	parse_str($parts['query'], $query);
-	$action = urldecode($query['action']);
-	if ($action == 'streamYouTube' && strpos($track_mpd_url,"&streamUrl=") !== false) {
-		$track_mpd_url = substr($track_mpd_url, 0, strpos($track_mpd_url, "&streamUrl="));
+	if ($track_mpd_url) {
+		$parts = parse_url($track_mpd_url);
+		parse_str($parts['query'], $query);
+		$action = urldecode($query['action']);
+		if ($action == 'streamYouTube' && strpos($track_mpd_url,"&streamUrl=") !== false) {
+			$track_mpd_url = substr($track_mpd_url, 0, strpos($track_mpd_url, "&streamUrl="));
+		}
 	}
 	return $track_mpd_url;
 }

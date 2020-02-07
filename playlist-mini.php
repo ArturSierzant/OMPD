@@ -165,9 +165,10 @@ function evaluateListpos(listpos) {
 		previous_miliseconds = 0;
 		previous_listpos = listpos;
 	}
-	else 
-		hideSpinner();
+	else {
+		//hideSpinner();
 	}
+}
 
 function evaluateIsplaying(isplaying, idx) {
 	if (previous_isplaying != isplaying) {
