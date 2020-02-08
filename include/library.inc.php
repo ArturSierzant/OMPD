@@ -1409,11 +1409,13 @@ function getYouTubeMPDUrl($url, $title = ''){
 		preg_match_all('!\d+!', $f, $matches_f);
 		
 		$format = array_search($matches_f[0], array_column($js['formats'], 'format_id'));
-		$yt_url = $js['formats'][$format]['url'];
-		/* $is_yt_url_query = strpos($yt_url,'?');
-		if ($is_yt_url_query === false) {
-			$yt_url = $yt_url . '?';
-		} */
+
+		if (isset($js['formats'][$format]['fragment_base_url'])){
+			$yt_url = $js['formats'][$format]['fragment_base_url'];
+		}else {
+			$yt_url = $js['formats'][$format]['url'];
+		}
+		
 		$ytArtist = "";
 		if ($js['artist']) {
 			$ytArtist = $js['artist'];
@@ -1482,7 +1484,7 @@ function getYouTubeMPDUrl($url, $title = ''){
 //  | Get Youtube stream URL                                                 |
 //  +------------------------------------------------------------------------+
 
-function getYouTubeStreamUrl($url, $title = ''){
+function getYouTubeStreamUrl($url){
 	global $cfg;
 	$cmd = trim($cfg['python_path'] . ' ' . $cfg['youtube-dl_path'] . ' ' . $cfg['youtube-dl_options'] . ' ' . ($url));
 	exec($cmd, $output, $ret);

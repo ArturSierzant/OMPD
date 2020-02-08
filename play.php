@@ -989,7 +989,14 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	} 
 	elseif($isYoutube){
 		$url = getYouTubeMPDUrl(getYouTubeId($track_id));
+		//$mpdCommand = mpd('addid "' . mpdEscapeChar($url) . '" ' . $insPos);
+		if (!$url) {
+			return 'add_error';
+		}
 		$mpdCommand = mpd('addid "' . mpdEscapeChar($url) . '" ' . $insPos);
+		if (is_string($mpdCommand) && strpos($mpdCommand,'ERROR') !== false) {
+			return 'add_error';
+		}
 		if ($playAfterInsert) {mpd('play ' . $insPos);}
 		if ($first && $mode == 'play') mpd('play ' . $index);
 	}
