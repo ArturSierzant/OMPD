@@ -77,6 +77,7 @@ if (strlen($title) > 0) {
 	$num_rows = mysqli_num_rows($query);
 	//other versions found || one other version found and track is from Tidal || one other version found and track is from e.g. YouTube
 	if ($num_rows > 1 || ($num_rows == 1 && isTidal($track_id)) || ($num_rows == 1 && !$track_id)) {
+		$track['title'] = $track_title;
 		$other_track_version = true;
 	}
 }

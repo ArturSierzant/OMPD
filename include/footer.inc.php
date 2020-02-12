@@ -52,6 +52,11 @@ if (isset($cfg['footer']) && $cfg['footer'] == 'dynamic') {
 else { 
 	echo '<script type="text/javascript">';
 	echo 'hideSpinner();';
+	echo "if('serviceWorker' in navigator) {";
+	echo "navigator.serviceWorker";
+	echo ".register('service-worker.js')";
+	echo '.then(function() { console.log("Service Worker Registered"); });';
+	echo "}";
 	echo '</script>';
 	echo '</body>' . "\n";
 	echo '</html>' . "\n";

@@ -184,7 +184,8 @@ function mpd($command,$player_host="",$player_port="") {
 				$array['elapsed'] = $seconds;
 			}
 			elseif (strpos($command,'load') !== false) {
-				$array[] = 'add_OK';
+				//$array[] = 'add_OK';
+				return 'add_OK';
 			}
 			return $array;
 		}
@@ -619,7 +620,9 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 function mpdAddTidalTrack($id, $insPos = '') {
 	global $cfg, $db;
 	$mpdCommand = 'ACK_ERROR_UNKNOWN';
-	$mpdCommand = mpd('addid "' . createStreamUrlMpd($id) . '" ' . $insPos);
+	$url = createStreamUrlMpd("tidal_" . $id);
+	$mpdCommand = mpd('addid "' . $url . '" ' . $insPos);
+	cliLog("id: " . $id . "; url: " . $url);
 	/* if ($cfg['tidal_direct']) {
 		$mpdCommand = mpd('addid "' . NJB_HOME_URL . 'stream.php?action=streamTidal&track_id=' . $id . '" ' . $insPos);
 	}

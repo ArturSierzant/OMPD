@@ -371,7 +371,10 @@ function playMPDplaylist() {
 	mpd('stop');
 	if ($cfg['play_queue'] == false)
 		mpd('clear');
-	$playResult = mpd('load ' . $favorite_id);
+	$playResult = mpd('load "' . $favorite_id . '"');
+	if ($playResult == 'add_OK') {
+		$playResult = 'play_OK';
+	}
 	mpd('play');
 	if ($playResult == 'ACK_ERROR_NO_EXIST') {
 		$playResult = 'play_error';

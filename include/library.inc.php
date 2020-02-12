@@ -1409,6 +1409,8 @@ function getYouTubeMPDUrl($url, $title = ''){
 		preg_match_all('!\d+!', $f, $matches_f);
 		
 		$format = array_search($matches_f[0], array_column($js['formats'], 'format_id'));
+		
+		//$format = array_search($f, array_column($js['formats'], 'format'));
 
 		if (isset($js['formats'][$format]['fragment_base_url'])){
 			$yt_url = $js['formats'][$format]['fragment_base_url'];

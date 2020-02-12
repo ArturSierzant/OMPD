@@ -556,6 +556,7 @@ var timer_delay				= 1000;
 var list_length				= <?php echo $listlength;?>;
 //console.trace();
 var fromPosition			= -1
+//var playClass = $('#play i').attr('class');
 
 $("#time").click(function(){
 	$.ajax({url: "play.php?action=beginOfTrack&menu=playlist"});
@@ -692,6 +693,8 @@ function evaluateStatus(data) {
 
 function evaluateListpos(listpos) {
 	if (previous_listpos != listpos) {
+		//$("#play i").removeClass("fa-cog fa-spin").addClass("fa-pause");
+		//$("#play i").removeClass().addClass(playClass);
 		document.getElementById('track' + previous_listpos).className = (previous_listpos & 1) ? 'even mouseover' : 'odd mouseover';
 		document.getElementById('track' + listpos).className = 'select';
 		document.getElementById('track' + previous_listpos + '_play').style.visibility  = 'hidden';
@@ -702,8 +705,11 @@ function evaluateListpos(listpos) {
 		previous_miliseconds = 0;
 		previous_listpos = listpos;
 	}
-	else hideSpinner();
+	else {
+	hideSpinner();
+	}
 	//resizeImgContainer();
+	//evaluateIsplaying(1,listpos);
 }
 
 
@@ -1259,50 +1265,60 @@ function msToTime(s) {
 	return t;
 }
 
-$(document).ready(function() {
-				
-				$('.showPL').click(function(){
-					$('html, body').animate({
-						scrollTop: ($(".select").offset().top - $("#fixedMenu").height())
-					}, 1000);
-				 });
+//$(document).ready(function () {}) - since jQuery 3.0 is deprecated. 
+//$(function () {}) is recommended
+$(function () {
+	
+	$('#next').click(function(){
+		//$("#play i").removeClass("fa-cog fa-spin");$("#play i").removeClass('fa-play fa-pause fa-stop').addClass('fa-cog fa-spin');
+	});	
+	
+	$('#previous').click(function(){
+		//$("#play i").removeClass("fa-cog fa-spin");$("#play i").removeClass('fa-play fa-pause fa-stop').addClass('fa-cog fa-spin');
+	});
+	
+	$('.showPL').click(function(){
+		$('html, body').animate({
+			scrollTop: ($(".select").offset().top - $("#fixedMenu").height())
+		}, 1000);
+	 });
 
-				$('.hidePL').click(function(){
+	$('.hidePL').click(function(){
 
-					$('html, body').animate({
-						scrollTop: $(".overlib").offset().top
-					}, 1000);
+		$('html, body').animate({
+			scrollTop: $(".overlib").offset().top
+		}, 1000);
 
-				 });
-				
-				//resizeCover();
-				
-				$('#pl-track-info-narrow').bind("DOMSubtreeModified",function() {
-					//resizeImgContainer();
-				});
-				
-				$(window).resize(function() {
-					//resizeCover();
-					resizeImgContainer();
-				});
-				
-				$('#play').longpress(function(e) {
-					ajaxRequest('play.php?action=stop&menu=playlist', evaluateIsplaying);
-				}, function(e) {
-						//ajaxRequest('play.php?action=play&menu=playlist', evaluateIsplaying);
-				});
-				/* //proper display cover when using spin.js as spinner
-				$('#image').css('position', 'absolute');
-				$('#image').css('top', '0'); */
-				
-				resizeImgContainer();
-				
-				<?php if (get('scrollTo')){
-				?>
-					var scrollTo = <?php echo get('scrollTo') ?>;
-					$(window).scrollTop(scrollTo);
-				<?php
-				} ?>
+	 });
+	
+	//resizeCover();
+	
+	$('#pl-track-info-narrow').bind("DOMSubtreeModified",function() {
+		//resizeImgContainer();
+	});
+	
+	$(window).resize(function() {
+		//resizeCover();
+		resizeImgContainer();
+	});
+	
+	$('#play').longpress(function(e) {
+		ajaxRequest('play.php?action=stop&menu=playlist', evaluateIsplaying);
+	}, function(e) {
+			//ajaxRequest('play.php?action=play&menu=playlist', evaluateIsplaying);
+	});
+	/* //proper display cover when using spin.js as spinner
+	$('#image').css('position', 'absolute');
+	$('#image').css('top', '0'); */
+	
+	resizeImgContainer();
+	
+	<?php if (get('scrollTo')){
+	?>
+		var scrollTo = <?php echo get('scrollTo') ?>;
+		$(window).scrollTop(scrollTo);
+	<?php
+	} ?>
 });
 
 

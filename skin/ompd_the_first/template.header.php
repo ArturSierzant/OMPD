@@ -20,7 +20,7 @@ require_once('include/play.inc.php');
 
 <script type="text/javascript" src="jquery/jquery-3.4.1.min.js"></script>
 <script type="text/javascript" src="javascript-src/spin.min.js"></script>
-<script type="text/javascript" src="javascript-src/arts.functions.js"></script>
+<script type="text/javascript" src="javascript-src/arts.functions.js?<?php echo filemtime('javascript-src/arts.functions.js') ?>"></script>
 <script type="text/javascript" src="javascript-src/jquery.longpress.js"></script>
 
 <?php
@@ -330,6 +330,11 @@ $(function () {
 	});
 	
 	$('a').click(function(){
+		if (this.hasAttribute('id')) {
+			if ($(this).attr('id').indexOf("_title") > -1) {
+				//$("#play i").removeClass('fa-play fa-pause fa-stop').addClass('fa-cog fa-spin');
+			}
+		}
 		$(this).find('> i[id^="play_"]').removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
 		$(this).find('> i[id^="add_"]').removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
 		$(this).find('> i[id^="insertPlay_"]').removeClass('fa-play-circle').addClass('fa-cog fa-spin icon-selected');
