@@ -169,7 +169,8 @@ function about() {
 	<li> added support for internet radio covers (settable in config.inc.php)</li>
 	<li> added default login option</li>
 	<li> added possibility to login using URL (login.php)</li>
-	<li> improved TIDAL support (python API replaced with PHP - works much faster)</li>
+	<li> added support for PWA (Progressive Web App)</li>
+	<li> improved TIDAL support (python API replaced with PHP API - works much faster)</li>
 	<li> improved Favorites - mixed lists (streams and local files) are allowed</li>
 	<li> improved Favorites - tracks from Tidal and YouTube now can be added to Favorites</li>
 	<li> fixed bugs</li>

@@ -818,7 +818,7 @@ request.always(function() {
 //  | tracks from Youtube                                                    |
 //  +------------------------------------------------------------------------+
 
-if ($cfg['show_youtube_results']) {
+if ($cfg['show_youtube_results'] && !$genre_id) {
 ?>
 <div>
 <h1 onclick='toggleSearchResults("YT");' class="pointer" id="ytTracks"><i id="iconSearchResultsYT" class="fa fa-chevron-circle-down icon-anchor"></i> Results from YouTube</h1>
@@ -1333,8 +1333,8 @@ INNER JOIN album ON track.album_id = album.album_id '
 ' AND (track.composer <> album.artist) 
 AND (album.artist NOT LIKE "%' .  mysqli_real_escape_string($db,$art) . '%")
 GROUP BY track.composer');
-
 $rows = mysqli_num_rows($queryTC);
+
 
 if ($rows > 0) {
 	if($rows > 1) $display_all_tracks = false;

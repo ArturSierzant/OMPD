@@ -620,18 +620,9 @@ function playTo($insPos, $track_id = '', $filepath = '', $dirpath = '', $player_
 function mpdAddTidalTrack($id, $insPos = '') {
 	global $cfg, $db;
 	$mpdCommand = 'ACK_ERROR_UNKNOWN';
-	$url = createStreamUrlMpd("tidal_" . $id);
+	$url = createStreamUrlMpd($id);
 	$mpdCommand = mpd('addid "' . $url . '" ' . $insPos);
 	cliLog("id: " . $id . "; url: " . $url);
-	/* if ($cfg['tidal_direct']) {
-		$mpdCommand = mpd('addid "' . NJB_HOME_URL . 'stream.php?action=streamTidal&track_id=' . $id . '" ' . $insPos);
-	}
-	elseif ($cfg['upmpdcli_tidal']) {
-	$mpdCommand = mpd('addid "' . $cfg['upmpdcli_tidal'] . $id . '" ' . $insPos);
-	}
-	else {
-		$mpdCommand = mpd('addid ' . MPD_TIDAL_URL . $id . ' ' . $insPos);
-	} */
 	return $mpdCommand;
 }
 

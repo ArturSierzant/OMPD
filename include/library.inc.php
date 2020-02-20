@@ -358,50 +358,50 @@ global $cfg, $db;
 
 function listOfFavorites($file = true, $stream = true, $track_id = "") {
 	global $cfg, $db;
-	/* if ($file) {
-		$listOfFavorites = "
-		<option class='listDivider' value='' selected disabled style='display: none;'>--- Select playlist ---</option>";
-		if ($track_id) {
-			$query2 = mysqli_query($db,'SELECT name, favorite.favorite_id FROM favorite join favoriteitem on favorite.favorite_id = favoriteitem.favorite_id WHERE name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" AND favorite.favorite_id not in (SELECT favorite_id FROM favoriteitem WHERE track_id = "' . $track_id . '") GROUP BY favorite.favorite_id ORDER BY name');
+	$favIds = array();
+	$inPlaylistIndicator = '[&#9673;] ';
+	if ($track_id){
+		if (isTidal($track_id)) {
+			$query = mysqli_query($db,"SELECT favorite_id FROM favoriteitem WHERE favorite_id NOT IN (SELECT favorite_id FROM favorite WHERE name = '" . $cfg['favorite_name'] . "' OR name = '" . $cfg['blacklist_name'] . "') AND (stream_url LIKE '%action=streamTidal%' AND stream_url LIKE '%" . getTidalId($track_id) ."%')");
+		}
+		elseif (isYoutube($track_id)) {
+			$query = mysqli_query($db,"SELECT favorite_id FROM favoriteitem WHERE favorite_id NOT IN (SELECT favorite_id FROM favorite WHERE name = '" . $cfg['favorite_name'] . "' OR name = '" . $cfg['blacklist_name'] . "') AND (stream_url LIKE '%action=streamYouTube%' AND stream_url LIKE '%" . getYouTubeId($track_id) ."%')");
 		}
 		else {
-			$query2 = mysqli_query($db,'SELECT name, favorite_id FROM favorite WHERE name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" ORDER BY name');
+			$query = mysqli_query($db,"SELECT favorite_id FROM favoriteitem WHERE favorite_id NOT IN (SELECT favorite_id FROM favorite WHERE name = '" . $cfg['favorite_name'] . "' OR name = '" . $cfg['blacklist_name'] . "') AND (track_id ='" . $track_id ."' OR stream_url LIKE '%" . $track_id ."%')");
 		}
-		while ($player = mysqli_fetch_assoc($query2)) {
-			$listOfFavorites .= "<option value=" . $player['favorite_id'] . ">" . html($player['name']) . "</option>";
+		while ($rows = mysqli_fetch_assoc($query)) {
+			$favIds[] = $rows['favorite_id'];
 		}
-	} */
+	}
 	if ($file) {
 		$listOfFavorites = "
 		<option class='listDivider' value='' selected disabled style='display: none;'>--- Select playlist ---</option>
 		<option class='listDivider' value='' disabled>--- File and mixed playlists ---</option>";
-		if ($track_id) {
-			//$query2 = mysqli_query($db,'SELECT name, favorite.favorite_id FROM favorite JOIN favoriteitem ON favorite.favorite_id = favoriteitem.favorite_id WHERE stream = 0 AND name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" AND favorite.favorite_id not in (SELECT favorite_id FROM favoriteitem WHERE track_id = "' . $track_id . '") GROUP BY favorite.favorite_id ORDER BY name');
-			$query2 = mysqli_query($db,'SELECT name, favorite.favorite_id, f.track_id FROM favorite LEFT JOIN favoriteitem ON favorite.favorite_id = favoriteitem.favorite_id LEFT JOIN (SELECT favorite_id, track_id FROM favoriteitem WHERE track_id = "' . $track_id . '") f ON favorite.favorite_id = f.favorite_id WHERE stream = 0 AND name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" GROUP BY favorite.favorite_id ORDER BY name');
-		}
-		else {
-			$query2 = mysqli_query($db,'SELECT name, favorite_id FROM favorite WHERE stream = 0 AND name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" ORDER BY name');
-		}
+		$query2 = mysqli_query($db,'SELECT name, favorite_id FROM favorite WHERE stream = 0 ORDER BY name');
 		while ($player = mysqli_fetch_assoc($query2)) {
 			$inPlaylist = '';
-			if ($player['track_id']) {
-				$inPlaylist = ' [&#9673;]';
+			if (in_array($player['favorite_id'], $favIds)) {
+				$inPlaylist = $inPlaylistIndicator;
 			}
-			$listOfFavorites .= "<option value=" . $player['favorite_id'] . ">" . html($player['name']) . $inPlaylist . "</option>";
+			$listOfFavorites .= "<option value=" . $player['favorite_id'] . ">" . $inPlaylist . html($player['name']) . "</option>";
 		}
 	}
 	if ($stream) {
-		$query2 = mysqli_query($db,'SELECT name, favorite_id FROM favorite WHERE stream = 1 AND name != "' . $cfg['favorite_name'] . '" AND name !="' . $cfg['blacklist_name'] . '" ORDER BY name');
+		$query2 = mysqli_query($db,'SELECT name, favorite_id FROM favorite WHERE stream = 1 ORDER BY name');
 		if ($query2) {
 			$listOfFavorites .= "<option class='listDivider' value='' disabled>--- Streams ---</option>";
 			while ($player = mysqli_fetch_assoc($query2)) {
-				$listOfFavorites .= "<option value='" . $player['favorite_id'] . "'>" . html($player['name']) . "</option>";
+			$inPlaylist = '';
+			if (in_array($player['favorite_id'], $favIds)) {
+				$inPlaylist = $inPlaylistIndicator;
 			}
+			$listOfFavorites .= "<option value=" . $player['favorite_id'] . ">" . $inPlaylist . html($player['name']) . "</option>";
+		}
 		}
 	}
 		return $listOfFavorites;
 }
-
 
 
 	

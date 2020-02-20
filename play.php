@@ -539,7 +539,9 @@ function loadTidalPlaylist($favorite_id) {
 				'" . $id . "', '" . mysqli_real_escape_string($db,$title) . "', '" . mysqli_real_escape_string($db,$artist) . "', '" . mysqli_real_escape_string($db,$artist) . "', '', '" . $volumeNumber . "', '" . $duration . "', '" . $trackNumber . "', '" . $album_id . "')";
 				
 				mysqli_query($db, $sql);
-				$playResult = mpdAddTidalTrack($id);
+				$playResult = mpdAddTidalTrack('tidal_' . $id);
+				cliLog("loadTidalPlaylist id: " . $id);
+				cliLog("loadTidalPlaylist: " . $playResult);
 		}
 	}
 	return $playResult;
