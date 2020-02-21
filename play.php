@@ -525,12 +525,12 @@ function loadTidalPlaylist($favorite_id) {
 				$releaseDate	= $trackList['items'][$i]['album']['releaseDate'];
 				
 				$sql = "SELECT album_id FROM tidal_album WHERE album_id = '" . $album_id . "'";
-				$rows = mysqli_num_rows($sql);
+				$rows = mysqli_num_rows(mysqli_query($db,$sql));
 				if ($rows == 0) {
 					$sql = "INSERT INTO tidal_album 
 					(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time, cover, type)
 					VALUES (
-					'" . $album_id . "', '', '', '', '" . mysqli_real_escape_string($db,$album) . "', '" . $releaseDate . "', '', 1, '','" . time() . "','" . $cover . "','playlist')";
+					'" . $album_id . "', '', '', '0', '" . mysqli_real_escape_string($db,$album) . "', '" . $releaseDate . "', '', '1', '0','" . time() . "','" . $cover . "','playlist')";
 					$query2=mysqli_query($db,$sql);
 				}
 				$sql = "REPLACE INTO tidal_track 
