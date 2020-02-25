@@ -40,8 +40,7 @@ var $tileSize = 0;
 var $tileSizeArr = calcTileSize();
 $tileSize = $tileSizeArr[0];
 $containerWidth = $tileSizeArr[1];
-var $useMaxWidth = false;
-
+var $useMaxWidth = true; //special case for skin dark-wide
 var opts = {
   lines: 13, // The number of lines to draw
   length: 21, // The length of each line

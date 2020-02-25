@@ -108,6 +108,11 @@ class TidalAPI {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "albums/" . $album_id . "/tracks?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
 		return $this->request();
 	}
+		
+	function getAlbumInfo($album_id) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/album?albumId=" . $album_id . "&deviceType=BROWSER&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
+		return $this->request();
+	}
 	
 	function getArtistAll($artist_id) {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/artist?artistId=" . $artist_id . "&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&deviceType=BROWSER");

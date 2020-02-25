@@ -356,8 +356,22 @@ global $cfg, $db;
 //  | List of Favorites                                                         |
 //  +---------------------------------------------------------------------------+
 
-function listOfFavorites($file = true, $stream = true, $track_id = "") {
+function listOfFavorites($file = true, $stream = true, $track_id = "", $track_mpd_url = "") {
 	global $cfg, $db;
+	if ($track_mpd_url) {
+		$url = parse_url($track_mpd_url);
+		if ($url["scheme"]) { //track_mpd_url is stream (like 'http://' or 'https://'), not a local file
+			parse_str($url["query"], $output);
+			switch ($output['action']){
+				case "streamYouTube":
+					$track_id = "youtube_" . $output['track_id'];
+					break;
+				case "streamTidal":
+					$track_id = "tidal_" . $output['track_id'];
+					break;
+			}
+		}
+	}
 	$favIds = array();
 	$inPlaylistIndicator = '[&#9673;] ';
 	if ($track_id){
@@ -378,7 +392,7 @@ function listOfFavorites($file = true, $stream = true, $track_id = "") {
 		$listOfFavorites = "
 		<option class='listDivider' value='' selected disabled style='display: none;'>--- Select playlist ---</option>
 		<option class='listDivider' value='' disabled>--- File and mixed playlists ---</option>";
-		$query2 = mysqli_query($db,'SELECT name, favorite_id FROM favorite WHERE stream = 0 ORDER BY name');
+		$query2 = mysqli_query($db,"SELECT name, favorite_id FROM favorite WHERE stream = 0 AND favorite_id NOT IN (SELECT favorite_id FROM favorite WHERE name = '" . $cfg['favorite_name'] . "' OR name = '" . $cfg['blacklist_name'] . "') ORDER BY name");
 		while ($player = mysqli_fetch_assoc($query2)) {
 			$inPlaylist = '';
 			if (in_array($player['favorite_id'], $favIds)) {

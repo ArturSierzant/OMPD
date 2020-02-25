@@ -26,6 +26,7 @@ require_once('include/play.inc.php');
 $file = $_GET['file'];
 $stream = $_GET['stream'];
 $track_id = $_GET['track_id'];
+$track_mpd_url = $_GET['track_mpd_url'];
 
 $file == 'true' ? $file = true : $file = false;
 $stream == 'true' ? $stream = true : $stream = false;
@@ -35,7 +36,7 @@ $stream == 'true' ? $stream = true : $stream = false;
 	$stream = true;
 //}
 
-echo listOfFavorites($file, $stream, $track_id);
+echo listOfFavorites($file, $stream, $track_id, $track_mpd_url);
 
 ?>
 	

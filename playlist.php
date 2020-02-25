@@ -1232,7 +1232,7 @@ function evaluateTrack(data) {
 	
 	changeTileSizeInfo();
 	resizeImgContainer();
-	getFavoritesList(current_track_id);
+	getFavoritesList(current_track_id,current_track_mpd_url);
 	
 	/* spinnerImg.stop();
 	$('#image').css('position', 'relative');*/

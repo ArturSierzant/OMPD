@@ -68,23 +68,27 @@ function changeTileSizeInfo() {
 
 function calcTileSize() {
   var $containerWidth = $(window).width();
-	if ($containerWidth > 1280) $containerWidth = 1280;
-	
-    if ($containerWidth <= 639) {
-		$tileCount=3;
-		$tileSize = Math.floor(($containerWidth/$tileCount) - 1);
-		//$tileSize = Math.floor((($containerWidth/$tileCount) - 1) * 10) / 10;
-    	$('.tile_info').css('font-size', function() { return Math.floor($tileSize/12) + 'px'; });
+	//if ($containerWidth > 1280) $containerWidth = 1280;
+	if (!$useMaxWidth) { //special case for skin dark-wide
+		if ($containerWidth > 1280) $containerWidth = 1280;
 	}
 	
-    if ($containerWidth > 639 && $containerWidth <= 1024) {
-		$tileCount=5;
-		$tileSize = Math.floor(($containerWidth/$tileCount) - 1);
-		//$tileSize = Math.floor((($containerWidth/$tileCount) - 1) * 10)/10;
-        $('.tile_info').css('font-size', function() { return Math.floor($tileSize/12) + 'px'; });
+	if ($containerWidth <= 639) {
+	$tileCount=3;
+	$tileSize = Math.floor(($containerWidth/$tileCount) - 1);
+	//$tileSize = Math.floor((($containerWidth/$tileCount) - 1) * 10) / 10;
+		$('.tile_info').css('font-size', function() { return Math.floor($tileSize/12) + 'px'; });
 	}
 	
-	if ($containerWidth > 1024 && $containerWidth <=1280) {
+	if ($containerWidth > 639 && $containerWidth <= 1024) {
+	$tileCount=5;
+	$tileSize = Math.floor(($containerWidth/$tileCount) - 1);
+	//$tileSize = Math.floor((($containerWidth/$tileCount) - 1) * 10)/10;
+			$('.tile_info').css('font-size', function() { return Math.floor($tileSize/12) + 'px'; });
+	}
+	
+	//if ($containerWidth > 1024 && $containerWidth <=1280) {
+	if ($containerWidth > 1024) {
 		$tileCount=7;
 		$tileSize = Math.floor((($containerWidth)/$tileCount) - 1);
 		//$tileSize = Math.floor((($containerWidth/$tileCount) - 1) * 10)/10;
@@ -684,6 +688,7 @@ function hideSaveCurrentTrack() {
 
 function showSaveCurrentTrack() {
 	$('#trackOptions').show();
+	$("#saveCurrentTrack").click();
 	$('#saveCurrentPlaylist i').removeClass("fa-check-circle-o fa-circle-o").addClass("fa-circle-o");
 	$('#saveCurrentTrack i').removeClass("fa-check-circle-o fa-circle-o").addClass("fa-check-circle-o");
 }
@@ -1188,13 +1193,14 @@ function setAnchorClick() {
 	})
 };
 
-function getFavoritesList(track_id){
+function getFavoritesList(track_id, track_mpd_url){
 	var request = $.ajax({  
 	url: "ajax-favorite-list.php",  
 	type: "GET",  
 	data: { 
 		file : 'true',
-		track_id : track_id
+		track_id : track_id,
+		track_mpd_url : track_mpd_url
 	},  
 	dataType: "html"
 	}); 

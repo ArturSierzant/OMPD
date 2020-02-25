@@ -40,6 +40,7 @@ var $tileSize = 0;
 var $tileSizeArr = calcTileSize();
 $tileSize = $tileSizeArr[0];
 $containerWidth = $tileSizeArr[1];
+var $useMaxWidth = false;
 
 var opts = {
   lines: 13, // The number of lines to draw
@@ -320,7 +321,7 @@ $(function () {
 		$(this).find('i').removeClass("fa-circle-o").addClass("fa-check-circle-o");
 		if ($(this).attr('id') == 'saveCurrentTrack') {
 			$("#trackOptions").slideDown( "slow", function() {});
-			getFavoritesList(current_track_id);
+			getFavoritesList(current_track_id,current_track_mpd_url);
 		}
 		else {
 			$("#trackOptions").slideUp( "slow", function() {});
