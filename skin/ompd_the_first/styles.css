@@ -1822,6 +1822,12 @@ div.in 	{ width:0px;
 		background-color: #fe9c00;
 		}
 
+div.in-static {
+  width: 0px;
+  height: 100%;
+  background-color: #fe9c00;
+}
+
 #bar-indicator {
 	position: absolute;
 	background-color: #FE9C00;
