@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2020 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -187,6 +187,17 @@ class TidalAPI {
 		$pic = str_replace("-","/",$pic);
 		//$pic = self::RESOURCES_URL . $pic . '/480x480.jpg';
 		$pic = self::RESOURCES_URL . $pic . '/640x428.jpg';
+		return $pic;
+	}
+	
+	static function albumCoverToURL($pic,$quality = 'hq') {
+		$pic = str_replace("-","/",$pic);
+		if ($quality == 'hq') {
+			$pic = self::RESOURCES_URL . $pic . '/1280x1280.jpg';
+		}
+		else {
+			$pic = self::RESOURCES_URL . $pic . '/320x320.jpg';
+		}
 		return $pic;
 	}
 	

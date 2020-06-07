@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2020 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -94,7 +94,8 @@ function about() {
 <tr class="odd">
 	<td></td>
 	<td colspan="3">
-	<i class="fa fa-globe fa-fw"></i>&nbsp;&nbsp;<a href="https://ompd.pl">https://ompd.pl</a><br>
+	<i class="fa fa-globe fa-fw"></i>&nbsp;&nbsp;<a href="https://ompd.pl" target="_blank">https://ompd.pl</a><br>
+	<i class="fa fa-github fa-fw"></i>&nbsp;&nbsp;<a href="https://github.com/ArturSierzant/OMPD" target="_blank">https://github.com/ArturSierzant/OMPD</a><br>
 	<i class="fa fa-envelope-o fa-fw"></i>&nbsp;&nbsp;<a href="mailto:info@ompd.pl">info@ompd.pl</a><br><br>
 	This program comes with <a href="about.php?action=license#nowarranty">ABSOLUTELY NO WARRANTY</a>.<br>
 	This is free software, and you are welcome to redistribute it<br>

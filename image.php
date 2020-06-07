@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2020 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -64,15 +64,24 @@ function image($image_id, $quality, $track_id) {
 	$bitmap = mysqli_fetch_assoc($query) or imageError(); */
 	
 	if (strpos($track_id,'tidal_') !== false || strpos($image_id,'tidal_') !== false) {
+		$t = new TidalAPI;
 		if ($track_id) $album_id = getTidalId($track_id);
 		if ($image_id) $album_id = getTidalId($image_id);
 		
+		$picQuery = mysqli_query($db,"SELECT cover FROM tidal_album 
+			WHERE album_id = '" . $album_id . "'");
+		
+		$rows = mysqli_fetch_assoc($picQuery);
+		$pic = $rows['cover'];
+		
 		header('Cache-Control: max-age=31536000');
 		if ($quality == 'hq') {
-			$data = file_get_contents("http://images.osl.wimpmusic.com/im/im?w=1000&h=1000&albumid=" . $album_id);
+			//$data = file_get_contents("http://images.osl.wimpmusic.com/im/im?w=1000&h=1000&albumid=" . $album_id);
+			$data = file_get_contents($t->albumCoverToURL($pic,'hq'));
 		}
 		else {
-			$data = file_get_contents("http://images.osl.wimpmusic.com/im/im?w=300&h=300&albumid=" . $album_id);
+			//$data = file_get_contents("http://images.osl.wimpmusic.com/im/im?w=300&h=300&albumid=" . $album_id);
+			$data = file_get_contents($t->albumCoverToURL($pic,'lq'));
 		}
 		if ($data) {
 			streamData($data, false, false, '"never_expire"');

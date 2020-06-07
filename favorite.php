@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2020 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -821,7 +821,7 @@ function importFavorite($favorite_id, $mode) {
 					$file[] = createStreamUrlMpd('tidal_' . $id);
 				}
 				//TIDAL album
-				elseif (strpos($url,TIDAL_ALBUM_URL) !== false || strpos($url,TIDAL_APP_ALBUM_URL) !== false || strpos($url,TIDAL_ALBUM_URL) !== false) {
+				elseif (strpos($url,TIDAL_ALBUM_URL) !== false || strpos($url,TIDAL_ALBUM_URL_2) !== false || strpos($url,TIDAL_APP_ALBUM_URL) !== false) {
 					$tidal_tracks = getTracksFromTidalAlbum($id);
 					$tidal_tracks = json_decode($tidal_tracks, true);
 					

@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2020 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -88,6 +88,12 @@ function config() {
 	$nav			= array();
 	$nav['name'][]	= 'Configuration';
 	require_once('include/header.inc.php');
+	
+	//precompile update.php to speed up update process
+	if (function_exists("opcache_compile_file")){
+		$isCompiled = opcache_compile_file (NJB_HOME_DIR . "update.php");
+	}
+	
 	$i = 0;
 ?>
 <table cellspacing="0" cellpadding="0" class="border">

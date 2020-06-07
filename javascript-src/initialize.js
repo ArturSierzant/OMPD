@@ -62,6 +62,23 @@ function hmacsha1(key, data) {
 
 
 //  +------------------------------------------------------------------------+
+//  | makeSid from                                                           |
+//  | https://stackoverflow.com/questions/1349404/                           |
+//  | generate-random-string-characters-in-javascript                        |
+//  +------------------------------------------------------------------------+
+function makeSid(length) {
+	var result           = '';
+	var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	var charactersLength = characters.length;
+	for ( var i = 0; i < length; i++ ) {
+		result += characters.charAt(Math.floor(Math.random() * charactersLength));
+	}
+return result;
+}
+
+
+
+//  +------------------------------------------------------------------------+
 //  | Set screen width in a session cookie for server side PHP script.       |
 //  +------------------------------------------------------------------------+
 function cookie() {
@@ -69,7 +86,32 @@ function cookie() {
 	if		(typeof window.innerWidth == 'number')			width = window.innerWidth;
 	else if	(typeof document.body.clientWidth == 'number')	width = document.body.clientWidth; // IE < 9
 	document.cookie = 'netjukebox_width=' + width;
+	if (!getCookie('netjukebox_sid')){
+		document.cookie = 'netjukebox_sid=' + makeSid(40) + '; Max-Age = 31536000';
+	}
 }
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | getCookie from https://www.w3schools.com/js/js_cookies.asp             |
+//  +------------------------------------------------------------------------+
+	function getCookie(cname) {
+	var name = cname + "=";
+	var decodedCookie = decodeURIComponent(document.cookie);
+	var ca = decodedCookie.split(';');
+	for(var i = 0; i <ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return "";
+	}
 
 
 

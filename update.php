@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2020 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -30,10 +30,12 @@
 //  | update.php                                                             |
 //  +------------------------------------------------------------------------+
 
+//set_time_limit(0);
+ini_set('max_execution_time', 0);
 
-ini_set('max_execution_time', '0');
 //ini_set('memory_limit', '-1');
 //$updateStage = $_GET["updateStage"];
+
 require_once('include/initialize.inc.php');
 require_once('include/cache.inc.php');
 require_once('include/library.inc.php');
@@ -611,9 +613,12 @@ function countDirectories_($dir) {
 				if (in_array($extension, $cfg['media_extension'])) {
 					if (!in_array($dir,$mediaDirs)){
 						$mediaDirs[] = $dir;
+						$prevDirsCounter = $dirsCounter;
 						$dirsCounter++;
-						mysqli_query($db,"UPDATE update_progress SET 
-				structure_image = 'Counting media directories: " . $dirsCounter . "'");
+						if ($dirsCounter - $prevDirsCounter > 50) {
+							mysqli_query($db,"UPDATE update_progress SET 
+							structure_image = 'Counting media directories: " . $dirsCounter . "'");
+						}
 					}
 					else {
 						continue;
@@ -626,12 +631,15 @@ function countDirectories_($dir) {
 }
 
 function countDirectories($base_dir) {
-	global $cfg, $db, $dirsCounter, $filesCounter, $isMediaDir;
+	global $cfg, $db, $dirsCounter, $filesCounter, $isMediaDir, $prevUpdateTime;
 	$isMediaDir = 0;
+	if (!isset($prevUpdateTime)) $prevUpdateTime = microtime(true);
 	//$entries = @scandir($base_dir) or message(__FILE__, __LINE__, 'error', '[b]Failed to open directory:[/b][br]' . $base_dir . '[list][*]Check media_dir value in the config.inc.php file[*]Check file permission[/list]');
 	cliLog('countDirectories for ' . $base_dir);
 	
-	$base_dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $base_dir);
+	if (NJB_DEFAULT_FILESYSTEM_CHARSET != 'UTF-8') {
+		$base_dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $base_dir);
+	}
 	
 	if ($cfg['ignore_media_dir_access_error']) {
 		$entries = @scandir($base_dir);
@@ -653,13 +661,27 @@ function countDirectories($base_dir) {
 		}
 		if($file == '.' || $file == '..' || (is_dir($dir) === TRUE && in_array($file, $cfg['directory_blacklist']) === TRUE)) continue;
 		if(is_dir($dir)) {
-			$directories []= iconv(NJB_DEFAULT_FILESYSTEM_CHARSET,'UTF-8', $dir);
+			if (NJB_DEFAULT_FILESYSTEM_CHARSET != 'UTF-8') {
+				$directories []= iconv(NJB_DEFAULT_FILESYSTEM_CHARSET,'UTF-8', $dir);
+			}
+			else {
+				$directories []= $dir;
+			}
 			if ($isMediaDir == 1) {
 					$dirsCounter = $dirsCounter + 1;
-				}
-			mysqli_query($db,"UPDATE update_progress SET 
-				structure_image = 'Counting media directories: " . $dirsCounter . "'");
-			$directories = array_merge($directories, countDirectories(iconv(NJB_DEFAULT_FILESYSTEM_CHARSET,'UTF-8', $dir)));
+					$currUpdateTime = microtime(true);
+					if ($currUpdateTime - $prevUpdateTime > 0.49) {
+						$prevUpdateTime = microtime(true);
+						mysqli_query($db,"UPDATE update_progress SET 
+						structure_image = 'Counting media directories: " . $dirsCounter . "'");
+					}
+			}
+			if (NJB_DEFAULT_FILESYSTEM_CHARSET != 'UTF-8') {
+				$directories = array_merge($directories, countDirectories(iconv(NJB_DEFAULT_FILESYSTEM_CHARSET,'UTF-8', $dir)));
+			}
+			else {
+				$directories = array_merge($directories, countDirectories($dir));
+			}
 		}
 	}
 	return $directories;
@@ -2133,6 +2155,5 @@ function fatalErrorHandle() {
 				message(__FILE__, __LINE__, 'error', '[b]Update error![/b] [br][br][b]PHP Fatal Error[/b][br]' . $error['message'] . ' [br] File: ' . $error['file'] . '[br] Line: ' . $error['line'] . '[br]');
     } 
 }
-
 
 ?>

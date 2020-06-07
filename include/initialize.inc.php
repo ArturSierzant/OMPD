@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2020 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -48,6 +48,7 @@ define('NJB_HTTPS', (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !
 
 define('TIDAL_RESOURCES_URL','https://resources.tidal.com/images/');
 define('TIDAL_ALBUM_URL','https://listen.tidal.com/album/');
+define('TIDAL_ALBUM_URL_2','https://tidal.com/browse/album/');
 define('TIDAL_ARTIST_URL','https://listen.tidal.com/artist/');
 define('TIDAL_TRACK_URL','https://tidal.com/browse/track/');
 define('TIDAL_TRACK_STREAM_URL','audio.tidal.com');
@@ -55,6 +56,7 @@ define('TIDAL_APP_ALBUM_URL','https://tidal.com/album/');
 define('TIDAL_APP_TRACK_URL','https://tidal.com/track/');
 define('TIDAL_MAX_CACHE_TIME', 21600); //6h in [s]
 define('MPD_TIDAL_URL','tidal://track/');
+
 
 
 define('NJB_HTTPQ', 0);
@@ -593,6 +595,11 @@ function logoutSession() {
 			"' . mysqli_real_escape_string($db, $session_seed) . '")');
 		//cliLog("logoutSession end - setting cookie");
 		header('Set-Cookie: netjukebox_sid = ' . $sid . '; Path=/; Max-Age = 31536000; samesite=strict');
+		?>
+		<script>
+		document.cookie = 'netjukebox_sid=<?php echo $sid; ?>; Max-Age = 31536000';
+		</script>
+		<?php
 		//setcookie('netjukebox_sid', $sid, time() + 31536000, null, null, NJB_HTTPS, true);
 		@ob_flush();
 		flush();

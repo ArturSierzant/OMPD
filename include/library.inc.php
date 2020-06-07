@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2020 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -27,15 +27,30 @@
 //  +------------------------------------------------------------------------+
 //  | Tile for album cover and info                                          |
 //  +------------------------------------------------------------------------+
-function draw_tile($size,$album,$multidisc = '', $retType = "echo") {
-		global $cfg;
+function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover = '') {
+		global $db,$cfg;
 		$res = "";
 		if ($multidisc != '') {
 			$md = '&md=' . $multidisc;
 		}
 		$res = '<div title="Go to album \'' . html($album['album']) .  '\'" class="tile pointer" style="width: ' . $size . 'px; height: ' . $size . 'px;">';
 		if (strpos($album['album_id'],'tidal') !== false) {
-			$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="http://images.osl.wimpmusic.com/im/im?w=300&h=300&albumid=' . str_replace('tidal_','',$album['album_id']) . '" alt="" width="100%" height="100%">';
+			//$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="http://images.osl.wimpmusic.com/im/im?w=300&h=300&albumid=' . str_replace('tidal_','',$album['album_id']) . '" alt="" width="100%" height="100%">';
+			$t = new TidalAPI;
+			if ($tidal_cover) {
+				$pic = $tidal_cover;
+			}
+			else {
+				$album_id = str_replace('tidal_','',$album['album_id']);
+				$picQuery = mysqli_query($db,"SELECT cover FROM tidal_album 
+				WHERE album_id = '" . $album_id . "'");
+				$rows = mysqli_fetch_assoc($picQuery);
+				$pic = $rows['cover'];
+			}
+			
+			$cover = $t->albumCoverToURL($pic,'lq');
+			
+			$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $cover . '" alt="" width="100%" height="100%">';
 		}
 		else {
 			$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="image.php?image_id=' . $album['image_id'] . '" alt="" width="100%" height="100%">';
@@ -930,7 +945,7 @@ function showAllFromTidal($searchStr, $size) {
 			$album['album_id'] = 'tidal_' . $art['id'];
 			$album['artist_alphabetic'] = $art['artists'][0]['name'];
 			$album['album'] = $art['title'];
-			$albumsList .= draw_tile($size, $album, '', 'string');
+			$albumsList .= draw_tile($size, $album, '', 'string',$art['cover']);
 			}
 		$albumsList .= '</table>';
 		$data['albums'] = $albumsList;
@@ -2568,6 +2583,7 @@ function mime_content_type_replacement($filename) {
 
 		// audio/video
 		'aif' => 'audio/aiff',
+		'aiff' => 'audio/aiff',
 		'mp3' => 'audio/mpeg',
 		'mp2' => 'audio/mpeg',
 		'mpc' => 'audio/mpeg',
@@ -2579,6 +2595,7 @@ function mime_content_type_replacement($filename) {
 		'flac' => 'audio/flac', 
 		'wv' => 'audio/wv', 
 		'wav' => 'audio/wav', 
+		//'iso' => 'audio/wav',
 		'wma' => 'audio/x-ms-wma',
 		'aac' => 'audio/aac',
 		'm4a' => 'audio/m4a',

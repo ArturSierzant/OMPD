@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2020 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -699,10 +699,12 @@ $cfg['media_extension'][]           = 'wma';
 // Losless audio
 $cfg['media_extension'][]           = 'ape';
 $cfg['media_extension'][]           = 'aif';
+$cfg['media_extension'][]           = 'aiff';
 $cfg['media_extension'][]           = 'flac';
 $cfg['media_extension'][]           = 'wv';
 $cfg['media_extension'][]           = 'wav';
 $cfg['media_extension'][]           = 'dsf';
+$cfg['media_extension'][]           = 'dff';
 
 
 

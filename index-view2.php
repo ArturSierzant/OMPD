@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2019 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2020 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -442,7 +442,7 @@ $i			= 0;
 $sort_url	= $url;
 $size_url	= $url . '&amp;order=' . $order . '&amp;sort=' . $sort;
 
-if ($cfg['use_tidal'] && $artist && !$qsType && !$tag && !in_array($artist,$cfg['VA']) ) {
+if ($cfg['use_tidal'] && $artist && !$qsType && !$tag && !in_array($artist,$cfg['VA']) && $filter == 'whole') {
 ?>
 
 
@@ -651,7 +651,7 @@ foreach (array_slice($album_multidisc,($page - 1) * $max_item_per_page, $max_ite
 //  +------------------------------------------------------------------------+
 //  | albums and top tracks from Tidal                                       |
 //  +------------------------------------------------------------------------+
-if ($cfg['use_tidal'] && $artist && $artist != 'All albums' && !in_array($artist,$cfg['VA'])) {
+if ($cfg['use_tidal'] && $artist && $artist != 'All albums' && !in_array($artist,$cfg['VA']) && $filter == 'whole') {
 ?>
 <div>
 <h1 onclick='toggleSearchResults("TI");' class="pointer" id="tidalAlbums"><i id="iconSearchResultsTI" class="fa fa-chevron-circle-down icon-anchor"></i> Albums from Tidal</h1>
@@ -818,7 +818,7 @@ request.always(function() {
 //  | tracks from Youtube                                                    |
 //  +------------------------------------------------------------------------+
 
-if ($cfg['show_youtube_results'] && !$genre_id) {
+if ($cfg['show_youtube_results'] && !$genre_id && !$year && !$qsType && !$dr && $filter == 'whole' && !in_array($artist,$cfg['VA'])) {
 ?>
 <div>
 <h1 onclick='toggleSearchResults("YT");' class="pointer" id="ytTracks"><i id="iconSearchResultsYT" class="fa fa-chevron-circle-down icon-anchor"></i> Results from YouTube</h1>
