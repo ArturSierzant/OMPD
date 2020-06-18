@@ -166,6 +166,11 @@ class TidalAPI {
 		return $this->request();
 	}
 	
+	/* function getUserHomePage() {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "/pages/home?locale=en_US&countryCode=" . $this->countryCode . "&deviceType=BROWSER");
+		return $this->request();
+	} */
+	
 	function getUserPlaylists() {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "users/" . $this->userId . "/playlists?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
 		return $this->request();
@@ -191,6 +196,9 @@ class TidalAPI {
 	}
 	
 	static function albumCoverToURL($pic,$quality = 'hq') {
+		if (!$pic) {
+			return false;
+		}
 		$pic = str_replace("-","/",$pic);
 		if ($quality == 'hq') {
 			$pic = self::RESOURCES_URL . $pic . '/1280x1280.jpg';

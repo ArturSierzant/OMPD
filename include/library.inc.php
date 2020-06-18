@@ -48,8 +48,19 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 				$pic = $rows['cover'];
 			}
 			
-			$cover = $t->albumCoverToURL($pic,'lq');
+			//album added before 'cover' field was added to 'tidal_album' table
+			if (!$pic) {
+				getAlbumFromTidal($album_id);
+				$picQuery = mysqli_query($db,"SELECT cover FROM tidal_album 
+				WHERE album_id = '" . $album_id . "'");
+				$rows = mysqli_fetch_assoc($picQuery);
+				$pic = $rows['cover'];
+			}
 			
+			$cover = $t->albumCoverToURL($pic,'lq');
+			if (!$cover) {
+				$cover = 'image/no_image.jpg';
+			}
 			$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $cover . '" alt="" width="100%" height="100%">';
 		}
 		else {

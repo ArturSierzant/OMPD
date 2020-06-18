@@ -31,25 +31,38 @@ $data = array();
 $results = array();
 $search = $_GET['searchStr'];
 $search = str_replace(" ", "+", $search);
-$html = file_get_html("https://www.youtube.com/results?search_query=" . $search);
+$html = new simple_html_dom();
+$html -> load_file("https://www.youtube.com/results?search_query=" . $search);
+//echo ($html);
+//exit();
 $i = 0;
 $data['return'] = 0;
 
-foreach($html->find('ol.item-section') as $ol){
-	foreach($ol->find('li') as $li) {
-			foreach($li->find('div.yt-lockup') as $d){
-				foreach($d->find('span.video-time') as $vt){
-					if($vt->innertext){
-						foreach($d->find('div.yt-lockup-content h3 a') as $a){
-							$results['items'][$i]['id'] = getYouTubeId($a->href);
-							$results['items'][$i]['title'] = $a->innertext;
-							$results['items'][$i]['url'] = $a->href;
-							$results['items'][$i]['time'] = $vt->innertext;
-							$i++;
+for ($j=1;$j<=5;$j++) {
+	foreach($html->find('ol.item-section') as $ol){
+		foreach($ol->find('li') as $li) {
+				foreach($li->find('div.yt-lockup') as $d){
+					foreach($d->find('span.video-time') as $vt){
+						if($vt->innertext){
+							foreach($d->find('div.yt-lockup-content h3 a') as $a){
+								$results['items'][$i]['id'] = getYouTubeId($a->href);
+								$results['items'][$i]['title'] = $a->innertext;
+								$results['items'][$i]['url'] = $a->href;
+								$results['items'][$i]['time'] = $vt->innertext;
+								$i++;
+							}
 						}
 					}
 				}
-			}
+		}
+	}
+	if ($i==0) {
+		//try to load YT page up to 5 times because sometimes it returned 0 results
+		$j++;
+		$html -> load_file("https://www.youtube.com/results?search_query=" . $search);
+	}
+	else {
+		break;
 	}
 }
 

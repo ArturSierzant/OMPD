@@ -244,7 +244,10 @@ function prev_() {
 	require_once('include/play.inc.php');
 	
 	$data = array();
-	
+	$status = mpd('status');
+	if ($status['state'] == 'stop') {
+		mpd('play');
+	}
 	mpd('previous');
 	if (get('menu') == 'playlist') {
 		$status = mpd('status');
@@ -283,7 +286,10 @@ function next_() {
 	require_once('include/play.inc.php');
 	
 	$data = array();
-	
+	$status = mpd('status');
+	if ($status['state'] == 'stop') {
+		mpd('play');
+	}
 	mpd('next');
 	if (get('menu') == 'playlist') {
 		$status = mpd('status');

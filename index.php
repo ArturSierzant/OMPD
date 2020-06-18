@@ -2123,18 +2123,19 @@ function viewRecentlyPlayed() {
 	
 	if ($type == 'day') {
 		if ($cfg['use_tidal']) {
-		$query_rp = mysqli_query($db, "SELECT * FROM
-		((SELECT a.album_id, a.image_id, a.album, a.artist_alphabetic, counter.time as played_time
-		FROM counter JOIN (SELECT album_id, image_id, album, artist_alphabetic FROM album) as a on a.album_id = counter.album_id
-		WHERE counter.album_id NOT LIKE 'tidal_%')
-		UNION 
-		(SELECT t.album_id, t.album_id as image_id, t.album, t.artist_alphabetic, counter.time as played_time
-		FROM counter JOIN (SELECT concat('tidal_',album_id) as album_id, album, artist_alphabetic FROM tidal_album) as t on t.album_id = counter.album_id
-		WHERE counter.album_id LIKE 'tidal_%')
-		) al
-		 ORDER BY al.played_time DESC
-		 ");
-	} else {
+			$query_rp = mysqli_query($db, "SELECT * FROM
+			((SELECT a.album_id, a.image_id, a.album, a.artist_alphabetic, counter.time as played_time
+			FROM counter JOIN (SELECT album_id, image_id, album, artist_alphabetic FROM album) as a on a.album_id = counter.album_id
+			WHERE counter.album_id NOT LIKE 'tidal_%')
+			UNION 
+			(SELECT t.album_id, t.album_id as image_id, t.album, t.artist_alphabetic, counter.time as played_time
+			FROM counter JOIN (SELECT concat('tidal_',album_id) as album_id, album, artist_alphabetic FROM tidal_album) as t on t.album_id = counter.album_id
+			WHERE counter.album_id LIKE 'tidal_%')
+			) al
+			 ORDER BY al.played_time DESC
+			 ");
+		} 
+		else {
 		$query_rp = mysqli_query($db, '
 		SELECT a.album_id, a.image_id, a.album, a.artist_alphabetic, counter.time as played_time
 		FROM counter JOIN (SELECT album_id, image_id, album, artist_alphabetic FROM album) as a on a.album_id = counter.album_id 
@@ -2293,11 +2294,27 @@ function viewPlayedAtDay() {
 	$page = (get('page') ? get('page') : 1);
 	$max_item_per_page = $cfg['max_items_per_page'];
 	
-	
-	$query_rp = mysqli_query($db, '
-		SELECT a.album_id, a.image_id, a.album, a.artist_alphabetic, counter.time as played_time
-		FROM counter JOIN (SELECT album_id, image_id, album, artist_alphabetic FROM album) as a on a.album_id = counter.album_id WHERE counter.time > ' . $beginOfDay . ' AND counter.time < ' . $endOfDay . ' ORDER BY played_time DESC
-		' );
+	if ($cfg['use_tidal']) {
+			$q = '
+				SELECT * FROM
+				(
+				(SELECT a.album_id, a.image_id, a.album, a.artist_alphabetic, counter.time as played_time
+				FROM counter JOIN (SELECT album_id, image_id, album, artist_alphabetic FROM album) as a on a.album_id = counter.album_id WHERE counter.time > ' . $beginOfDay . ' AND counter.time < ' . $endOfDay . ')
+				UNION
+				(SELECT CONCAT("tidal_", b.album_id) as album_id, b.album_id as image_id, b.album, b.artist_alphabetic, counter.time as played_time
+				FROM counter JOIN (SELECT album_id, cover, album, artist_alphabetic FROM tidal_album) as b on CONCAT("tidal_", b.album_id) = counter.album_id WHERE counter.time > ' . $beginOfDay . ' AND counter.time < ' . $endOfDay . ')
+				) as c
+				ORDER BY c.played_time DESC
+				';
+			$query_rp = mysqli_query($db, $q );
+			//echo $q;
+		} 
+		else {
+			$query_rp = mysqli_query($db, '
+				SELECT a.album_id, a.image_id, a.album, a.artist_alphabetic, counter.time as played_time
+				FROM counter JOIN (SELECT album_id, image_id, album, artist_alphabetic FROM album) as a on a.album_id = counter.album_id WHERE counter.time > ' . $beginOfDay . ' AND counter.time < ' . $endOfDay . ' ORDER BY played_time DESC
+				' );
+		}
 	
 	$album_multidisc = albumMultidisc($query_rp, 'rp');
 ?>
