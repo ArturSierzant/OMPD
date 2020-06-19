@@ -67,6 +67,7 @@ function javascript() {
 	$source = array('javascript-src/initialize.js',
 					'javascript-src/overlib.js',
 					'javascript-src/overlib_cssstyle.js',
+					'javascript-src/xzoom.min.js',
 					'javascript-src/sha1.js');
 	
 	$content = '';

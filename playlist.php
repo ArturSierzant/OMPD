@@ -106,8 +106,18 @@ if (count($file) == 0) {
 		<img src="image/loader.gif" alt="">
 	</div>
 	-->
-	<div id="image">
-		<a href="index.php"><img id="image_in" src="image/transparent.gif" alt=""></a>
+	<div id="image" tabindex=1>
+
+<script>
+    $(function () {
+	    $('.xzoom-1').xzoom(
+		defaultScale = -1,
+    		);
+    });
+</script>
+<div class="zoom-box">
+    <img id="image_in" class="xzoom-1" src="image/transparent.gif" xoriginal="image/transparent.gif" alt=""/>
+</div>
 	</div>
 		<div id="waitIndicatorImg"></div>
 </div>
@@ -1210,6 +1220,7 @@ function evaluateTrack(data) {
 	//console.log ('data.album_id = ' + data.album_id);
 	if (data.album_id) {
 		$("#image_in").attr("src","image.php?image_id=" + data.image_id + "&quality=hq&track_id=" + data.track_id);
+		$("#image_in").attr("xoriginal","image.php?image_id=" + data.image_id + "&quality=hq&track_id=" + data.track_id);
 		$("#image a").attr("href","index.php?action=view3&album_id=" + data.album_id);
 		
 	}
