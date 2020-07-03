@@ -23,6 +23,9 @@ require_once('include/initialize.inc.php');
 require_once('include/library.inc.php');
 require_once('PHPsimpleHTMLDomParser/simple_html_dom.php');
 
+//error_reporting(E_ALL ^ E_NOTICE);
+//@ini_set('display_errors', 'On');
+
 global $cfg, $db;
 
 authenticate('access_media');
@@ -32,14 +35,15 @@ $results = array();
 $search = $_GET['searchStr'];
 $search = str_replace(" ", "+", $search);
 $html = new simple_html_dom();
-$html -> load_file("https://www.youtube.com/results?search_query=" . $search);
-//echo ($html);
-//exit();
+//$html -> load_file("https://www.youtube.com/results?search_query=" . $search);
+$urlSearch = "https://www.google.com/search?q=site:youtube.com+" . $search;
+$html -> load_file($urlSearch);
 $i = 0;
 $data['return'] = 0;
 
-for ($j=1;$j<=5;$j++) {
-	foreach($html->find('ol.item-section') as $ol){
+
+for ($j=1;$j<=2;$j++) {
+	/* foreach($html->find('ol.item-section') as $ol){
 		foreach($ol->find('li') as $li) {
 				foreach($li->find('div.yt-lockup') as $d){
 					foreach($d->find('span.video-time') as $vt){
@@ -55,11 +59,39 @@ for ($j=1;$j<=5;$j++) {
 					}
 				}
 		}
+	} */
+	foreach($html->find('div[id=main]') as $ol){
+		for ($k = 3; $k <= 15; $k++) {
+			//echo $ol;
+			if ($ol->children($k) !== null && $ol->children($k)->find('div',0) !== null && $ol->children($k)->find('div',0)->find('div',0) !== null) {
+				foreach($ol->children($k)->find('div',0)->find('div',0)->find('a') as $a) {
+					$watch = $a->find('div',1)->innertext;
+					if (strpos($watch,'watch') !== false) {
+						$url = urldecode(str_replace('/url?q=','',$a->href));
+						$query = parse_url($url, PHP_URL_QUERY);
+						parse_str($query, $output);
+						$results['items'][$i]['id'] = $output['v'];
+						$title = $a->find('h3',0)->plaintext;
+						$title = mb_convert_encoding($title,'UTF-8','UTF-8');
+						$title = str_replace(' - YouTube','',$title);
+						$results['items'][$i]['title'] = $title;
+						$results['items'][$i]['url'] = "/watch?v=" . $output['v'];
+						
+						if ($ol->children($k)->find('div',0)->children(2) !== null) {
+							$t = $ol->children($k)->find('div',0)->children(2)->plaintext;
+							$t = preg_match('/\d{0,}\d{0,}:{0,}\d{0,}\d:\d\d/',$t,$matches);
+							$results['items'][$i]['time'] = $matches[0];
+						}
+					}
+					$i++;
+				}
+			}
+		}
 	}
 	if ($i==0) {
-		//try to load YT page up to 5 times because sometimes it returned 0 results
+		//try to load YT page up to 2 times because sometimes it returned 0 results
 		$j++;
-		$html -> load_file("https://www.youtube.com/results?search_query=" . $search);
+		$html -> load_file($urlSearch);
 	}
 	else {
 		break;

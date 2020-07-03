@@ -160,7 +160,7 @@ function about() {
 <tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
-	<td style="vertical-align: top;">v1.06 <br>2020.??.??</td>
+	<td style="vertical-align: top;">v1.06 <br>2020.07.??</td>
 	<td></td>
 	<td>
 	<ul style="padding-left: 1em;">

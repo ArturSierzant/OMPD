@@ -41,6 +41,7 @@ var $tileSizeArr = calcTileSize();
 $tileSize = $tileSizeArr[0];
 $containerWidth = $tileSizeArr[1];
 var $useMaxWidth = true; //special case for skin dark-wide
+
 var opts = {
   lines: 13, // The number of lines to draw
   length: 21, // The length of each line
@@ -716,7 +717,7 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 
 
 <span id="menuMiddleMedia">
-<span id="list" onclick='toggleSubMiddle("Alpha");'>people <i id="iconmenuSubMiddleMediaAlpha" class="fa fa-chevron-circle-down"></i></span>
+<span id="list" onclick='toggleSubMiddle("Alpha");'>artist <i id="iconmenuSubMiddleMediaAlpha" class="fa fa-chevron-circle-down"></i></span>
 
 <?php echo $header['seperation']; ?>
 <!-- <span id="genre" onclick='toggleSubMiddle("Genre");'>genre <i id="iconmenuSubMiddleMediaGenre" class="fa fa-chevron-circle-down"></i></span>

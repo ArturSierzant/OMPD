@@ -37,7 +37,7 @@ header('X-Accel-Buffering: no');
 
 define('NJB_START_TIME', microtime(true));
 
-define('NJB_VERSION', '1.05');
+define('NJB_VERSION', '1.06');
 define('NJB_DATABASE_VERSION', 47);
 define('NJB_IMAGE_SIZE', 300);
 define('NJB_IMAGE_QUALITY', 85);
