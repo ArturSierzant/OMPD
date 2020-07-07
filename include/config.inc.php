@@ -125,13 +125,28 @@ $cfg['stream_covers_dir'] = 'covers/';
 
 
 
+
 //  +------------------------------------------------------------------------+
 //  | Youtube search                                                         |
 //  +------------------------------------------------------------------------+
 //  | Show Youtube search results.                                           |
+//  |                                                                        |
+//  | O!MPD uses Google API to perform YouTube searches.                     |
+//  | Google API requires valid API key to be saved as $cfg['youtube_key'].  |
+//  | You can:                                                               |
+//  |  - use your own key (there is a lot tutorials in internet how to get   |
+//  |    one - it's easy and free)                                           |
+//  |  - use key provided by O!MPD - but it has day limit of uses            |
+//  |                                                                        |
+//  | Alternatively you can set $cfg['youtube_key'] = "". In that case       |
+//  | O!MPD will search YT results by asking google.com and parsing html     |
+//  | answer. Results list is usually limited to about 10 positions. But it  |
+//  | may stop working when Google changes layout of page with results.      |
 //  +------------------------------------------------------------------------+
 
 $cfg['show_youtube_results'] = true;
+$cfg['youtube_key'] = "AIzaSyCasdVt44uKVWymVBVtILwtu1Sgyx2sdl0";
+$cfg['youtube_max_results'] = "30";
 
 
 //  +------------------- END OF NEW IN O!MPD 1.06 ---------------------------+

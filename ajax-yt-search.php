@@ -32,69 +32,109 @@ authenticate('access_media');
 
 $data = array();
 $results = array();
-$search = $_GET['searchStr'];
-$search = str_replace(" ", "+", $search);
-$html = new simple_html_dom();
-//$html -> load_file("https://www.youtube.com/results?search_query=" . $search);
-$urlSearch = "https://www.google.com/search?q=site:youtube.com+" . $search;
-$html -> load_file($urlSearch);
+$search = str_replace(" ", "+", $_GET['searchStr']);
+
 $i = 0;
 $data['return'] = 0;
 
 
-for ($j=1;$j<=2;$j++) {
-	/* foreach($html->find('ol.item-section') as $ol){
-		foreach($ol->find('li') as $li) {
-				foreach($li->find('div.yt-lockup') as $d){
-					foreach($d->find('span.video-time') as $vt){
-						if($vt->innertext){
-							foreach($d->find('div.yt-lockup-content h3 a') as $a){
-								$results['items'][$i]['id'] = getYouTubeId($a->href);
-								$results['items'][$i]['title'] = $a->innertext;
-								$results['items'][$i]['url'] = $a->href;
-								$results['items'][$i]['time'] = $vt->innertext;
-								$i++;
+if ($cfg['youtube_key']) {
+  $YT_API_URL = 'https://www.googleapis.com/youtube/v3';
+  $DEVELOPER_KEY = $cfg['youtube_key'];
+  $maxResults = $cfg['youtube_max_results'];
+  $vidIDs = "";
+  
+  $url = "$YT_API_URL/search?part=snippet&imaxResults=&key=$DEVELOPER_KEY&maxResults=$maxResults&q=$search";
+
+  $opts = array(
+    'http' => array('ignore_errors' => true)
+  );
+
+  $context = stream_context_create($opts);
+
+  $searchResponse = file_get_contents($url, false, $context);
+
+  $searchResponse = json_decode($searchResponse, true);
+  if ($searchResponse['error']['message']) {
+    $data['return'] = 1;
+    $data['response'] = $searchResponse['error']['message'];
+  }
+  else {
+    foreach ($searchResponse['items'] as $searchResult) {
+      if ($searchResult['id']['kind'] == 'youtube#video') {
+          $results['items'][$i]['title'] = $searchResult['snippet']['title'];
+          $videoID = $searchResult['id']['videoId'];
+          $results['items'][$i]['id'] = $videoID;
+          $results['items'][$i]['url'] = "/watch?v=" . $videoID;
+          $vidIDs = $vidIDs . $videoID . ",";
+          $i++;
+      }
+    }
+    
+    $i = 0;
+    $details = file_get_contents("$YT_API_URL/videos?part=contentDetails&id=$vidIDs&key=$DEVELOPER_KEY");
+    $details =json_decode($details, true);
+
+    foreach ($details['items'] as $detail){
+      $vidDuration= $detail['contentDetails']['duration'];
+      preg_match_all('/(\d{0,2}H)/',$vidDuration,$parts);
+      $h = str_replace("H","",$parts[0][0]);
+      $h >= 1 ? $h = $h . ":" : $h = "";
+      preg_match_all('/(\d{0,2}M)/',$vidDuration,$parts);
+      $m = str_replace("M","",$parts[0][0]);
+      $m >= 1 ? $m = $m . ":" : $m = "0:";
+      if ($m < 10 && $h != "") $m = "0" . $m;
+      preg_match_all('/(\d{0,2}S)/',$vidDuration,$parts);
+      $s = str_replace("S","",$parts[0][0]);
+      $s >= 1 ? $s = $s  : $s = "00";
+      if ($s < 10 && $s >= 1) $s = "0" . $s;
+      $results['items'][$i]['time'] = "$h$m$s";
+      //$results['items'][$i]['time'] = $vidDuration;
+      $i++;
+    }
+  }
+}
+else {
+  $html = new simple_html_dom();
+  $urlSearch = "https://www.google.com/search?q=site:youtube.com+" . $search;
+  $html -> load_file($urlSearch);
+	for ($j=1;$j<=2;$j++) {
+		foreach($html->find('div[id=main]') as $ol){
+			for ($k = 3; $k <= 15; $k++) {
+				//echo $ol;
+				if ($ol->children($k) !== null && $ol->children($k)->find('div',0) !== null && $ol->children($k)->find('div',0)->find('div',0) !== null) {
+					foreach($ol->children($k)->find('div',0)->find('div',0)->find('a') as $a) {
+						$watch = $a->find('div',1)->innertext;
+						if (strpos($watch,'watch') !== false) {
+							$url = urldecode(str_replace('/url?q=','',$a->href));
+							$query = parse_url($url, PHP_URL_QUERY);
+							parse_str($query, $output);
+							$results['items'][$i]['id'] = $output['v'];
+							$title = $a->find('h3',0)->plaintext;
+							$title = mb_convert_encoding($title,'UTF-8','UTF-8');
+							$title = str_replace(' - YouTube','',$title);
+							$results['items'][$i]['title'] = $title;
+							$results['items'][$i]['url'] = "/watch?v=" . $output['v'];
+							
+							if ($ol->children($k)->find('div',0)->children(2) !== null) {
+								$t = $ol->children($k)->find('div',0)->children(2)->plaintext;
+								$t = preg_match('/\d{0,}\d{0,}:{0,}\d{0,}\d:\d\d/',$t,$matches);
+								$results['items'][$i]['time'] = $matches[0];
 							}
 						}
+						$i++;
 					}
-				}
-		}
-	} */
-	foreach($html->find('div[id=main]') as $ol){
-		for ($k = 3; $k <= 15; $k++) {
-			//echo $ol;
-			if ($ol->children($k) !== null && $ol->children($k)->find('div',0) !== null && $ol->children($k)->find('div',0)->find('div',0) !== null) {
-				foreach($ol->children($k)->find('div',0)->find('div',0)->find('a') as $a) {
-					$watch = $a->find('div',1)->innertext;
-					if (strpos($watch,'watch') !== false) {
-						$url = urldecode(str_replace('/url?q=','',$a->href));
-						$query = parse_url($url, PHP_URL_QUERY);
-						parse_str($query, $output);
-						$results['items'][$i]['id'] = $output['v'];
-						$title = $a->find('h3',0)->plaintext;
-						$title = mb_convert_encoding($title,'UTF-8','UTF-8');
-						$title = str_replace(' - YouTube','',$title);
-						$results['items'][$i]['title'] = $title;
-						$results['items'][$i]['url'] = "/watch?v=" . $output['v'];
-						
-						if ($ol->children($k)->find('div',0)->children(2) !== null) {
-							$t = $ol->children($k)->find('div',0)->children(2)->plaintext;
-							$t = preg_match('/\d{0,}\d{0,}:{0,}\d{0,}\d:\d\d/',$t,$matches);
-							$results['items'][$i]['time'] = $matches[0];
-						}
-					}
-					$i++;
 				}
 			}
 		}
-	}
-	if ($i==0) {
-		//try to load YT page up to 2 times because sometimes it returned 0 results
-		$j++;
-		$html -> load_file($urlSearch);
-	}
-	else {
-		break;
+		if ($i==0) {
+			//try to load YT page up to 2 times because sometimes it returned 0 results
+			$j++;
+			$html -> load_file($urlSearch);
+		}
+		else {
+			break;
+		}
 	}
 }
 
