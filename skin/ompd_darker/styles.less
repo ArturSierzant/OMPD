@@ -1,0 +1,114 @@
+/*  +------------------------------------------------------------------------+
+    | styles.css                                                             |
+    +------------------------------------------------------------------------+ */
+
+@import url("./../styles_inc.less");
+
+@font-face {
+    font-family: Roboto;
+    src: url(fonts/Roboto/Roboto-Regular.ttf);
+		font-weight: 400;
+}
+
+@font-face {
+    font-family: Roboto;
+    src: url(fonts/Roboto/Roboto-Light.ttf);
+		font-weight: 300;
+}
+
+/* Main background */
+@bg-main: #000;
+
+/* Sub background */
+@bg-sub: #161616;
+
+/* Categories background (headers, footers, album/now playing) */
+@bg-categories: #171717;
+
+/* Background color of track in tracklist/playlist */
+@bg-track: #111;
+
+/* Background playlist current track */
+@bg-playlist-active: #222;
+@bg-track-playing-active: #b53d00;
+
+/* Background of track submenu */
+@bg-track-submenu: #141414;
+
+/* Main banner background */
+@bg-banner: #161616;
+
+/* Main sub banner background */
+@bg-sub-banner-2: #161616;
+
+/* Main sub sub banner background */
+@bg-sub-sub-banner-2: lighten(@bg-sub-banner-2, 5%);
+
+/* Sub banner background */
+@bg-sub-banner: #4e6819;
+
+/* Sub sub banner background */
+@bg-sub-sub-banner: lighten(@bg-sub-banner, 3%);
+
+/* Footer background */
+@bg-footer: #161616;
+
+/* Background of forms */
+@bg-forms: #fefefe;
+@bg-forms-banner: #fefefe;
+
+/* Separators in subbanner */
+@separator-sub-banner: #cccccc;
+
+/* fonts */
+@font-first: #a5a5a5;
+@font-active: #fdf6e3;
+@font-banner: #a5a5a5;
+@font-categories: @font-banner;
+@font-tags: #fdf6e3;
+@font-search-button: #fdf6e3;
+@font-sub-banner: #fdf6e3;
+@font-sub-sub-banner: #fdf6e3;
+@font-sub-button: #fdf6e3;
+@font-album-title-library: #ffffff;
+@font-artist-library: fade(@font-album-title-library, 70%);
+@font-track-playing: #fdf6e3;
+@font-track-playing-active: #fdf6e3;
+@font-album-title-playing: #a5a5a5;
+
+/* tabs */
+@tab-selected: #b53d00; 
+@tab: #2f3439;
+
+/* buttons */
+@button: #777777;
+@button-banner: #a5a5a5;
+@button-banner-active: #fdf6e3;
+
+/* buttons in add/save playlist menu and submenus */
+@button-sub: #777777;
+
+/* buttons in select player, paginator, favorites, etc.*/
+@button-nav: #67891e;
+@button-quick-play: #fdf6e3;
+
+/* buttons in Now Playing: ff, play/pause, etc. */
+@button-playlist: #161616;
+@button-playlist-off: #a5a5a5;
+@button-playlist-on: #b53d00;
+
+/* logo */
+@logo-first-color: #3498db;
+@logo-second-color: #fdf6e3;
+
+/* playing bars */
+@playing-bar: #b53d00;
+@bg-playing-bar: #333;
+@volume-bar: @playing-bar;
+
+/* Active color */
+@active-nav: #b53d00;
+@active-banner: #b53d00;
+
+/* Player buttons outline */
+@player-button-outline: true;	

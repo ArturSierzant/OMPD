@@ -46,10 +46,10 @@ $cfg['mysqli_auto_create_db']       = true;
 //  | Use a UNIX style directory scheme with a trailing slash.               |
 //  |                                                                        |
 //  | Windows:        'D:/Media/';                                           |
-//  | Linux/Unix/OSX: '/var/mpd/music/';                                     |
+//  | Linux/Unix/OSX: '/var/lib/mpd/music/';                                 |
 //  +------------------------------------------------------------------------+
 
-$cfg['media_dir']                   = '/share/HDA_DATA/ompd/';
+$cfg['media_dir']                   = '/var/lib/mpd/music/';
 
 
 
