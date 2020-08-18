@@ -97,6 +97,12 @@ function search_all() {
 		tidal_tracks();
 		tidal_scripts();
 	}
+	if ($cfg['use_hra']) {
+		echo '<span class="nav_tree">Results from HighResAudio:</span>';
+		hra_artist();
+		hra_albums();
+		hra_scripts();
+	}
 	if ($cfg['show_youtube_results']) {
 		echo '<span class="nav_tree">Results from YouTube:</span>';
 		youtube_tracks();
@@ -1283,6 +1289,176 @@ function tidal_tracks(){
 <div id="searchResultsTIT">
 <span id="tracksLoadingIndicator">
 		<i class="fa fa-cog fa-spin icon-small"></i> Loading tracks list...
+</span>
+<?php 
+//if ($tileSizePHP) $size = $tileSizePHP;
+
+?>
+</div>
+</div>
+
+<?php
+}
+
+//  +------------------------------------------------------------------------+
+//  | Java scripts for HRA part                                              |
+//  +------------------------------------------------------------------------+
+
+function hra_scripts(){
+
+global $search_string;
+?>
+<script>
+
+var hraArtistsRequestDone = false;
+var hraAlbumsRequestDone = false;
+
+$('#hraArtists').click(function() {
+	if (!hraArtistsRequestDone) hraSearchArtists();
+});
+
+$('#hraAlbums').click(function() {
+	if (!hraAlbumsRequestDone) hraSearchAlbums();
+});
+
+function hraSearchArtists(){
+	var size = $tileSize;
+	//var searchStr = "<?php echo tidalEscapeChar($search_string);?>";
+	var searchStr = "<?php echo str_replace('"','',$search_string);?>";
+	var request = $.ajax({  
+		url: "ajax-hra-search.php",  
+		type: "POST",  
+		data: { search : "artists", tileSize : size, searchStr : searchStr },  
+		dataType: "json"
+	}); 
+	
+	request.done(function( data ) {
+		if (data['return'] == 1) {
+			$("[id*='LoadingIndicator']").hide();
+			$("[id*='searchResultsHRAA']").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution HRA request.<br><br>' + data['response'] + '<br><br></div>');
+			return;
+		}
+		
+		if (data['artists_results'] > 0) {
+			$( "#searchResultsHRAA" ).html( data['artists'] );	
+		}
+		else {
+			$("#searchResultsHRAA").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on HRA.</span>');
+		}
+		
+		hraArtistsRequestDone = true;
+		//console.log (data.length);
+	}); 
+	
+	request.fail(function( jqXHR, textStatus ) {  
+		//alert( "Request failed: " + textStatus );	
+	}); 
+
+	request.always(function() {
+		// $('#iframeRefresh').addClass("icon-anchor");
+		// $('#iframeRefresh').removeClass("icon-selected fa-spin");
+		$('[id^="add_hra"]').click(function(){
+			$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
+		});
+
+		$('[id^="play_hra"]').click(function(){
+			$(this).removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
+		});
+		
+	});
+};
+
+function hraSearchAlbums(){
+	var size = $tileSize;
+	//var searchStr = "<?php echo tidalEscapeChar($search_string);?>";
+	var searchStr = "<?php echo str_replace('"','',$search_string);?>";
+	var request = $.ajax({  
+		url: "ajax-hra-search.php",  
+		type: "POST",  
+		data: { search : "albums", tileSize : size, searchStr : searchStr },  
+		dataType: "json"
+	}); 
+	
+	request.done(function( data ) {
+		if (data['return'] == 1) {
+			$("[id*='LoadingIndicator']").hide();
+			$("[id*='searchResultsHRAAl']").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution HRA request.<br><br>' + data['response'] + '<br><br></div>');
+			return;
+		}
+		
+		if (data['albums_results'] > 0) {
+			$( "#searchResultsHRAAl" ).html( data['albums'] );	
+		}
+		else {
+			$("#searchResultsHRAAl").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on HRA.</span>');
+		}
+		
+		calcTileSize();
+		changeTileSizeInfo();
+		setAnchorClick();
+		//addFavSubmenuActions();
+		hraAlbumsRequestDone = true;
+		//console.log (data.length);
+	}); 
+	
+	request.fail(function( jqXHR, textStatus ) {  
+		//alert( "Request failed: " + textStatus );	
+	}); 
+
+	request.always(function() {
+		// $('#iframeRefresh').addClass("icon-anchor");
+		// $('#iframeRefresh').removeClass("icon-selected fa-spin");
+		$('[id^="add_hra"]').click(function(){
+			$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
+		});
+
+		$('[id^="play_hra"]').click(function(){
+			$(this).removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
+		});
+		
+	});
+};
+</script>
+<?php
+
+}
+
+//  +------------------------------------------------------------------------+
+//  | Artists from HRA                                                       |
+//  +------------------------------------------------------------------------+
+
+function hra_artist(){
+	global $cfg, $db, $size, $search_string;
+?>
+<div>
+<h1 onclick='toggleSearchResults("HRAA");' class="pointer" id="hraArtists"><i id="iconSearchResultsHRAA" class="fa fa-chevron-circle-down icon-anchor"></i> Artists</h1>
+<div id="searchResultsHRAA">
+<span id="hraArtistsLoadingIndicator">
+		<i class="fa fa-cog fa-spin icon-small"></i> Loading artists list...
+</span>
+<?php 
+//if ($tileSizePHP) $size = $tileSizePHP;
+
+?>
+</div>
+</div>
+
+<?php
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Albums from HRA                                                        |
+//  +------------------------------------------------------------------------+
+
+function hra_albums(){
+	global $cfg, $db, $size, $search_string;
+?>
+<div>
+<h1 onclick='toggleSearchResults("HRAAl");' class="pointer" id="hraAlbums"><i id="iconSearchResultsHRAAl" class="fa fa-chevron-circle-down icon-anchor"></i> Albums</h1>
+<div id="searchResultsHRAAl">
+<span id="hraAlbumsLoadingIndicator">
+		<i class="fa fa-cog fa-spin icon-small"></i> Loading albums list...
 </span>
 <?php 
 //if ($tileSizePHP) $size = $tileSizePHP;

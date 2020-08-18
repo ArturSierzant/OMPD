@@ -806,6 +806,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	//$md					= isset(get('md')) ? get('md') : '';
 	$md						= get('md');
 	$isYoutube 		= false;
+	$isHRA 		= false;
 	
 	if ($track_id) {
 		if (isTidal($track_id)) {
@@ -833,6 +834,9 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 			}
 
 		}
+		elseif (isHRA($track_id)){
+			$isHRA = true;
+		}
 		elseif (isYoutube($track_id)){
 			$isYoutube = true;
 		}
@@ -841,7 +845,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 		}
 	}
 	//only whole albums, not single tracks from e.g. search results
-	elseif ($album_id && !isTidal($track_id)) {
+	elseif ($album_id && !isTidal($track_id) && !isHRA($track_id)) {
 		if (isTidal($album_id)) {
 			//$tidal_album_id = str_replace("tidal_","",$album_id);
 			$tidal_album_id = getTidalId($album_id);
@@ -850,6 +854,17 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 			}
 			else {
 				$tidal_tracks = getTracksFromTidalAlbum($tidal_album_id);
+			}
+			$mds_updateCounter = array();
+			$mds_updateCounter[] = $album_id;
+		}
+		elseif (isHRA($album_id)) {
+			$hra_album_id = getHraId($album_id);
+			if ($insertType == 'album' && $insPos > 0) {
+				$hra_tracks = getTracksFromHraAlbum($hra_album_id, 'DESC');
+			}
+			else {
+				$hra_tracks = getTracksFromHraAlbum($hra_album_id);
 			}
 			$mds_updateCounter = array();
 			$mds_updateCounter[] = $album_id;
@@ -997,7 +1012,60 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 		else {
 			return 'add_error';
 		}
+	}
+	elseif (isHRA($album_id) && !isHRA($track_id)) {
+		if ($hra_tracks) {
+			$hra_tracks = json_decode($hra_tracks, true);
+			$productionYear = $hra_tracks["productionYear"];
+			$cover = $hra_tracks["cover"]["master"]["file_url"];
+			$album_id = $hra_tracks["id"];
+			$album_title = $hra_tracks["title"];
+			foreach ($hra_tracks["tracks"] as $hra_track) {
+				if (!isInFavorite('hra_' . $hra_track['playlistAdd'],$cfg['blacklist_id'])){
+					$hra_track["productionYear"] = $productionYear;
+					$hra_track["cover"] = $cover;
+					$hra_track["track_id"] = $hra_track['playlistAdd'];
+					$hra_track["album_id"] = $album_id;
+					$hra_track["album_title"] = $album_title;
+					$url = createHRAMPDUrl($hra_track);
+					//$url = getHRAMPDUrl(getHraId($hra_track['playlistAdd']));
+					if (!$url) {
+						return 'add_error';
+					}
+					$mpdCommand = mpd('addid "' . mpdEscapeChar($url) . '" ' . $insPos);
+					if (is_string($mpdCommand) && strpos($mpdCommand,'ERROR') !== false) {
+						return 'add_error';
+					}
+					
+					/* $mpdCommand = mpdAddHraTrack('hra_' . $hra_track['playlistAdd'], $insPos);
+					if ($mpdCommand == 'ACK_ERROR_UNKNOWN' || $mpdCommand == 'ACK_ERROR_NO_EXIST' || $mpdCommand == 'TIDAL_CONNECT_ERROR') {
+						return 'add_error';
+					} */
+					$n++;
+				}
+			}
+			if ($playAfterInsert) {mpd('play ' . $insPos);}
+			if ($first && $mode == 'play') {
+				mpd('play ' . $index);
+			}
+			$first = false;
+		}
+		else {
+			return 'add_error';
+		}
 	} 
+	elseif($isHRA){
+		$url = getHRAMPDUrl(getHraId($track_id));
+		if (!$url) {
+			return 'add_error';
+		}
+		$mpdCommand = mpd('addid "' . mpdEscapeChar($url) . '" ' . $insPos);
+		if (is_string($mpdCommand) && strpos($mpdCommand,'ERROR') !== false) {
+			return 'add_error';
+		}
+		if ($playAfterInsert) {mpd('play ' . $insPos);}
+		if ($first && $mode == 'play') mpd('play ' . $index);
+	}
 	elseif($isYoutube){
 		$url = getYouTubeMPDUrl(getYouTubeId($track_id));
 		//$mpdCommand = mpd('addid "' . mpdEscapeChar($url) . '" ' . $insPos);
@@ -2047,18 +2115,6 @@ function playlistTrack() {
 		}
 		$explodedComposer = multiexplode($cfg['artist_separator'],$track['track_composer']);
 		
-		/* $inFavorite = false;
-		if (isset($cfg['favorite_id'])) {
-			$query = mysqli_query($db,"SELECT track_id FROM favoriteitem WHERE track_id = '" . $track_id . "' AND favorite_id = '" . $cfg['favorite_id'] . "' LIMIT 1");
-			if (mysqli_num_rows($query) > 0) $inFavorite = true;
-		}
-		
-		$onBlacklist = false;
-		if (isset($cfg['blacklist_id'])) {
-			$query = mysqli_query($db,"SELECT track_id FROM favoriteitem WHERE track_id = '" . $track_id . "' AND favorite_id = '" . $cfg['blacklist_id'] . "' LIMIT 1");
-			if (mysqli_num_rows($query) > 0) $onBlacklist = true;
-		} */
-		
 		$isStream = false;
 		if (strpos($currentsong['file'],"://") !== false) $isStream = true;
 		
@@ -2106,6 +2162,7 @@ function playlistTrack() {
 	}
 	else { //track not found in OMPD DB - read info from MPD
 		//require_once('include/play.inc.php');
+		$album_id = '';
 		$status 		= mpd('status');
 		if ($status['time'] == '0:00') {
 			//wait 1s to mpd reads info from stream
@@ -2155,7 +2212,21 @@ function playlistTrack() {
 			$$artist	= $currentsong['file'];
 		 */
 		 
-		if (strpos($currentsong['file'],'ompd_title=') !== false){
+		if (strpos($currentsong['file'],'streamHRA') !== false){
+			//stream from HRA
+			$parts = parse_url($currentsong['file']);
+			parse_str($parts['query'], $query);
+			$title = urldecode($query['ompd_title']);
+			//$track_artist = urldecode($query['ompd_artist']);
+			$currentsong['Artist'] = urldecode($query['ompd_artist']);
+			$album = urldecode($query['ompd_album_title']);
+			$album_id = urldecode("hra_" . $query['ompd_album_id']);
+			$currentsong['Date'] = urldecode($query['ompd_year']);
+			$times[1] = (int)urldecode($query['ompd_duration']);
+			$data['thumbnail'] = urldecode($query['ompd_thumbnail']);
+			$currentsong['Genre'] = urldecode($query['ompd_genre']);;
+		}
+		elseif (strpos($currentsong['file'],'ompd_title=') !== false){
 			//stream from Youtube
 			$parts = parse_url($currentsong['file']);
 			parse_str($parts['query'], $query);
@@ -2213,7 +2284,7 @@ function playlistTrack() {
 		$data['album']		= (string) $album;
 		$data['by']			= (string) '';
 		$data['image_id']	= (string) '';
-		$data['album_id']	= (string) '';
+		$data['album_id']	= (string) $album_id;
 		$data['year']	= postProcessYear($currentsong['Date']);
 		$data['genre']	= (string) trim($currentsong['Genre']);
 		if (empty($data['genre'])) $data['genre'] = '&nbsp;';

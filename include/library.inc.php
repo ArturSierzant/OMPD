@@ -34,8 +34,7 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 			$md = '&md=' . $multidisc;
 		}
 		$res = '<div title="Go to album \'' . html($album['album']) .  '\'" class="tile pointer" style="width: ' . $size . 'px; height: ' . $size . 'px;">';
-		if (strpos($album['album_id'],'tidal') !== false) {
-			//$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="http://images.osl.wimpmusic.com/im/im?w=300&h=300&albumid=' . str_replace('tidal_','',$album['album_id']) . '" alt="" width="100%" height="100%">';
+		if (isTidal($album['album_id'])) {
 			$t = new TidalAPI;
 			if ($tidal_cover) {
 				$pic = $tidal_cover;
@@ -62,6 +61,9 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 				$cover = 'image/no_image.jpg';
 			}
 			$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $cover . '" alt="" width="100%" height="100%">';
+		}
+		elseif (isHra($album['album_id'])) {
+			$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $album["cover"] . '" alt="" width="100%" height="100%">';
 		}
 		else {
 			$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="image.php?image_id=' . $album['image_id'] . '" alt="" width="100%" height="100%">';
@@ -237,7 +239,7 @@ function trackSubMenu($i, $track, $album_id = '', $type = 'echo') {
 	<div><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playSelect' . $tidalAlbumId .'&amp;track_id=' . $track['track_id'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Play track ' . $track['number'] . '\');" onMouseOut="return nd();"><i id="play_' . $track['track_id'] . '" class="fa fa-play-circle-o fa-fw icon-small"></i>Remove all from playlist and play track</a>'; ?>
 	</div>
 	<?php
-	if (!isTidal($album_id) && !isYoutube($track['track_id'])) {
+	if (!isTidal($album_id) && !isHra($album_id) && !isYoutube($track['track_id'])) {
 	?>
 	<div><?php if ($cfg['access_stream']) echo '<a href="stream.php?action=playlist&amp;track_id=' . $track['track_id'] . '&amp;stream_id=' . $cfg['stream_id'] . '" onMouseOver="return overlib(\'Stream track ' . $track['number'] . '\');" onMouseOut="return nd();"><i class="fa fa-rss fa-fw icon-small"></i>Stream track</a>'; ?>
 	</div>
@@ -939,7 +941,6 @@ function showAllFromTidal($searchStr, $size) {
 		$data['artists_results'] = count($results['artists']['items']);
 		$artistsList = '<table class="border" cellspacing="0" cellpadding="0">';
 		foreach ($results['artists']['items'] as $art) {
-			//$artistsList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=viewTidalAlbums&amp;tidalArtist=' . rawurlencode($art['name']) . '&amp;tidalArtistId=' . rawurlencode($art['id']). '&amp;order=year">' . html($art['name']) . '</a></td></tr>';
 			$artistsList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=view2&order=year&sort=asc&artist=' . rawurlencode($art['name']) . '&amp;tidalArtistId=' . rawurlencode($art['id']). '&amp;order=year">' . html($art['name']) . '</a></td></tr>';
 			}
 		$artistsList .= '</table>';
@@ -968,109 +969,6 @@ function showAllFromTidal($searchStr, $size) {
 	if ($results['tracks']['items']) {
 		$data['tracks_results'] = count($results['tracks']['items']);
 		$tracksList = tidalTracksList($results['tracks']);
-		/* $tracksList = '<table class="border" cellspacing="0" cellpadding="0">';
-		$tracksList .= '
-		<tr class="header">
-			<td class="icon"></td><!-- track menu -->
-			<td class="icon">';
-		if ($cfg["access_add"] && false) {  
-			$tracksList .= '<span onMouseOver="return overlib(\'Add all tracks\');" onMouseOut="return nd();"><i id="add_all_TT" class="fa fa-plus-circle fa-fw icon-small pointer"></i></span>';
-		}
-		$tracksList .= '
-			</td><!-- add track -->
-			<td class="track-list-artist">Track artist&nbsp;</td>
-			<td>Title&nbsp;</td>
-			<td>Album&nbsp;</td>
-			<td></td>
-			<td></td>
-			<td align="right" class="time time_w">Time</td>
-			<td class="space right"></td>
-		</tr>';
-		
-		$i=40000;
-		$TT_ids = ''; 
-		foreach ($results['tracks']['items'] as $track) {
-			$track['track_id'] = 'tidal_' . $track['id'];
-			$isFavorite = isInFavorite($track['track_id'], $cfg['favorite_id']);
-			$isBlacklist = isInFavorite($track['track_id'], $cfg['blacklist_id']);
-			$even_odd = ($i++ & 1) ? 'even' : 'odd';
-			$tracksList .= '
-			
-			<tr class="' . $even_odd . ' mouseover">
-				<td class="icon">
-				<span id="menu-track'. $i .'">
-				<div onclick="toggleMenuSub(' . $i . ');">
-					<i id="menu-icon' . $i .'" class="fa fa-bars icon-small"></i>
-				</div>
-				</span>
-				</td>
-				
-				<td class="icon">
-				<span>';
-			if ($cfg['access_add']) {
-				$tracksList .= '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;album_id=tidal_' . $track['album']['id'] .'&amp;track_id=' . $track['track_id'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . addslashes($track['title']) . '\');" onMouseOut="return nd();"><i id="add_tidal_' . $track['id'] . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';
-			}
-			$tracksList .= '
-				</span>
-				</td>
-				<td class="track-list-artist">
-				<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['artists'][0]['name']) . '&amp;order=year">' . html($track['artists'][0]['name']) . '</a>';
-				if (count($track['artists']) > 1) {
-					foreach ($track['artists'] as $key => $TOPT_art)
-					if ($key > 0) {
-						$tracksList .= ' & <a href="index.php?action=view2&amp;artist=' . rawurlencode($TOPT_art['name']) . '&amp;order=year">' . html($TOPT_art['name']) . '</a>';
-					}
-				}
-				$tracksList .= '</td>
-				<td><a id="a_play_track' . $i . '" href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;album_id=tidal_' . $track['album']['id'] .'&amp;track_id=' . $track['track_id'] . '&amp;position_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'Play track ' . $track['number'] . '\');" onMouseOut="return nd();">' . $track['title'] . '</a>
-				<span class="track-list-artist-narrow">by ' . html($track['artists'][0]['name']);
-				if (count($track['artists']) > 1) {
-					foreach ($track['artists'] as $key => $TOPT_art)
-					if ($key > 0) {
-						$tracksList .= ' & ' . html($TOPT_art['name']);
-					}
-				}
-				$o = "";
-				if (!$isFavorite) {
-					$o = "-o";
-				}
-				$starClass = "";
-				if ($isBlacklist) {
-					$starClass = " blackstar blackstar-selected";
-				}
-				$tracksList .= '</span>
-				</td>
-				
-				<td><a id="a_album' . $i . '" href="index.php?action=view3&amp;album_id=tidal_' . $track['album']['id'] . '">' . $track['album']['title'] . '</a>
-				</td>
-				
-				<td onclick="toggleStarSub(' . $i . ',\'' . $track['track_id'] . '\');" class="pl-favorites">
-				<span id="blacklist-star-bg' . $track['track_id'] . '" class="' . $starClass . '">
-				<i class="fa fa-star' . $o . ' fa-fw" id="favorite_star-' . $track['track_id'] . '"></i>
-				</span>
-				</td>
-				
-				<td></td>
-				<td>' . formattedTime($track['duration'] * 1000) . '</td>
-				<td></td>
-				</tr>
-			
-			';
-			$tracksList .= '
-				<tr>
-					<td colspan="20">
-					' . starSubMenu($i, $isFavorite, $isBlacklist, $track['track_id'], 'string') . '
-					</td>
-				</tr>';
-			
-			$tracksList .= '
-				<tr>
-				<td colspan="20">
-				' . trackSubMenu($i, $track, 'tidal_' . $track['album']['id'], 'string') . '
-				</td>
-				</tr>';
-			}
-		$tracksList .= '</table>'; */
 		$data['tracks'] = $tracksList;
 	}
 	echo safe_json_encode($data);
@@ -1129,109 +1027,6 @@ function showTopTracksFromTidal($artist, $tidalArtistId = "") {
 	if ($results['items']) {
 		$data['tracks_results'] = $results['totalNumberOfItems'];
 		$tracksList = tidalTracksList($results);
-		/* $tracksList = '<table class="border" cellspacing="0" cellpadding="0">';
-		$tracksList .= '
-		<tr class="header">
-			<td class="icon"></td><!-- track menu -->
-			<td class="icon">';
-		if ($cfg["access_add"] && false) {  
-			$tracksList .= '<span onMouseOver="return overlib(\'Add all tracks\');" onMouseOut="return nd();"><i id="add_all_TOPT" class="fa fa-plus-circle fa-fw icon-small pointer"></i></span>';
-		}
-		$tracksList .= '
-			</td><!-- add track -->
-			<td class="track-list-artist">Track artist&nbsp;</td>
-			<td>Title&nbsp;</td>
-			<td>Album&nbsp;</td>
-			<td></td>
-			<td></td>
-			<td align="right" class="time time_w">Time</td>
-			<td class="space right"></td>
-		</tr>';
-		
-		$i=40000;
-		$TOPT_ids = ''; 
-		foreach ($results['items'] as $track) {
-			$track['track_id'] = 'tidal_' . $track['id'];
-			$isFavorite = isInFavorite($track['track_id'], $cfg['favorite_id']);
-			$isBlacklist = isInFavorite($track['track_id'], $cfg['blacklist_id']);
-			$even_odd = ($i++ & 1) ? 'even' : 'odd';
-			$tracksList .= '
-			
-			<tr class="' . $even_odd . ' mouseover">
-				<td class="icon">
-				<span id="menu-track'. $i .'">
-				<div onclick="toggleMenuSub(' . $i . ');">
-					<i id="menu-icon' . $i .'" class="fa fa-bars icon-small"></i>
-				</div>
-				</span>
-				</td>
-				
-				<td class="icon">
-				<span>';
-			if ($cfg['access_add']) {
-				$tracksList .= '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;album_id=tidal_' . $track['album']['id'] .'&amp;track_id=' . $track['track_id'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . addslashes($track['title']) . '\');" onMouseOut="return nd();"><i id="add_tidal_' . $track['id'] . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';
-			}
-			$tracksList .= '
-				</span>
-				</td>
-				<td class="track-list-artist">
-				<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['artists'][0]['name']) . '&amp;order=year">' . html($track['artists'][0]['name']) . '</a>';
-				if (count($track['artists']) > 1) {
-					foreach ($track['artists'] as $key => $TOPT_art)
-					if ($key > 0) {
-						$tracksList .= ' & <a href="index.php?action=view2&amp;artist=' . rawurlencode($TOPT_art['name']) . '&amp;order=year">' . html($TOPT_art['name']) . '</a>';
-					}
-				}
-				$tracksList .= '</td>
-				<td><a id="a_play_track' . $i . '" href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;album_id=tidal_' . $track['album']['id'] .'&amp;track_id=' . $track['track_id'] . '&amp;position_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'Play track ' . $track['number'] . '\');" onMouseOut="return nd();">' . $track['title'] . '</a>
-				<span class="track-list-artist-narrow">by ' . html($track['artists'][0]['name']);
-				if (count($track['artists']) > 1) {
-					foreach ($track['artists'] as $key => $TOPT_art)
-					if ($key > 0) {
-						$tracksList .= ' & ' . html($TOPT_art['name']);
-					}
-				}
-				$o = "";
-				if (!$isFavorite) {
-					$o = "-o";
-				}
-				$starClass = "";
-				if ($isBlacklist) {
-					$starClass = " blackstar blackstar-selected";
-				}
-				$tracksList .= '</span>
-				</td>
-				
-				<td><a id="a_album' . $i . '" href="index.php?action=view3&amp;album_id=tidal_' . $track['album']['id'] . '">' . $track['album']['title'] . '</a>
-				</td>
-				
-				<td onclick="toggleStarSub(' . $i . ',\'' . $track['track_id'] . '\');" class="pl-favorites">
-				<span id="blacklist-star-bg' . $track['track_id'] . '" class="' . $starClass . '">
-				<i class="fa fa-star' . $o . ' fa-fw" id="favorite_star-' . $track['track_id'] . '"></i>
-				</span>
-				</td>
-				
-				<td></td>
-				<td>' . formattedTime($track['duration'] * 1000) . '</td>
-				<td></td>
-				</tr>
-			
-			';
-			$tracksList .= '
-				<tr>
-					<td colspan="20">
-					' . starSubMenu($i, $isFavorite, $isBlacklist, $track['track_id'], 'string') . '
-					</td>
-				</tr>';
-			
-			$tracksList .= '
-				<tr>
-				<td colspan="20">
-				' . trackSubMenu($i, $track, 'tidal_' . $track['album']['id'], 'string') . '
-				</td>
-				</tr>';
-			}
-		$tracksList .= '</table>'; */
 		$data['top_tracks'] = $tracksList;
 	}
 	echo safe_json_encode($data);
@@ -1391,6 +1186,234 @@ function getTidalId($id){
 }
 
 
+//  +------------------------------------------------------------------------+
+//  | Artists from HRA                                                       |
+//  +------------------------------------------------------------------------+
+function showArtistsFromHRA($searchStr, $size) {
+	global $cfg, $db;
+	$value = $searchStr;
+	$artistsList = "";
+	$data = array();
+	
+	$h = new HraAPI;
+	$results = $h->searchArtists($value);
+	if (!$results['data']) {
+		$data['artists_results'] = 0;
+	}
+	if ($results['data']) {
+		$data['artists_results'] = count($results['data']);
+		$artistsList = '<table class="border" cellspacing="0" cellpadding="0">';
+		foreach ($results['data'] as $art) {
+			$artistsList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=view2&order=year&sort=asc&artist=' . rawurlencode($art['artist']) . '&amp;hraArtistId=' . rawurlencode($art['artistId']). '&amp;order=year">' . html($art['artist']) . '</a></td></tr>';
+			}
+		$artistsList .= '</table>';
+		$data['artists'] = $artistsList;
+	}
+	
+	echo safe_json_encode($data);
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Albums from HRA                                                        |
+//  +------------------------------------------------------------------------+
+function showAlbumsFromHRA($searchStr, $size) {
+	global $cfg, $db;
+	$value = $searchStr;
+	$artistsList = "";
+	$data = array();
+	
+	/* $h = new HraAPI;
+	$h->username = $cfg["hra_username"];
+	$h->password = $cfg["hra_password"];
+	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	$conn = $h->connect();
+	if ($conn === true){
+		$results = $h->searchArtists($value);
+	}
+	else {
+		$data['return'] = $conn["return"];
+		$data['response'] = $conn["error"];
+		echo safe_json_encode($data);
+		return;
+	} */
+	$h = new HraAPI;
+	$results = $h->searchAlbums($value);
+	if (!$results['data']) {
+		$data['albums_results'] = 0;
+	}
+	
+	if ($results['data']) {
+		$data['albums_results'] = count($results['data']);
+		$albumsList = '<table class="border" cellspacing="0" cellpadding="0">';
+		foreach ($results['data'] as $art) {
+			$album['album_id'] = 'hra_' . $art['albumId'];
+			$album['artist_alphabetic'] = $art['artist'];
+			$album['album'] = $art['title'];
+			$album['cover'] = $art['cover'];
+			$albumsList .= draw_tile($size, $album, '', 'string');
+			}
+		$albumsList .= '</table>';
+		$data['albums'] = $albumsList;
+	}
+	
+	echo safe_json_encode($data);
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Artist albums from HRA                                                 |
+//  +------------------------------------------------------------------------+
+function showArtistAlbumsFromHRA($searchStr, $size) {
+	global $cfg, $db;
+	$value = $searchStr;
+	$artistsList = "";
+	$data = array();
+	
+	$h = new HraAPI;
+	$results = $h->getArtistAlbums($value);
+	if (!$results['data']) {
+		$data['albums_results'] = 0;
+	}
+	else {
+		$data['albums_results'] = count($results['data']);
+		$albumsList = '<table class="border" cellspacing="0" cellpadding="0">';
+		foreach ($results['data'] as $art) {
+			$album['album_id'] = 'hra_' . $art['albumId'];
+			$album['artist_alphabetic'] = $art['artist'];
+			$album['album'] = $art['title'];
+			$album['cover'] = $art['cover'];
+			$albumsList .= draw_tile($size, $album, '', 'string');
+			}
+		$albumsList .= '</table>';
+		$data['albums'] = $albumsList;
+	}
+	
+	echo safe_json_encode($data);
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Tracks from HRA album                                                  |
+//  +------------------------------------------------------------------------+
+function getTracksFromHraAlbum($album_id, $order = '') {
+	global $cfg, $db;
+	$field = 'albumTracks';
+	$value = $album_id;
+	
+	/* $sql = "SELECT album_id FROM tidal_album WHERE album_id = " . $album_id;
+	$query = mysqli_query($db,$sql);
+	if (mysqli_num_rows($query) == 0) {
+		getAlbumFromTidal($album_id);
+	} */
+	 
+	$h = new HraAPI;
+	$h->username = $cfg["hra_username"];
+	$h->password = $cfg["hra_password"];
+	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	$conn = $h->connect();
+	if ($conn === true){
+		$tracks = $h->getAlbumTracks($album_id);
+	}
+	else {
+		$data['return'] = $conn["return"];
+		$data['response'] = $conn["error"];
+		echo safe_json_encode($data);
+		return;
+	}
+	
+	if (!$tracks["tracks"]) {
+		$data['results'] = 0;
+		return safe_json_encode($data);
+	}
+	 
+	if (count($tracks["tracks"]) > 0) {
+		if ($order == 'DESC') {
+			usort($tracks["tracks"], function ($a, $b) {
+				return $b['trackNumber'] <=> $a['trackNumber'];
+			});
+		}
+		return safe_json_encode($tracks);
+	}
+	return false;
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Check if album/track is from HRA                                       |
+//  +------------------------------------------------------------------------+
+
+function isHra($id) {
+	global $cfg;
+	if (strpos($id,"hra_") !== false || strpos($id,'highresaudio.com') !== false) {
+		return true;
+	}
+	return false;
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Get pure HRA id of item                                                |
+//  +------------------------------------------------------------------------+
+
+function getHraId($id){
+		return str_replace('hra_','',$id);
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Get HRA stream params                                                  |
+//  +------------------------------------------------------------------------+
+
+function getHRAMPDUrl($track_id){
+	global $cfg;
+	$h = new HraAPI;
+	$h->username = $cfg["hra_username"];
+	$h->password = $cfg["hra_password"];
+	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	$conn = $h->connect();
+	if ($conn === true){
+		$results = $h->getTrack($track_id);
+	}
+	else {
+		return false;
+	}
+	if ($results["data"]["results"]["tracks"]) {
+		$hraAlbumId = $results["data"]["results"]["tracks"]["album_id"];
+		$album = $h->getAlbum($hraAlbumId);
+		$results["data"]["results"]["tracks"]["productionYear"] = $album["data"]["results"]["productionYear"];
+		//$results["data"]["results"]["tracks"]["album_id"] = "zzzzz";
+		$results["data"]["results"]["tracks"]["track_id"] = $track_id;
+		$hraStreamUrl = createHRAMPDUrl($results["data"]["results"]["tracks"]);
+	}
+	else {
+		$hraStreamUrl = false;
+	}
+	return $hraStreamUrl;
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Create HRA stream params                                               |
+//  +------------------------------------------------------------------------+
+
+function createHRAMPDUrl($tracks){
+	$hraArtist = $tracks["artist"];
+	$hraTitle = $tracks["title"];
+	$hraDuration = $tracks["playtime"];
+	$hraThumbnail = "https://" . $tracks["cover"];
+	$hraUrl = $tracks["url"];
+	$hraGenre = $tracks["genre"];
+	$hraYear = $tracks["productionYear"];
+	$track_id = $tracks["track_id"];
+	$album_id = $tracks["album_id"];
+	$album_title = $tracks["album_title"];
+
+	//streamUrl MUST always be last in url!
+	$hraStreamUrl = NJB_HOME_URL . 'stream.php?action=streamHRA&track_id=' . $track_id . '&ompd_title=' . urlencode($hraTitle) . '&ompd_duration=' . urlencode($hraDuration) . '&ompd_artist=' . urlencode($hraArtist) . '&ompd_thumbnail=' . urlencode($hraThumbnail) . '&ompd_year=' . urlencode($hraYear) . '&ompd_genre=' . urlencode($hraGenre) . '&ompd_album_id=' . urlencode($album_id) . '&ompd_album_title=' . urlencode($album_title) . '&streamUrl=' . urlencode($hraUrl);
+	return $hraStreamUrl;
+}
 
 //  +------------------------------------------------------------------------+
 //  | Check if album/track is from Youtube                                   |

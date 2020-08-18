@@ -278,7 +278,21 @@ for ($i=0; $i < $listlength; $i++) {
 	if (!isset($table_track['artist']) && !$is_file_stream) {
 		$tidalTrack = '';
 		$playlistinfo = mpd('playlistinfo ' . $i);
-		if (strpos($playlistinfo['file'],'ompd_title=') !== false){
+		if (strpos($playlistinfo['file'],'action=streamHRA') !== false){
+			//stream from HRA
+			$table_track['hra'] = true;
+			$parts = parse_url($playlistinfo['file']);
+			parse_str($parts['query'], $query);
+			$table_track['title'] = urldecode($query['ompd_title']);
+			$table_track['album'] = urldecode($query['ompd_album_title']);
+			$playlistinfo['Time'] = (int)urldecode($query['ompd_duration']);
+			$table_track['track_artist'] = urldecode($query['ompd_artist']);
+			$table_track['cover'] = urldecode($query['ompd_thumbnail']);
+			$table_track['trackYear'] = urldecode($query['ompd_year']);
+			$table_track['genre'] = urldecode($query['ompd_genre']);
+			$album_genres = parseMultiGenre($table_track['genre']);
+		}
+		elseif (strpos($playlistinfo['file'],'ompd_title=') !== false){
 			//stream from Youtube
 			$table_track['youtube'] = true;
 			$parts = parse_url($playlistinfo['file']);
@@ -333,7 +347,12 @@ for ($i=0; $i < $listlength; $i++) {
 			else 
 				$table_track['album']	= $playlistinfo['file'];
 		}
-		if (!$tidalTrack) {
+		
+		if ($table_track['hra']) {
+			$table_track['number'] = $playlistinfo['Pos'] + 1;
+			$table_track['miliseconds'] = $playlistinfo['Time'] * 1000;
+		}
+		elseif (!$tidalTrack) {
 			$table_track['number'] = $playlistinfo['Pos'] + 1;
 			if (!$table_track['trackYear']) $table_track['trackYear'] = $playlistinfo['Date'];
 			$table_track['genre'] = $playlistinfo['Genre'];
@@ -352,9 +371,12 @@ for ($i=0; $i < $listlength; $i++) {
 		$pos = strpos($filepath, $table_track['title']);
 		$table_track['album'] = substr($filepath, 0, $pos);
 	}
-	//if ($table_track['cover']) { //for youtube streams
+	
 	if ($table_track['youtube']) { //for youtube streams
 		$src = "image_crop.php?thumbnail=" . $table_track['cover'];
+	}
+	elseif ($table_track['hra']) { //for hra streams
+		$src = $table_track['cover'];
 	}
 	else {
 		$query2 = mysqli_query($db,'SELECT album, year, image_id FROM album WHERE album_id="' . $table_track['album_id'] . '"');
@@ -1209,7 +1231,13 @@ function evaluateTrack(data) {
 	
 	//console.log ('data.album_id = ' + data.album_id);
 	if (data.album_id) {
-		$("#image_in").attr("src","image.php?image_id=" + data.image_id + "&quality=hq&track_id=" + data.track_id);
+		if (data.thumbnail){
+			//temporary solution for HRA streams
+			$("#image_in").attr("src","image_crop.php?thumbnail=" + encodeURIComponent(data.thumbnail));
+		}
+		else {
+			$("#image_in").attr("src","image.php?image_id=" + data.image_id + "&quality=hq&track_id=" + data.track_id);
+		}
 		$("#image a").attr("href","index.php?action=view3&album_id=" + data.album_id);
 		
 	}

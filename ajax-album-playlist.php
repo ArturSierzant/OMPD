@@ -28,14 +28,17 @@ authenticate('access_media');
 
 $album_id = $_POST['album_id'];
 $image_id = $_POST['image_id'];
-
-$query = mysqli_query($db,'SELECT genre FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" GROUP BY genre');
+$tracksList = json_decode($_POST['tracks'],true);
 $showGenre = false;
-if (mysqli_num_rows($query) > 1) $showGenre = true;
 
+if (!isHRA($album_id)){
+	$query = mysqli_query($db,'SELECT genre FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" GROUP BY genre');
+	if (mysqli_num_rows($query) > 1) $showGenre = true;
+}
 $disc = 1;
 $max_disc = 1;
 $discs = 1;
+$tracks = array();
 	
 if ($cfg['show_multidisc']) {
 	$query = mysqli_query($db, 'SELECT disc FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" GROUP BY disc');
@@ -57,7 +60,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 		$queryPart = ' AND disc = ' . (int) $disc . ' ';
 	}
 	
-	if (strpos($album_id,'tidal_') !== false) {
+	if (isTidal($album_id)) {
 		$queryStr = "
 		SELECT CONCAT('tidal_',tidal_track.track_id) as track_id, tidal_track.title, tidal_track.artist as track_artist, (tidal_track.seconds * 1000) as miliseconds, tidal_track.disc, tidal_track.number, tidal_track.genre_id, tidal_album.album, tidal_album.album_date, tidal_album.album_id FROM tidal_track LEFT JOIN tidal_album ON tidal_track.album_id = tidal_album.album_id WHERE tidal_album.album_id='" . str_replace('tidal_','',$album_id) . "'
 		ORDER BY disc, number";
@@ -66,6 +69,19 @@ for ($disc; $disc <= $max_disc; $disc++) {
 		if ($track_count < 2){ //0 - no tracks found; 1 - album added from tidal playlist or has only one track
 			getTracksFromTidalAlbum(str_replace('tidal_','',$album_id));
 			$query = mysqli_query($db,$queryStr);
+		}
+	}
+	elseif (isHRA($album_id)) {
+		foreach ($tracksList as $key => $t) {
+			$tracks[$key]["number"] = $t["trackNumber"]; 
+			$tracks[$key]["track_artist"] = $t["artist"]; 
+			$tracks[$key]["title"] = $t["title"]; 
+			$tracks[$key]["track_id"] = "hra_" . $t["playlistAdd"]; 
+			$tracks[$key]["miliseconds"] = 1000 * $t["playtime"]; 
+			if ($t['genre']) {
+				$tracks[$key]["genre"] = $t["genre"]; 
+				$showGenre = true;
+			}
 		}
 	}
 	else {
@@ -127,9 +143,17 @@ for ($disc; $disc <= $max_disc; $disc++) {
 				<td class="space right"><div class="space"></div></td>
 			</tr>
 		<?php
-		
+			/* echo ("<pre>");
+			print_r($tracksList);
+			echo ("</pre>"); */
 		$i = 0;
-		while ($track = mysqli_fetch_assoc($query)) { 
+		if (!isHRA($album_id)) {
+			while ($trackItem = mysqli_fetch_assoc($query)) {
+				$tracks[] = $trackItem; 
+			}
+		}
+		//while ($track = mysqli_fetch_assoc($query)) { 
+		foreach ($tracks as $track) { 
 		?>
 			<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 				<?php 
@@ -200,13 +224,6 @@ for ($disc; $disc <= $max_disc; $disc++) {
 				$tid = $track['track_id'];
 				if (isTidal($tid)){
 					$track_id = getTidalId($tid);
-					//check if in favorite/blacklist - do it here, because it's easier then creating SQL query
-					/* $query1 = mysqli_query($db,"SELECT position FROM favoriteitem WHERE favorite_id = '" . $cfg['favorite_id'] . "' AND (stream_url LIKE '%action=streamTidal&track_id=" . $track_id . "' OR stream_url = '" . mysqli_real_escape_string($db,$cfg['upmpdcli_tidal']) . $track_id . "' OR stream_url LIKE '" .mysqli_real_escape_string($db,MPD_TIDAL_URL) . $track_id . "')");
-					if (mysqli_num_rows($query1) > 0) $isFavorite = true;
-					
-					$query2 = mysqli_query($db,"SELECT position FROM favoriteitem WHERE favorite_id = '" . $cfg['blacklist_id'] . "' AND (stream_url LIKE '%action=streamTidal&track_id=" . $track_id . "' OR stream_url = '" . mysqli_real_escape_string($db,$cfg['upmpdcli_tidal']) . $track_id . "' OR stream_url LIKE '" .mysqli_real_escape_string($db,MPD_TIDAL_URL) . $track_id . "')");
-					if (mysqli_num_rows($query2) > 0) $isBlacklist = true; */
-					
 					$isFavorite = isInFavorite($tid, $cfg['favorite_id']);
 					$isBlacklist = isInFavorite($tid, $cfg['blacklist_id']);
 					
@@ -215,7 +232,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 					if ($track['favorite_pos']) $isFavorite = true;
 					if ($track['blacklist_pos']) $isBlacklist = true;
 				}
-				 
+				if (!isHRA($album_id)){
 				?>
 					<td onclick="toggleStarSub(<?php echo $i + $disc * 100 ?>,'<?php echo $tid ?>');" class="pl-favorites">
 						<span id="blacklist-star-bg<?php echo $tid ?>" class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
@@ -223,7 +240,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 						</span>
 					</td>
 				<?php 
-				
+				}
 				if ($cfg['show_DR']){ ?>
 				<td class="pl-tdr">
 				<?php
