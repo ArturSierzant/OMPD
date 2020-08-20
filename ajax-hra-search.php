@@ -34,19 +34,14 @@ $ajax = $_POST["ajax"];
 $artist = $_POST["artist"];
 
 if ($search == 'albums') {
-	//if ($searchStr) $searchStr = moveTheToBegining($searchStr);
 	showAlbumsFromHRA($searchStr, $size);
 }
 elseif ($search == 'artistalbums') {
 	$searchStr = moveTheToBegining($searchStr);
-	//$searchStr = str_replace("the ", "", strtolower($searchStr));
-	//$searchStr = str_replace("&", "", strtolower($searchStr));
 	showArtistAlbumsFromHRA($searchStr, $size);
 }
 elseif ($search == 'artists') {
 	if ($searchStr) $searchStr = moveTheToBegining($searchStr);
-	//$searchStr = str_replace("the ", "", strtolower($searchStr));
-	//$searchStr = str_replace("&", "", strtolower($searchStr));
 	showArtistsFromHRA($searchStr, $size);
 }
 /* elseif ($search == 'all') {

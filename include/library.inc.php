@@ -1223,20 +1223,6 @@ function showAlbumsFromHRA($searchStr, $size) {
 	$artistsList = "";
 	$data = array();
 	
-	/* $h = new HraAPI;
-	$h->username = $cfg["hra_username"];
-	$h->password = $cfg["hra_password"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate();
-	$conn = $h->connect();
-	if ($conn === true){
-		$results = $h->searchArtists($value);
-	}
-	else {
-		$data['return'] = $conn["return"];
-		$data['response'] = $conn["error"];
-		echo safe_json_encode($data);
-		return;
-	} */
 	$h = new HraAPI;
 	$results = $h->searchAlbums($value);
 	if (!$results['data']) {
@@ -1301,12 +1287,6 @@ function getTracksFromHraAlbum($album_id, $order = '') {
 	global $cfg, $db;
 	$field = 'albumTracks';
 	$value = $album_id;
-	
-	/* $sql = "SELECT album_id FROM tidal_album WHERE album_id = " . $album_id;
-	$query = mysqli_query($db,$sql);
-	if (mysqli_num_rows($query) == 0) {
-		getAlbumFromTidal($album_id);
-	} */
 	 
 	$h = new HraAPI;
 	$h->username = $cfg["hra_username"];
@@ -2730,6 +2710,7 @@ function albumMultidisc($query, $rp =''){
 					);
 				}
 			}
+			//TODO: check if not used anymore
 			else {			
 				if ($rp == 'rp') {
 					$album_multidisc[$album['played_time'] . '_' . $album['album_id']] = array(

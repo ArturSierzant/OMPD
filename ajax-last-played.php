@@ -31,12 +31,12 @@ $query = mysqli_query($db, '
 		SELECT * FROM
 		(SELECT album_id, time FROM counter
 		ORDER BY time DESC
-		LIMIT 10) c
+		LIMIT 20) c
 		GROUP BY c.album_id
 		ORDER BY c.time DESC' );
 
 $hra_session = false;
-//if ($tileSizePHP) $size = $tileSizePHP;
+
 $c = 0;
 while ( $album = mysqli_fetch_assoc ($query)) {
 	$c++;

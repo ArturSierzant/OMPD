@@ -59,13 +59,36 @@ if (isTidal($album_id)) {
 $query = mysqli_query($db,'SELECT artist, album
 	FROM tidal_album
 	WHERE album_id = "' . mysqli_real_escape_string($db,getTidalId($album_id)) . '"');
+	$album = mysqli_fetch_assoc($query);
+}
+elseif (isHra($album_id)) {
+	$album_id = getHraId($album_id);
+	$h = new HraAPI;
+	$h->username = $cfg["hra_username"];
+	$h->password = $cfg["hra_password"];
+	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	$conn = $h->connect();
+	if ($conn === true){
+		$albumHra = $h->getAlbum($album_id)['data']['results'];
+		if (!$albumHra) {
+			message(__FILE__, __LINE__, 'error', '[b]Error[/b][br]could not get data from HighResAudio');
+		}
+		$album = array();
+		$album['artist'] = $albumHra['artist'];
+		$album['album'] = $albumHra['title'];
+	}
+	else {
+		$data['return'] = $conn["return"];
+		$data['response'] = $conn["error"];
+		message(__FILE__, __LINE__, 'error', '[b]Error[/b][br]could not connect to HighResAudio');
+	}
 }
 else {
-$query = mysqli_query($db,'SELECT artist, album
+	$query = mysqli_query($db,'SELECT artist, album
 	FROM album
 	WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '"');
+	$album = mysqli_fetch_assoc($query);
 }
-$album = mysqli_fetch_assoc($query);
 
 if ($album == false)
 	message(__FILE__, __LINE__, 'error', '[b]Error[/b][br]album_id not found in database');

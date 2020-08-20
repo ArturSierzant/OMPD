@@ -135,7 +135,9 @@ for ($disc; $disc <= $max_disc; $disc++) {
 				<td class="track-list-artist">Artist</td>
 				<td class="textspace track-list-artist"></td>
 				<td class="time pl-genre"><?php if ($showGenre) echo'Genre'; ?></td>
+				<?php if (!isHRA($album_id)){ ?>
 				<td></td>
+				<?php } ?>
 				<?php if ($cfg['show_DR']){ ?>
 				<td class="time pl-tdr">DR</td>
 				<?php } ?>

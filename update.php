@@ -1404,7 +1404,7 @@ function databaseCleanup() {
 	mysqli_query($db,"DELETE counter
 		FROM counter LEFT JOIN album
 		ON counter.album_id = album.album_id
-		WHERE album.album_id IS NULL AND counter.album_id NOT LIKE 'tidal_%'");
+		WHERE album.album_id IS NULL AND counter.album_id NOT LIKE 'tidal_%' AND counter.album_id NOT LIKE 'hra_%'");
 	mysqli_query($db,'DELETE counter
 		FROM counter LEFT JOIN user
 		ON counter.user_id = user.user_id

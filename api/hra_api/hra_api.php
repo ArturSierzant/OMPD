@@ -88,6 +88,13 @@ class HraAPI {
 		return $this->request();
 	}
 	
+	function searchInCategory($query, $category) {
+		$query = urlencode($query);
+		$category = urlencode($category);
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/SearchInCategory/?search=" . $query ."&category=" . $category. "&lang=" . $this->lang);
+		return $this->request();
+	}
+	
 	function searchArtists($query, $limit = 50) {
 		//do some voodoo
 		$artists = explode("&", $query);
@@ -203,6 +210,11 @@ class HraAPI {
 	
 	function getFormats() {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/getAvailableFormats/?userData=" . $this->userData . "&lang=" . $this->lang);
+		return $this->request();
+	}
+	
+	function getAllCategories() {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/categories/ListAllCategories/?lang=" . $this->lang);
 		return $this->request();
 	}
 	
