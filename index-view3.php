@@ -76,7 +76,7 @@ if (strpos($album_id, 'tidal_') !== false) {
 		}
 	}
 }
-elseif (isHRA($album_id)) {
+elseif (isHra($album_id)) {
 	$h = new HraAPI;
 	$h->username = $cfg["hra_username"];
 	$h->password = $cfg["hra_password"];
@@ -92,6 +92,7 @@ elseif (isHRA($album_id)) {
 	$album["artist_alphabetic"] = $results["data"]["results"]["artist"];
 	$album["artist"] = $results["data"]["results"]["artist"];
 	$album["album"] = $results["data"]["results"]["title"];
+	$album["album_id"] = $results["data"]["results"]["id"];
 	$album["year"] = $results["data"]["results"]["productionYear"];
 	$album["source"] = $results["data"]["results"]["shop_url"];
 	$album["sample_rate"] = $results["data"]["results"]["tracks"][0]["format"];
@@ -112,7 +113,7 @@ elseif (isHRA($album_id)) {
 	$tracks = $results["data"]["results"]["tracks"];
 }
 else {
-	$query = mysqli_query($db, 'SELECT artist_alphabetic, artist, album, year, month, image_id, album_add_time, album.genre_id, album_dr
+	$query = mysqli_query($db, 'SELECT artist_alphabetic, artist, album, album_id, year, month, image_id, album_add_time, album.genre_id, album_dr
 	FROM album
 	WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');	
 	$album = mysqli_fetch_assoc($query);
@@ -150,7 +151,7 @@ if ($cfg['show_album_versions'] == true) {
 			$md_title = substr($album['album'], 0,  $md_ind_pos);
 			$mdqs = ' AND album NOT IN (SELECT album 
 			FROM album 
-			WHERE album LIKE "' . mysqli_real_escape_string($db, $md_title) . '%" AND artist = "' . mysqli_real_escape_string($db,$album['artist']) . '" AND album <> "' . mysqli_real_escape_string($db, $album['album']) . '"
+			WHERE album LIKE "' . mysqli_real_escape_string($db, $md_title) . '%" AND artist = "' . mysqli_real_escape_string($db,$album['artist']) . '" AND album_id <> "' . mysqli_real_escape_string($db, $album['album_id']) . '"
 			ORDER BY album) ';
 		}
 		
@@ -172,10 +173,11 @@ if ($cfg['show_album_versions'] == true) {
 			$qs = $qs . $conjunction . 'album LIKE "' . mysqli_real_escape_string($db, $album['album']) . $v . '%"' ;
 			$isSet = true;
 		}
-		$query_av = mysqli_query($db, 'SELECT album, image_id, album_id 
+		$qsAll = 'SELECT album, image_id, album_id 
 		FROM album 
-		WHERE (' . $qs . ') AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '" 
-		ORDER BY album');
+		WHERE ((' . $qs . ') AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '") OR (artist = "' . mysqli_real_escape_string($db, $album['artist']) .'" AND album LIKE "' . mysqli_real_escape_string($db, $album['album']) .'" AND album_id <> "' . mysqli_real_escape_string($db, $album['album_id']) . '") 
+		ORDER BY album';
+		$query_av = mysqli_query($db, $qsAll);
 		$album_versions_count = mysqli_num_rows($query_av);
 	}
 }
@@ -231,16 +233,16 @@ if ($cfg['access_add']){
 }
 if ($cfg['access_add'] && $cfg['access_play'])
 	$basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;album_id=' . $album_id . '&amp;insertType=album\',evaluateAdd);"><i id="insertPlay_' . $album_id . '" class="fa fa-fw  fa-play-circle icon-small"></i>Insert and play</a>';
-if ($cfg['access_stream'] && !isTidal($album_id) && !isHRA($album_id)){
+if ($cfg['access_stream'] && !isTidal($album_id) && !isHra($album_id)){
 	$basic[] = '<a href="stream.php?action=playlist&amp;album_id=' . $album_id . '&amp;stream_id=' . $cfg['stream_id'] . '"><i class="fa fa-fw  fa-rss  icon-small"></i>Stream album</a>';
 }
-if ($cfg['access_download'] && $cfg['album_download'] && !isTidal($album_id) && !isHRA($album_id))
+if ($cfg['access_download'] && $cfg['album_download'] && !isTidal($album_id) && !isHra($album_id))
 	$basic[] = '<a href="download.php?action=downloadAlbum&amp;album_id=' . $album_id . '&amp;download_id=' . $cfg['download_id'] . '" ' . onmouseoverDownloadAlbum($album_id) . '><i class="fa fa-fw  fa-download  icon-small"></i>Download album</a>';
-if ($cfg['access_play'] && !isTidal($album_id) && !isHRA($album_id)){
+if ($cfg['access_play'] && !isTidal($album_id) && !isHra($album_id)){
 	$dir_path = rawurlencode(dirname($cfg['media_dir'] . $rel_file['relative_file']));
 	$basic[] = '<a href="browser.php?dir=' . $dir_path . '"><i class="fa fa-fw  fa-folder-open  icon-small"></i>Browse...</a>';
 }
-if ($cfg['access_admin'] && !isTidal($album_id) && !isHRA($album_id)){
+if ($cfg['access_admin'] && !isTidal($album_id) && !isHra($album_id)){
 	$dir_path = rawurlencode(dirname($cfg['media_dir'] . $rel_file['relative_file']));
 	$basic[] = '<a href="update.php?action=update&amp;dir_to_update=' . $dir_path . '/&amp;sign=' . $cfg['sign'] . '"><i class="fa fa-fw fa-refresh fa-fw icon-small"></i>Update album</a>';
 }
@@ -284,7 +286,7 @@ elseif (strpos(strtolower($rel_file['relative_file']), strtolower($cfg['misc_tra
 	$album_info['album_dr'] = '';
 	
 }
-elseif (isHRA($album_id)) {
+elseif (isHra($album_id)) {
 	$album_info['audio_bits_per_sample'] = '24';
 	$album_info['audio_sample_rate'] = $album["sample_rate"] * 1000;
 	$album_info['audio_dataformat'] = $album["format"];
@@ -746,6 +748,7 @@ type: "POST",
 data: { 
 	album_id : '<?php echo $album_id; ?>',
 	image_id : '<?php echo $image_id; ?>',
+	total_time : '<?php echo $total_time["sum_miliseconds"]; ?>',
 	tracks : '<?php echo str_replace("'","\'",json_encode($tracks)); ?>'
 },  
 dataType: "html"

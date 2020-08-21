@@ -834,7 +834,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 			}
 
 		}
-		elseif (isHRA($track_id)){
+		elseif (isHra($track_id)){
 			$isHRA = true;
 		}
 		elseif (isYoutube($track_id)){
@@ -845,7 +845,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 		}
 	}
 	//only whole albums, not single tracks from e.g. search results
-	elseif ($album_id && !isTidal($track_id) && !isHRA($track_id)) {
+	elseif ($album_id && !isTidal($track_id) && !isHra($track_id)) {
 		if (isTidal($album_id)) {
 			//$tidal_album_id = str_replace("tidal_","",$album_id);
 			$tidal_album_id = getTidalId($album_id);
@@ -858,7 +858,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 			$mds_updateCounter = array();
 			$mds_updateCounter[] = $album_id;
 		}
-		elseif (isHRA($album_id)) {
+		elseif (isHra($album_id)) {
 			$hra_album_id = getHraId($album_id);
 			if ($insertType == 'album' && $insPos > 0) {
 				$hra_tracks = getTracksFromHraAlbum($hra_album_id, 'DESC');
@@ -1013,7 +1013,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 			return 'add_error';
 		}
 	}
-	elseif (isHRA($album_id) && !isHRA($track_id)) {
+	elseif (isHra($album_id) && !isHra($track_id)) {
 		if ($hra_tracks) {
 			$hra_tracks = json_decode($hra_tracks, true);
 			$productionYear = $hra_tracks["productionYear"];

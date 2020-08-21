@@ -28,10 +28,11 @@ authenticate('access_media');
 
 $album_id = $_POST['album_id'];
 $image_id = $_POST['image_id'];
+$total_time = $_POST['total_time'];
 $tracksList = json_decode($_POST['tracks'],true);
 $showGenre = false;
 
-if (!isHRA($album_id)){
+if (!isHra($album_id)){
 	$query = mysqli_query($db,'SELECT genre FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" GROUP BY genre');
 	if (mysqli_num_rows($query) > 1) $showGenre = true;
 }
@@ -71,7 +72,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 			$query = mysqli_query($db,$queryStr);
 		}
 	}
-	elseif (isHRA($album_id)) {
+	elseif (isHra($album_id)) {
 		foreach ($tracksList as $key => $t) {
 			$tracks[$key]["number"] = $t["trackNumber"]; 
 			$tracks[$key]["track_artist"] = $t["artist"]; 
@@ -135,7 +136,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 				<td class="track-list-artist">Artist</td>
 				<td class="textspace track-list-artist"></td>
 				<td class="time pl-genre"><?php if ($showGenre) echo'Genre'; ?></td>
-				<?php if (!isHRA($album_id)){ ?>
+				<?php if (!isHra($album_id)){ ?>
 				<td></td>
 				<?php } ?>
 				<?php if ($cfg['show_DR']){ ?>
@@ -149,7 +150,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 			print_r($tracksList);
 			echo ("</pre>"); */
 		$i = 0;
-		if (!isHRA($album_id)) {
+		if (!isHra($album_id)) {
 			while ($trackItem = mysqli_fetch_assoc($query)) {
 				$tracks[] = $trackItem; 
 			}
@@ -234,7 +235,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 					if ($track['favorite_pos']) $isFavorite = true;
 					if ($track['blacklist_pos']) $isBlacklist = true;
 				}
-				if (!isHRA($album_id)){
+				if (!isHra($album_id)){
 				?>
 					<td onclick="toggleStarSub(<?php echo $i + $disc * 100 ?>,'<?php echo $tid ?>');" class="pl-favorites">
 						<span id="blacklist-star-bg<?php echo $tid ?>" class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
@@ -273,14 +274,18 @@ for ($disc; $disc <= $max_disc; $disc++) {
 			</tr>
 			<?php
 		}
-		if (isTidal($album_id)) {
-			$query = mysqli_query($db, 'SELECT (seconds * 1000) AS sum_miliseconds FROM tidal_album WHERE album_id = "' .  mysqli_real_escape_string($db,getTidalId($album_id)) . '"');
+		$track = array();
+		if (isHra($album_id) || isTidal($album_id)) {
+			$track['sum_miliseconds'] = $total_time;
 		}
+		/* elseif (isTidal($album_id)) {
+			$query = mysqli_query($db, 'SELECT (seconds * 1000) AS sum_miliseconds FROM tidal_album WHERE album_id = "' .  mysqli_real_escape_string($db,getTidalId($album_id)) . '"');
+			$track = mysqli_fetch_assoc($query);
+		} */
 		else {
 			$query = mysqli_query($db, 'SELECT SUM(miliseconds) AS sum_miliseconds FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" AND disc = ' . (int) $disc);
-			
+			$track = mysqli_fetch_assoc($query);
 		}
-		$track = mysqli_fetch_assoc($query);
 	
 		echo '</table>';
 		?>
