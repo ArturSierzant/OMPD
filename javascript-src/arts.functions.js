@@ -968,10 +968,16 @@ function playlistSave(action, id, saveTrackId, host, port, track_mpd_url) {
 		if ($('#saveCurrentTrack i').hasClass('fa-check-circle-o')) saveTrack = 'true';
 	}
 	else { //request from list of tracks
-		id = id.split("-");
+		/* id = id.split("-");
 		saveTrackId = id[1];
-		id = "-" + id[1];
+		id = "-" + id[1]; */
+		
+		dashPos = id.indexOf("-");
+		l = id.length;
+		saveTrackId = id.substr(dashPos + 1, l - dashPos);
+		id = "-" + saveTrackId;
 		saveTrack = 'true';
+		//console.log("saveTrackId: " + saveTrackId);
 	}
 	
 	switch(action){

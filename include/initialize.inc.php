@@ -38,7 +38,7 @@ header('X-Accel-Buffering: no');
 define('NJB_START_TIME', microtime(true));
 
 define('NJB_VERSION', '1.06');
-define('NJB_DATABASE_VERSION', 47);
+define('NJB_DATABASE_VERSION', 48);
 define('NJB_IMAGE_SIZE', 300);
 define('NJB_IMAGE_QUALITY', 85);
 define('NJB_WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
@@ -108,7 +108,18 @@ if ($cfg['timezone'] != '') {
 $cfg['use_tidal'] = false;
 if ($cfg['tidal_username'] && $cfg['tidal_password'] && $cfg['tidal_token']) {
 	$cfg['use_tidal'] = true;
-	require_once('tidalapi/tidal_api.php');
+	require_once('api/tidal_api/tidal_api.php');
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | HighResAudio                                                           |
+//  +------------------------------------------------------------------------+
+
+$cfg['use_hra'] = false;
+if ($cfg['hra_username'] && $cfg['hra_password']) {
+	$cfg['use_hra'] = true;
+	require_once('api/hra_api/hra_api.php');
 }
 
 

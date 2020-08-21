@@ -737,25 +737,25 @@ request.always(function() {
 
 });
 <?php
-	$artist = replaceAnds($artist);
-	if (hasThe($artist)){
+	$artist1 = replaceAnds($artist);
+	if (hasThe($artist1)){
 		$sql = "SELECT MIN(last_update_time) as last_update_time 
 		FROM tidal_album 
-		WHERE (artist LIKE '" . mysqli_real_escape_string($db,moveTheToEnd($artist)) . "'
-		OR artist LIKE '" . mysqli_real_escape_string($db,moveTheToBegining($artist)) . "')
+		WHERE (artist LIKE '" . mysqli_real_escape_string($db,moveTheToEnd($artist1)) . "'
+		OR artist LIKE '" . mysqli_real_escape_string($db,moveTheToBegining($artist1)) . "')
 		AND last_update_time > 0";
 	}
 	else {
 		$sql = "SELECT MIN(last_update_time) as last_update_time 
 		FROM tidal_album 
-		WHERE artist LIKE '" . mysqli_real_escape_string($db,$artist) . "'
+		WHERE artist LIKE '" . mysqli_real_escape_string($db,$artist1) . "'
 		AND last_update_time > 0";
 	}
 	$query = mysqli_query($db, $sql);
 	$res = mysqli_fetch_assoc($query);
 	if ($res['last_update_time'] > (time() - TIDAL_MAX_CACHE_TIME)) {
 ?>
-$('#tidalAlbums').click();
+		$('#tidalAlbums').click();
 <?php
 	}
 ?>
@@ -812,6 +812,93 @@ request.always(function() {
 
 <?php
 } //use_tidal
+
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | albums from HRA                                                        |
+//  +------------------------------------------------------------------------+
+if ($cfg['use_hra'] && $artist && $artist != 'All albums' && !in_array($artist,$cfg['VA']) && $filter == 'whole') {
+?>
+<div>
+<h1 onclick='toggleSearchResults("HRA");' class="pointer" id="hraAlbums"><i id="iconSearchResultsHRA" class="fa fa-chevron-circle-down icon-anchor"></i> Albums from HighResAudio</h1>
+<div id="searchResultsHRA" class="albums_container">
+<span id="albumsLoadingIndicator">
+	<i class="fa fa-cog fa-spin icon-small"></i> Loading albums...
+</span>
+</div>
+</div>
+
+<script>
+
+$('#hraAlbums').click(function() {	
+<?php 
+//$artist = replaceAnds($artist);
+if ($tileSizePHP) {
+	$size = $tileSizePHP;
+}
+else {
+	$size = '$tileSize';
+}
+?>
+//$('#iframeRefresh').removeClass("icon-anchor");
+//$('#iframeRefresh').addClass("icon-selected fa-spin");
+//var size = $tileSize;
+var size = <?php echo $size; ?>;
+console.log ('$tileSize: ' + $tileSize);
+var artist = "<?php echo str_replace('"','', $artist); ?>";
+//var tidalArtistId = "<?php echo $tidalArtistId; ?>";
+
+//var artist = '<?php echo ($artist); ?>';
+var request = $.ajax({  
+	url: "ajax-hra-search.php",  
+	type: "POST",  
+	data: { search : "artistalbums", tileSize : size, searchStr : artist },  
+	dataType: "json"
+}); 
+
+request.done(function( data ) {
+	if (data.albums_results > 0) { //check if any album recieved
+		//$("[id='suggested']").show();
+		$( "#searchResultsHRA" ).html( data.albums );
+	}
+	else {
+		//var jsonObj = JSON.parse(data);
+		if (data.return == 1) {
+			$("#searchResultsHRA").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution HighResAudio request.<br>Error message:<br><br>' + data.response + '</div>');
+		}
+		else {
+			$("#searchResultsHRA").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on HighResAudio.</span>');
+		}
+	}
+	calcTileSize();
+	
+	//console.log (data.albums_results);
+}); 
+
+request.fail(function( jqXHR, textStatus ) {  
+	//alert( "Request failed: " + textStatus );	
+}); 
+
+request.always(function() {
+	$('[id^="add_hra"]').click(function(){
+		$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
+	});
+
+	$('[id^="play_hra"]').click(function(){
+		$(this).removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
+	});
+	
+});
+
+});
+
+</script>
+
+<?php
+} //use_hra
 
 
 //  +------------------------------------------------------------------------+

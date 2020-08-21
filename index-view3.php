@@ -76,6 +76,41 @@ if (strpos($album_id, 'tidal_') !== false) {
 		}
 	}
 }
+elseif (isHRA($album_id)) {
+	$h = new HraAPI;
+	$h->username = $cfg["hra_username"];
+	$h->password = $cfg["hra_password"];
+	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	$conn = $h->connect();
+	if ($conn === true){
+		$results = $h->getAlbum(getHraId($album_id));
+	}
+	else {
+		message(__FILE__, __LINE__, 'error', '[b]Error[/b][br]Error in execution HighResAudio request:[br] ' . $conn["error"]);
+	}
+	$album = array();
+	$album["artist_alphabetic"] = $results["data"]["results"]["artist"];
+	$album["artist"] = $results["data"]["results"]["artist"];
+	$album["album"] = $results["data"]["results"]["title"];
+	$album["year"] = $results["data"]["results"]["productionYear"];
+	$album["source"] = $results["data"]["results"]["shop_url"];
+	$album["sample_rate"] = $results["data"]["results"]["tracks"][0]["format"];
+	$album["url"] = $results["data"]["results"]["tracks"][0]["url"];
+	if (strpos($album["url"],".flac?") !== false) {
+		$album["format"] = "FLAC";
+		$album["profile"] = "Lossless compression";
+	}
+	$image_id = "https://" . $results["data"]["results"]["cover"]["master"]["file_url"];
+	$total_time['sum_miliseconds'] = $results["data"]["results"]["playtime"] * 1000;
+	
+	$query = mysqli_query($db, 'SELECT genre_id
+	FROM genre
+	WHERE genre = "' .  mysqli_real_escape_string($db,$results["data"]["results"]["genre"]) . '"');	
+	$genre = mysqli_fetch_assoc($query);
+	$album["genre_id"] = $genre['genre_id'];
+
+	$tracks = $results["data"]["results"]["tracks"];
+}
 else {
 	$query = mysqli_query($db, 'SELECT artist_alphabetic, artist, album, year, month, image_id, album_add_time, album.genre_id, album_dr
 	FROM album
@@ -147,7 +182,7 @@ if ($cfg['show_album_versions'] == true) {
 
 $featuring = false;
 
-$query = mysqli_query($db, 'SELECT track.audio_bits_per_sample, track.audio_sample_rate, track.audio_profile, track.audio_dataformat, track.comment, track.relative_file, album.album_dr FROM track left join album on album.album_id = track.album_id where album.album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"
+$query = mysqli_query($db, 'SELECT track.audio_bits_per_sample, track.audio_sample_rate, track.audio_profile, track.audio_dataformat, track.audio_encoder, track.comment, track.relative_file, album.album_dr FROM track left join album on album.album_id = track.album_id where album.album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"
 LIMIT 1');
 $album_info = $rel_file = mysqli_fetch_assoc($query);
 
@@ -196,16 +231,16 @@ if ($cfg['access_add']){
 }
 if ($cfg['access_add'] && $cfg['access_play'])
 	$basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;album_id=' . $album_id . '&amp;insertType=album\',evaluateAdd);"><i id="insertPlay_' . $album_id . '" class="fa fa-fw  fa-play-circle icon-small"></i>Insert and play</a>';
-if ($cfg['access_stream'] && !isTidal($album_id)){
+if ($cfg['access_stream'] && !isTidal($album_id) && !isHRA($album_id)){
 	$basic[] = '<a href="stream.php?action=playlist&amp;album_id=' . $album_id . '&amp;stream_id=' . $cfg['stream_id'] . '"><i class="fa fa-fw  fa-rss  icon-small"></i>Stream album</a>';
 }
-if ($cfg['access_download'] && $cfg['album_download'] && !isTidal($album_id))
+if ($cfg['access_download'] && $cfg['album_download'] && !isTidal($album_id) && !isHRA($album_id))
 	$basic[] = '<a href="download.php?action=downloadAlbum&amp;album_id=' . $album_id . '&amp;download_id=' . $cfg['download_id'] . '" ' . onmouseoverDownloadAlbum($album_id) . '><i class="fa fa-fw  fa-download  icon-small"></i>Download album</a>';
-if ($cfg['access_play'] && !isTidal($album_id)){
+if ($cfg['access_play'] && !isTidal($album_id) && !isHRA($album_id)){
 	$dir_path = rawurlencode(dirname($cfg['media_dir'] . $rel_file['relative_file']));
 	$basic[] = '<a href="browser.php?dir=' . $dir_path . '"><i class="fa fa-fw  fa-folder-open  icon-small"></i>Browse...</a>';
 }
-if ($cfg['access_admin'] && !isTidal($album_id)){
+if ($cfg['access_admin'] && !isTidal($album_id) && !isHRA($album_id)){
 	$dir_path = rawurlencode(dirname($cfg['media_dir'] . $rel_file['relative_file']));
 	$basic[] = '<a href="update.php?action=update&amp;dir_to_update=' . $dir_path . '/&amp;sign=' . $cfg['sign'] . '"><i class="fa fa-fw fa-refresh fa-fw icon-small"></i>Update album</a>';
 }
@@ -248,6 +283,12 @@ elseif (strpos(strtolower($rel_file['relative_file']), strtolower($cfg['misc_tra
 	$album_info['audio_profile'] = '';
 	$album_info['album_dr'] = '';
 	
+}
+elseif (isHRA($album_id)) {
+	$album_info['audio_bits_per_sample'] = '24';
+	$album_info['audio_sample_rate'] = $album["sample_rate"] * 1000;
+	$album_info['audio_dataformat'] = $album["format"];
+	$album_info['audio_profile'] = $album["profile"];
 }
 
 $idx = array_search($cfg['default_search_name'], $cfg['search_name']);
@@ -478,6 +519,16 @@ if (isTidal($album_id)) {
 </div>
 <?php
 }
+if (isHra($album_id)) {
+?>
+
+<div class="line">
+	<div class="add-info-left">Source:</div>
+	<div class="add-info-right"><a href="<?php echo $album["source"] ?>" target="new">High<b>Res</b>Audio</a>
+	</div>
+</div>
+<?php
+}
 
 ?>
 
@@ -487,8 +538,13 @@ if (isTidal($album_id)) {
 	</div>
 	<div class="add-info-right">
 	<?php 
-	if ($album_info['audio_dataformat'] != '' && $album_info['audio_profile'] != '')
-	echo strtoupper($album_info['audio_dataformat']) . ' - ' . $album_info['audio_profile'] . ''; ?>
+	if (stripos($album_info['audio_encoder'],'mqa') !== false && $album_info['audio_profile'] != '') {
+		echo 'MQA - ' . $album_info['audio_profile'] . '';
+	}
+	elseif ($album_info['audio_dataformat'] != '' && $album_info['audio_profile'] != '') {
+		echo strtoupper($album_info['audio_dataformat']) . ' - ' . $album_info['audio_profile'] . '';
+	}
+	?>
 	</div>
 </div>
 <?php }; 
@@ -694,7 +750,8 @@ url: "ajax-album-playlist.php",
 type: "POST",  
 data: { 
 	album_id : '<?php echo $album_id; ?>',
-	image_id : '<?php echo $image_id; ?>'
+	image_id : '<?php echo $image_id; ?>',
+	tracks : '<?php echo str_replace("'","\'",json_encode($tracks)); ?>'
 },  
 dataType: "html"
 }); 
