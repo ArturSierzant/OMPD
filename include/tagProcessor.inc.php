@@ -388,7 +388,10 @@ function parseAudioEncoder($data) {
     if(isset($data['mpeg']['audio']['LAME']['short_version'])) {
         return $data['mpeg']['audio']['LAME']['short_version'];
     }
-		if(isset($data['audio']['encoder'])) {
+    if(isset($data['comments']['mqaencoder'])) {
+        return substr($data['comments']['mqaencoder'],0,strpos($data['comments']['mqaencoder'],','));
+    }
+    if(isset($data['audio']['encoder'])) {
         return $data['audio']['encoder'];
     }
     return 'Unknown encoder';
