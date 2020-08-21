@@ -68,7 +68,7 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 		else {
 			$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="image.php?image_id=' . $album['image_id'] . '" alt="" width="100%" height="100%">';
 		}
-		if ($cfg['show_album_format'] == true && !isTidal($album_id) && !isHra($album_id)) {
+		if ($cfg['show_album_format'] == true && !isTidal($album['album_id']) && !isHra($album['album_id'])) {
 			$query = mysqli_query($db, 'SELECT track.audio_bits_per_sample, track.audio_sample_rate, track.audio_dataformat, track.audio_profile, track.audio_encoder 
 				FROM track left join album on album.album_id = track.album_id where album.album_id = "' .  mysqli_real_escape_string($db,$album['album_id']) . '"LIMIT 1');
 			$album_info = $rel_file = mysqli_fetch_assoc($query);
