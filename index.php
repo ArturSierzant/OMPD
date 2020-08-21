@@ -1679,24 +1679,7 @@ $(document).ready(function () {
 }; //show_suggested 
 if (!isset($cfg['show_last_played'])) $cfg['show_last_played'] = true;
 if ($cfg['show_last_played'] == true) {
-	if ($cfg['use_tidal']) {
-		/* $query = mysqli_query($db, "SELECT * FROM
-		((SELECT DISTINCT album.album_id, album.image_id, album.album, album.artist_alphabetic, c.m_time
-		FROM album RIGHT JOIN 
-		(SELECT album_id, MAX(time) AS m_time FROM counter WHERE album_id not like 'tidal_%' GROUP BY album_id) as c
-		ON c.album_id = album.album_id
-		ORDER BY c.m_time DESC, album.album DESC
-		LIMIT 10)
-		UNION 
-		(SELECT t.album_id, t.image_id, t.album, t.artist_alphabetic, d.m_time 
-		FROM (SELECT DISTINCT CONCAT('tidal_',tidal_album.album_id) as album_id, tidal_album.album_id as image_id, tidal_album.album, tidal_album.artist_alphabetic
-		FROM tidal_album) as t
-		JOIN 
-		(SELECT album_id, MAX(time) AS m_time FROM counter WHERE album_id like 'tidal_%' GROUP BY album_id) as d
-		ON d.album_id = t.album_id
-		ORDER BY d.m_time DESC, t.album DESC
-		LIMIT 10)) s
-		ORDER BY s.m_time DESC, s.album DESC"); */
+	/* if ($cfg['use_tidal']) {
 		$query = mysqli_query($db, "SELECT * FROM (
 		SELECT c1.album_id, c1.album_id as image_id, album, artist_alphabetic, c1.time 
 		FROM (SELECT * FROM (SELECT album_id, time FROM counter WHERE album_id like 'tidal_%' ORDER BY time DESC) c GROUP BY c.album_id
@@ -1718,24 +1701,47 @@ if ($cfg['show_last_played'] == true) {
 		ON c.album_id = album.album_id
 		ORDER BY c.m_time DESC, album.album DESC
 		LIMIT 10' );
-	}
-		
+	} */
+	
+	$query = mysqli_query($db, '
+		SELECT * FROM
+		(SELECT album_id, time FROM counter
+		ORDER BY time DESC
+		LIMIT 10) c
+		GROUP BY c.album_id
+		ORDER BY c.time DESC' );
+	
 	$rows = mysqli_num_rows($query);
 
 	if ($rows > 0) {
+		if ($tileSizePHP) $size = $tileSizePHP;
 	?>
 
 	<h1>&nbsp;Recently played albums <a href="index.php?action=viewRecentlyPlayed">(more...)</a></h1>
-	<div class="full">
-	<?php
-			while ( $album = mysqli_fetch_assoc ( $query ) ) {
-				if ($album) {
-					if ($tileSizePHP)
-						$size = $tileSizePHP;
-					draw_tile ( $size, $album );
-				}
-			}
-			?>
+	<script>
+		var request = $.ajax({  
+		url: "ajax-last-played.php",  
+		type: "POST",
+		data: { tileSize : "<?php echo $size; ?>" },
+		dataType: "html"
+		}); 
+
+	request.done(function(data) {
+		if (data) {
+			$( "#last_played" ).html(data);
+		}
+		else {
+			$( "#last_played" ).html('<h1 class="">Error loading last played albums.</h1>');
+		}
+	});
+	
+	</script>
+	<div class="full" id="last_played">
+		<div style="display: grid; height: 100%;">
+			<span id="albumsLoadingIndicator" style="margin: auto;">
+				<i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading recently played albums...</span>
+			</span>
+		</div>
 	</div>
 	<?php 
 	}
@@ -2122,58 +2128,26 @@ function viewRecentlyPlayed() {
 	$max_item_per_page = $cfg['max_items_per_page'];
 	
 	if ($type == 'day') {
-		if ($cfg['use_tidal']) {
-			$query_rp = mysqli_query($db, "SELECT * FROM
-			((SELECT a.album_id, a.image_id, a.album, a.artist_alphabetic, counter.time as played_time
-			FROM counter JOIN (SELECT album_id, image_id, album, artist_alphabetic FROM album) as a on a.album_id = counter.album_id
-			WHERE counter.album_id NOT LIKE 'tidal_%')
-			UNION 
-			(SELECT t.album_id, t.album_id as image_id, t.album, t.artist_alphabetic, counter.time as played_time
-			FROM counter JOIN (SELECT concat('tidal_',album_id) as album_id, album, artist_alphabetic FROM tidal_album) as t on t.album_id = counter.album_id
-			WHERE counter.album_id LIKE 'tidal_%')
-			) al
-			 ORDER BY al.played_time DESC
-			 ");
-		} 
-		else {
 		$query_rp = mysqli_query($db, '
-		SELECT a.album_id, a.image_id, a.album, a.artist_alphabetic, counter.time as played_time
-		FROM counter JOIN (SELECT album_id, image_id, album, artist_alphabetic FROM album) as a on a.album_id = counter.album_id 
-		WHERE counter.album_id NOT LIKE "tidal_%" 
-		ORDER BY played_time DESC
-		' );
-	}
+		SELECT album_id, time FROM counter
+		ORDER BY time DESC' );
 	}
 	else {
-		if ($cfg['use_tidal']) {
-		$query_rp = mysqli_query($db, "SELECT * FROM
-		((SELECT DISTINCT album.album_id, album.image_id, album.album, album.artist_alphabetic, c.m_time
-		FROM album RIGHT JOIN 
-		(SELECT album_id, MAX(time) AS m_time FROM counter WHERE album_id not like 'tidal_%' GROUP BY album_id) as c
-		ON c.album_id = album.album_id
-		ORDER BY c.m_time DESC, album.album DESC)
-		UNION 
-		(SELECT t.album_id, t.image_id, t.album, t.artist_alphabetic, d.m_time 
-		FROM (SELECT DISTINCT CONCAT('tidal_',tidal_album.album_id) as album_id, tidal_album.album_id as image_id, tidal_album.album, tidal_album.artist_alphabetic
-		FROM tidal_album) as t
-		JOIN 
-		(SELECT album_id, MAX(time) AS m_time FROM counter WHERE album_id like 'tidal_%' GROUP BY album_id) as d
-		ON d.album_id = t.album_id
-		ORDER BY d.m_time DESC, t.album DESC)) s
-		ORDER BY s.m_time DESC, s.album DESC");
-	} else {
 		$query_rp = mysqli_query($db, '
-			SELECT DISTINCT album.album_id, album.image_id, album.album, album.artist_alphabetic, c.m_time as played_time
-			FROM album RIGHT JOIN 
-			(SELECT album_id, MAX(time) AS m_time FROM counter 
-			WHERE counter.album_id NOT LIKE "tidal_%"
-			GROUP BY album_id) as c
-			ON c.album_id = album.album_id
-			ORDER BY c.m_time DESC
-			' );
+		SELECT * FROM
+		(SELECT album_id, time FROM counter
+		ORDER BY time DESC) c
+		GROUP BY c.album_id
+		ORDER BY c.time DESC' );
 	}
+	$album_multidisc = array();
+	while ( $album = mysqli_fetch_assoc ($query_rp)) {
+		$album_multidisc[$album['time'] . '_' .$album['album_id']] = array(
+					'album_id' => $album['album_id'],
+					'played_time' => $album['time']
+					);
 	}
-		$album_multidisc = albumMultidisc($query_rp, 'rp');
+	$cfg['items_count'] = count($album_multidisc);
 ?>
 
 
@@ -2195,7 +2169,66 @@ function viewRecentlyPlayed() {
 		if ($currDate <> $prevDate && $type == 'day') {
 			echo '<div class="decade">' . $currDate . ' - ' . date("l", ($ts)) . '</div>';
 		}
-		draw_tile($size,$album_m,'allDiscs');
+		
+		
+			$albums = array();
+			$a_id = $album_m['album_id'];
+			$albums['album_id'] = $a_id;
+			$tidal_cover = '';
+			if (isTidal($a_id)){
+				$query1 = mysqli_query($db, "SELECT album, cover, artist_alphabetic FROM tidal_album 
+				WHERE album_id='" . getTidalId($a_id) . "' LIMIT 1");
+				$a = mysqli_fetch_assoc ( $query1 );
+				$albums['album'] = $a['album'];
+				$tidal_cover = $a['cover'];
+				$albums['artist_alphabetic'] = $a['artist_alphabetic'];
+			}
+			elseif (isHra($a_id)){
+				if (!$hra_session) {
+					$h = new HraAPI;
+					$h->username = $cfg["hra_username"];
+					$h->password = $cfg["hra_password"];
+					if (NJB_WINDOWS) $t->fixSSLcertificate();
+					$conn = $h->connect();
+					if ($conn === true) $hra_session = true;
+				}
+				if ($hra_session === true){
+					$results = $h->getAlbum(getHraId($a_id));
+					if ($results['data']['results']){
+						$albums['album'] = $results['data']['results']['title'];
+						$albums['cover'] = 'https://' . $results['data']['results']['cover']['master']['file_url'];
+						$albums['artist_alphabetic'] = $results['data']['results']['artist'];
+					}
+					else {
+						$albums = null;
+					}
+				}
+				else {
+					$albums = null;
+				}
+				
+			}
+			else {
+				$query1 = mysqli_query($db, "SELECT album, image_id, artist_alphabetic FROM album 
+				WHERE album_id='" . $a_id . "' LIMIT 1");
+				$a = mysqli_fetch_assoc ( $query1 );
+				$albums['album'] = $a['album'];
+				$albums['image_id'] = $a['image_id'];
+				$albums['artist_alphabetic'] = $a['artist_alphabetic'];
+			}
+			if ($albums) {
+				$album_multidisc_1[$a_id] = array(
+						'album_id' => $a_id,
+						'image_id' => $albums['image_id'],
+						'album' => $albums['album'],
+						'artist_alphabetic' => $albums['artist_alphabetic'],
+						'cover' => $albums['cover']
+						);
+				draw_tile($size,$album_multidisc_1[$a_id],'allDiscs', 'echo', $tidal_cover);
+			}
+		
+		
+		
 		$prevDate = $currDate;
 	}
 ?>
@@ -2294,29 +2327,23 @@ function viewPlayedAtDay() {
 	$page = (get('page') ? get('page') : 1);
 	$max_item_per_page = $cfg['max_items_per_page'];
 	
-	if ($cfg['use_tidal']) {
-			$q = '
-				SELECT * FROM
-				(
-				(SELECT a.album_id, a.image_id, a.album, a.artist_alphabetic, counter.time as played_time
-				FROM counter JOIN (SELECT album_id, image_id, album, artist_alphabetic FROM album) as a on a.album_id = counter.album_id WHERE counter.time > ' . $beginOfDay . ' AND counter.time < ' . $endOfDay . ')
-				UNION
-				(SELECT CONCAT("tidal_", b.album_id) as album_id, b.album_id as image_id, b.album, b.artist_alphabetic, counter.time as played_time
-				FROM counter JOIN (SELECT album_id, cover, album, artist_alphabetic FROM tidal_album) as b on CONCAT("tidal_", b.album_id) = counter.album_id WHERE counter.time > ' . $beginOfDay . ' AND counter.time < ' . $endOfDay . ')
-				) as c
-				ORDER BY c.played_time DESC
-				';
-			$query_rp = mysqli_query($db, $q );
-			//echo $q;
-		} 
-		else {
-			$query_rp = mysqli_query($db, '
-				SELECT a.album_id, a.image_id, a.album, a.artist_alphabetic, counter.time as played_time
-				FROM counter JOIN (SELECT album_id, image_id, album, artist_alphabetic FROM album) as a on a.album_id = counter.album_id WHERE counter.time > ' . $beginOfDay . ' AND counter.time < ' . $endOfDay . ' ORDER BY played_time DESC
-				' );
-		}
+	$query_rp = mysqli_query($db, '
+	SELECT * FROM
+	(SELECT album_id, time FROM counter
+	WHERE time > ' . $beginOfDay . ' AND time < ' . $endOfDay . '
+	ORDER BY time DESC) c
+	GROUP BY c.album_id
+	ORDER BY c.time DESC' );
+
+	$album_multidisc = array();
+	while ( $album = mysqli_fetch_assoc ($query_rp)) {
+		$album_multidisc[$album['time'] . '_' .$album['album_id']] = array(
+					'album_id' => $album['album_id'],
+					'played_time' => $album['time']
+					);
+	}
+	$cfg['items_count'] = count($album_multidisc);
 	
-	$album_multidisc = albumMultidisc($query_rp, 'rp');
 ?>
 
 
@@ -2328,7 +2355,73 @@ function viewPlayedAtDay() {
 	$prevDate = '';
 	$currDate = '';
 	foreach (array_slice($album_multidisc,($page - 1) * $max_item_per_page,$max_item_per_page) as $album_m) {
-		draw_tile($size,$album_m,'allDiscs');
+		$ts = $album_m['played_time'];
+		$currDate = date('Y.m.d', $ts);
+		//$start = mktime(0,0,0,$m,$d,$y);
+		if ($currDate <> $prevDate && $type == 'day') {
+			echo '<div class="decade">' . $currDate . ' - ' . date("l", ($ts)) . '</div>';
+		}
+		
+		
+			$albums = array();
+			$a_id = $album_m['album_id'];
+			$albums['album_id'] = $a_id;
+			$tidal_cover = '';
+			if (isTidal($a_id)){
+				$query1 = mysqli_query($db, "SELECT album, cover, artist_alphabetic FROM tidal_album 
+				WHERE album_id='" . getTidalId($a_id) . "' LIMIT 1");
+				$a = mysqli_fetch_assoc ( $query1 );
+				$albums['album'] = $a['album'];
+				$tidal_cover = $a['cover'];
+				$albums['artist_alphabetic'] = $a['artist_alphabetic'];
+			}
+			elseif (isHra($a_id)){
+				if (!$hra_session) {
+					$h = new HraAPI;
+					$h->username = $cfg["hra_username"];
+					$h->password = $cfg["hra_password"];
+					if (NJB_WINDOWS) $t->fixSSLcertificate();
+					$conn = $h->connect();
+					if ($conn === true) $hra_session = true;
+				}
+				if ($hra_session === true){
+					$results = $h->getAlbum(getHraId($a_id));
+					if ($results['data']['results']){
+						$albums['album'] = $results['data']['results']['title'];
+						$albums['cover'] = 'https://' . $results['data']['results']['cover']['master']['file_url'];
+						$albums['artist_alphabetic'] = $results['data']['results']['artist'];
+					}
+					else {
+						$albums = null;
+					}
+				}
+				else {
+					$albums = null;
+				}
+				
+			}
+			else {
+				$query1 = mysqli_query($db, "SELECT album, image_id, artist_alphabetic FROM album 
+				WHERE album_id='" . $a_id . "' LIMIT 1");
+				$a = mysqli_fetch_assoc ( $query1 );
+				$albums['album'] = $a['album'];
+				$albums['image_id'] = $a['image_id'];
+				$albums['artist_alphabetic'] = $a['artist_alphabetic'];
+			}
+			if ($albums) {
+				$album_multidisc_1[$a_id] = array(
+						'album_id' => $a_id,
+						'image_id' => $albums['image_id'],
+						'album' => $albums['album'],
+						'artist_alphabetic' => $albums['artist_alphabetic'],
+						'cover' => $albums['cover']
+						);
+				draw_tile($size,$album_multidisc_1[$a_id],'allDiscs', 'echo', $tidal_cover);
+			}
+		
+		
+		
+		$prevDate = $currDate;
 	}
 ?>
 </div>

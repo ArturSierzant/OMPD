@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS `cache` (
 
 CREATE TABLE IF NOT EXISTS `counter` (
   `sid` varchar(40) NOT NULL DEFAULT '',
-  `album_id` varchar(30) NOT NULL DEFAULT '',
+  `album_id` varchar(50) NOT NULL DEFAULT '',
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
   `flag` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `time` int(10) unsigned NOT NULL DEFAULT '0',
@@ -711,7 +711,7 @@ INSERT INTO `user` VALUES ('anonymous', 'adf8efe68157cf37503f86d602bec6d593750c3
 -- Default server
 --
 
-INSERT INTO `server` VALUES ('database_version', '47');
+INSERT INTO `server` VALUES ('database_version', '48');
 INSERT INTO `server` VALUES ('escape_char_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('getid3_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('image_quality', '0');

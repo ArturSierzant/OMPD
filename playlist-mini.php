@@ -327,7 +327,13 @@ function evaluateTrack(data) {
 	//console.log ("artist: " + artist);
 	
 	if (data.album_id) {
-		$("#image_in_mini").attr("src","image.php?image_id=" + data.image_id + "&track_id=" + data.track_id);
+		if (data.thumbnail){
+			//temporary solution for HRA streams
+			$("#image_in_mini").attr("src","image_crop.php?thumbnail=" + encodeURIComponent(data.thumbnail));
+		}
+		else {
+			$("#image_in_mini").attr("src","image.php?image_id=" + data.image_id + "&track_id=" + data.track_id);
+		}
 	}
 	else if (data.thumbnail) {
 		//thumbnail e.g. from Youtube
