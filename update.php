@@ -1017,8 +1017,8 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 		if (isset($ThisFileInfo['error']) == false &&
 			isset($ThisFileInfo['comments']['picture'][0]['image_mime']) &&
 			isset($ThisFileInfo['comments']['picture'][0]['data']) &&
-			($ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/jpeg' || $ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/png')) {
-				if ($ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/jpeg')	$image = NJB_HOME_DIR . 'tmp/' . $image_front_arr[0] . '.jpg';
+			($ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/jpeg' || $ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/jpg' || $ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/png')) {
+				if ($ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/jpeg' || $ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/jpg')	$image = NJB_HOME_DIR . 'tmp/' . $image_front_arr[0] . '.jpg';
 				if ($ThisFileInfo['comments']['picture'][0]['image_mime'] == 'image/png')	$image = NJB_HOME_DIR . 'tmp/' . $image_front_arr[0] . '.png';
 				if (file_put_contents($image, $ThisFileInfo['comments']['picture'][0]['data']) === false) 
 					message(__FILE__, __LINE__, 'error', '[b]Update error![/b] [br][br][b]Failed to write image to:[/b][br]' . $image .'[br] file: ' . $file[0] .'[br] data: [br]Check write permissions.');
