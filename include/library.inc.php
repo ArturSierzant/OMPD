@@ -68,6 +68,12 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 		else {
 			$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="image.php?image_id=' . $album['image_id'] . '" alt="" width="100%" height="100%">';
 		}
+		if ($cfg['show_album_format'] == true && !isTidal($album['album_id']) && !isHra($album['album_id'])) {
+			$query = mysqli_query($db, 'SELECT track.audio_bits_per_sample, track.audio_sample_rate, track.audio_dataformat, track.audio_profile, track.audio_encoder 
+				FROM track left join album on album.album_id = track.album_id where album.album_id = "' .  mysqli_real_escape_string($db,$album['album_id']) . '"LIMIT 1');
+			$album_info = $rel_file = mysqli_fetch_assoc($query);
+			$res .= '   <div class="tile_format">' . html(calculateAlbumFormat($album_info)) . '</div>';
+		}
 		//$res .= '	<div id="tile_title" class="tile_info">';
 		$res .= '	<div class="tile_info" style="cursor: initial;">';
 		$res .= '	<div class="tile_title">' . html($album['album']) . '</div>';
@@ -3053,4 +3059,40 @@ function isInFavorite($track_id, $favorite_id) {
 	
 	return $inFavorite;
 }
+
+//  +------------------------------------------------------------------------+
+//  | Calculate album format                                                 |
+//  +------------------------------------------------------------------------+
+function calculateAlbumFormat($album_information) {
+	if (strpos($album_information['audio_profile'],'Lossless') === false) {
+		return $album_information['audio_dataformat'];
+	}
+	elseif (stripos($album_information['audio_encoder'],'mqa') !== false) {
+		return "MQA";
+	}
+	elseif (strpos($album_information['audio_profile'],'Lossless') !== false && $album_information['audio_sample_rate'] == '44100' && $album_information['audio_bits_per_sample'] == '16') {
+		return "CD";
+	}
+	elseif ($album_information['audio_dataformat'] == 'dsf') {
+		switch ($album_information['audio_sample_rate']) {
+			case '2822400':
+				return "DSD64";
+			case '5644800':
+				return "DSD128";
+			case '11289600':
+				return "DSD256";
+			case '22579200':
+				return "DSD512";
+			default:
+				return "DSF";
+		}
+	}
+	elseif ($album_information['audio_sample_rate'] >= '44100' && $album_information['audio_bits_per_sample'] > '16') {
+		return $album_information['audio_bits_per_sample'] . '/' . round($album_information['audio_sample_rate']/1000,0);
+	}
+	else {
+		return "UNKNOWN";
+	}
+}
+
 ?>

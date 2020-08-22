@@ -1674,6 +1674,19 @@ div.tile {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.tile_format {
+  padding: 0.6em;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  color: #ffffff;
+  position: absolute;
+  top: 5%;
+  right: 5%;
+  width: auto;
+  background-color: #222222;
+  opacity: 0.85;
+  filter: alpha(opacity=85);
+}
 .tile_info {
   padding: 0.4em;
   font-size: 0.8em;
