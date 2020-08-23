@@ -729,6 +729,10 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 
 <?php echo $header['seperation']; ?>
 
+<span id="formatFilter" onclick='toggleSubMiddle("FormatFilter");'>format filter <i id="iconmenuSubMiddleMediaFormatFilter" class="fa fa-chevron-circle-down"></i></span>
+
+<?php echo $header['seperation']; ?>
+
 <?php
 	
 	$header['menu'] = "\t" . '<a href="index.php?action=viewYear">year</a>' . $header['seperation'];
@@ -808,6 +812,16 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 	</p></span>
 	<?php
 		//if ($i<$count) echo '&nbsp;|&nbsp;';
+	}
+	?>
+</div>
+
+<div id="menuSubMiddleMediaFormatFilter">
+	<?php 
+	$query = mysqli_query($db,'SELECT DISTINCT audio_dataformat FROM track WHERE audio_dataformat != ""');
+	if (mysqli_num_rows($query) > 0) {
+		while ($formatType = mysqli_fetch_assoc($query))
+			echo  '<p><span><a href="index.php?action=view2&amp;filter=exact&amp;order=artist&amp;format=' . $formatType['audio_dataformat'] . '">' . str_replace(" ", "&nbsp;", html(strtoupper($formatType['audio_dataformat']))) . '</a></span></p>';
 	}
 	?>
 </div>

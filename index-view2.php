@@ -50,6 +50,7 @@ $thumbnail	= 1;
 $order	 	= get('order')				or $order = ($year || $dr ? 'artist' : (in_array(strtolower($artist), $cfg['no_album_artist']) ? 'album' : 'year'));
 $sort	 	= get('sort') == 'desc'		? 'desc' : 'asc';
 $qsType 	= (int) get('qsType')				or $qsType = false;
+$format		= get('format');
 
 //$artist = moveTheToEnd($artist);
 
@@ -231,7 +232,7 @@ elseif ($dr) {
 	$list_url		= 'index.php?action=view2&amp;thumbnail=0&amp;dr=' . $dr . '&amp;order=' . $order . '&amp;sort=' . $sort;
 	$thumbnail_url	= 'index.php?action=view2&amp;thumbnail=1&amp;dr=' . $dr . '&amp;order=' . $order . '&amp;sort=' . $sort;
 }
-else {
+else {	
 	if ($filter == 'all' || $artist == '') {
 		$artist = 'All albums';
 		$filter = 'all';
@@ -242,9 +243,10 @@ else {
 	$nav['name'][]	= 'Library';
 	$nav['url'][]	= 'index.php';
 	if ($qsType) $nav['name'][] = $cfg['quick_search'][$qsType][0];
+	if ($format) $nav['name'][] = strtoupper($format);
 	elseif ($tag) 	$nav['name'][]	= $tag;
 	else 	$nav['name'][]	= 'Artist: ' . $artist;
-	
+
 	require_once('include/header.inc.php');
 
 	if ($filter == 'all')			$filter_query = 'WHERE 1';
@@ -426,7 +428,13 @@ if ($qsType) {
 }
 
 
-
+if ($format) {
+	$order_query = 'ORDER BY album.artist, year, album';
+	$query_str = ('SELECT album, album.artist, artist_alphabetic, album.year, month, genre_id, image_id, album.album_id FROM album, track WHERE album.album_id=track.album_id AND track.audio_dataformat = \'' . $format . '\' GROUP BY track.album_id ' . $order_query);		
+	$order_bitmap_artist = '<span class="fa fa-sort-alpha-asc"></span>';
+	$sort_album = 'desc';
+	$query = mysqli_query($db, $query_str);	
+}
 
 //  +------------------------------------------------------------------------+
 //  | View 2 - thumbnail mode                                                |
@@ -584,7 +592,8 @@ $("#fav4genre").on("click",function(){
 <tr class="header">
 	
 	<td>
-	<?php if (!($tag || $qsType)) {?>
+
+	<?php if (!($tag || $qsType || $format)) {?>
 		<a <?php echo ($order_bitmap_artist == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=artist&amp;sort=<?php echo $sort_artist; ?>">&nbsp;Artist <?php echo $order_bitmap_artist; ?></a>
 		&nbsp;<a <?php echo ($order_bitmap_album == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=album&amp;sort=<?php echo $sort_album; ?>">Album <?php echo $order_bitmap_album; ?></a>
 		&nbsp;<a <?php echo ($order_bitmap_genre == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="<?php echo $sort_url; ?>&amp;order=genre&amp;sort=<?php echo $sort_genre; ?>">Genre <?php echo $order_bitmap_genre; ?></a>
