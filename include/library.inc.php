@@ -74,6 +74,16 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 			$album_info = $rel_file = mysqli_fetch_assoc($query);
 			$res .= '   <div class="tile_format">' . html(calculateAlbumFormat($album_info)) . '</div>';
 		}
+		elseif ($cfg['show_album_format'] == true && isTidal($album['album_id'])) {
+			if ($aq = calculateAlbumFormat($album)) {
+				$res .= '   <div class="tile_format">' . html($aq) . '</div>';
+			}
+		}
+		elseif ($cfg['show_album_format'] == true && isHra($album['album_id'])) {
+			if ($aq = calculateAlbumFormat($album)) {
+				$res .= '   <div class="tile_format">' . html($aq) . '</div>';
+			}
+		}
 		//$res .= '	<div id="tile_title" class="tile_info">';
 		$res .= '	<div class="tile_info" style="cursor: initial;">';
 		$res .= '	<div class="tile_title">' . html($album['album']) . '</div>';
@@ -543,6 +553,7 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 		if ($results['items'] || $resultsEPs['items']) {
 			$sql = "DELETE FROM tidal_album WHERE artist_id = '" . mysqli_real_escape_string($db,$tidalArtistId) . "'";
 			mysqli_query($db, $sql);
+
 			for($i=0;$i<2;$i++) {
 				if ($i == 0) {
 					$albums = $results['items'];
@@ -568,16 +579,18 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 					}
 					if ($artists == '') $artists = $album["artist"]["name"];
 					
+					
 					$sql = "REPLACE INTO tidal_album 
-					(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time, cover, type)
+					(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time, cover, type, audio_quality)
 					VALUES (
-					'" . $album["id"] . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . $album["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$album["title"]) . "', '" . $album["releaseDate"] . "', '', 1, '" . $album["duration"] . "','" . time() . "', '" .$album['cover'] . "','" . $album['type'] . "')";
+					'" . $album["id"] . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . $album["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$album["title"]) . "', '" . $album["releaseDate"] . "', '', 1, '" . $album["duration"] . "','" . time() . "', '" . $album["cover"] . "','" . $album["type"] . "','" . $album["audioQuality"] . "')";
 					
 					mysqli_query($db, $sql);
 					
 					$tidalAlbum["album_id"] = 'tidal_' . $album["id"];
 					$tidalAlbum["album"] = $album["title"];
 					$tidalAlbum["artist_alphabetic"] = $artists;
+					$tidalAlbum["audio_quality"] = $album["audioQuality"];
 					draw_tile($size, $tidalAlbum);
 				}
 			}
@@ -638,12 +651,12 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 		for ($j=0;$j<2;$j++){
 			if ($j==0) {
 				$filter_query1 = 'WHERE type="album" AND ' . $filter_query;
-				$sql = "SELECT album_id, album, artist, album_date FROM tidal_album " . $filter_query1;
+				$sql = "SELECT album_id, album, artist, album_date, audio_quality FROM tidal_album " . $filter_query1;
 				$query = mysqli_query($db,$sql);
 			}
 			else {
 				$filter_query1 = 'WHERE type != "album" AND ' . $filter_query;
-				$sql = "SELECT album_id, album, artist, album_date FROM tidal_album " . $filter_query1;
+				$sql = "SELECT album_id, album, artist, album_date, audio_quality FROM tidal_album " . $filter_query1;
 				$query = mysqli_query($db,$sql);
 				if (mysqli_num_rows($query) > 0) {
 					echo ('<h1>EPs and Singles</h1>');
@@ -655,6 +668,7 @@ function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
 				$tidalAlbum["album_id"] = 'tidal_' . $album["album_id"];
 				$tidalAlbum["album"] = $album["album"];
 				$tidalAlbum["artist_alphabetic"] = $album["artist"];
+				$tidalAlbum["audio_quality"] = $album["audio_quality"];
 				draw_tile($size, $tidalAlbum);
 			}
 		}
@@ -703,9 +717,9 @@ function getAlbumFromTidal($album_id) {
 	if ($artists == '') $artists = $results["artist"]["name"];
 	
 	$sql = "REPLACE INTO tidal_album 
-	(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time, cover, type)
+	(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time, cover, type, audio_quality)
 	VALUES (
-	'" . $results["id"] . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . $results["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$results["title"]) . "', '" . $results["releaseDate"] . "', '', 1, '" . $results["duration"] . "','0','" . $results["cover"] . "','" . $results['type'] . "')";
+	'" . $results["id"] . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . $results["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$results["title"]) . "', '" . $results["releaseDate"] . "', '', 1, '" . $results["duration"] . "','0','" . $results["cover"] . "','" . $results['type'] . "','" . $results['audioQuality'] . "')";
 	
 	mysqli_query($db, $sql);
 	$data['results'] = 1;
@@ -963,6 +977,7 @@ function showAllFromTidal($searchStr, $size) {
 			$album['album_id'] = 'tidal_' . $art['id'];
 			$album['artist_alphabetic'] = $art['artists'][0]['name'];
 			$album['album'] = $art['title'];
+			$album['audio_quality'] = $art['audioQuality'];
 			$albumsList .= draw_tile($size, $album, '', 'string',$art['cover']);
 			}
 		$albumsList .= '</table>';
@@ -1202,6 +1217,7 @@ function showArtistsFromHRA($searchStr, $size) {
 	$data = array();
 	
 	$h = new HraAPI;
+	if (NJB_WINDOWS) $h->fixSSLcertificate();
 	$results = $h->searchArtists($value);
 	if (!$results['data']) {
 		$data['artists_results'] = 0;
@@ -1230,6 +1246,16 @@ function showAlbumsFromHRA($searchStr, $size) {
 	$data = array();
 	
 	$h = new HraAPI;
+	$h->username = $cfg["hra_username"];
+	$h->password = $cfg["hra_password"];
+	if (NJB_WINDOWS) $h->fixSSLcertificate();
+	$conn = $h->connect();
+	if (!$conn){
+		$data['return'] = $conn["return"];
+		$data['response'] = $conn["error"];
+		echo safe_json_encode($data);
+		return;
+	}
 	$results = $h->searchAlbums($value);
 	if (!$results['data']) {
 		$data['albums_results'] = 0;
@@ -1243,6 +1269,10 @@ function showAlbumsFromHRA($searchStr, $size) {
 			$album['artist_alphabetic'] = $art['artist'];
 			$album['album'] = $art['title'];
 			$album['cover'] = $art['cover'];
+			if ($cfg['show_album_format']) {
+				$aq = $h->getAlbum($art['albumId']);
+				$album['audio_quality'] = $aq['data']['results']['tracks'][0]['format'];
+			}
 			$albumsList .= draw_tile($size, $album, '', 'string');
 			}
 		$albumsList .= '</table>';
@@ -1264,6 +1294,17 @@ function showArtistAlbumsFromHRA($searchStr, $size) {
 	$data = array();
 	
 	$h = new HraAPI;
+	$h->username = $cfg["hra_username"];
+	$h->password = $cfg["hra_password"];
+	if (NJB_WINDOWS) $h->fixSSLcertificate();
+	$conn = $h->connect();
+	if (!$conn){
+		$data['return'] = $conn["return"];
+		$data['response'] = $conn["error"];
+		echo safe_json_encode($data);
+		return;
+	}
+	
 	$results = $h->getArtistAlbums($value);
 	if (!$results['data']) {
 		$data['albums_results'] = 0;
@@ -1276,6 +1317,10 @@ function showArtistAlbumsFromHRA($searchStr, $size) {
 			$album['artist_alphabetic'] = $art['artist'];
 			$album['album'] = $art['title'];
 			$album['cover'] = $art['cover'];
+			if ($cfg['show_album_format']) {
+				$aq = $h->getAlbum($art['albumId']);
+				$album['audio_quality'] = $aq['data']['results']['tracks'][0]['format'];
+			}
 			$albumsList .= draw_tile($size, $album, '', 'string');
 			}
 		$albumsList .= '</table>';
@@ -1297,7 +1342,7 @@ function getTracksFromHraAlbum($album_id, $order = '') {
 	$h = new HraAPI;
 	$h->username = $cfg["hra_username"];
 	$h->password = $cfg["hra_password"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	if (NJB_WINDOWS) $h->fixSSLcertificate();
 	$conn = $h->connect();
 	if ($conn === true){
 		$tracks = $h->getAlbumTracks($album_id);
@@ -1357,7 +1402,7 @@ function getHRAMPDUrl($track_id){
 	$h = new HraAPI;
 	$h->username = $cfg["hra_username"];
 	$h->password = $cfg["hra_password"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	if (NJB_WINDOWS) $h->fixSSLcertificate();
 	$conn = $h->connect();
 	if ($conn === true){
 		$results = $h->getTrack($track_id);
@@ -3064,7 +3109,23 @@ function isInFavorite($track_id, $favorite_id) {
 //  | Calculate album format                                                 |
 //  +------------------------------------------------------------------------+
 function calculateAlbumFormat($album_information) {
-	if (strpos($album_information['audio_profile'],'Lossless') === false) {
+	if ($album_information['audio_quality']) {
+		if (isTidal($album_information['album_id'])) {
+		switch (strtolower($album_information['audio_quality'])){
+			case "high":
+			case "lossless":
+				return "CD";
+			case "hi_res":
+				return "Master";
+			default: 
+				return $album_information['audio_quality'];
+			}
+		}
+		elseif (isHra($album_information['album_id'])) {
+			return "24/" . round($album_information['audio_quality'],0);
+		}
+	}
+	elseif (strpos($album_information['audio_profile'],'Lossless') === false) {
 		return $album_information['audio_dataformat'];
 	}
 	elseif (stripos($album_information['audio_encoder'],'mqa') !== false) {

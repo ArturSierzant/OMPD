@@ -164,7 +164,8 @@ function about() {
 	<td></td>
 	<td>
 	<ul style="padding-left: 1em;">
-	<li> added support for HighResAudio</li>
+	<li> added support for HighResAudio (thanks to <a target="_blank" href="https://github.com/marcbth">marcbth</a>)</li>
+	<li> added badge with audio format info on album cover (thanks to <a target="_blank" href="https://github.com/paradix">paradix</a>)</li>
 	<li> fixed bugs</li>
 	</ul>
 	<br>

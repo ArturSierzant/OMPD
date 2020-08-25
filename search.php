@@ -1261,7 +1261,7 @@ function tidal_albums(){
 ?>
 <div>
 <h1 onclick='toggleSearchResults("TIAl");' class="pointer" id="tidalAlbums"><i id="iconSearchResultsTIAl" class="fa fa-chevron-circle-down icon-anchor"></i> Albums</h1>
-<div id="searchResultsTIAl">
+<div id="searchResultsTIAl" class="albums_container">
 <span id="albumsLoadingIndicator">
 		<i class="fa fa-cog fa-spin icon-small"></i> Loading albums list...
 </span>
@@ -1456,7 +1456,7 @@ function hra_albums(){
 ?>
 <div>
 <h1 onclick='toggleSearchResults("HRAAl");' class="pointer" id="hraAlbums"><i id="iconSearchResultsHRAAl" class="fa fa-chevron-circle-down icon-anchor"></i> Albums</h1>
-<div id="searchResultsHRAAl">
+<div id="searchResultsHRAAl" class="albums_container">
 <span id="hraAlbumsLoadingIndicator">
 		<i class="fa fa-cog fa-spin icon-small"></i> Loading albums list...
 </span>

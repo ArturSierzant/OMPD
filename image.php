@@ -77,6 +77,9 @@ function image($image_id, $quality, $track_id) {
 		header('Cache-Control: max-age=31536000');
 		if ($quality == 'hq') {
 			//$data = file_get_contents("http://images.osl.wimpmusic.com/im/im?w=1000&h=1000&albumid=" . $album_id);
+			
+			/* $stream = fopen($t->albumCoverToURL($pic,'hq'), 'r');
+			$data = stream_get_contents($t->albumCoverToURL($pic,'hq')); */
 			$data = file_get_contents($t->albumCoverToURL($pic,'hq'));
 		}
 		else {

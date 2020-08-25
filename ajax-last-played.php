@@ -46,12 +46,13 @@ while ( $album = mysqli_fetch_assoc ($query)) {
 	$albums['album_id'] = $a_id;
 	$tidal_cover = '';
 	if (isTidal($a_id)){
-		$query1 = mysqli_query($db, "SELECT album, cover, artist_alphabetic FROM tidal_album 
+		$query1 = mysqli_query($db, "SELECT album, cover, artist_alphabetic, audio_quality FROM tidal_album 
 		WHERE album_id='" . getTidalId($a_id) . "' LIMIT 1");
 		$a = mysqli_fetch_assoc ( $query1 );
 		$albums['album'] = $a['album'];
 		$tidal_cover = $a['cover'];
 		$albums['artist_alphabetic'] = $a['artist_alphabetic'];
+		$albums['audio_quality'] = $a['audio_quality'];
 	}
 	elseif (isHra($a_id)){
 		if (!$hra_session) {
@@ -68,6 +69,9 @@ while ( $album = mysqli_fetch_assoc ($query)) {
 				$albums['album'] = $results['data']['results']['title'];
 				$albums['cover'] = 'https://' . $results['data']['results']['cover']['master']['file_url'];
 				$albums['artist_alphabetic'] = $results['data']['results']['artist'];
+				if ($cfg['show_album_format']) {
+					$albums['audio_quality'] = $results['data']['results']['tracks'][0]['format'];
+				}
 			}
 			else {
 				$albums = null;
