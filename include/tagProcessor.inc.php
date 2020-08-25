@@ -350,6 +350,9 @@ function parseAudioBitsPerSample($data) {
 }
 
 function parseAudioSampleRate($data) {
+    if(isset($data['comments']['mqaencoder'][0]) && isset($data['comments']['originalsamplerate'][0])) {
+        return $data['comments']['originalsamplerate'][0];
+    }
     if(isset($data['audio']['sample_rate'])) {
         return $data['audio']['sample_rate'];
     }
@@ -388,7 +391,10 @@ function parseAudioEncoder($data) {
     if(isset($data['mpeg']['audio']['LAME']['short_version'])) {
         return $data['mpeg']['audio']['LAME']['short_version'];
     }
-		if(isset($data['audio']['encoder'])) {
+    if(isset($data['comments']['mqaencoder'][0])) {
+        return substr($data['comments']['mqaencoder'][0],0,strpos($data['comments']['mqaencoder'][0],','));
+    }
+    if(isset($data['audio']['encoder'])) {
         return $data['audio']['encoder'];
     }
     return 'Unknown encoder';

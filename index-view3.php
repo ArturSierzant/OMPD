@@ -184,7 +184,7 @@ if ($cfg['show_album_versions'] == true) {
 
 $featuring = false;
 
-$query = mysqli_query($db, 'SELECT track.audio_bits_per_sample, track.audio_sample_rate, track.audio_profile, track.audio_dataformat, track.comment, track.relative_file, album.album_dr FROM track left join album on album.album_id = track.album_id where album.album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"
+$query = mysqli_query($db, 'SELECT track.audio_bits_per_sample, track.audio_sample_rate, track.audio_profile, track.audio_dataformat, track.audio_encoder, track.comment, track.relative_file, album.album_dr FROM track left join album on album.album_id = track.album_id where album.album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"
 LIMIT 1');
 $album_info = $rel_file = mysqli_fetch_assoc($query);
 
@@ -540,8 +540,13 @@ if (isHra($album_id)) {
 	</div>
 	<div class="add-info-right">
 	<?php 
-	if ($album_info['audio_dataformat'] != '' && $album_info['audio_profile'] != '')
-	echo strtoupper($album_info['audio_dataformat']) . ' - ' . $album_info['audio_profile'] . ''; ?>
+	if (stripos($album_info['audio_encoder'],'mqa') !== false && $album_info['audio_profile'] != '') {
+		echo 'MQA - ' . $album_info['audio_profile'] . '';
+	}
+	elseif ($album_info['audio_dataformat'] != '' && $album_info['audio_profile'] != '') {
+		echo strtoupper($album_info['audio_dataformat']) . ' - ' . $album_info['audio_profile'] . '';
+	}
+	?>
 	</div>
 </div>
 <?php }; 
