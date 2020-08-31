@@ -18,7 +18,6 @@
 //  | along with this program.  If not, see <http://www.gnu.org/licenses/>.  |
 //  +------------------------------------------------------------------------+
 
-
 require_once('include/initialize.inc.php');
 require_once('include/library.inc.php');
 
@@ -31,6 +30,7 @@ $image_id = $_POST['image_id'];
 $total_time = $_POST['total_time'];
 $tracksList = json_decode($_POST['tracks'],true);
 $showGenre = false;
+
 
 if (!isHra($album_id)){
 	$query = mysqli_query($db,'SELECT genre FROM track WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" GROUP BY genre');

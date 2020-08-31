@@ -511,7 +511,7 @@ if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
 					if (value["picture"]) {
 						img = '<img src="' + value["picture"] + '">';
 					}
-					related_artists += '<div class="artist_related"><a href="index.php?action=view2&artist=' + encodeURIComponent(value["name"]) + '&order=year"><div class="artist_container_small">' + img + '</div><div>' + value["name"] + '</div></a></div>';
+					related_artists += '<div class="artist_related" onmouseover="return overlib(\'' + value["name"] + '\', CAPTION , \'Go to artist\');" onmouseout="return nd();"><a href="index.php?action=view2&artist=' + encodeURIComponent(value["name"]) + '&order=year"><div class="artist_container_small">' + img + '</div><div>' + value["name"] + '</div></a></div>';
 				});
 				related_artists +='</div>';
 			}

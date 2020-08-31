@@ -30,6 +30,15 @@
 function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover = '') {
 		global $db,$cfg;
 		$res = "";
+		
+		$maxPlayed = $cfg['max_played'];
+		
+		$playedQuery = mysqli_query($db,"SELECT count(album_id) AS c FROM counter WHERE album_id ='" . $album['album_id'] . "'");
+		$rows = mysqli_fetch_assoc($playedQuery);
+		$played = $rows['c'];
+		
+		$pop = $played/$maxPlayed * $size;
+		//$pop = 0;
 		if ($multidisc != '') {
 			$md = '&md=' . $multidisc;
 		}
@@ -71,17 +80,27 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 		if ($cfg['show_album_format'] == true && !isTidal($album['album_id']) && !isHra($album['album_id'])) {
 			$query = mysqli_query($db, 'SELECT track.audio_bits_per_sample, track.audio_sample_rate, track.audio_dataformat, track.audio_profile, track.audio_encoder 
 				FROM track left join album on album.album_id = track.album_id where album.album_id = "' .  mysqli_real_escape_string($db,$album['album_id']) . '"LIMIT 1');
-			$album_info = $rel_file = mysqli_fetch_assoc($query);
-			$res .= '   <div class="tile_format">' . html(calculateAlbumFormat($album_info)) . '</div>';
+			$album_info = mysqli_fetch_assoc($query);
+			$audio_format = calculateAlbumFormat($album_info);
+			if ($cfg['testing'] == 'on' && $audio_format <> 'CD') {
+				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
+			}
+			elseif ($cfg['testing'] == 'off') {
+				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
+			}
 		}
 		elseif ($cfg['show_album_format'] == true && isTidal($album['album_id'])) {
-			if ($aq = calculateAlbumFormat($album)) {
-				$res .= '   <div class="tile_format">' . html($aq) . '</div>';
+			$audio_format = calculateAlbumFormat($album);
+			if ($cfg['testing'] == 'on' && $audio_format <> 'CD') {
+				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
+			}
+			elseif ($cfg['testing'] == 'off') {
+				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
 			}
 		}
 		elseif ($cfg['show_album_format'] == true && isHra($album['album_id'])) {
-			if ($aq = calculateAlbumFormat($album)) {
-				$res .= '   <div class="tile_format">' . html($aq) . '</div>';
+			if ($audio_format = calculateAlbumFormat($album)) {
+				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
 			}
 		}
 		//$res .= '	<div id="tile_title" class="tile_info">';
@@ -96,6 +115,9 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 		}		
 			
 		$res .= '</div>';
+		if ($cfg['show_album_popularity']) {
+			$res .= '<div class="in tile_popularity" style="width: ' . $pop . 'px;"></div>';
+		}
 		$res .= '</div>';
 		if ($retType == 'echo') {
 			echo $res;

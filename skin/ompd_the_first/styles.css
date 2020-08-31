@@ -1950,6 +1950,12 @@ div.tile:active {
 		opacity: 0.85;
 		filter: alpha(opacity=85);
 		}
+.tile_popularity {
+  position: relative;
+  bottom: 2px;
+  width: 0px;
+  height: 2px;
+}
 .tile_info {
 		padding:0.4em;
 		font-size: 0.8em; 

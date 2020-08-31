@@ -225,6 +225,20 @@ require_once(NJB_HOME_DIR . 'include/tagProcessor.inc.php');
 if (NJB_SCRIPT != 'message.php' && NJB_SCRIPT != 'cache.php')
 	require_once(NJB_HOME_DIR . 'include/mysqli.inc.php');
 
+
+
+//  +------------------------------------------------------------------------+
+//  | Set max_played for counting popularity                                 |
+//  +------------------------------------------------------------------------+
+
+$cfg['max_played'] = 0;
+
+$maxQuery = mysqli_query($db,"SELECT album_id, count(*) AS c FROM counter GROUP BY album_id ORDER BY c DESC LIMIT 1");
+$rows = mysqli_fetch_assoc($maxQuery);
+if ($rows) $cfg['max_played'] = $rows['c'];
+
+
+
 //  +------------------------------------------------------------------------+
 //  | Check and set default favorite and blacklist playlist                  |
 //  +------------------------------------------------------------------------+

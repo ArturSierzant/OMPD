@@ -111,6 +111,12 @@ elseif (isHra($album_id)) {
 	$album["genre_id"] = $genre['genre_id'];
 
 	$tracks = $results["data"]["results"]["tracks"];
+	
+	foreach($tracks as &$value) {
+			$value['title'] = str_replace('"','\"',$value['title']);
+			$value['artist'] = str_replace('"','\"',$value['artist']);
+	}
+
 }
 else {
 	$query = mysqli_query($db, 'SELECT artist_alphabetic, artist, album, album_id, year, month, image_id, album_add_time, album.genre_id, album_dr
@@ -383,12 +389,12 @@ if ($cfg['show_discography_browser'] == true && !in_array($album['artist'],$cfg[
 			$thumbIDCount = $thumbCount;
 		}
 		//$playCounter = 0;
-		$query_pop = mysqli_query($db, 'SELECT COUNT(*) AS counter
+		$query_pop = mysqli_query($db, 'SELECT COUNT(*) AS counter, MAX(time) as last
 		FROM counter
 		WHERE album_id = "' . $discography['album_id'] . '"');
 		$playCounter = mysqli_fetch_assoc($query_pop);
 		//$albumPopularity = $playCounter['counter'];
-	echo '<img id="thumb' . $discography['album_id'] .  '" class="imgThumb' . $selected . '" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $discography['album_id'] . '"\' src="image.php?image_id=' . $discography['image_id'] . '" onMouseOver="return overlib(\'' . htmlspecialchars(addslashes($discography['artist']), ENT_QUOTES) . '</div><div class=' . chr(92) . chr(39) . 'ol_line' . chr(92) . chr(39) . '><div>' . htmlspecialchars(addslashes($discography['album']), ENT_QUOTES) . '</div><div class=' . chr(92) . chr(39) . 'ol_line' . chr(92) . chr(39) . '></div><div>' . $discography['year'] . '</div><div class=' . chr(92) . chr(39) . 'ol_line' . chr(92) . chr(39) . '></div><div>Played: ' . $playCounter['counter'] .  ($playCounter['counter'] == 1 ? " time" : " times") . '</div>\', CAPTION , \'Go to album\');" onMouseOut="return nd();" alt="">';
+	echo '<img id="thumb' . $discography['album_id'] .  '" class="imgThumb' . $selected . '" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $discography['album_id'] . '"\' src="image.php?image_id=' . $discography['image_id'] . '" onMouseOver="return overlib(\'' . htmlspecialchars(addslashes($discography['artist']), ENT_QUOTES) . '</div><div class=' . chr(92) . chr(39) . 'ol_line' . chr(92) . chr(39) . '><div>' . htmlspecialchars(addslashes($discography['album']), ENT_QUOTES) . '</div><div class=' . chr(92) . chr(39) . 'ol_line' . chr(92) . chr(39) . '></div><div>' . $discography['year'] . '</div><div class=' . chr(92) . chr(39) . 'ol_line' . chr(92) . chr(39) . '></div><div>Played: ' . $playCounter['counter'] . ($playCounter['counter'] == 1 ? " time" : " times") . '</div><div class=' . chr(92) . chr(39) . 'ol_line' . chr(92) . chr(39) . '></div><div>Last time: ' . ($playCounter['counter'] > 0 ? date("Y-m-d", $playCounter['last']) : " - ") . '</div>\', CAPTION , \'Go to album\');" onMouseOut="return nd();" alt="">';
 	$thumbCount++;
 	}
 	?>

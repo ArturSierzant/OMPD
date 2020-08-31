@@ -1679,29 +1679,6 @@ $(document).ready(function () {
 }; //show_suggested 
 if (!isset($cfg['show_last_played'])) $cfg['show_last_played'] = true;
 if ($cfg['show_last_played'] == true) {
-	/* if ($cfg['use_tidal']) {
-		$query = mysqli_query($db, "SELECT * FROM (
-		SELECT c1.album_id, c1.album_id as image_id, album, artist_alphabetic, c1.time 
-		FROM (SELECT * FROM (SELECT album_id, time FROM counter WHERE album_id like 'tidal_%' ORDER BY time DESC) c GROUP BY c.album_id
-		ORDER BY c.time  DESC LIMIT 10) c1
-		INNER JOIN tidal_album ON REPLACE(c1.album_id, 'tidal_','') = tidal_album.album_id
-
-		UNION
-		SELECT c2.album_id, image_id, album, artist_alphabetic, c2.time 
-		FROM (SELECT * FROM (SELECT album_id, time FROM counter WHERE album_id not like 'tidal_%' ORDER BY time DESC) c GROUP BY c.album_id
-		ORDER BY c.time  DESC LIMIT 10) c2
-		INNER JOIN album ON c2.album_id = album.album_id
-		) w
-		ORDER BY w.time DESC");
-	} else {
-		$query = mysqli_query($db, '
-		SELECT DISTINCT album.album_id, album.image_id, album.album, album.artist_alphabetic
-		FROM album RIGHT JOIN 
-		(SELECT album_id, MAX(time) AS m_time FROM counter WHERE album_id NOT LIKE "tidal_%" GROUP BY album_id) as c
-		ON c.album_id = album.album_id
-		ORDER BY c.m_time DESC, album.album DESC
-		LIMIT 10' );
-	} */
 	
 	$query = mysqli_query($db, '
 		SELECT * FROM
@@ -1719,10 +1696,11 @@ if ($cfg['show_last_played'] == true) {
 
 	<h1>&nbsp;Recently played albums <a href="index.php?action=viewRecentlyPlayed">(more...)</a></h1>
 	<script>
+		var size = $tileSize;
 		var request = $.ajax({  
 		url: "ajax-last-played.php",  
 		type: "POST",
-		data: { tileSize : "<?php echo $size; ?>" },
+		data: { tileSize : size },
 		dataType: "html"
 		}); 
 
@@ -1733,6 +1711,7 @@ if ($cfg['show_last_played'] == true) {
 		else {
 			$( "#last_played" ).html('<h1 class="">Error loading last played albums.</h1>');
 		}
+		
 	});
 	
 	</script>

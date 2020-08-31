@@ -74,10 +74,11 @@ $cfg['hra_lang'] = "en";
 //  +------------------------------------------------------------------------+
 //  | Album format badge settings                                            |
 //  +------------------------------------------------------------------------+
-//  | Show album format badge on album cover                                 |
+//  | Show album format badge and popularity on album cover                  |
 //  +------------------------------------------------------------------------+
 
 $cfg['show_album_format'] = false; 
+$cfg['show_album_popularity'] = false; 
 
 
 //  +------------------- END OF NEW IN O!MPD 1.07 ---------------------------+
