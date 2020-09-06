@@ -71,62 +71,6 @@ $cfg['player_id']	= $player['player_id'];
 
 
 
-
-//  +------------------------------------------------------------------------+
-//  | httpQ                                                                  |
-//  +------------------------------------------------------------------------+
-function httpq($action, $argument = false) {
-	global $cfg;
-	
-	$request =  'GET /' . $action . '?p=' . rawurldecode($cfg['player_pass']) . (($argument) ? '&' . $argument : '') . ' HTTP/1.0' . "\r\n\r\n";
-	
-	$soket = @fsockopen($cfg['player_host'], $cfg['player_port'], $error_no, $error_string, 1) or message(__FILE__, __LINE__, 'error', '[b]Winamp httpQ error[/b][br]Failed to connect to: ' . $cfg['player_host'] . ':' . $cfg['player_port'] . '[br]' . $error_string);
-	@fwrite($soket, $request) or message(__FILE__, __LINE__, 'error', '[b]Winamp httpQ error[/b][br]Failed to write to: ' . $cfg['player_host'] . ':' . $cfg['player_port']);
-	$content = stream_get_contents($soket);
-	fclose($soket);
-	
-	$temp = explode("\r\n\r\n", $content, 2);
-	if (isset($temp[1])) {
-		$header = $temp[0];
-		$content = $temp[1];
-		
-		$header_array = explode("\r\n", $header);
-		foreach ($header_array as $value) {
-			if (preg_match('#^Server: Winamp httpQ.+?([0-9]\.[0-9])#', $value, $match) && $match[1] < 3.1)
-				message(__FILE__, __LINE__, 'error', '[b]Winamp httpQ error[/b][br]netjukebox requires httpQ 3.1 or higher[/b][br]Now httpQ ' . $match[1] . ' is running on: ' . $cfg['player_host'] . ':' . $cfg['player_port']);
-		}
-	}	
-	return $content;
-}
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | videoLAN                                                               |
-//  +------------------------------------------------------------------------+
-function vlc($command) {
-	global $cfg;
-	
-	$request = 'GET /requests/status.xml?command=' . $command . ' HTTP/1.1' . "\r\n";
-	$request .= 'Connection: Close' . "\r\n\r\n";
-	
-	$soket = @fsockopen($cfg['player_host'], $cfg['player_port'], $error_no, $error_string, 1) or message(__FILE__, __LINE__, 'error', '[b]videoLAN error[/b][br]Failed to connect to: ' . $cfg['player_host'] . ':' . $cfg['player_port'] . '[br]' . $error_string);
-	@fwrite($soket, $request) or message(__FILE__, __LINE__, 'error', '[b]videoLAN error[/b][br]Failed to write to: ' . $cfg['player_host'] . ':' . $cfg['player_port']);
-	$content = stream_get_contents($soket);
-	fclose($soket);
-	
-	$temp = explode("\r\n\r\n", $content, 2);
-	if (isset($temp[1])) {
-		$header = $temp[0];
-		$content = $temp[1];
-	}
-	return $content;
-}
-
-
-
-
 //  +------------------------------------------------------------------------+
 //  | Music Player Daemon                                                    |
 //  +------------------------------------------------------------------------+

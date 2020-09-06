@@ -98,11 +98,12 @@ var timer_id				= 0;
 var timer_function			= 'ajaxRequest("play.php?action=playlistStatus&menu=playlist", evaluateStatus)';
 var timer_delay				= 1000;
 var list_length				= '';
-var fromPosition			= -1
+var fromPosition			= -1;
  
 var testing = '<?php echo $cfg['testing']; ?>';
 
 getTrackIDs();
+
 
 ajaxRequest('play.php?action=playlistTrack&track_id=' + track_id[previous_listpos] + '&menu=playlist', evaluateTrack);
 
@@ -155,6 +156,10 @@ function evaluateStatus(data) {
 	evaluateListpos(data.listpos);
 	evaluatePlaytime(data);
 	evaluateIsplaying(data.isplaying, data.listpos);
+	//set changeTileSizeInfo to properly count popularity on cover 
+		if (document.getElementById('artist_mini').innerHTML.indexOf('tileSizePHP') < 0){
+			changeTileSizeInfo();
+		}
 }
 
 
@@ -369,7 +374,6 @@ $(document).ready(function() {
 		ajaxRequest('play.php?action=stop&menu=playlist', evaluateIsplaying);
 	}, function(e) {
 	});
-	
 });
 
 

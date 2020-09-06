@@ -99,9 +99,8 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 			}
 		}
 		elseif ($cfg['show_album_format'] == true && isHra($album['album_id'])) {
-			if ($audio_format = calculateAlbumFormat($album)) {
-				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
-			}
+			$res .= "<script>getHraAudioFormat('" . $album['album_id'] . "');</script>";
+			$res .= '   <div style = "display: none;" class="tile_format" id="tile_format_' . $album['album_id'] . '"></div>';
 		}
 		//$res .= '	<div id="tile_title" class="tile_info">';
 		$res .= '	<div class="tile_info" style="cursor: initial;">';
@@ -1340,7 +1339,7 @@ function showArtistAlbumsFromHRA($searchStr, $size) {
 			$album['album'] = $art['title'];
 			$album['cover'] = $art['cover'];
 			if ($cfg['show_album_format']) {
-				$aq = $h->getAlbum($art['albumId']);
+				//$aq = $h->getAlbum($art['albumId']);
 				$album['audio_quality'] = $aq['data']['results']['tracks'][0]['format'];
 			}
 			$albumsList .= draw_tile($size, $album, '', 'string');
@@ -3170,7 +3169,7 @@ function calculateAlbumFormat($album_information) {
 				return "DSF";
 		}
 	}
-	elseif ($album_information['audio_sample_rate'] >= '44100' && $album_information['audio_bits_per_sample'] > '16') {
+	elseif ($album_information['audio_sample_rate'] >= '44100' && $album_information['audio_bits_per_sample'] >='16') {
 		return $album_information['audio_bits_per_sample'] . '/' . round($album_information['audio_sample_rate']/1000,0);
 	}
 	else {

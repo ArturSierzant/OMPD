@@ -40,7 +40,7 @@ $hra_session = false;
 $c = 0;
 while ( $album = mysqli_fetch_assoc ($query)) {
 	$c++;
-	if ($c > 7) break; //7 is max number of tile displayed on page
+	if ($c > 7) break; //7 is max number of tile displayed on page width
 	$albums = array();
 	$a_id = $album['album_id'];
 	$albums['album_id'] = $a_id;

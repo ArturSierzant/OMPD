@@ -1220,3 +1220,25 @@ function getFavoritesList(track_id, track_mpd_url){
 function escapeRegExp(string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
+
+
+function getHraAudioFormat (albumId) {
+	var request = $.ajax({  
+	url: "ajax-get-hra-audio-format.php",  
+	type: "POST",  
+	data: { 
+		album_id : albumId,
+	},  
+	dataType: "json"
+	}); 
+
+	request.done(function(data) {
+		if (data['audio_format']) {
+			$("#tile_format_" + data['album_id']).html(data['audio_format']);
+			$("#tile_format_" + data['album_id']).show();
+		}
+	}); 
+
+	request.fail(function( jqXHR, textStatus ) {
+	}); 
+}

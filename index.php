@@ -1696,6 +1696,7 @@ if ($cfg['show_last_played'] == true) {
 
 	<h1>&nbsp;Recently played albums <a href="index.php?action=viewRecentlyPlayed">(more...)</a></h1>
 	<script>
+		calcTileSize();
 		var size = $tileSize;
 		var request = $.ajax({  
 		url: "ajax-last-played.php",  
@@ -1706,16 +1707,16 @@ if ($cfg['show_last_played'] == true) {
 
 	request.done(function(data) {
 		if (data) {
-			$( "#last_played" ).html(data);
+			$( "#recently_played" ).html(data);
 		}
 		else {
-			$( "#last_played" ).html('<h1 class="">Error loading last played albums.</h1>');
+			$( "#recently_played" ).html('<h1 class="">Error loading last played albums.</h1>');
 		}
-		
+		//calcTileSize();
 	});
 	
 	</script>
-	<div class="full" id="last_played">
+	<div class="full" id="recently_played">
 		<div style="display: grid; height: 100%;">
 			<span id="albumsLoadingIndicator" style="margin: auto;">
 				<i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading recently played albums...</span>
@@ -1724,7 +1725,7 @@ if ($cfg['show_last_played'] == true) {
 	</div>
 	<?php 
 	}
-} //last_played
+} //recently_played
 ?>
 <h1>&nbsp;New albums</h1>
 
