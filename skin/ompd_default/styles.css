@@ -1634,6 +1634,20 @@ div.in-static {
   height: 100%;
   background-color: #e74c3c;
 }
+/* 
+.timebar-anim {
+  position: relative;
+  animation-duration: 5s;
+  animation-iteration-count: infinite;
+  animation-name: timebar;
+  width: 20px !important;
+}
+
+@keyframes timebar {
+  0%   {left:0px;}
+  100% {left:350px;}
+}
+ */
 #bar-indicator {
   position: absolute;
   background-color: #e74c3c;
@@ -2268,6 +2282,7 @@ h1 {
 }
 .artist_bio_text {
   margin-top: 5px;
+  text-align: justify;
 }
 .artist_bio_source {
   margin-bottom: 5px;

@@ -2628,6 +2628,10 @@ h1 {
 	max-height: 260px;
 	color: #ffffff;
 }
+.artist_bio_text {
+	margin-top: 5px;
+	text-align: justify;
+}
 .artist_bio_related {
   overflow: hidden;
   /* max-height: 100px; */

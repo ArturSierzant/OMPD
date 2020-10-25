@@ -44,7 +44,7 @@ elseif ($search == 'all') {
 	showAllFromTidal($searchStr, $size);
 }
 elseif ($search == 'bio') {
-	showArtistBio($searchStr);
+	showArtistBio($searchStr, $size);
 }
 elseif ($search == 'topTracks') {
 	$searchStr = moveTheToBegining($searchStr);

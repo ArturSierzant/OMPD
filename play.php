@@ -58,6 +58,7 @@ elseif	($action == 'seekImageMap')		seekImageMap();
 elseif	($action == 'playIndex')		playIndex();
 elseif	($action == 'deleteIndex')		deleteIndex();
 elseif	($action == 'deleteBelowIndex')	deleteBelowIndex();
+elseif	($action == 'deleteAlbum')	deleteAlbum();
 elseif	($action == 'deleteIndexAjax')	deleteIndexAjax();
 elseif	($action == 'deletePlayed')		deletePlayed();
 elseif	($action == 'crop')				crop();
@@ -1538,8 +1539,157 @@ function deleteBelowIndex() {
 		$data = array();
 		$data['index'] = (string) $index;
 		echo safe_json_encode($data);
-	}		
+	}
+}
 
+
+
+//  +------------------------------------------------------------------------+
+//  | Delete all from album                                                  |
+//  +------------------------------------------------------------------------+
+function deleteAlbum() {
+	global $cfg, $db;
+	authenticate('access_play');
+	require_once('include/play.inc.php');
+	
+	$index = (int) get('index');
+	$playlist = mpd('playlist');
+  $source = $playlist[$index];
+	$itemsToDel = array();
+  $tracks = array();
+  
+  if (strpos($source,"action=streamTidal") !== false){
+    $queryURL = parse_url($source, PHP_URL_QUERY);
+    parse_str($queryURL, $output);
+    $trackId = $output['track_id'];
+    
+    $query = mysqli_query($db,"SELECT album_id FROM tidal_track WHERE track_id='" . $trackId . "' LIMIT 1");
+    $album = mysqli_fetch_assoc($query);
+    $albumId = $album['album_id'];
+    
+    $query = mysqli_query($db,"SELECT track_id FROM tidal_track WHERE album_id='" . $albumId . "'");
+    while ($track = mysqli_fetch_assoc($query)){
+      $tracks[] = $track['track_id'];
+    };
+    
+    foreach ($playlist as $key => $playlistItem) {
+      if (strpos($playlistItem,"action=streamTidal") !== false){
+        $queryURL = parse_url($playlistItem, PHP_URL_QUERY);
+        parse_str($queryURL, $output);
+        $trackId = $output['track_id'];
+        if (in_array($trackId,$tracks)) {
+          $itemsToDel[] = $key;
+        }
+      }
+    }
+  }
+  elseif (strpos($source,"action=streamHRA") !== false){
+    $queryURL = parse_url($source, PHP_URL_QUERY);
+    parse_str($queryURL, $output);
+    $albumId = $output['ompd_album_id'];
+    foreach ($playlist as $key => $playlistItem) {
+      if (strpos($playlistItem,"action=streamHRA") !== false){
+        $queryURL = parse_url($playlistItem, PHP_URL_QUERY);
+        parse_str($queryURL, $output);
+        if ($output['ompd_album_id'] == $albumId) {
+          $itemsToDel[] = $key;
+        }
+      }
+    }
+  }
+  elseif (strpos($source,"action=streamYouTube") !== false){
+    $queryURL = parse_url($source, PHP_URL_QUERY);
+    parse_str($queryURL, $output);
+    $trackId = $output['track_id'];
+    foreach ($playlist as $key => $playlistItem) {
+      if (strpos($playlistItem,"action=streamYouTube") !== false){
+        $queryURL = parse_url($playlistItem, PHP_URL_QUERY);
+        parse_str($queryURL, $output);
+        if ($output['track_id'] == $trackId) {
+          $itemsToDel[] = $key;
+        }
+      }
+    }
+  }
+  elseif (strpos($source,"action=streamTo") !== false && strpos($source,"track_id=") !== false){
+    $queryURL = parse_url($source, PHP_URL_QUERY);
+    parse_str($queryURL, $output);
+    $trackId = $output['track_id'];
+    
+    $query = mysqli_query($db,"SELECT album_id FROM track WHERE track_id='" . mysqli_real_escape_string($db,$trackId) . "' LIMIT 1");
+    $album = mysqli_fetch_assoc($query);
+    $albumId = $album['album_id'];
+    
+    foreach ($playlist as $key => $playlistItem) {
+      if (strpos($playlistItem,"track_id=") !== false){
+        $queryURL = parse_url($playlistItem, PHP_URL_QUERY);
+        parse_str($queryURL, $output);
+        $trackId = $output['track_id'];
+        
+        $query = mysqli_query($db,"SELECT album_id FROM track WHERE track_id='" . mysqli_real_escape_string($db,$trackId) . "' LIMIT 1");
+        $album = mysqli_fetch_assoc($query);
+        
+        if ($album['album_id'] == $albumId) {
+          $itemsToDel[] = $key;
+        }
+      }
+    }
+  }
+  elseif (strpos($source,"action=streamTo") !== false && strpos($source,"filepath=") !== false){
+    $queryURL = parse_url($source, PHP_URL_QUERY);
+    parse_str($queryURL, $output);
+    $filepath = $output['filepath'];
+    $dir = dirname(urldecode($filepath));
+    
+    foreach ($playlist as $key => $playlistItem) {
+      if (strpos($playlistItem,"filepath=") !== false){
+        $queryURL = parse_url($playlistItem, PHP_URL_QUERY);
+        parse_str($queryURL, $output);
+        if (dirname(urldecode($output['filepath'])) == $dir) {
+          $itemsToDel[] = $key;
+        }
+      }
+    }
+  }
+  elseif (strpos($source,"://") !== false){
+    foreach ($playlist as $key => $playlistItem) {
+      if ($playlistItem == $source) {
+        $itemsToDel[] = $key;
+      }
+    }
+  }
+  else {
+    $query = mysqli_query($db,"SELECT album_id FROM track WHERE relative_file='" . mysqli_real_escape_string($db,$source) . "' LIMIT 1");
+    $album = mysqli_fetch_assoc($query);
+    $albumId = $album['album_id'];
+    
+    foreach ($playlist as $key => $playlistItem) {
+      if (strpos($playlistItem,"://") === false){
+        $query = mysqli_query($db,"SELECT album_id FROM track WHERE relative_file='" . mysqli_real_escape_string($db,$playlistItem) . "' LIMIT 1");
+        $album = mysqli_fetch_assoc($query);
+        if ($album['album_id'] == $albumId) {
+          $itemsToDel[] = $key;
+        }
+      }
+    }
+  }
+  
+  foreach ( array_reverse($itemsToDel) as $delIndex ) {
+    mpd('delete ' . $delIndex);
+  }
+  
+  
+	if (get('menu') == 'playlist') {
+		$data = array();
+		$data['index'] = $index;
+		//$data['playlist'] = $playlist;
+		$data['source'] = $source;
+		$data['trackId'] = $trackId;
+		$data['albumId'] = $albumId;
+		//$data['tracks'] = $tracks;
+		$data['itemsToDel'] = $itemsToDel;
+		echo safe_json_encode($data);
+	}
 }
 
 

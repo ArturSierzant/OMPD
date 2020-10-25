@@ -82,19 +82,19 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 				FROM track left join album on album.album_id = track.album_id where album.album_id = "' .  mysqli_real_escape_string($db,$album['album_id']) . '"LIMIT 1');
 			$album_info = mysqli_fetch_assoc($query);
 			$audio_format = calculateAlbumFormat($album_info);
-			if ($cfg['testing'] == 'on' && $audio_format <> 'CD') {
+			if ($cfg['testing'] == 'on' && $audio_format <> 'CD'  && $audio_format <> 'UNKNOWN') {
 				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
 			}
-			elseif ($cfg['testing'] == 'off') {
+			elseif ($cfg['testing'] == 'off'  && $audio_format <> 'UNKNOWN') {
 				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
 			}
 		}
 		elseif ($cfg['show_album_format'] == true && isTidal($album['album_id'])) {
 			$audio_format = calculateAlbumFormat($album);
-			if ($cfg['testing'] == 'on' && $audio_format <> 'CD') {
+			if ($cfg['testing'] == 'on' && $audio_format <> 'CD' && $audio_format <> 'UNKNOWN') {
 				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
 			}
-			elseif ($cfg['testing'] == 'off') {
+			elseif ($cfg['testing'] == 'off' && $audio_format <> 'UNKNOWN') {
 				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
 			}
 		}
@@ -102,6 +102,7 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 			$res .= "<script>getHraAudioFormat('" . $album['album_id'] . "');</script>";
 			$res .= '   <div style = "display: none;" class="tile_format" id="tile_format_' . $album['album_id'] . '"></div>';
 		}
+    
 		//$res .= '	<div id="tile_title" class="tile_info">';
 		$res .= '	<div class="tile_info" style="cursor: initial;">';
 		$res .= '	<div class="tile_title">' . html($album['album']) . '</div>';
@@ -397,9 +398,11 @@ global $cfg, $db;
 	<td colspan="12">
 		<div class="menuSubRight" id="menu-sub-track<?php echo $i ?>" onclick='offMenuSub(<?php echo $i ?>);'> 
 		<div class="icon-anchor" id="track<?php echo $i; ?>_delete" <?php if ($cfg['access_play']) 
-		echo 'onclick="javascript:showSpinner();ajaxRequest(\'play.php?action=deleteIndex&amp;index=' . $i . '&amp;menu=playlist\',evaluateListpos);"'; ?>>Remove <i class="fa fa-times-circle fa-fw icon-small"></i></div>
-		<div class="icon-anchor" id="track<?php echo $i; ?>_delete_below" <?php if ($cfg['access_play']) 
-		echo 'onclick="javascript:showSpinner();ajaxRequest(\'play.php?action=deleteBelowIndex&amp;index=' . $i . '&amp;menu=playlist\',evaluateListpos);"'; ?>>Remove all below<i class="fa fa-times-circle-o fa-fw icon-small"></i></div>
+		echo 'onclick="javascript:showSpinner();ajaxRequest(\'play.php?action=deleteIndex&amp;index=' . $i . '&amp;menu=playlist\');"'; ?>>Remove <i class="fa fa-times-circle fa-fw icon-small"></i></div>
+		<div class="icon-anchor" id="track<?php echo $i; ?>_delete_album" <?php if ($cfg['access_play']) 
+		echo 'onclick="javascript:showSpinner();ajaxRequest(\'play.php?action=deleteAlbum&amp;index=' . $i . '&amp;menu=playlist\');"'; ?>>Remove all from this album<i class="fa fa-dot-circle-o  fa-fw icon-small"></i></div>
+    <div class="icon-anchor" id="track<?php echo $i; ?>_delete_below" <?php if ($cfg['access_play']) 
+		echo 'onclick="javascript:showSpinner();ajaxRequest(\'play.php?action=deleteBelowIndex&amp;index=' . $i . '&amp;menu=playlist\');"'; ?>>Remove all below<i class="fa fa-times-circle-o fa-fw icon-small"></i></div>
 		<div class="icon-anchor" id="track<?php echo $i; ?>_play_next" <?php if ($cfg['access_play']) 
 		echo 'onclick="javascript:moveTrack(\'playNext\',' . $i . ',false);"'; ?>>Play next <i class="fa fa-caret-square-o-right fa-fw icon-small"></i></div>
 		<div class="icon-anchor" id="track<?php echo $i; ?>_move_top" <?php if ($cfg['access_play']) 
@@ -782,7 +785,7 @@ function getTrackAlbumFromTidal($track_id) {
 //  +------------------------------------------------------------------------+
 //  | Artist biography from Tidal                                            |
 //  +------------------------------------------------------------------------+
-function showArtistBio($artist_name) {
+function showArtistBio($artist_name, $size) {
 	global $cfg, $db;
 	$artist_name = moveTheToBegining($artist_name);
 	$data = array();
@@ -801,10 +804,6 @@ function showArtistBio($artist_name) {
 		else {
 			//$data["test"] = $res["totalNumberOfItems"];
 			foreach ($res["items"] as $artist) {
-				/* echo tidalEscapeChar(strtolower($artist["name"])) . '<br>';
-				echo $artist["name"] . '<br>';
-				echo tidalEscapeChar(strtolower($artist_name)) . '<br>';
-				echo $artist_name; */
 				if (tidalEscapeChar(strtolower($artist["name"])) == tidalEscapeChar(strtolower($artist_name))) {
 					$id = $artist["id"];
 					$data = $t->getArtistBio($id);
@@ -831,6 +830,7 @@ function showArtistBio($artist_name) {
 							$i++;
 						}
 					}
+					$data['size'] = $size;
 					/* $data = $t->getArtistAll($id);
 					$data["picture"] = $t->getArtistPicture($data["rows"][0]["modules"][0]["artist"]["picture"]);
 					$data["text"] = formatBio($data["rows"][0]["modules"][0]["bio"]["text"]); */
@@ -1338,10 +1338,10 @@ function showArtistAlbumsFromHRA($searchStr, $size) {
 			$album['artist_alphabetic'] = $art['artist'];
 			$album['album'] = $art['title'];
 			$album['cover'] = $art['cover'];
-			if ($cfg['show_album_format']) {
+			/* if ($cfg['show_album_format']) {
 				//$aq = $h->getAlbum($art['albumId']);
 				$album['audio_quality'] = $aq['data']['results']['tracks'][0]['format'];
-			}
+			} */
 			$albumsList .= draw_tile($size, $album, '', 'string');
 			}
 		$albumsList .= '</table>';
@@ -3147,7 +3147,12 @@ function calculateAlbumFormat($album_information) {
 		}
 	}
 	elseif (strpos($album_information['audio_profile'],'Lossless') === false) {
-		return $album_information['audio_dataformat'];
+		if ($album_information['audio_dataformat']) {
+      return $album_information['audio_dataformat'];
+    }
+    else {
+      return "UNKNOWN";
+    }
 	}
 	elseif (stripos($album_information['audio_encoder'],'mqa') !== false) {
 		return "MQA";

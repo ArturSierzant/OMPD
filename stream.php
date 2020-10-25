@@ -564,7 +564,7 @@ function streamHRA($id) {
 	$h = new HraAPI;
 	$h->username = $cfg["hra_username"];
 	$h->password = $cfg["hra_password"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	if (NJB_WINDOWS) $h->fixSSLcertificate();
 	$conn = $h->connect();
 	if ($conn === true){
 		$results = $h->getTrack($id);
