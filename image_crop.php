@@ -21,7 +21,13 @@
 
 $thumbnail = str_replace('https://','http://',$_GET['thumbnail']);
 
-$img = imagecreatefromjpeg($thumbnail);
+if (strpos($thumbnail,'.webp') !== false) {
+  $img = imagecreatefromwebp($thumbnail);
+}
+else {
+  $img = imagecreatefromjpeg($thumbnail);
+}
+
 if ($img) {
 	//$size = min(imagesx($img), imagesy($img));
 	$size = imagesy($img);

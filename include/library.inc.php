@@ -1515,7 +1515,11 @@ function getYouTubeId($id){
 
 function getYouTubeMPDUrl($url, $title = ''){
 	global $cfg;
-	$cmd = trim($cfg['python_path'] . ' ' . $cfg['youtube-dl_path'] . ' ' . $cfg['youtube-dl_options'] . ' ' . ($url));
+  //prevent 'youtube-dl: error: no such option: -O'
+  if (strpos(getYouTubeId($url),'-') !== false) {
+    $url = "http://www.youtube.com/watch?v=" . getYouTubeId($url);
+  }
+	$cmd = trim($cfg['python_path'] . ' ' . $cfg['youtube-dl_path'] . ' ' . $cfg['youtube-dl_options'] . ' "' . ($url) . '"');
 	exec($cmd, $output, $ret);
 	if ($ret == 0) {
 		$js = json_decode($output[0],true);
@@ -1586,8 +1590,12 @@ function getYouTubeMPDUrl($url, $title = ''){
 		else {
 			$ytYear = substr($js['upload_date'],0,4);
 		}
+    $thumb = parse_url($js['thumbnail']);
+    //cut thumb url for string like:
+    //https://i.ytimg.com/vi/vPYFWnzjIy0/hqdefault.jpg?sqp=-oaymwEZCNACELwBSFXyq4qpAwsIARUAAIhCGAFwAQ==&rs=AOn4CLBlGIaJTB1qHkM1vuoNyUsCwpufyA
+    $thumb = $thumb['scheme'] . "://" . $thumb['host'] . "/" . $thumb['path'];
 		//streamUrl MUST always be last in url!
-		$ytStreamUrl = NJB_HOME_URL . 'stream.php?action=streamYouTube&track_id=' . $id . '&ompd_title=' . urlencode($ompd_title) . '&ompd_duration=' . urlencode($js['duration']) . '&ompd_artist=' . urlencode($ytArtist) . '&ompd_thumbnail=' . urlencode($js['thumbnail']) . '&ompd_year=' . urlencode($ytYear) . '&ompd_webpage=' . urlencode($js['webpage_url']) . '&streamUrl=' . urlencode($yt_url);
+		$ytStreamUrl = NJB_HOME_URL . 'stream.php?action=streamYouTube&track_id=' . $id . '&ompd_title=' . urlencode($ompd_title) . '&ompd_duration=' . urlencode($js['duration']) . '&ompd_artist=' . urlencode($ytArtist) . '&ompd_thumbnail=' . urlencode($thumb) . '&ompd_year=' . urlencode($ytYear) . '&ompd_webpage=' . urlencode($js['webpage_url']) . '&streamUrl=' . urlencode($yt_url);
 	}
 	else {
 		$ytStreamUrl = false;
