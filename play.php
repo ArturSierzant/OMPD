@@ -2541,10 +2541,8 @@ function updateAddPlay() {
 	//authenticate('access_playlist', false, false, true);
 	$album_id = get('album_id');
 	$data = array();
-	
-	//sleep(6);
-	
-	$query = mysqli_query($db,'SELECT COUNT(c.album_id) as counter, c.time FROM (SELECT time, album_id FROM counter WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '" ORDER BY time DESC) c ORDER BY c.time');
+  
+  $query = mysqli_query($db,'SELECT COUNT(album_id) as counter, max(time) as time FROM counter WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '"');
 	$played = mysqli_fetch_assoc($query);
 	
 	$query = mysqli_query($db,'SELECT artist, artist_alphabetic, album, image_id, album.album_id, COUNT(*) AS counter

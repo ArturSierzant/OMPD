@@ -2113,12 +2113,7 @@ function viewRecentlyPlayed() {
 		ORDER BY time DESC' );
 	}
 	else {
-		$query_rp = mysqli_query($db, '
-		SELECT * FROM
-		(SELECT album_id, time FROM counter
-		ORDER BY time DESC) c
-		GROUP BY c.album_id
-		ORDER BY c.time DESC' );
+    $query_rp = mysqli_query($db, 'SELECT album_id, max(time) FROM counter GROUP BY album_id ORDER BY max(time) DESC' );
 	}
 	$album_multidisc = array();
 	while ( $album = mysqli_fetch_assoc ($query_rp)) {

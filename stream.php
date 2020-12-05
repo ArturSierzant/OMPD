@@ -539,15 +539,22 @@ function streamTidal($id) {
 			//get 8 bytes of stream to make sure that stream is ready
 			$stream = file_get_contents($trackURL["url"], NULL, NULL, 0, 8);
 			if (strlen($stream) > 0) {
-				cliLog('stream: ' . $stream . ' iteration: ' . $i);
+				cliLog('timestamp: ' . time() . ' stream: ' . $stream . ' iteration: ' . $i);
 				break;
 			}
 		}
-		
-		cliLog('Tidal track URL for ' . $id . ': ' . 	$trackURL["url"]);
-		header("Location: " . $trackURL["url"]);
+    
+    if ($cfg['fix_tidal_freezes']) {
+      $logWD = 'false';
+      if ($cfg['debug']) $logWD = 'true';
+      $handle = popen('curl "' . NJB_HOME_URL . 'watchdog.php?host=' . $_SERVER['REMOTE_ADDR'] . '&port=6600&track_id=' . $id .'&logWD=' . $logWD .' " &', 'r');
+    }
+    
+    header("Location: " . $trackURL["url"]);
+    exit;
 	}
-	else {
+	else {  
+		cliLog('TIDAL_CONNECT_ERROR for id=' . $id);
 		echo 'TIDAL_CONNECT_ERROR';
 		var_dump($conn);
 	}

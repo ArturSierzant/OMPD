@@ -993,7 +993,7 @@ div.playlist_status_on_border	{border: solid 1px rgb(77, 144, 254);}
 }
 
 .pl-track-info-right {
-	overflow: auto;
+	/* overflow: auto; */
 }
 
 .pl-track-info {

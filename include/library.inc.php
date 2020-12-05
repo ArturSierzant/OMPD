@@ -36,7 +36,6 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 		$playedQuery = mysqli_query($db,"SELECT count(album_id) AS c FROM counter WHERE album_id ='" . $album['album_id'] . "'");
 		$rows = mysqli_fetch_assoc($playedQuery);
 		$played = $rows['c'];
-		
 		$pop = $played/$maxPlayed * $size;
 		//$pop = 0;
 		if ($multidisc != '') {

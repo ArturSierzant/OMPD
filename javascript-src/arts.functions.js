@@ -28,6 +28,12 @@ function changeTileSizeInfo() {
 		else {
 			this.href = this.href.replace('index.php?','index.php?tileSizePHP=' + $tileSizeArr[0] + '&');
 		}
+    if (this.href.indexOf('statistics.php?')<0) {
+			this.href = this.href.replace('statistics.php','statistics.php?tileSizePHP=' + $tileSizeArr[0]);
+			}
+		else {
+			this.href = this.href.replace('statistics.php?','statistics.php?tileSizePHP=' + $tileSizeArr[0] + '&');
+		}
 	}
 	else {
 		pos1 = this.href.indexOf('PHP=');
@@ -416,7 +422,8 @@ function resizeImgContainer() {
 	$('.pl-track-info-right').css('width', '');
 	$('.album-info-area-right').css('width', '');
 	
-	$('#image_in').css("top", "0");
+	$('#image_in').css('top', '0');
+  $('#pl-track-info-narrow').css('top','0');
 	
 	if (winW < 530) {
 		
@@ -439,7 +446,13 @@ function resizeImgContainer() {
 		//return;
 		$('#image').css('height', maxH);
 		$('#image').css('max-height', maxH);
-
+    
+    //calc only if #image_container exists (only on NowPlaying and Album view) - in other case error appeared
+    if ($('#image_container').css('height')) {
+      diff = $('#image_container').css('height').replace('px','') - $('#image_in').css('height').replace('px','');
+      $('#pl-track-info-narrow').css('position','relative');
+      $('#pl-track-info-narrow').css('top','-' + diff/2 + 'px');
+    }
 		
 		//$('#image_container').css('max-height', function(){return (winW) * 1.1;});
 		

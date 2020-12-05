@@ -545,6 +545,24 @@ function setMaxWidth() {
 function setMiniplayer(){
 		$(".wrapper, .bottom, .back-to-top, div.playlist_button").toggleClass("miniplayer");
 }
+var request = $.ajax({  
+		url: "ajax-check-status.php",  
+		type: "POST",
+		dataType: "json"
+		}); 
+
+	request.done(function(data) {
+		if (data) {
+			//console.log(data);
+      $.each(data, function(index, value){
+          //console.log ("data: " + data[index][0] + data[index][1] );
+        if (data[index]["state"] == "NOK") {
+          $("#player" + data[index]["player_id"]).css("opacity","0.4");
+        }
+      });
+		}
+	});
+
 </script>
 
 
@@ -589,7 +607,7 @@ $action 		= get('action');
 //require_once('include/play.inc.php');
 //$status = mpdSilent('status');
 
-$query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM player ORDER BY player_name');
+$query2 = mysqli_query($db,'SELECT player_name, player_type, player_id, player_host, player_port FROM player ORDER BY player_name');
 
 ?>
 <div id="fixedMenu">
@@ -626,7 +644,7 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id FROM play
 <?php
 	while ($player = mysqli_fetch_assoc($query2)) {
 ?>
-	<span onclick="javascript: changePlayer(<?php echo $player['player_id']; ?>);"><?php echo html($player['player_name']); ?></span>
+	<span id="player<?php echo $player['player_id']; ?>" onclick="javascript: changePlayer(<?php echo $player['player_id']; ?>);"><?php echo html($player['player_name']); ?></span>
 <?php
 }
 ?>

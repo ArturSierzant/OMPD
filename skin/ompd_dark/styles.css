@@ -941,7 +941,7 @@ div.playlist_status_on_border {
   color: #777777;
 }
 .pl-track-info-right {
-  overflow: auto;
+  /* overflow: auto */
 }
 .pl-track-info {
   padding-left: 5px;

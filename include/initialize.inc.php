@@ -79,9 +79,12 @@ $cfg['sign_validated']		= false;
 //$cfg['sign_validated']		= true;
 $cfg['align']				= false;
 
+
+
 //  +------------------------------------------------------------------------+
 //  | Initialize by ArtS                                                     |
 //  +------------------------------------------------------------------------+
+
 $cfg['player_id'] = 1;
 $scroll_bar_correction = 20;
 $base_size = 150;

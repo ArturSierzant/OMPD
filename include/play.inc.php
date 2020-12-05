@@ -80,7 +80,6 @@ function mpd($command,$player_host="",$player_port="") {
 		$player_host = $cfg['player_host'];
 		$player_port = $cfg['player_port'];
 	}
-	
 	$soket = @fsockopen($player_host, $player_port, $error_no, $error_string, 3) or message(__FILE__, __LINE__, 'error', '[b]Music Player Daemon error[/b][br]Failed to connect to: ' . $cfg['player_host'] . ':' . $cfg['player_port'] . '[br]' . $error_string . '[br]Check player settings:[br] [url=config.php?action=playerProfile]config.php?action=playerProfile[/url]');
 	if ($cfg['mpd_password'] != '') {
 		@fwrite($soket, "password " . $cfg['mpd_password'] . "\n") or message(__FILE__, __LINE__, 'error', '[b]Music Player Daemon error[/b][br]Failed to write to: ' . $cfg['player_host'] . ':' . $cfg['player_port']);
@@ -131,6 +130,10 @@ function mpd($command,$player_host="",$player_port="") {
 				//$array[] = 'add_OK';
 				return 'add_OK';
 			}
+      elseif ($command == 'ping') {
+        // returned value: OK
+        return $line;
+      }
 			return $array;
 		}
 		if ($command == 'playlist' && version_compare($cfg['mpd_version'], '0.16.0', '<')) {
@@ -175,7 +178,6 @@ function mpd($command,$player_host="",$player_port="") {
 				$array[] = iconv('UTF-8', NJB_DEFAULT_CHARSET, $value);
 			}
 		}
-		
 		else {
 			// name: value
 			list($key, $value) = explode(': ', $line, 2);
@@ -273,15 +275,18 @@ function mpd_OK($command,$player_host="",$player_port="") {
 //  +------------------------------------------------------------------------+
 function mpdSilent($command,$player_host="",$player_port="") {
 	global $cfg;
+  
+	$timeout = 3;
+  if ($command == 'ping') $timeout = 1.5;
 	
-	$time_start = microtime(true);
+  $time_start = microtime(true);
 	if ($player_host=="" && $player_port==""){
 		$player_host = $cfg['player_host'];
 		$player_port = $cfg['player_port'];
 	}
 	
 	//$soket = @fsockopen($cfg['player_host'], $cfg['player_port'], $error_no, $error_string, 3);
-	$soket = @fsockopen($player_host, $player_port, $error_no, $error_string, 3);
+	$soket = @fsockopen($player_host, $player_port, $error_no, $error_string, $timeout);
 	if (!$soket)
 		return false; 
 	
@@ -332,6 +337,10 @@ function mpdSilent($command,$player_host="",$player_port="") {
 				list($seconds, $dummy) = explode(':', $array['time'], 2);
 				$array['elapsed'] = $seconds;
 			}
+      elseif ($command == 'ping') {
+        // returned value: OK
+        return $line;
+      }
 			$time_end = microtime(true);
 			$cfg['delay'] = round(($time_end - $time_start) * 1000);
 			return $array;

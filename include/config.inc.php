@@ -81,6 +81,20 @@ $cfg['show_album_format'] = false;
 $cfg['show_album_popularity'] = false; 
 
 
+
+//  +------------------------------------------------------------------------+
+//  | Fix TIDAL freezes                                                      |
+//  +------------------------------------------------------------------------+
+//  | Sometimes songs from TIDAL freeze at the beginning. To avoid this      |
+//  | set fix_tidal_freezes to true. Everytime stream starts a watchdog      |
+//  | will be started to do STOP/PLAY stream when it freezes.                |
+//  | It requires curl to be installed and avaialble for web server          |
+//  +------------------------------------------------------------------------+
+
+$cfg['fix_tidal_freezes'] = false;
+
+
+
 //  +------------------- END OF NEW IN O!MPD 1.07 ---------------------------+
 
 
