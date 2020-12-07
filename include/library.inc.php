@@ -98,8 +98,13 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 			}
 		}
 		elseif ($cfg['show_album_format'] == true && isHra($album['album_id'])) {
-			$res .= "<script>getHraAudioFormat('" . $album['album_id'] . "');</script>";
-			$res .= '   <div style = "display: none;" class="tile_format" id="tile_format_' . $album['album_id'] . '"></div>';
+      if ($album['audio_quality_tag']) {
+        $res .= '   <div class="tile_format">' . html($album['audio_quality_tag']) . '</div>';
+      }
+      else {
+        $res .= "<script>getHraAudioFormat('" . $album['album_id'] . "');</script>";
+        $res .= '   <div style = "display: none;" class="tile_format" id="tile_format_' . $album['album_id'] . '"></div>';
+      }
 		}
     
 		//$res .= '	<div id="tile_title" class="tile_info">';
@@ -3136,7 +3141,34 @@ function isInFavorite($track_id, $favorite_id) {
 //  +------------------------------------------------------------------------+
 //  | Calculate album format                                                 |
 //  +------------------------------------------------------------------------+
-function calculateAlbumFormat($album_information) {
+function calculateAlbumFormat($album_information, $hra_tag = "") {
+  if ($hra_tag) {
+    $format = '';
+    switch(strtolower($hra_tag)) {
+      case 'fl441':
+        $format = '24/44';
+        break;
+      case 'fl48':
+        $format = '24/48';
+        break;
+      case 'fl882':
+        $format = '24/88';
+        break;
+      case 'fl96':
+        $format = '24/94';
+        break;
+      case 'fl1764':
+        $format = '24/176';
+        break;
+      case 'fl192':
+        $format = '24/192';
+        break;
+      case 'mqa':
+        $format = 'MQA';
+        break;
+    }
+    return $format;
+  }
 	if ($album_information['audio_quality']) {
 		if (isTidal($album_information['album_id'])) {
 		switch (strtolower($album_information['audio_quality'])){

@@ -1237,7 +1237,7 @@ function escapeRegExp(string) {
 
 function getHraAudioFormat (albumId) {
 	var request = $.ajax({  
-	url: "ajax-get-hra-audio-format.php",  
+	url: "ajax-get-hra-audio-format.php",
 	type: "POST",  
 	data: { 
 		album_id : albumId,

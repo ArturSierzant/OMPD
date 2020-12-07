@@ -212,12 +212,26 @@ class HraAPI {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/getAvailableFormats/?userData=" . $this->userData . "&lang=" . $this->lang);
 		return $this->request();
 	}
-	
-	function getAllCategories() {
-		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/categories/ListAllCategories/?lang=" . $this->lang);
+  
+	function getEditorPlaylists() {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/editorPlaylists/?category=" . urlencode('New Releases') . "&userData=" . $this->userData . "&lang=" . $this->lang);
 		return $this->request();
 	}
-	
+  
+	function getSingleEditorPlaylists($id) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/getSingleEditorPlaylists/?id=" . $id . "&userData=" . $this->userData . "&lang=" . $this->lang);
+		return $this->request();
+	}
+  
+  function getAllCategories() {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/categories/ListAllCategories/?userData=" . $this->userData . "&lang=" . $this->lang);
+		return $this->request();
+	}
+  
+  function getCategorieContent($categorie, $limit=30, $offset=0) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/categories/ListCategorieContent/?category=" . urlencode($categorie) . "&limit=" . $limit . "&offset=" . $offset . "&userData=" . $this->userData . "&lang=" . $this->lang);
+		return $this->request();
+	}
 
 	function request() {
 		curl_setopt($this->curl, CURLOPT_POST, 0);

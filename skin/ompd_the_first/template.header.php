@@ -558,6 +558,8 @@ var request = $.ajax({
           //console.log ("data: " + data[index]["player_id"] + data[index]["state"] );
         if (data[index]["state"] == "NOK") {
           $("#player" + data[index]["player_id"]).css("opacity","0.4");
+          $("#selectSource option[value='" + data[index]["player_id"] + "']").remove();
+          $("#selectDest option[value='" + data[index]["player_id"] + "']").remove();
         }
       });
 		}
@@ -643,7 +645,6 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id, player_h
 <div id="selectPlayer">
 <?php
 	while ($player = mysqli_fetch_assoc($query2)) {
-    //$ping = mpdSilent('ping',$player['player_host'],$player['player_port']);
 ?>
 	<span id="player<?php echo $player['player_id']; ?>" onclick="javascript: changePlayer(<?php echo $player['player_id']; ?>);"><?php echo html($player['player_name']); ?></span>
 <?php

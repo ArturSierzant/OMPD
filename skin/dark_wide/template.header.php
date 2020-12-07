@@ -553,11 +553,11 @@ var request = $.ajax({
 
 	request.done(function(data) {
 		if (data) {
-			//console.log(data);
-      $.each(data, function(index, value){
-          //console.log ("data: " + data[index][0] + data[index][1] );
+		 $.each(data, function(index, value){
         if (data[index]["state"] == "NOK") {
           $("#player" + data[index]["player_id"]).css("opacity","0.4");
+          $("#selectSource option[value='" + data[index]["player_id"] + "']").remove();
+          $("#selectDest option[value='" + data[index]["player_id"] + "']").remove();  
         }
       });
 		}

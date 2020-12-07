@@ -60,6 +60,8 @@ elseif	($action == 'viewGenre')		viewGenre();
 elseif	($action == 'viewDR')			viewDR();
 elseif	($action == 'viewComposer')		viewComposer();
 elseif	($action == 'viewNew')			viewNew();
+elseif	($action == 'viewNewFromHRA')			viewNewFromHRA();
+elseif	($action == 'viewNewFromTidal')			viewNewFromTidal();
 elseif	($action == 'viewPopular')		viewPopular();
 elseif	($action == 'viewRecentlyPlayed')	viewRecentlyPlayed();
 elseif	($action == 'viewPlayedAtDay')	viewPlayedAtDay();
@@ -1726,7 +1728,77 @@ if ($cfg['show_last_played'] == true) {
 	<?php 
 	}
 } //recently_played
+
+if ($cfg['use_tidal']) {
 ?>
+
+<h1>&nbsp;Featured New albums from Tidal <a href="index.php?action=viewNewFromTidal">(more...)</a></h1>
+	<script>
+		calcTileSize();
+		var size = $tileSize;
+		var request = $.ajax({  
+		url: "ajax-tidal-new-albums.php",  
+		type: "POST",
+		data: { tileSize : size, limit : 10, offset : 0 },
+		dataType: "html"
+		}); 
+
+	request.done(function(data) {
+		if (data) {
+			$( "#new_tidal" ).html(data);
+		}
+		else {
+			$( "#new_tidal" ).html('<h1 class="">Error loading new albums from Tidal.</h1>');
+		}
+	});
+	
+	</script>
+	<div class="full" id="new_tidal">
+		<div style="display: grid; height: 100%;">
+			<span id="albumsLoadingIndicator" style="margin: auto;">
+				<i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading new albums from Tidal...</span>
+			</span>
+		</div>
+	</div>
+<?php
+} //new from Tidal
+
+if ($cfg['use_hra']) {
+?>
+
+<h1>&nbsp;New albums from HighResAudio <a href="index.php?action=viewNewFromHRA">(more...)</a></h1>
+	<script>
+		calcTileSize();
+		var size = $tileSize;
+		var request = $.ajax({  
+		url: "ajax-hra-new-albums.php",  
+		type: "POST",
+		data: { tileSize : size, limit : 10, offset : 0 },
+		dataType: "html"
+		}); 
+
+	request.done(function(data) {
+		if (data) {
+			$( "#new_HRA" ).html(data);
+		}
+		else {
+			$( "#new_HRA" ).html('<h1 class="">Error loading new albums from HRA.</h1>');
+		}
+	});
+	
+	</script>
+	<div class="full" id="new_HRA">
+		<div style="display: grid; height: 100%;">
+			<span id="albumsLoadingIndicator" style="margin: auto;">
+				<i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading new albums from HighResAudio...</span>
+			</span>
+		</div>
+	</div>
+<?php
+} //new from HRA
+?>
+
+
 <h1>&nbsp;New albums</h1>
 
 <div class="albums_container">
@@ -1856,6 +1928,154 @@ new albums <?php if (isset($addedOn)) echo ' added on ' . $addedOn; ?>
 
 <?php
 	
+	require_once('include/footer.inc.php');
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | View new from Tidal                                                    |
+//  +------------------------------------------------------------------------+
+function viewNewFromTidal() {
+	global $cfg, $db;
+	global $base_size, $spaces, $scroll_bar_correction;
+	
+	authenticate('access_media');
+	
+	// formattedNavigator
+	$nav			= array();
+	$nav['name'][]	= 'Library';
+	$nav['url'][]	= 'index.php';
+	$nav['name'][]	= 'Featured new albums from Tidal:';
+	require_once('include/header.inc.php');
+
+?>
+
+
+<h1>
+featured new albums
+</h1>
+
+
+<div class="albums_container">
+<?php
+if ($tileSizePHP) $size = $tileSizePHP;
+$t = new TidalAPI;
+$t->username = $cfg["tidal_username"];
+$t->password = $cfg["tidal_password"];
+$t->token = $cfg["tidal_token"];
+$t->audioQuality = $cfg["tidal_audio_quality"];
+$t->fixSSLcertificate();
+$conn = $t->connect();
+if ($conn === true){
+  $curr_page = (get('page') ? get('page') : 1);
+  $results = $t->getFeatured($cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+  if ($results['items']){
+    foreach($results['items'] as $res) {
+      $albums = array();
+      $albums['album_id'] = 'tidal_' . $res['id'];
+      $albums['album'] = $res['title'];
+      $albums['cover'] = $t->albumCoverToURL($res['cover'],'lq');
+      $albums['artist_alphabetic'] = $res['artist']['name'];
+      if ($cfg['show_album_format']) {
+        $albums['audio_quality'] = $res['audioQuality'];
+      }
+      draw_tile ( $size, $albums, '', 'echo', '' );
+    }
+    $cfg['items_count'] = $results['totalNumberOfItems'];
+  }
+  else {
+    $albums = null;
+  }
+}
+else {
+  $albums = null;
+}
+?>
+</div>
+
+<table cellspacing="0" cellpadding="0" class="border">
+
+<tr class="<?php echo $class; ?> smallspace"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
+<tr class="line"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
+
+</table>
+
+<?php
+	require_once('include/footer.inc.php');
+}
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | View new from HRA                                                      |
+//  +------------------------------------------------------------------------+
+function viewNewFromHRA() {
+	global $cfg, $db;
+	global $base_size, $spaces, $scroll_bar_correction;
+	
+	authenticate('access_media');
+	
+	// formattedNavigator
+	$nav			= array();
+	$nav['name'][]	= 'Library';
+	$nav['url'][]	= 'index.php';
+	$nav['name'][]	= 'New albums from HighResAudio:';
+	require_once('include/header.inc.php');
+
+?>
+
+
+<h1>
+new albums
+</h1>
+
+
+<div class="albums_container">
+<?php
+	
+	if ($tileSizePHP) $size = $tileSizePHP;
+  $h = new HraAPI;
+  $h->username = $cfg["hra_username"];
+  $h->password = $cfg["hra_password"];
+  if (NJB_WINDOWS) $t->fixSSLcertificate();
+  $conn = $h->connect();
+  if ($conn === true) {
+    $curr_page = (get('page') ? get('page') : 1);
+    $results = $h->getCategorieContent("new", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+    if ($results['data']['results']){
+      foreach($results['data']['results'] as $res) {
+        $albums = array();
+        $albums['album_id'] = 'hra_' . $res['id'];
+        $albums['album'] = $res['title'];
+        $albums['cover'] = $res['cover'];
+        $albums['artist_alphabetic'] = $res['artist'];
+        if ($cfg['show_album_format']) {
+          $albums['audio_quality_tag'] = calculateAlbumFormat("",$res['tags']);
+        }
+        draw_tile ( $size, $albums, '', 'echo', '' );
+      }
+      $cfg['items_count'] = $cfg['max_items_per_page'] * 30;
+    }
+    else {
+      $albums = null;
+    }
+  }
+  else {
+  $albums = null;
+  }
+?>
+</div>
+
+<table cellspacing="0" cellpadding="0" class="border">
+
+<tr class="<?php echo $class; ?> smallspace"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
+<tr class="line"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
+
+</table>
+
+<?php
 	require_once('include/footer.inc.php');
 }
 

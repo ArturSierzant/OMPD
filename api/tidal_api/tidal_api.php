@@ -152,12 +152,13 @@ class TidalAPI {
 	function getNewAlbums($limit = 100) {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/show_more_featured_albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&deviceType=BROWSER");
 		$res = $this->request();
-		$s = array_search("featured-new",array_column($res["rows"][0]["modules"][0]["tabs"],"key"));
+    return $res;
+    $s = array_search("featured-new",array_column($res["rows"][0]["modules"][0]["tabs"],"key"));
 		return $res["rows"][0]["modules"][0]["tabs"][$s]["pagedList"]["items"];
 	}
 	
-	function getFeatured() {
-		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/new/albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
+	function getFeatured($limit = 100, $offset = 0) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/new/albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
 		return $this->request();
 	}
 	
