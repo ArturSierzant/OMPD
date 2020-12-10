@@ -44,16 +44,4 @@ elseif ($search == 'artists') {
 	if ($searchStr) $searchStr = moveTheToBegining($searchStr);
 	showArtistsFromHRA($searchStr, $size);
 }
-/* elseif ($search == 'all') {
-	showAllFromTidal($searchStr, $size);
-}
-elseif ($search == 'bio') {
-	showArtistBio($searchStr);
-}
-elseif ($search == 'topTracks') {
-	$searchStr = moveTheToBegining($searchStr);
-	showTopTracksFromTidal($searchStr, $artistId);
-} */
 ?>
-
-	

@@ -160,6 +160,21 @@ class TidalAPI {
 	function getFeatured($limit = 100, $offset = 0) {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/new/albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
 		return $this->request();
+	}	
+  
+  function getFeaturedRecommended($limit = 100, $offset = 0) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/recommended/albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
+		return $this->request();
+	}
+  
+	function getFeaturedTop($limit = 100, $offset = 0) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/top/albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
+		return $this->request();
+	}
+	
+  function getFeaturedLocal($limit = 100, $offset = 0) {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/local/albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
+		return $this->request();
 	}
 	
 	function getStreamURL($track_id) {

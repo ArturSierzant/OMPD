@@ -23,6 +23,7 @@ require_once('include/library.inc.php');
 
 global $cfg, $db;
 
+$type = $_POST["type"];
 $size = $_POST["tileSize"];
 $limit = $_POST["limit"];
 $offset = $_POST["offset"];
@@ -37,7 +38,20 @@ $t->audioQuality = $cfg["tidal_audio_quality"];
 $t->fixSSLcertificate();
 $conn = $t->connect();
 if ($conn === true){
-  $results = $t->getFeatured($limit, $offset);
+  switch ($type){
+    case "featured_new":
+      $results = $t->getFeatured($limit, $offset);
+      break;
+    case "featured_recommended":
+      $results = $t->getFeaturedRecommended($limit, $offset);
+      break;
+    case "featured_local":
+      $results = $t->getFeaturedLocal($limit, $offset);
+      break;
+    case "featured_top":
+      $results = $t->getFeaturedTop($limit, $offset);
+      break;
+  }
   if ($results['items']){
     foreach($results['items'] as $res) {
       $albums = array();
