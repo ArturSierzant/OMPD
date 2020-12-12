@@ -223,13 +223,41 @@ class HraAPI {
 		return $this->request();
 	}
   
+  function getAllGenres() {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/categories/ListAllGenre/?userData=" . $this->userData . "&lang=" . $this->lang);
+		return $this->request();
+	}
+  
   function getAllCategories() {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/categories/ListAllCategories/?userData=" . $this->userData . "&lang=" . $this->lang);
 		return $this->request();
 	}
   
   function getCategorieContent($categorie, $limit=30, $offset=0) {
-		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/categories/ListCategorieContent/?category=" . urlencode($categorie) . "&limit=" . $limit . "&offset=" . $offset . "&userData=" . $this->userData . "&lang=" . $this->lang);
+    switch ($categorie) {
+    case "new":
+      $categorie = "\/HIGHRES AUDIO\/Musicstore\/Neue Alben hinzugefügt";
+      break;
+    case "pop":
+      $categorie = "\/HIGHRES AUDIO\/Musicstore\/Genre\/Pop";
+      break;
+    case "rock":
+      $categorie = "\/HIGHRES AUDIO\/Musicstore\/Genre\/Rock";
+      break;
+    case "jazz":
+      $categorie = "\/HIGHRES AUDIO\/Musicstore\/Genre\/Jazz";
+      break;
+    case "classical":
+      $categorie = "\/HIGHRES AUDIO\/Musicstore\/Genre\/Classical";
+      break;
+    case "blues":
+      $categorie = "\/HIGHRES AUDIO\/Musicstore\/Genre\/Blues";
+      break;
+    }
+    
+    //$categorie = "\/HIGHRES AUDIO\/Musicstore\/Genre\/R&B";
+
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/categories/ListCategorieContent/?category=" . urlencode($categorie) . "&limit=" . $limit . "&offset=" . $offset . "&lang=" . $this->lang);
 		return $this->request();
 	}
 

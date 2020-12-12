@@ -23,6 +23,7 @@ require_once('include/library.inc.php');
 
 global $cfg, $db;
 
+$type = $_POST["type"];
 $size = $_POST["tileSize"];
 $limit = $_POST["limit"];
 $offset = $_POST["offset"];
@@ -31,32 +32,43 @@ authenticate('access_media');
 
 
 $h = new HraAPI;
-$h->username = $cfg["hra_username"];
-$h->password = $cfg["hra_password"];
 if (NJB_WINDOWS) $t->fixSSLcertificate();
-$conn = $h->connect();
-if ($conn === true) {
-  $results = $h->getCategorieContent("new", $limit, $offset);
-  if ($results['data']['results']){
-    foreach($results['data']['results'] as $res) {
-      $albums = array();
-      $albums['album_id'] = 'hra_' . $res['id'];
-      $albums['album'] = $res['title'];
-      $albums['cover'] = $res['cover'];
-      $albums['artist_alphabetic'] = $res['artist'];
-      if ($cfg['show_album_format']) {
-        $albums['audio_quality_tag'] = calculateAlbumFormat("",$res['tags']);
-      }
-      draw_tile ( $size, $albums, '', 'echo', '' );
+
+switch ($type){
+  case "new":
+    $results = $h->getCategorieContent("new", $limit, $offset);
+    break;
+  case "pop":
+    $results = $h->getCategorieContent("pop", $limit, $offset);
+    break;
+  case "rock":
+    $results = $h->getCategorieContent("rock", $limit, $offset);
+    break;
+  case "jazz":
+    $results = $h->getCategorieContent("jazz", $limit, $offset);
+    break;
+  case "classical":
+    $results = $h->getCategorieContent("classical", $limit, $offset);
+    break;
+  case "blues":
+    $results = $h->getCategorieContent("blues", $limit, $offset);
+    break;
+}
+if ($results['data']['results']){
+  foreach($results['data']['results'] as $res) {
+    $albums = array();
+    $albums['album_id'] = 'hra_' . $res['id'];
+    $albums['album'] = $res['title'];
+    $albums['cover'] = $res['cover'];
+    $albums['artist_alphabetic'] = $res['artist'];
+    if ($cfg['show_album_format']) {
+      $albums['audio_quality_tag'] = calculateAlbumFormat("",$res['tags']);
     }
-  }
-  else {
-    $albums = null;
+    draw_tile ( $size, $albums, '', 'echo', '' );
   }
 }
 else {
-$albums = null;
+  $albums = null;
 }
-
 ?>
 

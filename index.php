@@ -60,6 +60,7 @@ elseif	($action == 'viewGenre')		viewGenre();
 elseif	($action == 'viewDR')			viewDR();
 elseif	($action == 'viewComposer')		viewComposer();
 elseif	($action == 'viewNew')			viewNew();
+elseif	($action == 'viewHRA')			viewHRA();
 elseif	($action == 'viewNewFromHRA')			viewNewFromHRA();
 elseif	($action == 'viewTidal')			viewTidal();
 elseif	($action == 'viewNewFromTidal')			viewNewFromTidal();
@@ -1767,14 +1768,14 @@ if ($cfg['use_tidal']) {
 if ($cfg['use_hra']) {
 ?>
 
-<h1>&nbsp;New albums from HighResAudio <a href="index.php?action=viewNewFromHRA">(more...)</a></h1>
+<h1>&nbsp;New albums from <a href="index.php?action=viewHRA">HighResAudio</a> <a href="index.php?action=viewNewFromHRA&type=new">(more...)</a></h1>
 	<script>
 		calcTileSize();
 		var size = $tileSize;
 		var request = $.ajax({  
 		url: "ajax-hra-new-albums.php",  
 		type: "POST",
-		data: { tileSize : size, limit : 10, offset : 0 },
+		data: { type: "new", tileSize : size, limit : 10, offset : 0 },
 		dataType: "html"
 		}); 
 
@@ -2139,8 +2140,10 @@ function viewTidal() {
 function viewNewFromTidal() {
 	global $cfg, $db;
 	global $base_size, $spaces, $scroll_bar_correction;
-	$type = get('type');
-	authenticate('access_media');
+	
+  $type = get('type');
+	
+  authenticate('access_media');
 	
 	// formattedNavigator
 	$nav			= array();
@@ -2235,11 +2238,10 @@ else {
 
 
 
-
 //  +------------------------------------------------------------------------+
-//  | View new from HRA                                                      |
+//  | HRA                                                                    |
 //  +------------------------------------------------------------------------+
-function viewNewFromHRA() {
+function viewHRA() {
 	global $cfg, $db;
 	global $base_size, $spaces, $scroll_bar_correction;
 	
@@ -2249,16 +2251,75 @@ function viewNewFromHRA() {
 	$nav			= array();
 	$nav['name'][]	= 'Library';
 	$nav['url'][]	= 'index.php';
-	$nav['name'][]	= 'New albums from HighResAudio:';
+	$nav['name'][]	= 'HighResAudio:';
 	require_once('include/header.inc.php');
 
+  showNewHRAAlbumsByCategory('new');
+  showNewHRAAlbumsByCategory('rock');
+  showNewHRAAlbumsByCategory('blues');
+  showNewHRAAlbumsByCategory('pop');
+  showNewHRAAlbumsByCategory('jazz');
+  showNewHRAAlbumsByCategory('classical');
+
+  require_once('include/footer.inc.php');
+}
+
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | View new from HRA                                                      |
+//  +------------------------------------------------------------------------+
+function viewNewFromHRA() {
+	global $cfg, $db;
+	global $base_size, $spaces, $scroll_bar_correction;
+	
+  $type = get('type');
+	
+  authenticate('access_media');
+	
+	// formattedNavigator
+	$nav			= array();
+	$nav['name'][]	= 'Library';
+	$nav['url'][]	= 'index.php';
+	//$nav['name'][]	= 'New albums from HighResAudio:';
+	//require_once('include/header.inc.php');
+  $nav['name'][]	= 'HighResAudio';
+	$nav['url'][]	= 'index.php?action=viewHRA';
+  switch ($type) {
+    case "new":
+      $nav['name'][]	= 'New albums:';
+      require_once('include/header.inc.php');
+      echo ('<h1>New albums</h1>');
+      break;
+    case "pop":
+      $nav['name'][]	= 'New pop albums:';
+      require_once('include/header.inc.php');
+      echo ('<h1>New pop albums</h1>');
+      break;
+    case "rock":
+      $nav['name'][]	= 'New rock albums:';
+      require_once('include/header.inc.php');
+      echo ('<h1>New rock albums</h1>');
+      break;
+    case "jazz":
+      $nav['name'][]	= 'New jazz albums:';
+      require_once('include/header.inc.php');
+      echo ('<h1>New jazz albums</h1>');
+      break;
+    case "classical":
+      $nav['name'][]	= 'New classical albums:';
+      require_once('include/header.inc.php');
+      echo ('<h1>New classical albums</h1>');
+      break;
+    case "blues":
+      $nav['name'][]	= 'New blues albums:';
+      require_once('include/header.inc.php');
+      echo ('<h1>New blues albums</h1>');
+      break;
+  }
 ?>
-
-
-<h1>
-new albums
-</h1>
-
 
 <div class="albums_container">
 <?php
@@ -2271,7 +2332,27 @@ new albums
   $conn = $h->connect();
   if ($conn === true) {
     $curr_page = (get('page') ? get('page') : 1);
-    $results = $h->getCategorieContent("new", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+    switch ($type){
+    case "new":
+      $results = $h->getCategorieContent("new", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+      break;
+    case "pop":
+      $results = $h->getCategorieContent("pop", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+      break;
+    case "rock":
+      $results = $h->getCategorieContent("rock", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+      break;
+    case "jazz":
+      $results = $h->getCategorieContent("jazz", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+      break;
+    case "classical":
+      $results = $h->getCategorieContent("classical", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+      break;
+    case "blues":
+      $results = $h->getCategorieContent("blues", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+      break;
+  }
+  
     if ($results['data']['results']){
       foreach($results['data']['results'] as $res) {
         $albums = array();
