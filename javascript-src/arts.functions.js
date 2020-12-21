@@ -351,6 +351,7 @@ function resizeSuggested($tileSize,$containerWidth) {
 	$('.full').css('width', function() { 
 	return ($tileCount * $tileSize + (($tileCount - 1) * 1) + 'px'); 
 	});
+  $("#suggested_artists_for_you").css("height","auto");
 }
 
 function resizeUsersTab($tileSize,$containerWidth) {

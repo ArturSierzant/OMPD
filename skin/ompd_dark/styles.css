@@ -29,6 +29,24 @@ body {
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
 }
+/* Scrollbars */
+/* Works on Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a3a #111111;
+}
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: auto;
+}
+*::-webkit-scrollbar-track {
+  background: #111111;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: #3a3a3a;
+  /*  border-radius: 1px; */
+  border: 1px solid #3a3a3a;
+}
 p {
   margin: 0;
 }

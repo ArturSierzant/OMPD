@@ -772,7 +772,7 @@ var request = $.ajax({
 }); 
 
 request.done(function( data ) {  
-	if (data.tracks_results > 0) { //check if any album recieved
+	if (data.tracks_results > 0) { //check if any track recieved
 		$( "#searchResultsTOPT" ).html( data.top_tracks );
 	}
 	else {

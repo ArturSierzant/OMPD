@@ -13,3 +13,4 @@ tidalapi/tidal.py
 .vscode
 ajax-tidal-download.php
 ajax-hra-download.php
+ajax-tidal-pages.php

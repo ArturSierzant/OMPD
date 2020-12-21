@@ -6,10 +6,9 @@
 	zoom: 100%;
 } 
 
-html {height: 100%;}	
+html {height: 100%;}
 
 
-	
 body {
 	margin: 0 auto;
 	border: 0;
@@ -30,6 +29,27 @@ body {
 	-webkit-box-sizing: border-box;
 }
 
+/* Scrollbars */
+/* Works on Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: @bg-playing-bar @bg-main;
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: auto;
+}
+
+*::-webkit-scrollbar-track {
+  background: @bg-main;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: @bg-playing-bar;
+ /*  border-radius: 1px; */
+  border: 1px solid @bg-playing-bar;
+}
 
 p {
 	margin: 0;

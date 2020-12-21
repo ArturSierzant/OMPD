@@ -1734,14 +1734,14 @@ if ($cfg['show_last_played'] == true) {
 if ($cfg['use_tidal']) {
 ?>
 
-<h1>&nbsp;Featured new albums from <a href="index.php?action=viewTidal">Tidal</a> <a href="index.php?action=viewNewFromTidal&type=featured_new">(more...)</a></h1>
+<h1>&nbsp;Suggested new albums from <a href="index.php?action=viewTidal">Tidal</a> <a href="index.php?action=viewNewFromTidal&type=suggested_new">(more...)</a></h1>
 	<script>
 		calcTileSize();
 		var size = $tileSize;
 		var request = $.ajax({  
 		url: "ajax-tidal-new-albums.php",  
 		type: "POST",
-		data: { type: "featured_new", tileSize : size, limit : 10, offset : 0 },
+		data: { type: "suggested_new", tileSize : size, limit : 10, offset : 0 },
 		dataType: "html"
 		}); 
 
@@ -1938,197 +1938,9 @@ new albums <?php if (isset($addedOn)) echo ' added on ' . $addedOn; ?>
 //  +------------------------------------------------------------------------+
 //  | Tidal                                                                  |
 //  +------------------------------------------------------------------------+
+
 function viewTidal() {
-	global $cfg, $db;
-	global $base_size, $spaces, $scroll_bar_correction;
-	
-	authenticate('access_media');
-	
-	// formattedNavigator
-	$nav			= array();
-	$nav['name'][]	= 'Library';
-	$nav['url'][]	= 'index.php';
-	$nav['name'][]	= 'Tidal:';
-	require_once('include/header.inc.php');
-
-?>
-
-<h1>&nbsp;Featured new albums <a href="index.php?action=viewNewFromTidal&type=featured_new">(more...)</a></h1>
-	<script>
-		calcTileSize();
-		var size = $tileSize;
-		var request = $.ajax({  
-		url: "ajax-tidal-new-albums.php",  
-		type: "POST",
-		data: { type: "featured_new", tileSize : size, limit : 10, offset : 0 },
-		dataType: "html"
-		}); 
-
-	request.done(function(data) {
-		if (data) {
-			$( "#new_tidal" ).html(data);
-		}
-		else {
-			$( "#new_tidal" ).html('<h1 class="">Error loading new albums from Tidal.</h1>');
-		}
-	});
-	
-	</script>
-	<div class="full" id="new_tidal">
-		<div style="display: grid; height: 100%;">
-			<span id="albumsLoadingIndicator" style="margin: auto;">
-				<i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading albums from Tidal...</span>
-			</span>
-		</div>
-	</div>
-
-<h1>&nbsp;Featured recommended albums <a href="index.php?action=viewNewFromTidal&type=featured_recommended">(more...)</a></h1>
-	<script>
-		calcTileSize();
-		var size = $tileSize;
-		var request = $.ajax({  
-		url: "ajax-tidal-new-albums.php",  
-		type: "POST",
-		data: { type: "featured_recommended", tileSize : size, limit : 10, offset : 0 },
-		dataType: "html"
-		}); 
-
-	request.done(function(data) {
-		if (data) {
-			$( "#new_recommended_tidal" ).html(data);
-		}
-		else {
-			$( "#new_recommended_tidal" ).html('<h1 class="">Error loading new albums from Tidal.</h1>');
-		}
-	});
-	
-	</script>
-	<div class="full" id="new_recommended_tidal">
-		<div style="display: grid; height: 100%;">
-			<span id="albumsLoadingIndicator" style="margin: auto;">
-				<i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading albums from Tidal...</span>
-			</span>
-		</div>
-	</div>
-
-<h1>&nbsp;Featured local albums <a href="index.php?action=viewNewFromTidal&type=featured_local">(more...)</a></h1>
-	<script>
-		calcTileSize();
-		var size = $tileSize;
-		var request = $.ajax({  
-		url: "ajax-tidal-new-albums.php",  
-		type: "POST",
-		data: { type: "featured_local", tileSize : size, limit : 10, offset : 0 },
-		dataType: "html"
-		}); 
-
-	request.done(function(data) {
-		if (data) {
-			$( "#new_local_tidal" ).html(data);
-		}
-		else {
-			$( "#new_local_tidal" ).html('<h1 class="">Error loading new albums from Tidal.</h1>');
-		}
-	});
-	
-	</script>
-	<div class="full" id="new_local_tidal">
-		<div style="display: grid; height: 100%;">
-			<span id="albumsLoadingIndicator" style="margin: auto;">
-				<i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading albums from Tidal...</span>
-			</span>
-		</div>
-	</div>
-  
-<h1>&nbsp;Featured top albums <a href="index.php?action=viewNewFromTidal&type=featured_top">(more...)</a></h1>
-	<script>
-		calcTileSize();
-		var size = $tileSize;
-		var request = $.ajax({  
-		url: "ajax-tidal-new-albums.php",  
-		type: "POST",
-		data: { type: "featured_top", tileSize : size, limit : 10, offset : 0 },
-		dataType: "html"
-		}); 
-
-	request.done(function(data) {
-		if (data) {
-			$( "#new_top_tidal" ).html(data);
-		}
-		else {
-			$( "#new_top_tidal" ).html('<h1 class="">Error loading new albums from Tidal.</h1>');
-		}
-	});
-	
-	</script>
-	<div class="full" id="new_top_tidal">
-		<div style="display: grid; height: 100%;">
-			<span id="albumsLoadingIndicator" style="margin: auto;">
-				<i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading albums from Tidal...</span>
-			</span>
-		</div>
-	</div>
-<?php
-
-  $t = new TidalAPI;
-  $t->username = $cfg["tidal_username"];
-  $t->password = $cfg["tidal_password"];
-  $t->token = $cfg["tidal_token"];
-  if (NJB_WINDOWS) $t->fixSSLcertificate();
-  $conn = $t->connect();
-  if ($conn === true){
-    $playlists = $t->getUserPlaylists();
-    if ($playlists['totalNumberOfItems'] > 0) {
-  ?>
-  <h1>&nbsp;Playlists</h1>
-  <table cellspacing="0" cellpadding="0" class="border tabFixed break-word">
-  <tr class="header">
-	
-	<td class="icon"></td><!-- optional play -->
-	<td class="icon"></td><!-- optional add -->
-	<td class="icon"></td><!-- optional stream -->
-	<td></td>
-	<td></td>
-	<td class="icon"></td><!-- optional delete -->
-	<td class="icon"></td>
-	<td class="space"></td>
-</tr>
-  <?php
-      for ($j = 0; $j < $playlists['totalNumberOfItems']; $j++) {
-        $plName = $playlists['items'][$j]['title'];
-        $plId = $playlists['items'][$j]['uuid'];
-        //$plLastMod = $playlists['Last-Modified'][$j];
-      ?>		
-        <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
-          
-          <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalPlaylist&amp;favorite_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();"><i id="play_' . $plId . '" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
-          
-          <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=addTidalPlaylist&amp;favorite_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Add to playlist\');" onMouseOut="return nd();"><i id="add_' . $plId . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>'; ?></td>
-          
-          <td>
-          </td>
-          
-          <td><?php if ($cfg['access_play'])	echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalPlaylist&amp;favorite_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();">' . html($plName) . '</a>';
-              else 													echo html($plName); ?>
-          </td>
-          
-          <td>
-            <?php echo $playlists['items'][$j]['description']; ?></td>
-          <td>
-          </td>
-          
-          <td>
-            <?php if ($cfg['access_admin']) echo '<a href="favorite.php?action=viewTidalPlaylist&amp;favorite_id=' . $plId . '&plName=' . $plName . '" onMouseOver="return overlib(\'See tracks\');" onMouseOut="return nd();"><i class="fa fa-list fa-fw icon-small"></i></a>'; ?>
-          </td>
-          
-          <td></td>
-        </tr>
-      <?php	
-      }
-    }
-  }
-  echo '</table>' . "\n";
-  require_once('include/footer.inc.php');
+	require_once("index-tidal.php");
 }
 
 
@@ -2152,30 +1964,49 @@ function viewNewFromTidal() {
   $nav['name'][]	= 'Tidal';
 	$nav['url'][]	= 'index.php?action=viewTidal';
   switch ($type) {
+    case "suggested_new":
+      $nav['name'][] = 'Suggested new albums:';
+      require_once('include/header.inc.php');
+      echo ('<h1>Suggested new albums</h1>');
+      break;
     case "featured_new":
-      $nav['name'][]	= 'Featured new albums:';
+      $nav['name'][] = 'Featured new albums:';
       require_once('include/header.inc.php');
       echo ('<h1>Featured new albums</h1>');
       break;
     case "featured_recommended":
-      $nav['name'][]	= 'Featured recommended albums:';
+      $nav['name'][] = 'Featured recommended albums:';
       require_once('include/header.inc.php');
       echo ('<h1>Featured recommended albums</h1>');
       break;
     case "featured_local":
-      $nav['name'][]	= 'Featured local albums:';
+      $nav['name'][] = 'Featured local albums:';
       require_once('include/header.inc.php');
       echo ('<h1>Featured local albums</h1>');
       break;
     case "featured_top":
-      $nav['name'][]	= 'Featured top albums:';
+      $nav['name'][] = 'Featured top albums:';
       require_once('include/header.inc.php');
       echo ('<h1>Featured top albums</h1>');
+      break;
+    case "new_for_you":
+      $nav['name'][] = 'New albums for you:';
+      require_once('include/header.inc.php');
+      echo ('<h1>New albums for you</h1>');
+      break;
+    case "suggested_for_you":
+      $nav['name'][] = 'Suggested albums for you:';
+      require_once('include/header.inc.php');
+      echo ('<h1>Suggested albums for you</h1>');
+      break;
+    case "suggested_new_tracks":
+      $nav['name'][] = 'Suggested new tracks:';
+      require_once('include/header.inc.php');
+      echo ('<h1>Suggested new tracks</h1>');
       break;
   }
 ?>
 
-<div class="albums_container">
 <?php
 if ($tileSizePHP) $size = $tileSizePHP;
 $t = new TidalAPI;
@@ -2186,41 +2017,66 @@ $t->audioQuality = $cfg["tidal_audio_quality"];
 $t->fixSSLcertificate();
 $conn = $t->connect();
 if ($conn === true){
+  $mediaType = 'album';
   $curr_page = (get('page') ? get('page') : 1);
+  //50 is Tidal limitation for getting data by dataApiPath
+  $tidalMaxItemPerPage = $cfg['max_items_per_page'];
+  if ($tidalMaxItemPerPage > 50) $tidalMaxItemPerPage = 50;
   switch ($type){
+    case "suggested_new":
+      $results = $t->getSuggestedNew($tidalMaxItemPerPage, $tidalMaxItemPerPage * ($curr_page - 1), true);
+      break;
     case "featured_new":
-    $results = $t->getFeatured($cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+      $results = $t->getFeatured($cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
       break;
     case "featured_recommended":
-    $results = $t->getFeaturedRecommended($cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+      $results = $t->getFeaturedRecommended($cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
       break;
     case "featured_local":
-    $results = $t->getFeaturedLocal($cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+      $results = $t->getFeaturedLocal($cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
       break;
     case "featured_top":
-    $results = $t->getFeaturedTop($cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+      $results = $t->getFeaturedTop($cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+      break;
+    case "new_for_you":
+      $results = $t->getNewForYou($tidalMaxItemPerPage, $tidalMaxItemPerPage * ($curr_page - 1), true);
+      break;
+    case "suggested_for_you":
+      $results = $t->getSuggestedForYou($tidalMaxItemPerPage, $tidalMaxItemPerPage * ($curr_page - 1), true);
+      break;
+    case "suggested_new_tracks":
+      $results = $t->getSuggestedNewTracks($tidalMaxItemPerPage, $tidalMaxItemPerPage * ($curr_page - 1), true);
+      $mediaType = 'track';
       break;
   }
   if ($results['items']){
-    foreach($results['items'] as $res) {
-      $albums = array();
-      $albums['album_id'] = 'tidal_' . $res['id'];
-      $albums['album'] = $res['title'];
-      $albums['cover'] = $t->albumCoverToURL($res['cover'],'lq');
-      $albums['artist_alphabetic'] = $res['artist']['name'];
-      if ($cfg['show_album_format']) {
-        $albums['audio_quality'] = $res['audioQuality'];
+    if ($mediaType == 'album'){
+      echo '<div class="albums_container">';
+      foreach($results['items'] as $res) {
+        $albums = array();
+        $albums['album_id'] = 'tidal_' . $res['id'];
+        $albums['album'] = $res['title'];
+        $albums['cover'] = $t->albumCoverToURL($res['cover'],'lq');
+        $albums['artist_alphabetic'] = $res['artists'][0]['name'];
+        if ($cfg['show_album_format']) {
+          $albums['audio_quality'] = $res['audioQuality'];
+        }
+        draw_tile ( $size, $albums, '', 'echo', '' );
       }
-      draw_tile ( $size, $albums, '', 'echo', '' );
+      $cfg['items_count'] = $results['totalNumberOfItems'];
     }
-    $cfg['items_count'] = $results['totalNumberOfItems'];
+    elseif ($mediaType == 'track') {
+      $tracksList = tidalTracksList($results);
+      echo '<div>';
+      echo $tracksList;
+    }
   }
   else {
-    $albums = null;
+    echo ('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
   }
 }
 else {
-  $albums = null;
+  echo('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Tidal request.<br>Error message:<br><br>' . $conn["error"] . '</div>');
 }
 ?>
 </div>

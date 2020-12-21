@@ -176,16 +176,102 @@ class TidalAPI {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/local/albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
 		return $this->request();
 	}
+	  
+  function getSuggestedNew($limit = 50, $offset = 0, $getMore = false) {
+    $res = $this->getHomePage();
+    foreach($res['rows'] as $key => $row){
+      if ($row['modules'][0]['title'] == 'Suggested New Albums') {
+        if ($getMore) {
+          $apiPath = $res['rows'][$key]['modules'][0]['pagedList']['dataApiPath'];
+          $more = $this->getByApiPath($limit, $offset, $apiPath);
+          return $more;
+        }
+        else {
+          return ($res['rows'][$key]['modules'][0]['pagedList']);
+        }
+      }
+    }
+		return false;
+	}
+	
+  function getNewForYou($limit = 50, $offset = 0, $getMore = false) {
+		$res = $this->getHomePage();
+    foreach($res['rows'] as $key => $row){
+      if ($row['modules'][0]['title'] == 'New Releases For You') {
+        if ($getMore) {
+          $apiPath = $res['rows'][$key]['modules'][0]['pagedList']['dataApiPath'];
+          $more = $this->getByApiPath($limit, $offset, $apiPath);
+          return $more;
+        }
+        else {
+          return ($res['rows'][$key]['modules'][0]['pagedList']);
+        }
+      }
+    }
+		return false;
+	}
+  
+  function getSuggestedForYou($limit = 50, $offset = 0, $getMore = false) {
+		$res = $this->getExplorePage();
+    foreach($res['rows'] as $key => $row){
+      if ($row['modules'][0]['title'] == 'Suggested Albums for You') {
+        if ($getMore) {
+          $apiPath = $res['rows'][$key]['modules'][0]['pagedList']['dataApiPath'];
+          $more = $this->getByApiPath($limit, $offset, $apiPath);
+          return $more;
+        }
+        else {
+          return ($res['rows'][$key]['modules'][0]['pagedList']);
+        }
+      }
+    }
+		return false;
+	}
+
+  function getSuggestedArtistsForYou($limit = 50, $offset = 0, $getMore = false) {
+		$res = $this->getExplorePage();
+    foreach($res['rows'] as $key => $row){
+      if ($row['modules'][0]['title'] == 'Suggested Artists for You') {
+        if ($getMore) {
+          $apiPath = $res['rows'][$key]['modules'][0]['pagedList']['dataApiPath'];
+          $more = $this->getByApiPath($limit, $offset, $apiPath);
+          return $more;
+        }
+        else {
+          return ($res['rows'][$key]['modules'][0]['pagedList']);
+        }
+      }
+    }
+		return false;
+	}
+  
+  function getSuggestedNewTracks($limit = 50, $offset = 0, $getMore = false) {
+		$res = $this->getHomePage();
+    foreach($res['rows'] as $key => $row){
+      if ($row['modules'][0]['title'] == 'Suggested New Tracks') {
+        if ($getMore) {
+          $apiPath = $res['rows'][$key]['modules'][0]['pagedList']['dataApiPath'];
+          $more = $this->getByApiPath($limit, $offset, $apiPath);
+          return $more;
+        }
+        else {
+          return ($res['rows'][$key]['modules'][0]['pagedList']);
+        }
+      }
+    }
+		return false;
+	}
+
+  function getByApiPath($limit = 50, $offset = 0, $apiPath) {
+    if ($limit > 50) $limit = 50; //Tidal API limitation
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . $apiPath ."?sessionId=" . $this->sessionId . "&locale=en_US&deviceType=BROWSER&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
+		return $this->request();
+	}
 	
 	function getStreamURL($track_id) {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "tracks/" . $track_id . "/streamUrl?soundQuality=" . $this->audioQuality . "&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
 		return $this->request();
 	}
-	
-	/* function getUserHomePage() {
-		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "/pages/home?locale=en_US&countryCode=" . $this->countryCode . "&deviceType=BROWSER");
-		return $this->request();
-	} */
 	
 	function getUserPlaylists() {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "users/" . $this->userId . "/playlists?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
@@ -194,6 +280,17 @@ class TidalAPI {
 	
 	function getUserPlaylistTracks($playlist_id, $limit = 1000) {
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "playlists/" . $playlist_id . "/tracks?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
+		return $this->request();
+	}
+  
+	function getHomePage() {
+		//curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " pages/home?locale=en_US&deviceType=DESKTOP&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " pages/home?locale=en_US&deviceType=BROWSER&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
+		return $this->request();
+	}
+	
+  function getExplorePage() {
+		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " pages/explore?locale=en_US&deviceType=BROWSER&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
 		return $this->request();
 	}
 	

@@ -72,8 +72,8 @@ if ($counter == $maxCounter) {
   return;
 }
 
-usleep(500000);
-cliLog('Checking if stream is playing after 0.5s pause...');
+usleep(200000);
+cliLog('Checking if stream is playing after 0.2s pause...');
 $status = mpd("status",$host,$port);
 cliLog('"time"=' . $status['time']);
 if ($status['time'] == '0:0' || !$status['time']) {

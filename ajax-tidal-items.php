@@ -36,52 +36,55 @@ $t->password = $cfg["tidal_password"];
 $t->token = $cfg["tidal_token"];
 $t->audioQuality = $cfg["tidal_audio_quality"];
 $t->fixSSLcertificate();
-//usleep(rand(100,10000));
 $conn = $t->connect();
+$data = array();
+
 if ($conn === true){
   switch ($type){
-    case "suggested_new":
-      $results = $t->getSuggestedNew();
+    case "suggested_artists":
+      $results = $t->getSuggestedArtistsForYou($limit, $offset, true);
       break;
-    case "featured_new":
-      $results = $t->getFeatured($limit, $offset);
-      break;
-    case "featured_recommended":
-      $results = $t->getFeaturedRecommended($limit, $offset);
-      break;
-    case "featured_local":
-      $results = $t->getFeaturedLocal($limit, $offset);
-      break;
-    case "featured_top":
-      $results = $t->getFeaturedTop($limit, $offset);
-      break;
-    case "new_for_you":
-      $results = $t->getNewForYou($limit, $offset);
-      break;
-    case "suggested_for_you":
-      $results = $t->getSuggestedForYou($limit, $offset);
+    case "suggested_new_tracks":
+      $results = $t->getSuggestedNewTracks($limit, $offset, false);
       break;
   }
   if ($results['items']){
-    foreach($results['items'] as $res) {
-      $albums = array();
-      $albums['album_id'] = 'tidal_' . $res['id'];
-      $albums['album'] = $res['title'];
-      $albums['cover'] = $t->albumCoverToURL($res['cover'],'lq');
-      $albums['artist_alphabetic'] = $res['artists'][0]['name'];
-      if ($cfg['show_album_format']) {
-        $albums['audio_quality'] = $res['audioQuality'];
-      }
-      draw_tile ( $size, $albums, '', 'echo', '' );
+    switch ($type){
+      case "suggested_artists":
+        $i = 0;
+        foreach($results['items'] as $artist) {
+          $data["artists"][$i]["id"] = $artist["id"];
+          $data["artists"][$i]["name"] = $artist["name"];
+          if ($artist["picture"]) {
+            $data["artists"][$i]["picture"] = $t->artistPictureToURL($artist["picture"]);
+          }
+          else {
+            $data["artists"][$i]["picture"] = "";
+          }
+          $i++;
+        }
+        $data['items_count'] = $i;
+        $data['size'] = $size;
+        break;
+      case "suggested_new_tracks":
+        $data['tracks_results'] = $results['totalNumberOfItems'];
+        $tracksList = tidalTracksList($results);
+        $data['new_tracks'] = $tracksList;
+        break;
     }
+    
   }
   else {
-    echo 'No albums found';
+    $data['return'] = 0;
+    $data['items_count'] = 0;
   }
 }
 else {
-  echo 'Error in connection to Tidal (' . $conn['error'] . ')';
+  $data['return'] = $conn["return"];
+  $data['response'] = $conn["error"];
 }
+
+echo safe_json_encode($data);
 
 ?>
 
