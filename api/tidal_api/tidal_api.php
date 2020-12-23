@@ -26,9 +26,9 @@ class TidalAPI {
 	public $audioQuality = "HIGH";
 	public $curl;
 	public $fixSSLcertificate = false;
-	protected $sessionId;
-	protected $countryCode;
-	protected $userId;
+	public $sessionId;
+	public $countryCode;
+	public $userId;
 	
 	const AUTH_URL = "https://api.tidalhifi.com/v1/login/username";
 	const API_URL = "https://api.tidalhifi.com/v1/";
@@ -52,7 +52,13 @@ class TidalAPI {
 			curl_setopt($this->curl, CURLOPT_SSL_VERIFYPEER, 0);
 	}
 	
-	function connect() {
+	function connect($sessionId = '', $countryCode = '') {
+    if ($sessionId && $countryCode){
+      $this->sessionId = $sessionId;
+      $this->countryCode = $countryCode;
+      //$this->userId = $res_json["userId"];
+      return true;
+    }
 		curl_setopt($this->curl, CURLOPT_URL,self::AUTH_URL);
 		curl_setopt($this->curl, CURLOPT_POST, 1);
 		curl_setopt($this->curl, CURLOPT_POSTFIELDS,

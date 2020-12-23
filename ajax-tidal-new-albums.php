@@ -27,6 +27,8 @@ $type = $_POST["type"];
 $size = $_POST["tileSize"];
 $limit = $_POST["limit"];
 $offset = $_POST["offset"];
+$sessionId = $_POST["sessionId"];
+$countryCode = $_POST["countryCode"];
 
 authenticate('access_media');
 
@@ -36,8 +38,8 @@ $t->password = $cfg["tidal_password"];
 $t->token = $cfg["tidal_token"];
 $t->audioQuality = $cfg["tidal_audio_quality"];
 $t->fixSSLcertificate();
-//usleep(rand(100,10000));
-$conn = $t->connect();
+//usleep(rand(0,10000));
+$conn = $t->connect($sessionId, $countryCode);
 if ($conn === true){
   switch ($type){
     case "suggested_new":
@@ -76,11 +78,11 @@ if ($conn === true){
     }
   }
   else {
-    echo 'No albums found';
+    echo '<div style="line-height: normal;">No albums found.</div>';
   }
 }
 else {
-  echo 'Error in connection to Tidal (' . $conn['error'] . ')';
+  echo '<div style="line-height: normal;">Error in connection to Tidal (' . $conn['error'] . ').</div>';
 }
 
 ?>

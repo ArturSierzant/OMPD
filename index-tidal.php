@@ -50,7 +50,12 @@ $t->password = $cfg["tidal_password"];
 $t->token = $cfg["tidal_token"];
 if (NJB_WINDOWS) $t->fixSSLcertificate();
 $conn = $t->connect();
-
+$sessionId = '';
+$countryCode = '';
+if ($conn){
+  $sessionId = $t->sessionId;
+  $countryCode = $t->countryCode;
+}
 ?>
 
 <h1>&nbsp;Featured new albums <a href="index.php?action=viewNewFromTidal&type=featured_new">(more...)</a></h1>
@@ -60,7 +65,7 @@ $conn = $t->connect();
   var request = $.ajax({  
   url: "ajax-tidal-new-albums.php",  
   type: "POST",
-  data: { type: "featured_new", tileSize : size, limit : 10, offset : 0 },
+  data: { type: "featured_new", tileSize : size, limit : 10, offset : 0, sessionId : "<?php echo $sessionId; ?>", countryCode : "<?php echo $countryCode; ?>" },
   dataType: "html"
   }); 
 
@@ -69,7 +74,7 @@ request.done(function(data) {
     $( "#new_tidal" ).html(data);
   }
   else {
-    $( "#new_tidal" ).html('<h1 class="">Error loading new albums from Tidal.</h1>');
+    $( "#new_tidal" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
   }
 });
 
@@ -89,7 +94,7 @@ request.done(function(data) {
   var request = $.ajax({  
   url: "ajax-tidal-new-albums.php",  
   type: "POST",
-  data: { type: "suggested_new", tileSize : size, limit : 10, offset : 0 },
+  data: { type: "suggested_new", tileSize : size, limit : 10, offset : 0, sessionId : "<?php echo $sessionId; ?>", countryCode : "<?php echo $countryCode; ?>" },
   dataType: "html"
   }); 
 
@@ -98,7 +103,7 @@ request.done(function(data) {
     $( "#suggested_new" ).html(data);
   }
   else {
-    $( "#suggested_new" ).html('<h1 class="">Error loading new albums from Tidal.</h1>');
+    $( "#suggested_new" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
   }
 });
 
@@ -213,7 +218,7 @@ else {
   var request = $.ajax({  
   url: "ajax-tidal-new-albums.php",  
   type: "POST",
-  data: { type: "featured_local", tileSize : size, limit : 10, offset : 0 },
+  data: { type: "featured_local", tileSize : size, limit : 10, offset : 0, sessionId : "<?php echo $sessionId; ?>", countryCode : "<?php echo $countryCode; ?>" },
   dataType: "html"
   }); 
 
@@ -222,7 +227,7 @@ request.done(function(data) {
     $( "#new_local_tidal" ).html(data);
   }
   else {
-    $( "#new_local_tidal" ).html('<h1 class="">Error loading new albums from Tidal.</h1>');
+    $( "#new_local_tidal" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
   }
 });
 
@@ -273,7 +278,7 @@ request.done(function(data) {
   var request = $.ajax({  
   url: "ajax-tidal-new-albums.php",  
   type: "POST",
-  data: { type: "new_for_you", tileSize : size, limit : 10, offset : 0 },
+  data: { type: "new_for_you", tileSize : size, limit : 10, offset : 0, sessionId : "<?php echo $sessionId; ?>", countryCode : "<?php echo $countryCode; ?>" },
   dataType: "html"
   }); 
 
@@ -282,7 +287,7 @@ request.done(function(data) {
     $( "#new_for_you" ).html(data);
   }
   else {
-    $( "#new_for_you" ).html('<h1 class="">Error loading new albums from Tidal.</h1>');
+    $( "#new_for_you" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
   }
 });
 
@@ -302,7 +307,7 @@ request.done(function(data) {
   var request = $.ajax({  
   url: "ajax-tidal-new-albums.php",  
   type: "POST",
-  data: { type: "suggested_for_you", tileSize : size, limit : 10, offset : 0 },
+  data: { type: "suggested_for_you", tileSize : size, limit : 10, offset : 0, sessionId : "<?php echo $sessionId; ?>", countryCode : "<?php echo $countryCode; ?>" },
   dataType: "html"
   }); 
 
@@ -311,7 +316,7 @@ request.done(function(data) {
     $( "#suggested_for_you" ).html(data);
   }
   else {
-    $( "#suggested_for_you" ).html('<h1 class="">Error loading new albums from Tidal.</h1>');
+    $( "#suggested_for_you" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
   }
 });
 

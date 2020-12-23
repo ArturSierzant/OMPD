@@ -20,7 +20,7 @@ body {
   font-family: "Roboto", "sans-serif";
   width: 100%;
   height: 100%;
-  max-width: 1280px;
+  max-width: 1275px;
   letter-spacing: 0px;
   overflow-y: scroll;
 }
@@ -37,14 +37,14 @@ body {
 }
 /* Works on Chrome, Edge, and Safari */
 *::-webkit-scrollbar {
-  width: auto;
+  width: 7px;
+  height: 7px;
 }
 *::-webkit-scrollbar-track {
   background: #2b2b2c;
 }
 *::-webkit-scrollbar-thumb {
   background-color: #585858;
-  /*  border-radius: 1px; */
   border: 1px solid #585858;
 }
 p {
@@ -74,7 +74,9 @@ i:active {
   }
   .full {
     height: 11em;
-    overflow: hidden;
+    /* overflow: hidden; */
+    overflow-x: scroll;
+    overflow-y: hidden;
     display: inline-block;
     margin-bottom: 5px;
     white-space: nowrap;
@@ -188,7 +190,9 @@ i:active {
   }
   .full {
     height: 9.65em;
-    overflow: hidden;
+    /* overflow: hidden; */
+    overflow-x: scroll;
+    overflow-y: hidden;
     display: inline-block;
     margin-bottom: 5px;
     white-space: nowrap;
@@ -318,7 +322,9 @@ i:active {
   }
   .full {
     height: 11.5em;
-    overflow: hidden;
+    /* overflow: hidden; */
+    overflow-x: scroll;
+    overflow-y: hidden;
     display: inline-block;
     margin-bottom: 5px;
     white-space: nowrap;
@@ -353,6 +359,27 @@ i:active {
 @media all and (min-width: 1281px) {
   td.side-margin {
     width: 0px;
+  }
+}
+/* devices with touch screen */
+@media (pointer: none), (pointer: coarse) {
+  .tile_popularity {
+    bottom: 2px !important;
+  }
+  * {
+    scrollbar-width: none;
+    scrollbar-color: #585858 #2b2b2c;
+  }
+  *::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+  *::-webkit-scrollbar-track {
+    background: #2b2b2c;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: #585858;
+    border: 1px solid #585858;
   }
 }
 #menu {
@@ -416,7 +443,7 @@ i:active {
   position: fixed;
   width: 100%;
   height: 100%;
-  max-width: 1280px;
+  max-width: 1275px;
 }
 #back-ground-img {
   width: 100%;
@@ -802,7 +829,7 @@ td.menu_bottom_right {
 #fixedMenu {
   background: inherit;
   width: 100%;
-  max-width: 1280px;
+  max-width: 1275px;
   position: fixed;
   z-index: 30;
   top: 0;
@@ -1719,12 +1746,6 @@ div.tile {
   opacity: 0.85;
   filter: alpha(opacity=85);
 }
-.tile_popularity {
-  position: relative;
-  bottom: 2px;
-  width: 0px;
-  height: 2px;
-}
 .tile_info {
   padding: 0.4em;
   font-size: 0.8em;
@@ -1748,6 +1769,12 @@ div.tile {
 }
 .tile_band {
   color: rgba(255, 255, 255, 0.7);
+}
+.tile_popularity {
+  position: relative;
+  bottom: 3px;
+  width: 0px;
+  /* height: 3px; */
 }
 div.tile_space {
   margin-bottom: 0.3846em;
@@ -2231,7 +2258,7 @@ h1 {
   height: 4.2em;
   width: 100%;
   background-color: #cb4b16;
-  max-width: 1280px;
+  max-width: 1275px;
   border-top: 1px solid #e8632c;
 }
 #image_container_mini,

@@ -39,7 +39,7 @@ $size = $_POST["tileSize"];
 	$query = mysqli_query($db,"SELECT * FROM album 
 	WHERE album_id NOT IN 
 		(SELECT album_id FROM counter WHERE time > " . $time4months  . ")
-	ORDER BY RAND() LIMIT 10");
+	ORDER BY RAND() LIMIT 15");
 	
 	while ($album = mysqli_fetch_assoc($query)) {
 		draw_tile($size,$album);

@@ -28,6 +28,12 @@ $temp = dirname(__FILE__);
 $temp = realpath($temp . '/..');
 define('NJB_HOME_DIR', str_replace('\\', '/', $temp) . '/');
 
+$cfg = array();
+require_once(NJB_HOME_DIR . 'include/config.inc.php');
+
+//time to wait before checking if track is playing [ms]
+$time2wait = 200000;
+
 cliLog('----------------------------------------------');
 cliLog('Watchdog for track_id: ' . $track_id);
 cliLog('Time: ' . time());
@@ -72,8 +78,14 @@ if ($counter == $maxCounter) {
   return;
 }
 
-usleep(200000);
-cliLog('Checking if stream is playing after 0.2s pause...');
+if ($cfg['testing'] == 'on') {
+  if ($host == '192.168.1.244') { //for bedroom player
+    $time2wait = 2000000;
+  }
+}
+
+usleep($time2wait);
+cliLog('Checking if stream is playing after ' . $time2wait . 'ms pause...');
 $status = mpd("status",$host,$port);
 cliLog('"time"=' . $status['time']);
 if ($status['time'] == '0:0' || !$status['time']) {

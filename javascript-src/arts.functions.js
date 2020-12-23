@@ -346,9 +346,39 @@ function resizeTile($tileSize,$containerWidth) {
 	
 }
 
+// getScrollbarWidth from https://stackoverflow.com/questions/13382516/getting-scroll-bar-width-using-javascript
+
+function getScrollbarWidth() {
+
+  // Creating invisible container
+  const outer = document.createElement('div');
+  outer.style.visibility = 'hidden';
+  outer.style.overflow = 'scroll'; // forcing scrollbar to appear
+  outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
+  document.body.appendChild(outer);
+
+  // Creating inner element and placing it in the container
+  const inner = document.createElement('div');
+  outer.appendChild(inner);
+
+  // Calculating difference between container's full width and the child width
+  const scrollbarWidth = (outer.offsetWidth - inner.offsetWidth);
+
+  // Removing temporary elements from the DOM
+  outer.parentNode.removeChild(outer);
+
+  return scrollbarWidth;
+
+}
+
 function resizeSuggested($tileSize,$containerWidth) {
-	$('.full').css('height', function() { return ($tileSize + 4); });
-	$('.full').css('width', function() { 
+  if (getScrollbarWidth() > 0) {
+    $('.full').css('height', function() { return ($tileSize + 8); });
+  }
+  else {
+    $('.full').css('height', function() { return ($tileSize + 1); });
+	}
+  $('.full').css('width', function() { 
 	return ($tileCount * $tileSize + (($tileCount - 1) * 1) + 'px'); 
 	});
   $("#suggested_artists_for_you").css("height","auto");

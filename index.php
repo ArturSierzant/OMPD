@@ -1624,8 +1624,7 @@ function viewNewStartPage() {
 <div id="suggested">
 	<h1>&nbsp;Albums not played for more than 3 months (random)&nbsp;&nbsp;&nbsp;<i class="fa fa-refresh pointer icon-anchor larger" id="iframeRefresh"></i></h1>
 	<div id="suggested_full" class="full">
-		<div id="suggested_container">
-		</div>
+		
 	</div>
 </div>
 
@@ -1645,7 +1644,7 @@ $('#iframeRefresh').click(function() {
 	request.done(function( data ) {  
 		if (data.indexOf('tile') > 0) { //check if any album recieved
 			$("[id='suggested']").show();
-			$( "#suggested_container" ).html( data );	
+			$( "#suggested_full" ).html( data );	
 		}
 		else {
 			$("[id='suggested']").hide();
@@ -1661,11 +1660,11 @@ $('#iframeRefresh').click(function() {
 	request.always(function() {
 		$('#iframeRefresh').addClass("icon-anchor");
 		$('#iframeRefresh').removeClass("icon-selected fa-spin");
-		$('#suggested_container [id^="add_"]').click(function(){
+		$('#suggested_full [id^="add_"]').click(function(){
 			$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
 		});
 		
-		$('#suggested_container [id^="play_"]').click(function(){
+		$('#suggested_full [id^="play_"]').click(function(){
 			$(this).removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
 		});
 		
@@ -1714,7 +1713,7 @@ if ($cfg['show_last_played'] == true) {
 			$( "#recently_played" ).html(data);
 		}
 		else {
-			$( "#recently_played" ).html('<h1 class="">Error loading last played albums.</h1>');
+			$( "#recently_played" ).html('<div style="line-height: initial;">Error loading albums.</div>');
 		}
 		//calcTileSize();
 	});
@@ -1750,7 +1749,7 @@ if ($cfg['use_tidal']) {
 			$( "#new_tidal" ).html(data);
 		}
 		else {
-			$( "#new_tidal" ).html('<h1 class="">Error loading new albums from Tidal.</h1>');
+			$( "#new_tidal" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
 		}
 	});
 	
@@ -1775,7 +1774,7 @@ if ($cfg['use_hra']) {
 		var request = $.ajax({  
 		url: "ajax-hra-new-albums.php",  
 		type: "POST",
-		data: { type: "new", tileSize : size, limit : 10, offset : 0 },
+		data: { type: "new", tileSize : size, limit : 15, offset : 0 },
 		dataType: "html"
 		}); 
 
@@ -1784,7 +1783,7 @@ if ($cfg['use_hra']) {
 			$( "#new_HRA" ).html(data);
 		}
 		else {
-			$( "#new_HRA" ).html('<h1 class="">Error loading new albums from HRA.</h1>');
+			$( "#new_HRA" ).html('<div style="line-height: initial;">Error loading albums from HRA.</div>');
 		}
 	});
 	
