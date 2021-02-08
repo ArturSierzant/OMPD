@@ -247,8 +247,11 @@ if ($db) {
 //  | Check and set default favorite and blacklist playlist                  |
 //  +------------------------------------------------------------------------+
 
-checkDefaultFavorites();
-checkDefaultBlacklist();
+if ($db) {
+  checkDefaultFavorites();
+  checkDefaultBlacklist();
+}
+
 
 //  +------------------------------------------------------------------------+
 //  | Simple authenticate                                                    |
