@@ -119,7 +119,10 @@ if (count($file) == 0) {
 
 <div class="pl-track-info-right">
 <div class="pl-track-info" id="pl-track-info">
-	<div class="pl-track-title"><span id="track_number" class="pl-track-number">&nbsp;</span><span id="title">&nbsp;</span><span id="title_wait_indicator" class="pl-track-title icon-selected">&nbsp;<i class="fa fa-cog fa-spin"></i></span></div>
+	<div class="pl-track-title">
+    <span id="track_number" class="pl-track-number">&nbsp;</span><span id="title">&nbsp;</span>
+    <!-- <span id="title_wait_indicator" class="pl-track-title icon-selected">&nbsp;<i class="fa fa-cog fa-spin"></i></span> -->
+  </div>
 	<div class="pl-fld-name">track title</div>
 	<div class="pl-track-artist"><span id="artist">&nbsp;</span></div>
 	<div class="pl-fld-name">track artist</div>
@@ -150,7 +153,10 @@ if (count($file) == 0) {
 
 <div class="pl-track-info" id="pl-track-info-narrow" style="text-align: center;">
 	<div class="pl-track-number-title">
-		<span class="pl-track-number" id="track_number1">&nbsp;</span><span id="title1" class="pl-track-title">&nbsp;</span><span id="title1_wait_indicator" class="pl-track-title icon-selected">&nbsp;<i class="fa fa-cog fa-spin"></i></span>
+		<span class="pl-track-number" id="track_number1">&nbsp;</span>
+    <span id="title1" class="pl-track-title">&nbsp;</span>
+    <!-- <span id="title1_wait_indicator" class="pl-track-title icon-selected">&nbsp;<i class="fa fa-cog fa-spin"></i></span>
+    -->
 	</div>
 	<div class="pl-file-info">
 		<span class="pl-track-artist" id="artist1">&nbsp;</span>
@@ -988,8 +994,8 @@ function evaluateTrack(data) {
 		$('#title').removeClass('icon-anchor');
 		$('#title1').off('click');
 		$('#title').off('click');
-		$('#title1_wait_indicator').show();
-		$('#title_wait_indicator').show();
+		//$('#title1_wait_indicator').show();
+		//$('#title_wait_indicator').show();
 		//console.log('track_id=' + data.track_id);
 		ajaxRequest('ajax-track-version.php?track_id=' + data.track_id + '&track_title=' + data.title + '&menu=playlist', evaluateTrackVersion);
 		previous_track_id = data.track_id;

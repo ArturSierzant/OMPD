@@ -954,7 +954,7 @@ div.playlist_button {
   width: 3em;
   height: 2.3em;
   cursor: pointer;
-  background-color: #161616;
+  background-color: #171717;
   border: solid 1px #171717;
   color: #171717;
 }
@@ -1015,13 +1015,13 @@ div.playlist_status_on_border {
 }
 .pl-track-artist {
   font-size: 1.1em;
-  padding-top: 0.5em;
+  padding-top: 0.4em;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .pl-track-favorites {
   font-size: 1.4em;
-  padding-top: 0.5em;
+  padding-top: 0.4em;
   color: #fdf6e3;
 }
 .pl-favorites {
@@ -2320,7 +2320,7 @@ h1 {
   font-size: 210px;
   width: 260px;
   border-radius: 10px;
-  background-color: #161616;
+  background-color: #171717;
   display: inline-block;
   max-height: 260px;
   color: #ffffff;
@@ -2360,7 +2360,7 @@ h1 {
 }
 .artist_related .artist_container_small {
   border-radius: 10px;
-  background-color: #161616;
+  background-color: #171717;
   color: #ffffff;
 }
 #timebar_mini {

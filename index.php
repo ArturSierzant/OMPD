@@ -2112,6 +2112,7 @@ function viewHRA() {
   showNewHRAAlbumsByCategory('new');
   showNewHRAAlbumsByCategory('rock');
   showNewHRAAlbumsByCategory('blues');
+  showNewHRAAlbumsByCategory('rb');
   showNewHRAAlbumsByCategory('pop');
   showNewHRAAlbumsByCategory('jazz');
   showNewHRAAlbumsByCategory('classical');
@@ -2173,6 +2174,11 @@ function viewNewFromHRA() {
       require_once('include/header.inc.php');
       echo ('<h1>New blues albums</h1>');
       break;
+    case "rb":
+      $nav['name'][]	= 'New R&B albums:';
+      require_once('include/header.inc.php');
+      echo ('<h1>New R&B albums</h1>');
+      break;
   }
 ?>
 
@@ -2205,6 +2211,9 @@ function viewNewFromHRA() {
       break;
     case "blues":
       $results = $h->getCategorieContent("blues", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+      break;
+    case "rb":
+      $results = $h->getCategorieContent("R & B", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
       break;
   }
   

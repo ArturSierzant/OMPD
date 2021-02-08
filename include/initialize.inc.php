@@ -236,10 +236,11 @@ if (NJB_SCRIPT != 'message.php' && NJB_SCRIPT != 'cache.php')
 
 $cfg['max_played'] = 0;
 
-$maxQuery = mysqli_query($db,"SELECT album_id, count(*) AS c FROM counter GROUP BY album_id ORDER BY c DESC LIMIT 1");
-$rows = mysqli_fetch_assoc($maxQuery);
-if ($rows) $cfg['max_played'] = $rows['c'];
-
+if ($db) {
+  $maxQuery = mysqli_query($db,"SELECT album_id, count(*) AS c FROM counter GROUP BY album_id ORDER BY c DESC LIMIT 1");
+  $rows = mysqli_fetch_assoc($maxQuery);
+  if ($rows) $cfg['max_played'] = $rows['c'];
+}
 
 
 //  +------------------------------------------------------------------------+

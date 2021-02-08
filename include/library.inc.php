@@ -1401,8 +1401,15 @@ function getTracksFromHraAlbum($album_id, $order = '') {
 //  +------------------------------------------------------------------------+
 
 function showNewHRAAlbumsByCategory($category) {
+  $categoryName = $category;
+  if ($category == 'rb') {
+    $categoryName = 'R&B';
+  }
+  if ($category == 'new') {
+    $categoryName = '';
+  }
   echo '
-  <h1>&nbsp;New ' . $category . ' albums <a href="index.php?action=viewNewFromHRA&type=' . $category . '">(more...)</a></h1>
+  <h1>&nbsp;New ' . $categoryName . ' albums <a href="index.php?action=viewNewFromHRA&type=' . $category . '">(more...)</a></h1>
 	<script>
 		calcTileSize();
 		var size = $tileSize;
@@ -3193,7 +3200,7 @@ function calculateAlbumFormat($album_information, $hra_tag = "") {
         $format = '24/88';
         break;
       case 'fl96':
-        $format = '24/94';
+        $format = '24/96';
         break;
       case 'fl1764':
         $format = '24/176';

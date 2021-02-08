@@ -29,12 +29,15 @@ class TidalAPI {
 	public $sessionId;
 	public $countryCode;
 	public $userId;
+  private $trials = 1;
 	
 	const AUTH_URL = "https://api.tidalhifi.com/v1/login/username";
 	const API_URL = "https://api.tidalhifi.com/v1/";
 	const RESOURCES_URL = "https://resources.tidal.com/images/";
+  const MAX_CONNECTION_REPEAT = 5;
 	
 	public function __construct(){
+    //$this->trials = 0;
 		$this->curl = curl_init();
 		curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
 		//to fix "SSL certificate problem: unable to get local issuer certificate" under Windows uncomment below lines or use function fixSSLcertificate():
@@ -43,6 +46,7 @@ class TidalAPI {
 	}
 	
 	public function __destruct(){
+    //$this->logout($this->sessionId);
 		curl_close($this->curl);
 	}
 	
@@ -79,14 +83,28 @@ class TidalAPI {
 				$this->userId = $res_json["userId"];
 				return true;
 			}
+      elseif ($res_json["userMessage"] == 'Server at capacity' && $this->trials < self::MAX_CONNECTION_REPEAT){
+        usleep(100000);
+        $this->trials++;
+        return $this->connect();
+      }
 			else {
 				$errors = array();
 				$errors['return'] = 1;
 				$errors['error'] = $res_json["userMessage"];
+				$errors['trials'] = $this->trials;
 				return $errors;
 			}
 		};
-	}
+  }
+  function logout($sessionId, $countryCode='') {
+    curl_setopt($this->curl, CURLOPT_URL,self::API_URL . 'logout');
+    curl_setopt($this->curl, CURLOPT_POST, 1);
+    curl_setopt($this->curl, CURLOPT_POSTFIELDS,
+    http_build_query(array('sessionId' => $sessionId,'countryCode' => $countryCode)));
+    $server_output = curl_exec($this->curl);
+    return $server_output;
+  }
 	
 	function search($type, $query, $limit = 50) {
 		$query = urlencode($query);
@@ -330,9 +348,10 @@ class TidalAPI {
 	
 	function request() {
 		curl_setopt($this->curl, CURLOPT_POST, 0);
-		$server_output = curl_exec($this->curl);
-		$res_json = json_decode($server_output, true);
-		return $res_json;
+    $server_output = curl_exec($this->curl);
+    $res_json = json_decode($server_output, true);
+    $res_json['trials'] = $this->trials;
+    return $res_json;
 	}
 	
 }

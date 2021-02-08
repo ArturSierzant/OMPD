@@ -466,7 +466,7 @@ $popularity = round($played['counter'] / $max_played['counter'] * 100);
 
 <?php if (count($album_genres) > 0) { ?>
 <div class="line">
-	<div class="add-info-left">Genre:</div>
+	<div class="add-info-left"><a href="index.php?action=viewGenre">Genre:</a></div>
 	<div class="add-info-right">
 	<?php 
 	foreach($album_genres as $g_id => $ag) {

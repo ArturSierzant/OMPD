@@ -25,14 +25,13 @@ $track_id = $_GET["track_id"];
 $logWD = $_GET["logWD"];
 
 $temp = dirname(__FILE__);
-$temp = realpath($temp . '/..');
+$temp = realpath($temp);
 define('NJB_HOME_DIR', str_replace('\\', '/', $temp) . '/');
-
 $cfg = array();
 require_once(NJB_HOME_DIR . 'include/config.inc.php');
 
-//time to wait before checking if track is playing [ms]
-$time2wait = 200000;
+//time to wait before checking if track is playing [us]
+$time2wait = 500000;
 
 cliLog('----------------------------------------------');
 cliLog('Watchdog for track_id: ' . $track_id);
@@ -42,23 +41,31 @@ $status = mpd("status",$host,$port);
 cliLog('state: ' . $status['state']);
 if ($status['state'] != 'play') {
   cliLog('State <> "play" -> exiting function');
+  cliLog('END of watchdog for track_id: ' . $track_id);
+  cliLog('----------------------------------------------');
+  return;
 }
 
 $song = mpd("currentsong",$host,$port);
 $file = $song['file'];
-cliLog('file: ' . $file);
+cliLog('file on mpd playlist: ' . $file);
 
 
 $counter = 0;
-$maxCounter = 100;
+$maxCounter = 150; //150 * 10000us = 15s
 
 while (strpos($file,$track_id) === false && $counter < $maxCounter){
   $counter++;
   cliLog('Waiting for track to be loaded, attempt: ' . $counter);
   $song = mpd("currentsong",$host,$port);
   $file = $song['file'];
+  //cliLog('  Track on mpd: ' . $file);
   usleep(100000);
 }
+
+cliLog('End of waiting:');
+cliLog('  Track: ' . $file);
+cliLog('  Counter: ' . $counter);
 
 cliLog('Checking if stream is playing...');
 $status = mpd("status",$host,$port);
@@ -85,7 +92,7 @@ if ($cfg['testing'] == 'on') {
 }
 
 usleep($time2wait);
-cliLog('Checking if stream is playing after ' . $time2wait . 'ms pause...');
+cliLog('Checking if stream is playing after ' . $time2wait . 'us pause...');
 $status = mpd("status",$host,$port);
 cliLog('"time"=' . $status['time']);
 if ($status['time'] == '0:0' || !$status['time']) {
@@ -188,7 +195,8 @@ function mpd($command,$player_host="",$player_port="") {
 function cliLog($message){
   global $logWD;
   if ($logWD == 'true') {
-    error_log($message . "\n", 3, NJB_HOME_DIR . 'ompd/tmp/update_log.txt');
+    //ini_set('log_errors', 'On');
+    error_log($message . "\n", 3, NJB_HOME_DIR . 'tmp/update_log.txt');
   }
 }
 ?>

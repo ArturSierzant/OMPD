@@ -53,6 +53,9 @@ switch ($type){
   case "blues":
     $results = $h->getCategorieContent("blues", $limit, $offset);
     break;
+  case "rb":
+    $results = $h->getCategorieContent("R & B", $limit, $offset);
+    break;
 }
 if ($results['data']['results']){
   foreach($results['data']['results'] as $res) {
