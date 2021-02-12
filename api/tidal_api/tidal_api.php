@@ -286,7 +286,7 @@ class TidalAPI {
 		return false;
 	}
 
-  function getByApiPath($limit = 50, $offset = 0, $apiPath) {
+  function getByApiPath($limit, $offset, $apiPath) {
     if ($limit > 50) $limit = 50; //Tidal API limitation
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . $apiPath ."?sessionId=" . $this->sessionId . "&locale=en_US&deviceType=BROWSER&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
 		return $this->request();

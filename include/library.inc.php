@@ -494,7 +494,7 @@ function listOfFavorites($file = true, $stream = true, $track_id = "", $track_mp
 //  +------------------------------------------------------------------------+
 //  | Albums from Tidal                                                      |
 //  +------------------------------------------------------------------------+
-function showAlbumsFromTidal($artist, $size, $ajax = true, $tidalArtistId) {
+function showAlbumsFromTidal($artist, $size, $ajax, $tidalArtistId) {
 	global $cfg, $db;
 	//echo $artist;
 	//$artist = tidalEscapeChar($artist);
@@ -1728,7 +1728,9 @@ function onmouseoverDownloadAlbum($album_id) {
 	}
 	
 	sort($extensions);
-	$source = implode($extensions, ', ');
+  
+  $source = implode(', ', $extensions);
+	//$source = implode($extensions, ', ');
 	
 	if ($exact)	$list = formattedSize($filesize);
 	else		$list = html_entity_decode('&plusmn; ', null, NJB_DEFAULT_CHARSET) . formattedSize($filesize);

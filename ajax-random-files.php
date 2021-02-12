@@ -34,8 +34,8 @@ $file_count = 0;
 $dir = myDecode($dir);
 $dir = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $dir);
 
-setcookie('random_limit', $limit, time() + (86400 * 30 * 365), "/"); // 86400 = 1 day
-setcookie('random_dir', $dir, time() + (86400 * 30 * 365), "/");
+setcookie('random_limit', $limit, time() + (86400 * 365), "/"); // 86400 = 1 day
+setcookie('random_dir', $dir, time() + (86400 * 365), "/");
 
 $query1 = mysqli_query($db,'SELECT player.player_name as pl, player.player_host as host, player.player_port as port FROM player, session WHERE (sid = BINARY "' . cookie('netjukebox_sid') . '") and player.player_id=session.player_id');
 $session1 = mysqli_fetch_assoc($query1);
@@ -43,7 +43,7 @@ $player1 = $session1['pl'];
 $player1_host = $session1['host'];
 $player1_port = $session1['port'];
 
-recursiveScan($dir. '/');
+recursiveScan(rtrim($dir, DIRECTORY_SEPARATOR). '/');
 
 $file_count = count($file);
 if ($limit > $file_count) {

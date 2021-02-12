@@ -340,7 +340,7 @@ function update($dir_to_update = '') {
 		countDirectories($dir_to_scan);
 		
 		
-		if ($dirsCounter == 1) $dirsCounter = 0;
+		//if ($dirsCounter == 1) $dirsCounter = 0;
 		/* $result = mysqli_query($db,"update update_progress set 
 			update_status = 0,
 			update_time = '" . $updateTime . "',

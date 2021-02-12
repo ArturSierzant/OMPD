@@ -1161,7 +1161,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 			}
 		}
 	}
-	if ($album_id && count($mds_updateCounter) > 0) {
+	if ($album_id && $mds_updateCounter && count($mds_updateCounter) > 0) {
 		foreach ($mds_updateCounter as $md_album_id) {
 			updateCounter($md_album_id, NJB_COUNTER_PLAY);
 		}

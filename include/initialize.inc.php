@@ -29,7 +29,8 @@
 //  +------------------------------------------------------------------------+
 //  | Initialize                                                             |
 //  +------------------------------------------------------------------------+
-error_reporting(E_ALL ^ E_NOTICE);
+//error_reporting(E_ALL ^ E_NOTICE);
+error_reporting(E_ERROR);
 @ini_set('display_errors', 'Off');
 
 //prevent buffering for nginx
@@ -110,7 +111,7 @@ if ($cfg['timezone'] != '') {
 
 $cfg['use_tidal'] = false;
 if ($cfg['tidal_username'] && $cfg['tidal_password'] && $cfg['tidal_token']) {
-	$cfg['use_tidal'] = true;
+  $cfg['use_tidal'] = true;
 	require_once('api/tidal_api/tidal_api.php');
 }
 
@@ -202,7 +203,7 @@ if (version_compare(PHP_VERSION, '5.2.0', '<'))
 //  | Check for required extensions                                          |
 //  +------------------------------------------------------------------------+
 if (function_exists('imagecreatetruecolor') == false)
-	message(__FILE__, __LINE__, 'error', '[b]GD2 not loaded[/b][list][*]Compile PHP with GD2 support.[*]Or use a loadable module in the php.ini[/list]');
+	message(__FILE__, __LINE__, 'error', '[b]GD2 or GD not loaded[/b][list][*]Compile PHP with GD or GD2 support.[*]Or use a loadable module in the php.ini[/list]');
 if (function_exists('mysqli_connect') == false)
 	message(__FILE__, __LINE__, 'error', '[b]MYSQLi not loaded[/b][list][*]Compile PHP with MYSQL support.[*]Or use a loadable module in the php.ini[/list]');
 if (function_exists('mb_convert_encoding') == false)
@@ -213,6 +214,12 @@ if (function_exists('json_encode') == false)
 	message(__FILE__, __LINE__, 'error', '[b]JSON not loaded[/b][list][*]Compile PHP with JSON support.[*]Or use a loadable module in the php.ini[/list]');
 if (function_exists('ctype_alnum') == false)
 	message(__FILE__, __LINE__, 'error', '[b]CTYPE not loaded[/b][list][*]Compile PHP with CTYPE support.[*]Or use a loadable module in the php.ini[/list]');
+if ($cfg['use_hra'] || $cfg['use_tidal']) {
+  if (function_exists('curl_init') == false)
+    message(__FILE__, __LINE__, 'error', '[b]CURL not loaded[/b][list][*]Compile PHP with CURL support.[*]Or use a loadable module in the php.ini[/list]');
+}
+  
+
 
 
 

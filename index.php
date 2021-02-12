@@ -835,7 +835,8 @@ function viewRandomAlbum() {
 		FROM album
 		WHERE ' . $filter . '
 		ORDER BY RAND()
-		LIMIT ' . (int) $colombs * 2);
+		LIMIT ' . (int) $cfg['max_items_per_page']/3);
+		//LIMIT ' . (int) $colombs * 2);
 	while ($album = mysqli_fetch_assoc($query)) {		
 			if ($album) {
 			if ($tileSizePHP) $size = $tileSizePHP;
@@ -2506,7 +2507,7 @@ function viewRecentlyPlayed() {
 		ORDER BY time DESC' );
 	}
 	else {
-    $query_rp = mysqli_query($db, 'SELECT album_id, max(time) FROM counter GROUP BY album_id ORDER BY max(time) DESC' );
+    $query_rp = mysqli_query($db, 'SELECT album_id, max(time) as time FROM counter GROUP BY album_id ORDER BY max(time) DESC' );
 	}
 	$album_multidisc = array();
 	while ( $album = mysqli_fetch_assoc ($query_rp)) {

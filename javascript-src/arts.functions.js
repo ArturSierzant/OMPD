@@ -238,7 +238,6 @@ function evaluateAdd(data) {
 			}, timeOut);
 			
 		}
-		
 		else if (data.playResult == 'play_OK') {
 			$('[id="play_' + data.track_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-check-square icon-ok');
 			offMenuSub('');
@@ -297,7 +296,7 @@ function evaluateAdd(data) {
 			}
 			setTimeout(function(){
 			  $('[id="insertPlay_' + data.track_id +'"]').removeClass('fa-exclamation-triangle icon-nok').addClass('fa-play-circle');
-			  $('[id="menu-icon' + data.position_id +'"]').removeClass('fa-exclamation-triangle icon-nok').addClass('fa-bar');
+			  $('[id="menu-icon' + data.position_id +'"]').removeClass('fa-exclamation-triangle icon-nok').addClass('fa-bars');
 				$('[id="add_' + data.track_id +'"]').removeClass('fa-exclamation-triangle icon-nok').addClass('fa-plus-circle');
 			}, timeOut);
 			

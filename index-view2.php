@@ -1209,9 +1209,9 @@ if ($fav_rows > 0) {
 	. $filter_query . 
 	' AND (favoriteitem.favorite_id = "' . $favId . '") 
 	GROUP BY track.artist');
-	
-	$rows = mysqli_num_rows($queryFav);
-
+	if ($queryFav) {
+    $rows = mysqli_num_rows($queryFav);
+  }
 }
 if ($rows > 0) {
 	if($rows > 1) $display_all_tracks = false;
@@ -1420,7 +1420,10 @@ INNER JOIN album ON track.album_id = album.album_id '
 ' AND (track.composer <> album.artist) 
 AND (album.artist NOT LIKE "%' .  mysqli_real_escape_string($db,$art) . '%")
 GROUP BY track.composer');
-$rows = mysqli_num_rows($queryTC);
+
+if ($queryTC) {
+  $rows = mysqli_num_rows($queryTC);
+}
 
 
 if ($rows > 0) {
