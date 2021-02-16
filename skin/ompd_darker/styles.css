@@ -153,7 +153,8 @@ i:active {
   }
   #menuSubMiddleMediaGenre,
   #genreList,
-  #menuSubMiddleMediaQuickSearch {
+  #menuSubMiddleMediaQuickSearch,
+  #menuSubMiddleMediaFormatFilter {
     column-count: 3;
     -moz-column-count: 3;
     -webkit-column-count: 3;
@@ -262,7 +263,8 @@ i:active {
   }
   #menuSubMiddleMediaGenre,
   #genreList,
-  #menuSubMiddleMediaQuickSearch {
+  #menuSubMiddleMediaQuickSearch,
+  #menuSubMiddleMediaFormatFilter {
     column-count: 4;
     -moz-column-count: 4;
     -webkit-column-count: 4;
@@ -728,6 +730,7 @@ td.menu_bottom_right {
 #menuSubMiddleMediaAlpha a,
 #menuSubMiddleMediaGenre a,
 #menuSubMiddleMediaQuickSearch a,
+#menuSubMiddleMediaFormatFilter a,
 .paginator-nav a {
   color: #fdf6e3;
 }
