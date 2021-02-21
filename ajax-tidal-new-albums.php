@@ -27,8 +27,8 @@ $type = $_POST["type"];
 $size = $_POST["tileSize"];
 $limit = $_POST["limit"];
 $offset = $_POST["offset"];
-$sessionId = $_POST["sessionId"];
-$countryCode = $_POST["countryCode"];
+$sessionId = isset($_POST["sessionId"]) ? $_POST["sessionId"] : '';
+$countryCode = isset($_POST["countryCode"]) ? $_POST["countryCode"] : '';
 
 authenticate('access_media');
 

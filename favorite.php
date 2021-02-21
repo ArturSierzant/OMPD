@@ -852,7 +852,7 @@ function importFavorite($favorite_id, $mode) {
 		$file = implode('<seperation>', $file);
 		$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
 		$file = explode('<seperation>', $file);
-	}
+  }
 	else
 		message(__FILE__, __LINE__, 'error', '[b]Player not supported[/b]');
 
@@ -905,8 +905,12 @@ function importFavorite($favorite_id, $mode) {
 		if ($isStream == 0 && $track['track_id']) {
 			$hasFiles = 1;
 			$position = $i + $offset + 1;
-			mysqli_query($db,'INSERT INTO favoriteitem (track_id, position, favorite_id)
+      cliLog('INSERT INTO favoriteitem (track_id, position, favorite_id)
 				VALUES ("' . mysqli_real_escape_string($db,$track['track_id']) . '",
+				' . (int) $position . ',
+				' . (int) $favorite_id . ')');
+			mysqli_query($db,'INSERT INTO favoriteitem (stream_url, track_id, position, favorite_id)
+				VALUES ("", "' . mysqli_real_escape_string($db,$track['track_id']) . '",
 				' . (int) $position . ',
 				' . (int) $favorite_id . ')');
 		}

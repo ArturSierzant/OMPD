@@ -243,7 +243,7 @@ if (NJB_SCRIPT != 'message.php' && NJB_SCRIPT != 'cache.php')
 
 $cfg['max_played'] = 0;
 
-if ($db) {
+if (isset($db)) {
   $maxQuery = mysqli_query($db,"SELECT album_id, count(*) AS c FROM counter GROUP BY album_id ORDER BY c DESC LIMIT 1");
   $rows = mysqli_fetch_assoc($maxQuery);
   if ($rows) $cfg['max_played'] = $rows['c'];
@@ -254,7 +254,7 @@ if ($db) {
 //  | Check and set default favorite and blacklist playlist                  |
 //  +------------------------------------------------------------------------+
 
-if ($db) {
+if (isset($db)) {
   checkDefaultFavorites();
   checkDefaultBlacklist();
 }
@@ -847,8 +847,20 @@ function setSkin($skin) {
 //  | Message: ok / warning / error                                          |
 //  +------------------------------------------------------------------------+
 function message($file, $line, $type, $message)	{
-	global $cfg, $db;
-	if (php_sapi_name() == 'cli') {
+  global $cfg, $db;
+
+  if (strpos($file,'initialize.inc.php') !== false) {
+    require_once(NJB_HOME_DIR . 'include/library.inc.php');
+    echo '<html><body style="background-color: #222; color: fff; font-family: verdana;"><br><br>';
+    echo str_repeat('-', 70) . "<br>";
+    echo "<h1>" . strtoupper($type) . "</h1>";
+    echo str_repeat('-', 70) . "<br><br>";
+    echo bbcode($message) . "<br>";
+    echo str_repeat('-', 70) . "<br><br>";
+    echo "</body></html>";
+    exit();
+  }
+	elseif (php_sapi_name() == 'cli') {
 		// Command line error message
 		require_once(NJB_HOME_DIR . 'include/library.inc.php');
 		echo "\n";

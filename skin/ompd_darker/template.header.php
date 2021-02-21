@@ -232,7 +232,7 @@ $(function () {
 	addFavSubmenuActions();
 	resizeImgContainer();
 	<?php
-	$action = $_GET['action'];
+	$action = isset($_GET['action']) ? $_GET['action'] : '';
 	if (NJB_SCRIPT != 'playlist.php' && strpos($action,'layerProfile') === false && $action != 'license' && NJB_SCRIPT != 'message.php' && $cfg['username'] != '' && $cfg['show_miniplayer']) {
 	?>
 		setMiniplayer();

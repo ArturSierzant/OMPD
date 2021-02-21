@@ -665,6 +665,7 @@ function addSelectUrl() {
 	
 	$url = get('url');
 	$data = array();
+	$tidal_tracks = array();
 	$addResult = 'add_error';
 	
 	if ($url!="") {
@@ -681,7 +682,7 @@ function addSelectUrl() {
 					}
 					$tidal_tracks = getTracksFromTidalAlbum($album_id);
 				}
-				
+        $tidal_tracks = json_decode($tidal_tracks, true);
 				$tidal_tracks['track_id'] = $id;
 				$mpdCommand = mpdAddTidalTrack('tidal_' . $id);
 				
@@ -808,6 +809,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	$md						= get('md');
 	$isYoutube 		= false;
 	$isHRA 		= false;
+  $multidiscs_count = 1;
 	
 	if ($track_id) {
 		if (isTidal($track_id)) {
@@ -898,8 +900,9 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 				$query = mysqli_query($db,'SELECT disc 
 				FROM track LEFT JOIN album ON track.album_id = album.album_id 
 				WHERE ' . $select_md . ' GROUP BY disc');
-				$multidiscs_count = mysqli_num_rows($query);
-				
+        if ($query) {
+          $multidiscs_count = mysqli_num_rows($query);
+				}
 				$order_by = 'track.relative_file, track.disc, track.number';
 				if ($multidiscs_count > 1) {
 					$order_by = 'track.disc, track.number, track.relative_file';
@@ -2082,11 +2085,14 @@ function playlistStatus() {
 		$status 	= mpd('status');
 		$currentsong = mpd('currentsong');
 		
-		
 		$data['hash']			= md5(implode('<seperation>', $playlist));
 		$data['listpos']		= isset($status['song']) ? (int) $status['song'] : 0;
 		$data['totalTracks']		= (int) $status['playlistlength'];
-		$data['volume']			= (int) $status['volume'];
+		$vol = 0;
+    if (isset($status['volume'])) {
+      $vol = (int) $status['volume'];
+    }
+    $data['volume']			= $vol;
 		$data['repeat']			= (int) $status['repeat'];
 		$data['shuffle']		= (int) $status['random'];
 		$data['consume']		= $status['consume'];
@@ -2121,7 +2127,7 @@ function playlistStatus() {
 				$data['title']	= basename($currentsong['file']);
 			}
 		}
-		if (!$data['track_artist']) $data['track_artist']	= $currentsong['Artist'];
+		if (!isset($data['track_artist'])) $data['track_artist'] = isset($currentsong['Artist']) ? $currentsong['Artist'] : null;
 		$data['relative_file'] = $currentsong['file'];
 		
 		//$data['Time'] = $currentsong['Time'] * 1000;
@@ -2280,7 +2286,7 @@ function playlistTrack() {
 		$data['title']		= (string) $track['title'];
 		$data['album']		= (string) $track['album'];
 		//$data['album']		= (string) $title;
-		$data['by']			= (string) $by;
+		//$data['by']			= (string) $by;
 		$data['image_id']	= (string) $track['image_id'];
 		$data['album_id']	= (string) $track['album_id'];
 		$data['year']	= ((is_null($track['year'])) ? (string) $track['trackYear'] : (string) $track['year']);
@@ -2555,7 +2561,7 @@ function updateAddPlay() {
 	
 	$popularity = round($played['counter'] / $max_played['counter'] * 100);
 	
-	$data['played']			= (string) $played['counter'] . ' ' . (($played['counter'] == 1) ? ' time' : ' times');
+	$data['played']			= (string) $played['counter'] . " " . (($played['counter'] == 1) ? " time" : " times");
 	$data['last_played']	= date("Y-m-d H:i",$played['time']);
 	$data['popularity']		= (int) $popularity;
 	$data['album_id']		= $album_id;

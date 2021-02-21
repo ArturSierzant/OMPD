@@ -30,14 +30,16 @@
 function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover = '') {
 		global $db,$cfg;
 		$res = "";
-		
+		$md = "";
 		$maxPlayed = $cfg['max_played'];
 		
 		$playedQuery = mysqli_query($db,"SELECT count(album_id) AS c FROM counter WHERE album_id ='" . $album['album_id'] . "'");
 		$rows = mysqli_fetch_assoc($playedQuery);
 		$played = $rows['c'];
-		$pop = $played/$maxPlayed * $size;
-		//$pop = 0;
+		$pop = 0;
+    if ($maxPlayed > 0 && $size > 0) {
+      $pop = $played/$maxPlayed * $size;
+    }
 		if ($multidisc != '') {
 			$md = '&md=' . $multidisc;
 		}
@@ -98,7 +100,7 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 			}
 		}
 		elseif ($cfg['show_album_format'] == true && isHra($album['album_id'])) {
-      if ($album['audio_quality_tag']) {
+      if (isset($album['audio_quality_tag'])) {
         $res .= '   <div class="tile_format">' . html($album['audio_quality_tag']) . '</div>';
       }
       else {
@@ -253,7 +255,7 @@ function trackSubMenu($i, $track, $album_id = '', $type = 'echo') {
 		ob_start();
 	}
 	global $cfg, $db;
-	if ($track['tid']) {
+	if (isset($track['tid'])) {
 		$track['track_id'] = $track['tid']; // needed in search.php 'Track Artist'
 	}
 	$tidalAlbumId = '';
@@ -263,7 +265,9 @@ function trackSubMenu($i, $track, $album_id = '', $type = 'echo') {
 		$tidalAlbumId = '&amp;album_id=tidal_' . $track['album']['id']; 
 	}
 	
-	$track['relative_file'] = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $track['relative_file']);
+	if (isset($track['relative_file'])) {
+    $track['relative_file'] = iconv('UTF-8', NJB_DEFAULT_FILESYSTEM_CHARSET, $track['relative_file']);
+  }
 ?>
 <div class="menuSub" id="menu-sub-track<?php echo $i ?>" onclick='//offMenuSub(<?php echo $i ?>);'> 
 	
@@ -1890,7 +1894,7 @@ function genreNavigator($genre_id) {
 		$nav['name'][] = 'General';
 		$nav['url'][]  = '';
 	}
-	if ($genre['genre']) {
+	if (isset($genre['genre'])) {
 		$nav['name'][] = 'Genre';
 		$nav['url'][]  = 'index.php?&action=viewGenre';
 		$nav['name'][] = $genre['genre'];
@@ -2835,8 +2839,8 @@ function albumMultidisc($query, $rp =''){
 					'image_id' => $album['image_id'],
 					'album' => $album['album'],
 					'artist_alphabetic' => $album['artist_alphabetic'],
-					'year' => $album['year'],
-					'genre_id' => $album['genre_id'],
+					'year' => isset($album['year']) ? $album['year'] : null,
+					'genre_id' => isset($album['genre_id']) ? $album['genre_id'] : null,
 					'allDiscs' => 'allDiscs'
 					);
 				}
@@ -2861,8 +2865,8 @@ function albumMultidisc($query, $rp =''){
 						'image_id' => $album['image_id'],
 						'album' => $album['album'],
 						'artist_alphabetic' => $album['artist_alphabetic'],
-						'year' => $album['year'],
-						'genre_id' => $album['genre_id'],
+						'year' => isset($album['year']) ? $album['year'] : null,
+						'genre_id' => isset($album['genre_id']) ? $album['genre_id'] : null,
 						'allDiscs' => ''
 						);
 				}
@@ -3113,8 +3117,8 @@ function updateFavoriteStreamStatus($favorite_id) {
 function getTrackMpdUrl($track_mpd_url) {
 	if ($track_mpd_url) {
 		$parts = parse_url($track_mpd_url);
-		parse_str($parts['query'], $query);
-		$action = urldecode($query['action']);
+		parse_str(isset($parts['query']) ? $parts['query'] : '', $query);
+		$action = urldecode(isset($query['action']) ? $query['action'] : '');
 		if ($action == 'streamYouTube' && strpos($track_mpd_url,"&streamUrl=") !== false) {
 			$track_mpd_url = substr($track_mpd_url, 0, strpos($track_mpd_url, "&streamUrl="));
 		}
@@ -3129,8 +3133,8 @@ function getTrackMpdUrl($track_mpd_url) {
 
 function getTrackIdFromUrl($track_mpd_url) {
 	$parts = parse_url($track_mpd_url);
-	parse_str($parts['query'], $query);
-	$track_id = urldecode($query['track_id']);
+	parse_str(isset($parts['query']) ? $parts['query'] : '', $query);
+	$track_id = urldecode(isset($query['track_id']) ? $query['track_id'] : '');
 	if ($track_id) {
 		return $track_id;
 	}
@@ -3216,7 +3220,7 @@ function calculateAlbumFormat($album_information, $hra_tag = "") {
     }
     return $format;
   }
-	if ($album_information['audio_quality']) {
+	if (isset($album_information['audio_quality'])) {
 		if (isTidal($album_information['album_id'])) {
 		switch (strtolower($album_information['audio_quality'])){
 			case "high":
@@ -3267,5 +3271,6 @@ function calculateAlbumFormat($album_information, $hra_tag = "") {
 		return "UNKNOWN";
 	}
 }
+
 
 ?>

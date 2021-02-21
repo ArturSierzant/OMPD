@@ -272,7 +272,9 @@ function parseComment($data) {
     }
     $commentsArray = array_values($data['comments']['comment']);
     if(isset($commentsArray[0])) {
-        return $commentsArray[0];
+        if (strpos($commentsArray[0],"{'Classical Extras': {") === FALSE) {
+          return $commentsArray[0];
+        }
     }
     return '';
 }

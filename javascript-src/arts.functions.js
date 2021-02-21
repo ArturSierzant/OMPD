@@ -454,7 +454,8 @@ function resizeImgContainer() {
 	
 	$('#image_in').css('top', '0');
   $('#pl-track-info-narrow').css('top','0');
-	
+	//alert(winW + ' ' + bodyMaxWidth);
+			
 	if (winW < 530) {
 		
 		$('#image').css('max-width', (winW));
@@ -506,7 +507,7 @@ function resizeImgContainer() {
 			// $('.album-info-area-right').css('width', '');
 		}
 		else if (maxH<50 || winW == bodyMaxWidth) {
-			$('#image_container').css('width', maxH  + "%");
+      $('#image_container').css('width', maxH  + "%");
 			$('.pl-track-info-right').css('width', (100 - maxH - 2) + "%");
 			$('.album-info-area-right').css('width', (100 - maxH - 3) + "%");
 		} 

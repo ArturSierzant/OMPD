@@ -73,6 +73,8 @@ $q = 'SELECT * FROM
 	
 $query = mysqli_query($db,$q);
 
+$other_track_version = false;
+
 if (strlen($title) > 0) {
 	$num_rows = mysqli_num_rows($query);
 	//other versions found || one other version found and track is from Tidal || one other version found and track is from e.g. YouTube
@@ -81,9 +83,7 @@ if (strlen($title) > 0) {
 		$other_track_version = true;
 	}
 }
-else {
-	$other_track_version = false;
-}
+
 
 $track_id = array();
 while ($track2 = mysqli_fetch_assoc($query)) {

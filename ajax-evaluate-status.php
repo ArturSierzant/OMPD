@@ -35,7 +35,7 @@ if ($cfg['player_type'] == NJB_MPD) {
 	$status 	= mpdSilent('status');
 	
 	if ($status != false) {
-		$data['volume']	= (int) $status['volume'];
+		$data['volume']	= (int) isset($status['volume']) ? $status['volume'] : 0;
 	}
 	else {
 		$data['volume']	= -1;
