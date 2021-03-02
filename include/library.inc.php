@@ -100,7 +100,7 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 			}
 		}
 		elseif ($cfg['show_album_format'] == true && isHra($album['album_id'])) {
-      if (isset($album['audio_quality_tag'])) {
+      if (isset($album['audio_quality_tag']) && $album['audio_quality_tag'] != '') {
         $res .= '   <div class="tile_format">' . html($album['audio_quality_tag']) . '</div>';
       }
       else {
@@ -3197,21 +3197,27 @@ function calculateAlbumFormat($album_information, $hra_tag = "") {
     $format = '';
     switch(strtolower($hra_tag)) {
       case 'fl441':
+      case '44.1':
         $format = '24/44';
         break;
       case 'fl48':
+      case '48':
         $format = '24/48';
         break;
       case 'fl882':
+      case '88.2':
         $format = '24/88';
         break;
       case 'fl96':
+      case '96':
         $format = '24/96';
         break;
       case 'fl1764':
+      case '176.4':
         $format = '24/176';
         break;
       case 'fl192':
+      case '192':
         $format = '24/192';
         break;
       case 'mqa':

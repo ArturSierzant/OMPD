@@ -74,7 +74,7 @@ if ($conn === true){
       if ($cfg['show_album_format']) {
         $albums['audio_quality'] = $res['audioQuality'];
       }
-      draw_tile ( $size, $albums, '', 'echo', '' );
+      draw_tile ( $size, $albums, '', 'echo', $res['cover'] );
     }
   }
   else {
