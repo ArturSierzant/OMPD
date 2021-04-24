@@ -65,6 +65,7 @@ elseif 	($action == 'cacheDeleteProfile')		{cacheDeleteProfile();			batchTransco
 elseif	($action == 'externalStorage')			externalStorage();
 elseif	($action == 'deleteExternalStorage')	{deleteExternalStorage();		externalStorage();}
 elseif	($action == 'editSettings')			editSettings();
+elseif	($action == 'tidal')			editTidal();
 
 else	message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]action');
 
@@ -275,63 +276,7 @@ function config() {
 </tr>
 <?php
 	}
-/*	
-	$no_image		= mysqli_num_rows(mysqli_query($db, 'SELECT album_id FROM bitmap WHERE flag = 0'));
-	$skipped_image	= mysqli_num_rows(mysqli_query($db, 'SELECT album_id FROM bitmap WHERE flag = 1 OR flag = 2'));
-
-	if ($cfg['access_admin'] && $no_image > 0) { ?>
-<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
-	<td></td>
-	<td><a href="update.php?action=imageUpdate&amp;flag=0"><img src="<?php echo $cfg['img']; ?>medium_image.png" alt="" class="medium">Update&nbsp;image</a></td>
-	<td></td>
-	<td><?php echo $no_image . (($no_image == 1) ? ' undefined image' : ' undefined images'); ?></td>
-	<td></td>
-</tr>
-<?php
-	}
-
-	if ($cfg['access_admin'] && $skipped_image > 0)	{ ?>
-<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
-	<td></td>
-	<td><a href="update.php?action=imageUpdate&amp;flag=2"><img src="<?php echo $cfg['img']; ?>medium_image.png" alt="" class="medium">Update&nbsp;image</a></td>
-	<td></td>
-	<td><?php echo $skipped_image . (($skipped_image == 1) ? ' skipped image' : ' skipped images'); ?></td>
-	<td></td>
-</tr>
-<?php
-	}
-
-	if ($cfg['access_admin'] && is_dir($cfg['external_storage'])) { ?>
-<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
-	<td></td>
-	<td><a href="config.php?action=externalStorage"><img src="<?php echo $cfg['img']; ?>medium_external_storage.png" alt="" class="medium">External&nbsp;storage</a></td>
-	<td></td>
-	<td>File manager for external storage</td>
-	<td></td>
-</tr>
-<?php
-	}	
-	if ($cfg['access_admin']) { ?>
-<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
-	<td></td>
-	<td><a href="config.php?action=batchTranscode"><img src="<?php echo $cfg['img']; ?>medium_transcode.png" alt="" class="medium">Batch&nbsp;transcode</a></td>
-	<td></td>
-	<td>Batch transcode media</td>
-	<td></td>
-</tr>
-<?php
-	}	
-	if ($cfg['access_admin'] && $cfg['image_share']) { ?>
-<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
-	<td></td>
-	<td><a href="config.php?action=shareImage"><img src="<?php echo $cfg['img']; ?>medium_share.png" alt="" class="medium">Share&nbsp;image</a></td>
-	<td></td>
-	<td>Enabled in the configuration file</td>
-	<td></td>
-</tr>
-<?php
-	}
-*/
+  
 	if ($cfg['access_admin'] && $cfg['php_info']) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
@@ -342,8 +287,14 @@ function config() {
 </tr>
 <?php
 	} 
-
 ?>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
+	<td class="nowrap"><a href="config.php?action=tidal"><i class="ux ico-tidal icon-small fa-fw"></i>Tidal</a></td>
+	<td></td>
+	<td>Tidal login and status</td>
+	<td></td>
+</tr>
 </table>
 <?php
 	require_once('include/footer.inc.php');
@@ -1329,6 +1280,317 @@ function editSettings() {
 	require_once('include/header.inc.php');
 	require_once('include/settings.inc.php');
 	require_once('include/footer.inc.php');
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Tidal login                                                            |
+//  +------------------------------------------------------------------------+
+function editTidal() {
+  global $cfg, $db, $t;
+  authenticate('access_logged_in');
+
+  // formattedNavigator
+  $nav			= array();
+  $nav['name'][]	= 'Configuration';
+  $nav['url'][]	= 'config.php';
+  $nav['name'][]	= 'Tidal';
+  require_once('include/header.inc.php');
+  $showLogin = true;
+  $showRefresh = false;
+
+  $query = mysqli_query($db, 'SELECT * FROM tidal_token LIMIT 1');
+  if ($query) $tidal_token = mysqli_fetch_assoc($query);
+?>
+<table cellspacing="0" cellpadding="0" class="border">
+<tr class="header">
+  <td class="space"></td>
+  <td style="width:0.1%; white-space: nowrap;">Tidal account login status</td>
+  <td></td>
+  <td class="space"></td>
+</tr>
+
+<?php
+if (!$query) {
+?>
+<tr class="even">
+  <td></td>
+  <td>Fatal error: </td>
+  <td>token table not found in DB</td>
+  <td></td>
+</tr>
+<?php
+}
+elseif ($tidal_token['time'] == 0) {
+  $showRefresh = false;
+?>
+<tr class="even">
+  <td></td>
+  <td>Login status:</td>
+  <td id="loginStatusInfo">not logged in</td>
+  <td></td>
+</tr>
+<?php
+} 
+elseif (time() > $tidal_token['expires_after']) {
+  $showLogin = false;
+?>
+<tr class="even">
+  <td></td>
+  <td>Token expired:</td>
+  <td>try to refresh token</td>
+  <td></td>
+</tr>
+<?php
+}
+elseif (time() < $tidal_token['expires_after']) {
+  $showLogin = false;
+  $showRefresh = true;
+  $tokenStatus = $t->verifyAccessToken();
+  if (isset($tokenStatus['sessionId'])) {
+    $exDate = date('Y-m-d H:i',$tidal_token['expires_after']);
+    $tLeft = $tidal_token['expires_after'] - time();
+    $m = floor(($tLeft%3600)/60);
+    $h = floor(($tLeft%86400)/3600);
+    $d = floor(($tLeft%2592000)/86400);
+    $tLeft = $d . " days " . $h . " hours " . $m . " minutes";
+?>
+<tr class="even">
+  <td></td>
+  <td>Login status:</td>
+  <td>logged in</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td></td>
+  <td>Token status:</td>
+  <td>valid</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td></td>
+  <td>Last token refresh: </td>
+  <td><?php echo date('Y-m-d H:i',$tidal_token['time']); ?></td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td></td>
+  <td>Token valid until: </td>
+  <td><?php echo $exDate; ?> (<?php echo $tLeft; ?> left)</td>
+  <td></td>
+</tr>
+<?php
+  }
+  else {
+?>
+<tr class="even">
+  <td></td>
+  <td>Token is invalid:</td>
+  <td><?php echo $tokenStatus['response']; ?><br><br>
+  Try to refresh token or logout and login to Tidal again.</td>
+  <td></td>
+</tr>
+<?php
+  }
+}
+
+if ($showLogin) {
+?>
+<tr class="even">
+  <td></td>
+  <td><div class="buttons">
+  <span id="loginTidal" onmouseover="return overlib('Login to Tidal');" onmouseout="return nd();">&nbsp;<i class="fa fa-sign-in fa-fw"></i> Tidal login</span>
+  </div></td>
+  <td id="loginInfo">Login to Tidal and start using Tidal in O!MPD.</td>
+  <td></td>
+</tr>
+<?php
+}
+if ($showRefresh) {
+?>
+<tr class="even">
+  <td></td>
+  <td><div class="buttons">
+  <span id="refreshToken" onmouseover="return overlib('Refresh token');" onmouseout="return nd();">&nbsp;<i class="fa fa-refresh fa-fw"></i> Refresh token</span></div>
+  </div></td>
+  <td id="refreshInfo">No need to use this button when token is valid. When token expires it should be refreshed automatically. In case something is wrong with autorefreshing, you can try to do it manually. </td>
+  <td></td>
+</tr>
+
+<tr class="even">
+  <td></td>
+  <td><div class="buttons">
+  <span id="logoutTidal" onmouseover="return overlib('Logout from Tidal');" onmouseout="return nd();">&nbsp;<i class="fa fa-sign-out fa-fw"></i> Tidal logout</span>
+  </div></td>
+  <td id="logoutInfo">Logout Tidal session and stop using Tidal in O!MPD.</td>
+  <td></td>
+</tr>
+<?php
+}
+?>
+
+</table>
+
+<script>
+
+var interval = 2000,
+    timeLeft = 300,
+    xhr,
+    checkAuthStatus = function () {
+     xhr = $.ajax({
+            url: "ajax-tidal-auth.php",  
+            type: "POST",  
+            data: { action : "checkAuthStatus" },  
+            dataType: "json",
+            success: function(json) {
+               if (json.auth_finished) {
+                $('#loginTidal > i').removeClass('fa-cog fa-spin').addClass('fa-check-square');
+                setTimeout(function() {
+                  $('#loginTidal > i').removeClass('fa-check-square').addClass('fa-sign-in');
+                }, 2000);
+                //timeLeft = 0;
+                location.reload();
+                xhr.abort();
+                return;
+               }
+               if (json.return == 1) {
+                $('#loginInfo').html("Login failed. Error:<br><br>" + json.error + "<br><br>Error description:>br><br>" + json.error_description);
+                $('#loginTidal > i').removeClass('fa-cog fa-spin').addClass('fa-exclamation-circle icon-nok');
+                setTimeout(function() {
+                  $('#loginTidal > i').removeClass('fa-exclamation-circle icon-nok').addClass('fa-sign-in');
+                }, 2000);
+                timeLeft = 0;
+                return;
+              }
+              
+              $('#loginStatusInfo').html(json.auth_status);
+              timeLeft = timeLeft - (interval/1000);
+              $('#verificationTimer').html(timeLeft);
+            },
+            complete: function() {
+              if (timeLeft > 0) {
+                setTimeout(checkAuthStatus, interval);
+              }
+              else {
+                $('#loginStatusInfo').html("login failed");
+                $('#loginInfo').html("Login timeout occured. Try to login again.");
+                $('#loginTidal > i').removeClass('fa-cog fa-spin').addClass('fa-exclamation-circle icon-nok');
+                setTimeout(function() {
+                  $('#loginTidal > i').removeClass('fa-exclamation-circle icon-nok').addClass('fa-sign-in');
+                }, 2000);
+              }
+            },
+            error: function() {
+              $('#loginTidal > i').removeClass('fa-cog fa-spin').addClass('fa-exclamation-circle icon-nok');
+                setTimeout(function() {
+                  $('#loginTidal > i').removeClass('fa-exclamation-circle icon-nok').addClass('fa-sign-in');
+                }, 2000);
+            }
+          });
+    };
+
+
+
+$('#loginTidal').click(function() {
+  $('#loginTidal > i').removeClass('fa-sign-in').addClass('fa-cog fa-spin');
+  loginTidal();
+});
+
+$('#logoutTidal').click(function() {
+  $('#logoutTidal > i').removeClass('fa-sign-out').addClass('fa-cog fa-spin');
+  logoutTidal();
+});
+
+$('#refreshToken').click(function() {
+  $('#refreshToken > i').removeClass('fa-refresh').addClass('fa-cog fa-spin');
+  refreshToken();
+});
+
+function loginTidal(){
+    $.ajax({
+    url: "ajax-tidal-auth.php",  
+    type: "POST",  
+    data: { action : "getTidalDeviceCode" },  
+    dataType: "json",
+    success: function(json) {
+       if (json.return == 1) {
+        $('#loginInfo').html("Login failed. Error:<br>" + json.error);
+        $('#loginTidal > i').removeClass('fa-cog fa-spin').addClass('fa-exclamation-circle icon-nok');
+        setTimeout(function() {
+          $('#loginTidal > i').removeClass('fa-exclamation-circle icon-nok').addClass('fa-sign-in');
+        }, 2000);
+        return;
+      }
+      $('#loginInfo').html('Go to <a href="https://' + json.verificationUriComplete + '" target="_blank">https://' + json.verificationUriComplete + '</a> within <span id="verificationTimer">' + json.expiresIn + '</span> seconds and login to Tidal to finish authorization.');
+      interval = json.interval * 1000;
+      timeLeft = json.expiresIn;
+      checkAuthStatus();
+      //$('#loginTidal > i').removeClass('fa-cog fa-spin').addClass('fa-sign-in');
+    },
+    error: function() {
+      $('#loginTidal > i').removeClass('fa-cog fa-spin').addClass('fa-exclamation-circle icon-nok');
+        setTimeout(function() {
+          $('#loginTidal > i').removeClass('fa-exclamation-circle icon-nok').addClass('fa-sign-in');
+        }, 2000);
+    }
+  });
+};
+
+function logoutTidal(){
+    $.ajax({
+    url: "ajax-tidal-auth.php",  
+    type: "POST",  
+    data: { action : "logoutTidal" },  
+    dataType: "json",
+    success: function(json) {
+      if (json.return == 1) {
+        $('#logoutInfo').html("Logout failed. Error:<br>" + json.error);
+        $('#logoutTidal > i').removeClass('fa-cog fa-spin').addClass('fa-exclamation-circle icon-nok');
+        setTimeout(function() {
+          $('#logoutTidal > i').removeClass('fa-exclamation-circle icon-nok').addClass('fa-sign-out');
+        }, 2000);
+        return;
+      }
+      location.reload();
+    },
+    error: function() {
+      $('#logoutTidal > i').removeClass('fa-cog fa-spin').addClass('fa-exclamation-circle icon-nok');
+        setTimeout(function() {
+          $('#logoutTidal > i').removeClass('fa-exclamation-circle icon-nok').addClass('fa-sign-out');
+        }, 2000);
+    }
+  });
+};
+
+function refreshToken(){
+    $.ajax({
+    url: "ajax-tidal-auth.php",  
+    type: "POST",  
+    data: { action : "refreshAccessToken" },  
+    dataType: "json",
+    success: function(json) {
+      if (json.return == 1) {
+        $('#refreshInfo').html("Token refresh failed. Error:<br>" + json.error);
+        $('#refreshToken > i').removeClass('fa-cog fa-spin').addClass('fa-exclamation-circle icon-nok');
+        setTimeout(function() {
+          $('#refreshToken > i').removeClass('fa-exclamation-circle icon-nok').addClass('fa-refresh');
+        }, 2000);
+        return;
+      }
+      location.reload();
+    },
+    error: function() {
+      $('#refreshToken > i').removeClass('fa-cog fa-spin').addClass('fa-exclamation-circle icon-nok');
+        setTimeout(function() {
+          $('#refreshToken > i').removeClass('fa-exclamation-circle icon-nok').addClass('fa-refresh');
+        }, 2000);
+    }
+  });
+};
+
+</script>
+<?php
+  require_once('include/footer.inc.php');
 }
 
 ?>

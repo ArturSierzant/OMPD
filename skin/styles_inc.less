@@ -33,7 +33,7 @@ body {
 /* Works on Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: @bg-playing-bar @bg-main;
+  scrollbar-color: @bg-playing-bar @bg-sub;
 }
 
 /* Works on Chrome, Edge, and Safari */
@@ -43,7 +43,7 @@ body {
 }
 
 *::-webkit-scrollbar-track {
-  background: @bg-main;
+  background: @bg-sub;
 }
 
 *::-webkit-scrollbar-thumb {
@@ -1241,12 +1241,12 @@ tr.album_list td {
 }
 
 tr.year {
-	height: 2.5em;
+	height: 3em;
 	background-color: (@bg-track);
 }
 
 tr.year td {
-	border-bottom: dotted 1px (@bg-categories);
+	border-bottom: solid 1px (@bg-categories);
 	padding: 7px 5px 7px 0;
 }
 

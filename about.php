@@ -166,7 +166,10 @@ function about() {
 	<ul style="padding-left: 1em;">
 	<li> added support for HighResAudio (thanks to <a target="_blank" href="https://github.com/marcbth">marcbth</a>)</li>
 	<li> added badge with audio format info on album cover (thanks to <a target="_blank" href="https://github.com/paradix">paradix</a>)</li>
+	<li> added support for Tidal oauth2 login</li>
 	<li> added popularity bar on album cover</li>
+	<li> added new popularity category (by album year)</li>
+  <li> compatibillity with PHP8</li>
 	<li> fixed bugs</li>
 	</ul>
 	<br>
@@ -451,6 +454,13 @@ function about() {
 	<td>PHP Simple HTML DOM Parser</td>
 	<td></td>
 	<td><a href="https://simplehtmldom.sourceforge.io/" target="_blank">https://simplehtmldom.sourceforge.io/</a></td>
+	<td></td>
+</tr>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
+	<td>Ping for PHP class</td>
+	<td></td>
+	<td><a href="https://github.com/geerlingguy/Ping" target="_blank">https://github.com/geerlingguy/Ping</a></td>
 	<td></td>
 </tr>
 

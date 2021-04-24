@@ -151,6 +151,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 			echo ("</pre>"); */
 		$i = 0;
 		if (!isHra($album_id)) {
+      $tracks = array();
 			while ($trackItem = mysqli_fetch_assoc($query)) {
 				$tracks[] = $trackItem; 
 			}

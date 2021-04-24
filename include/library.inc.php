@@ -28,7 +28,7 @@
 //  | Tile for album cover and info                                          |
 //  +------------------------------------------------------------------------+
 function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover = '') {
-		global $db,$cfg;
+		global $db,$cfg, $t;
 		$res = "";
 		$md = "";
 		$maxPlayed = $cfg['max_played'];
@@ -44,9 +44,10 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 			$md = '&md=' . $multidisc;
 		}
 		$res = '<div title="Go to album \'' . html($album['album']) .  '\'" class="tile pointer" style="width: ' . $size . 'px; height: ' . $size . 'px;">';
-		if (isTidal($album['album_id'])) {
-			$t = new TidalAPI;
-			if ($tidal_cover) {
+		if (isTidal($album['album_id']) && $cfg['use_tidal']) {
+			//$t = new TidalAPI;
+			//$t = tidal();
+      if ($tidal_cover) {
 				$pic = $tidal_cover;
 			}
 			else {
@@ -72,7 +73,7 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 			}
 			$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $cover . '" alt="" width="100%" height="100%">';
 		}
-		elseif (isHra($album['album_id'])) {
+		elseif (isHra($album['album_id']) && $cfg['use_hra']) {
 			$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $album["cover"] . '" alt="" width="100%" height="100%">';
 		}
 		else {
@@ -496,10 +497,163 @@ function listOfFavorites($file = true, $stream = true, $track_id = "", $track_mp
 
 	
 //  +------------------------------------------------------------------------+
+//  | Init Tidal object                                                      |
+//  +------------------------------------------------------------------------+
+
+function tidal() {
+  global $cfg, $db;
+  $t = new TidalAPI;
+  $t->userId = $cfg['tidal_userid'];
+  $t->countryCode = $cfg['tidal_countryCode'];
+  $t->token = $cfg["tidal_token"];
+  $t->refreshToken = $cfg["tidal_refresh_token"];
+  $t->expiresAfter = $cfg["tidal_expires_after"];
+  $t->audioQuality = $cfg["tidal_audio_quality"];
+  $t->deviceCode = $cfg["tidal_deviceCode"];
+  $t->fixSSLcertificate();
+  return $t;
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Refresh Tidal access_token                                             |
+//  +------------------------------------------------------------------------+
+
+function refreshTidalAccessToken() {
+  global $cfg, $db, $t;
+  $res = $t->refreshAccessToken();
+  if (isset($res['access_token'])) {
+    //write token to DB
+    $tokenTime = time();
+    $expires_after = $tokenTime + (int) $res['expires_in'];
+    $sql = 'UPDATE tidal_token SET
+            time = ' . $tokenTime . ',
+            access_token = "' . mysqli_real_escape_string($db,$res['access_token']) . '",
+            token_type = "' . mysqli_real_escape_string($db,$res['token_type']) . '",
+            expires_in = ' . (int) $res['expires_in'] . ',
+            expires_after = ' . $expires_after . ',
+            userId = ' . (int) $res['user']['userId'] . ',
+            countryCode = "' . mysqli_real_escape_string($db,$res['user']['countryCode']) . '",
+            username = "' . mysqli_real_escape_string($db,$res['user']['username']) . '"
+            WHERE 1';
+    if (!mysqli_query($db, $sql)) {
+      $errors = array();
+      $errors['return'] = 1;
+      $errors['error'] = "Token refresh failure: error in writing to DB.";
+      return ($errors);
+    }
+    $res['expires_after'] = date('Y-m-d H:i:s',$expires_after);
+  }
+  return $res;
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Login to Tidal stage 1: get device code                                |
+//  +------------------------------------------------------------------------+
+
+function getTidalDeviceCode() {
+  global $cfg, $db, $t;
+  $res = $t->getDeviceCode();
+  if (isset($res['deviceCode'])) {
+    //write deviceCode to DB
+    $sql = 'UPDATE tidal_token SET
+            time = 0,
+            access_token = "",
+            refresh_token = "",
+            token_type = "",
+            expires_in = 0,
+            expires_after = 0,
+            userId = 0,
+            countryCode = "",
+            username = "",
+            deviceCode = "' . $res['deviceCode'] . '"
+            WHERE 1';
+    if (!mysqli_query($db, $sql)) {
+      $errors = array();
+      $errors['return'] = 1;
+      $errors['error'] = "Get device code failure: error in writing to DB.";
+      return ($errors);
+    }
+  }
+  return $res;
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Login to Tidal stage 2: check auth status                              |
+//  +------------------------------------------------------------------------+
+
+function checkTidalAuthStatus() {
+  global $cfg, $db, $t;
+  $token = mysqli_query($db,"SELECT * FROM tidal_token LIMIT 1");
+  $rows = mysqli_fetch_assoc($token);
+  $res = $t->checkAuthStatus();
+  $res['auth_finished'] = false; 
+  if (isset($res['access_token'])) {
+    //write token to DB
+    $tokenTime = time();
+    $expires_after = $tokenTime + (int) $res['expires_in'];
+    $sql = 'UPDATE tidal_token SET
+            time = ' . $tokenTime . ',
+            access_token = "' . mysqli_real_escape_string($db,$res['access_token']) . '",
+            refresh_token = "' . mysqli_real_escape_string($db,$res['refresh_token']) . '",
+            token_type = "' . mysqli_real_escape_string($db,$res['token_type']) . '",
+            expires_in = ' . (int) $res['expires_in'] . ',
+            expires_after = ' . $expires_after . ',
+            userId = ' . (int) $res['user']['userId'] . ',
+            countryCode = "' . mysqli_real_escape_string($db,$res['user']['countryCode']) . '",
+            username = "' . mysqli_real_escape_string($db,$res['user']['username']) . '"
+            WHERE 1';
+    if (!mysqli_query($db, $sql)) {
+      $errors = array();
+      $errors['return'] = 1;
+      $errors['error'] = "Get device code failure: error in writing to DB.";
+      return ($errors);
+    }
+    $res['auth_finished'] = true; 
+  }
+  return $res;
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Logout from Tidal                                                      |
+//  +------------------------------------------------------------------------+
+
+function logoutTidal() {
+  global $cfg, $db, $t;
+  $res = $t->logout();
+  if ($res['logout_status'] === true) {
+    //reset token in DB
+    $sql = 'UPDATE tidal_token SET
+            time = 0,
+            access_token = "",
+            refresh_token = "",
+            token_type = "",
+            expires_in = 0,
+            expires_after = 0,
+            userId = 0,
+            countryCode = "",
+            username = "",
+            deviceCode = ""
+            WHERE 1';
+    if (!mysqli_query($db, $sql)) {
+      $errors = array();
+      $errors['return'] = 1;
+      $errors['error'] = "Error while resetting token in DB.";
+      return ($errors);
+    }
+  }
+  return $res;
+}
+
+
+//  +------------------------------------------------------------------------+
 //  | Albums from Tidal                                                      |
 //  +------------------------------------------------------------------------+
 function showAlbumsFromTidal($artist, $size, $ajax, $tidalArtistId) {
-	global $cfg, $db;
+	global $cfg, $db, $t;
 	//echo $artist;
 	//$artist = tidalEscapeChar($artist);
 	//$artist = replaceAnds($artist);
@@ -525,11 +679,12 @@ function showAlbumsFromTidal($artist, $size, $ajax, $tidalArtistId) {
 	if (abs($res['min_last_update_time'] - $minDate) > 10) $forceUpdate = true;
 	
 	if ($res['min_last_update_time'] < (time() - TIDAL_MAX_CACHE_TIME) || !$query || $forceUpdate) {
-		$t = new TidalAPI;
+		/* $t = new TidalAPI;
 		$t->username = $cfg["tidal_username"];
 		$t->password = $cfg["tidal_password"];
 		$t->token = $cfg["tidal_token"];
-		if (NJB_WINDOWS) $t->fixSSLcertificate();
+		if (NJB_WINDOWS) $t->fixSSLcertificate(); */
+    //$t = tidal();
 		$conn = $t->connect();
 		
 		if ($conn === true){
@@ -712,15 +867,16 @@ function showAlbumsFromTidal($artist, $size, $ajax, $tidalArtistId) {
 //  | Album from Tidal                                                       |
 //  +------------------------------------------------------------------------+
 function getAlbumFromTidal($album_id) {
-	global $cfg, $db;
+	global $cfg, $db, $t;
 
 	$data = array();
 	
-	$t = new TidalAPI;
+  //$t = tidal();
+	/* $t = new TidalAPI;
 	$t->username = $cfg["tidal_username"];
 	$t->password = $cfg["tidal_password"];
 	$t->token = $cfg["tidal_token"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	if (NJB_WINDOWS) $t->fixSSLcertificate(); */
 	$conn = $t->connect();
 	if ($conn === true){
 		$results = $t->getAlbum($album_id);
@@ -763,15 +919,16 @@ function getAlbumFromTidal($album_id) {
 //  | Album from Tidal with selected track                                   |
 //  +------------------------------------------------------------------------+
 function getTrackAlbumFromTidal($track_id) {
-	global $cfg, $db;
+	global $cfg, $db, $t;
 
 	$data = array();
 	
-	$t = new TidalAPI;
+  //$t = tidal();
+	/* $t = new TidalAPI;
 	$t->username = $cfg["tidal_username"];
 	$t->password = $cfg["tidal_password"];
 	$t->token = $cfg["tidal_token"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	if (NJB_WINDOWS) $t->fixSSLcertificate(); */
 	$conn = $t->connect();
 	if ($conn === true){
 		$results = $t->getTrack($track_id);
@@ -794,14 +951,15 @@ function getTrackAlbumFromTidal($track_id) {
 //  | Artist biography from Tidal                                            |
 //  +------------------------------------------------------------------------+
 function showArtistBio($artist_name, $size) {
-	global $cfg, $db;
+	global $cfg, $db, $t;
 	$artist_name = moveTheToBegining($artist_name);
 	$data = array();
-	$t = new TidalAPI;
+  //$t = tidal();
+	/* $t = new TidalAPI;
 	$t->username = $cfg["tidal_username"];
 	$t->password = $cfg["tidal_password"];
 	$t->token = $cfg["tidal_token"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	if (NJB_WINDOWS) $t->fixSSLcertificate(); */
 	$conn = $t->connect();
 	if ($conn === true){
 		$res = $t->search("artists",$artist_name);
@@ -888,7 +1046,7 @@ function formatBio($bio) {
 //  | Tracks from Tidal album                                                |
 //  +------------------------------------------------------------------------+
 function getTracksFromTidalAlbum($album_id, $order = '') {
-	global $cfg, $db;
+	global $cfg, $db, $t;
 	$field = 'albumTracks';
 	$value = $album_id;
 	
@@ -898,11 +1056,12 @@ function getTracksFromTidalAlbum($album_id, $order = '') {
 		getAlbumFromTidal($album_id);
 	}
 	 
-	$t = new TidalAPI;
+   //$t = tidal();
+	/* $t = new TidalAPI;
 	$t->username = $cfg["tidal_username"];
 	$t->password = $cfg["tidal_password"];
 	$t->token = $cfg["tidal_token"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	if (NJB_WINDOWS) $t->fixSSLcertificate(); */
 	$conn = $t->connect();
 	if ($conn === true){
 		$results = $t->getAlbumTracks($album_id);
@@ -960,18 +1119,19 @@ function getTracksFromTidalAlbum($album_id, $order = '') {
 //  | All from Tidal                                                         |
 //  +------------------------------------------------------------------------+
 function showAllFromTidal($searchStr, $size) {
-	global $cfg, $db;
+	global $cfg, $db, $t;
 	$field = 'all';
 	$value = $searchStr;
 	$artistsList = "";
 	$albumsList = "";
 	$data = array();
 	
-	$t = new TidalAPI;
+	/* $t = new TidalAPI;
 	$t->username = $cfg["tidal_username"];
 	$t->password = $cfg["tidal_password"];
 	$t->token = $cfg["tidal_token"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	if (NJB_WINDOWS) $t->fixSSLcertificate(); */
+  //$t = tidal();
 	$conn = $t->connect();
 	if ($conn === true){
 		$results = $t->searchAll($value);
@@ -1028,16 +1188,17 @@ function showAllFromTidal($searchStr, $size) {
 //  | Top tracks from Tidal                                                  |
 //  +------------------------------------------------------------------------+
 function showTopTracksFromTidal($artist, $tidalArtistId = "") {
-	global $cfg, $db;
+	global $cfg, $db, $t;
 	$value = $searchStr;
 	$data = array();
 	$data['tracks_results'] = 0;
 	
-	$t = new TidalAPI;
+	/* $t = new TidalAPI;
 	$t->username = $cfg["tidal_username"];
 	$t->password = $cfg["tidal_password"];
 	$t->token = $cfg["tidal_token"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	if (NJB_WINDOWS) $t->fixSSLcertificate(); */
+  //$t = tidal();
 	$conn = $t->connect();
 	if ($conn === true){
 		if ($tidalArtistId) {
@@ -1294,16 +1455,18 @@ function showAlbumsFromHRA($searchStr, $size) {
 		$data['albums_results'] = count($results['data']);
 		$albumsList = '<table class="border" cellspacing="0" cellpadding="0">';
 		foreach ($results['data'] as $art) {
-			$album['album_id'] = 'hra_' . $art['albumId'];
-			$album['artist_alphabetic'] = $art['artist'];
-			$album['album'] = $art['title'];
-			$album['cover'] = $art['cover'];
-			if ($cfg['show_album_format']) {
-				$aq = $h->getAlbum($art['albumId']);
-				$album['audio_quality'] = $aq['data']['results']['tracks'][0]['format'];
+      if (isset($art['cover'])) { //no cover -> album not published yet
+        $album['album_id'] = 'hra_' . $art['albumId'];
+        $album['artist_alphabetic'] = $art['artist'];
+        $album['album'] = $art['title'];
+        $album['cover'] = $art['cover'];
+        if ($cfg['show_album_format']) {
+          $aq = $h->getAlbum($art['albumId']);
+          $album['audio_quality'] = $aq['data']['results']['tracks'][0]['format'];
+        }
+        $albumsList .= draw_tile($size, $album, '', 'string');
 			}
-			$albumsList .= draw_tile($size, $album, '', 'string');
-			}
+    }
 		$albumsList .= '</table>';
 		$data['albums'] = $albumsList;
 	}
@@ -1342,16 +1505,18 @@ function showArtistAlbumsFromHRA($searchStr, $size) {
 		$data['albums_results'] = count($results['data']);
 		$albumsList = '<table class="border" cellspacing="0" cellpadding="0">';
 		foreach ($results['data'] as $art) {
-			$album['album_id'] = 'hra_' . $art['albumId'];
-			$album['artist_alphabetic'] = $art['artist'];
-			$album['album'] = $art['title'];
-			$album['cover'] = $art['cover'];
-			/* if ($cfg['show_album_format']) {
-				//$aq = $h->getAlbum($art['albumId']);
-				$album['audio_quality'] = $aq['data']['results']['tracks'][0]['format'];
-			} */
-			$albumsList .= draw_tile($size, $album, '', 'string');
+      if (isset($art['cover'])) { //no cover -> album not published yet
+        $album['album_id'] = 'hra_' . $art['albumId'];
+        $album['artist_alphabetic'] = $art['artist'];
+        $album['album'] = $art['title'];
+        $album['cover'] = $art['cover'];
+        /* if ($cfg['show_album_format']) {
+          //$aq = $h->getAlbum($art['albumId']);
+          $album['audio_quality'] = $aq['data']['results']['tracks'][0]['format'];
+        } */
+        $albumsList .= draw_tile($size, $album, '', 'string');
 			}
+      }
 		$albumsList .= '</table>';
 		$data['albums'] = $albumsList;
 	}

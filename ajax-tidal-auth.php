@@ -18,62 +18,35 @@
 //  | along with this program.  If not, see <http://www.gnu.org/licenses/>.  |
 //  +------------------------------------------------------------------------+
 
+
 require_once('include/initialize.inc.php');
 require_once('include/library.inc.php');
 
-global $cfg, $db;
+global $cfg, $db, $t;
 
-$type = $_POST["type"];
-$size = $_POST["tileSize"];
-$limit = $_POST["limit"];
-$offset = $_POST["offset"];
+$action = $_POST["action"];
 
-authenticate('access_media');
-
-
-$h = new HraAPI;
-if (NJB_WINDOWS) $t->fixSSLcertificate();
-
-switch ($type){
-  case "new":
-    $results = $h->getCategorieContent("new", $limit, $offset);
-    break;
-  case "pop":
-    $results = $h->getCategorieContent("pop", $limit, $offset);
-    break;
-  case "rock":
-    $results = $h->getCategorieContent("rock", $limit, $offset);
-    break;
-  case "jazz":
-    $results = $h->getCategorieContent("jazz", $limit, $offset);
-    break;
-  case "classical":
-    $results = $h->getCategorieContent("classical", $limit, $offset);
-    break;
-  case "blues":
-    $results = $h->getCategorieContent("blues", $limit, $offset);
-    break;
-  case "rb":
-    $results = $h->getCategorieContent("R & B", $limit, $offset);
-    break;
+if ($action == 'verifyAccessToken'){
+  echo safe_json_encode($t->verifyAccessToken());
 }
-if ($results['data']['results']){
-  foreach($results['data']['results'] as $res) {
-    if ($res['publishingStatus'] == 'published') {
-      $albums = array();
-      $albums['album_id'] = 'hra_' . $res['id'];
-      $albums['album'] = $res['title'];
-      $albums['cover'] = $res['cover'];
-      $albums['artist_alphabetic'] = $res['artist'];
-      if ($cfg['show_album_format']) {
-        $albums['audio_quality_tag'] = calculateAlbumFormat("",$res['tags']);
-      }
-      draw_tile ( $size, $albums, '', 'echo', '' );
-  }
-  }
+elseif ($action == 'refreshAccessToken'){
+  $res = refreshTidalAccessToken();
+  echo safe_json_encode($res);
 }
-else {
-  $albums = null;
+elseif ($action == 'getTidalDeviceCode'){
+  $res = getTidalDeviceCode();
+  echo safe_json_encode($res);
 }
+elseif ($action == 'checkAuthStatus'){
+  $res = checkTidalAuthStatus();
+  echo safe_json_encode($res);
+}
+elseif ($action == 'logoutTidal'){
+  $res = logoutTidal();
+  echo safe_json_encode($res);
+}
+
+
 ?>
 
+	

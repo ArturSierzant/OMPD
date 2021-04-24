@@ -60,7 +60,7 @@ exit();
 //  | Home                                                                   |
 //  +------------------------------------------------------------------------+
 function home() {
-	global $cfg, $db;
+	global $cfg, $db, $t;
 	authenticate('access_favorite');
 	
 	// formattedNavigator
@@ -213,11 +213,12 @@ function home() {
 	
 	
 	if ($cfg['use_tidal']) {
-		$t = new TidalAPI;
+		/* $t = new TidalAPI;
 		$t->username = $cfg["tidal_username"];
 		$t->password = $cfg["tidal_password"];
 		$t->token = $cfg["tidal_token"];
-		if (NJB_WINDOWS) $t->fixSSLcertificate();
+		if (NJB_WINDOWS) $t->fixSSLcertificate(); */
+    //$t = tidal();
 		$conn = $t->connect();
 		if ($conn === true){
 			$playlists = $t->getUserPlaylists();

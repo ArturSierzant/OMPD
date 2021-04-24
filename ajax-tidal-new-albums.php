@@ -21,7 +21,7 @@
 require_once('include/initialize.inc.php');
 require_once('include/library.inc.php');
 
-global $cfg, $db;
+global $cfg, $db, $t;
 
 $type = $_POST["type"];
 $size = $_POST["tileSize"];
@@ -32,13 +32,13 @@ $countryCode = isset($_POST["countryCode"]) ? $_POST["countryCode"] : '';
 
 authenticate('access_media');
 
-$t = new TidalAPI;
+/* $t = new TidalAPI;
 $t->username = $cfg["tidal_username"];
 $t->password = $cfg["tidal_password"];
 $t->token = $cfg["tidal_token"];
 $t->audioQuality = $cfg["tidal_audio_quality"];
 $t->fixSSLcertificate();
-//usleep(rand(0,10000));
+ *///usleep(rand(0,10000));
 $conn = $t->connect($sessionId, $countryCode);
 if ($conn === true){
   switch ($type){

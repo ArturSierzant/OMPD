@@ -389,6 +389,25 @@ CREATE TABLE IF NOT EXISTS `tidal_track` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tidal_token`
+--
+
+CREATE TABLE `tidal_token` (
+  `time` int(10) NOT NULL,
+  `access_token` text COLLATE utf8_unicode_ci NOT NULL,
+  `refresh_token` text COLLATE utf8_unicode_ci NOT NULL,
+  `token_type` tinytext COLLATE utf8_unicode_ci NOT NULL,
+  `expires_in` int(10) NOT NULL,
+  `expires_after` int(10) NOT NULL,
+  `userId` int(11) NOT NULL,
+  `countryCode` tinytext COLLATE utf8_unicode_ci NOT NULL,
+  `username` text COLLATE utf8_unicode_ci NOT NULL,
+  `deviceCode` text COLLATE utf8_unicode_ci NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Struktura tabeli dla  `user`
 --
 
@@ -708,11 +727,20 @@ INSERT INTO `user` VALUES ('anonymous', 'adf8efe68157cf37503f86d602bec6d593750c3
 
 -- --------------------------------------------------------
 
+--
+-- 
+-- Default Tidal token
+
+INSERT INTO `tidal_token`(`time`, `access_token`, `refresh_token`, `token_type`, `expires_in`, `expires_after`, `userId`, `countryCode`, `username`, `deviceCode`) VALUES (0,'','','',0,0,0,'','','');
+
+
+-- --------------------------------------------------------
+
 -- 
 -- Default server
 --
 
-INSERT INTO `server` VALUES ('database_version', '49');
+INSERT INTO `server` VALUES ('database_version', '50');
 INSERT INTO `server` VALUES ('escape_char_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('getid3_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('image_quality', '0');

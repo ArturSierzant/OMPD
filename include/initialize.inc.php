@@ -39,7 +39,7 @@ header('X-Accel-Buffering: no');
 define('NJB_START_TIME', microtime(true));
 
 define('NJB_VERSION', '1.06');
-define('NJB_DATABASE_VERSION', 49);
+define('NJB_DATABASE_VERSION', 50);
 define('NJB_IMAGE_SIZE', 300);
 define('NJB_IMAGE_QUALITY', 85);
 define('NJB_WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
@@ -56,6 +56,7 @@ define('TIDAL_TRACK_STREAM_URL','audio.tidal.com');
 define('TIDAL_APP_ALBUM_URL','https://tidal.com/album/');
 define('TIDAL_APP_TRACK_URL','https://tidal.com/track/');
 define('TIDAL_MAX_CACHE_TIME', 21600); //6h in [s]
+define('TIDAL_TOKEN_VERIFY_URL', 'api.tidal.com');
 define('MPD_TIDAL_URL','tidal://track/');
 
 
@@ -79,6 +80,13 @@ $cfg['username']			= '';
 $cfg['sign_validated']		= false;
 //$cfg['sign_validated']		= true;
 $cfg['align']				= false;
+
+//Tidal object
+$t							= null;
+//$tidalAutoRefresh is set in play.php to prevent token refreshing 
+//when miniplayer is used
+if (!isset($tidalAutoRefresh)) $tidalAutoRefresh = true;
+
 
 
 
@@ -105,25 +113,15 @@ if ($cfg['timezone'] != '') {
     date_default_timezone_set($cfg['timezone']);
 }
 
-//  +------------------------------------------------------------------------+
-//  | Tidal                                                                  |
-//  +------------------------------------------------------------------------+
-
-$cfg['use_tidal'] = false;
-if ($cfg['tidal_username'] && $cfg['tidal_password'] && $cfg['tidal_token']) {
-  $cfg['use_tidal'] = true;
-	require_once('api/tidal_api/tidal_api.php');
-}
-
 
 //  +------------------------------------------------------------------------+
 //  | HighResAudio                                                           |
 //  +------------------------------------------------------------------------+
 
+require_once('api/hra_api/hra_api.php');
 $cfg['use_hra'] = false;
 if ($cfg['hra_username'] && $cfg['hra_password']) {
-	$cfg['use_hra'] = true;
-	require_once('api/hra_api/hra_api.php');
+  $cfg['use_hra'] = true;
 }
 
 
@@ -230,6 +228,7 @@ if ($cfg['use_hra'] || $cfg['use_tidal']) {
 require_once(NJB_HOME_DIR . 'include/library.inc.php');
 require_once(NJB_HOME_DIR . 'include/globalize.inc.php');
 require_once(NJB_HOME_DIR . 'include/tagProcessor.inc.php');
+require_once(NJB_HOME_DIR . 'ping/ping.php');
 
 // To prevent mysql error snowball effect, and to speed up the message.php and cache.php script.
 if (NJB_SCRIPT != 'message.php' && NJB_SCRIPT != 'cache.php')
@@ -258,6 +257,45 @@ if (isset($db)) {
   checkDefaultFavorites();
   checkDefaultBlacklist();
 }
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Tidal                                                                  |
+//  +------------------------------------------------------------------------+
+
+require_once('api/tidal_api/tidal_api.php');
+$cfg['use_tidal'] = false;
+if (isset($db)) {
+  $token = mysqli_query($db,"SELECT * FROM tidal_token LIMIT 1");
+  if ($token && mysqli_num_rows($token)>0) {
+    $rows = mysqli_fetch_assoc($token);
+    $cfg['tidal_userid'] = $rows['userId'];
+    $cfg['tidal_token'] = $rows['access_token'];
+    $cfg['tidal_expires_after'] = $rows['expires_after'];
+    $cfg['tidal_countryCode'] = $rows['countryCode'];
+    $cfg['tidal_refresh_token'] = $rows['refresh_token'];
+    $cfg['tidal_deviceCode'] = $rows['deviceCode'];
+
+    $t = tidal();
+    $conn = $t->connect();
+    if ($conn == true){
+      $cfg['use_tidal'] = true;
+    }
+    else {
+      if ($tidalAutoRefresh !== false && $rows['time'] > 0){
+        $host = TIDAL_TOKEN_VERIFY_URL;
+        $ping = new \JJG\Ping($host);
+        $latency = $ping->ping();
+        if ($latency !== false) { // Tidal API server is reachable
+          refreshTidalAccessToken();
+        }
+      }
+  }
+}
+}
+
+
 
 
 //  +------------------------------------------------------------------------+

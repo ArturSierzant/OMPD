@@ -58,13 +58,14 @@ exit();
 //  | Image                                                                  |
 //  +------------------------------------------------------------------------+
 function image($image_id, $quality, $track_id) {
-	global $cfg, $db;
+	global $cfg, $db, $t;
 	require_once('getid3/getid3/getid3.php');
 	/* $query  = mysqli_query($db,'SELECT image, image_front FROM bitmap WHERE image_id = "' . mysqli_real_escape_string($db,$image_id) . '" LIMIT 1');
 	$bitmap = mysqli_fetch_assoc($query) or imageError(); */
 	
 	if (isTidal($track_id) || isTidal($image_id)) {
-		$t = new TidalAPI;
+		//$t = new TidalAPI;
+    //$t = tidal();
 		if ($track_id) $album_id = getTidalId($track_id);
 		if ($image_id) $album_id = getTidalId($image_id);
 		

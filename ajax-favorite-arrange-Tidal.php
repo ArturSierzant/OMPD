@@ -23,7 +23,7 @@
 require_once('include/initialize.inc.php');
 require_once('include/library.inc.php');
 require_once('include/play.inc.php');
-global $cfg, $db;
+global $cfg, $db, $t;
 authenticate('access_favorite');
 
 $action = $_POST['action'];
@@ -37,15 +37,18 @@ $cfg['player_host'] = $session1['player_host'];
 $cfg['player_port'] = $session1['player_port'];
 $cfg['player_pass'] = $session1['player_pass'];
 
-$t = new TidalAPI;
+/* $t = new TidalAPI;
 $t->username = $cfg["tidal_username"];
 $t->password = $cfg["tidal_password"];
 $t->token = $cfg["tidal_token"];
-if (NJB_WINDOWS) $t->fixSSLcertificate();
+if (NJB_WINDOWS) $t->fixSSLcertificate(); */
+//$t = tidal();
 $conn = $t->connect();
 
 if ($conn === true){
 	$trackList = $t->getUserPlaylistTracks($favorite_id);
+  //echo '<pre>' . print_r($trackList) . '</pre>';
+  //exit();
 	?>
 	<script type="text/javascript">
 	/* $('[id^="add_"]').click(function(){
@@ -78,7 +81,7 @@ if ($conn === true){
 				$releaseDate	= $trackList['items'][$i]['album']['releaseDate'];
 				$extUrl = TIDAL_ALBUM_URL . $album_id;
 				$sql = "SELECT album_id FROM tidal_album WHERE album_id = '" . $album_id . "'";
-				$rows = mysqli_num_rows($sql);
+				$rows = mysqli_num_rows(mysqli_query($db, $sql));
 				if ($rows == 0) {
 					$sql = "INSERT INTO tidal_album 
 					(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time, cover, type)

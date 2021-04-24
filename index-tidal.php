@@ -30,7 +30,7 @@
 //  | Tidal                                                                  |
 //  +------------------------------------------------------------------------+
 
-global $cfg, $db;
+global $cfg, $db, $t;
 global $base_size, $spaces, $scroll_bar_correction;
 
 authenticate('access_media');
@@ -44,11 +44,12 @@ require_once('include/header.inc.php');
 
 $tileSize = $_GET['tileSizePHP'];
 
-$t = new TidalAPI;
+/* $t = new TidalAPI;
 $t->username = $cfg["tidal_username"];
 $t->password = $cfg["tidal_password"];
 $t->token = $cfg["tidal_token"];
-if (NJB_WINDOWS) $t->fixSSLcertificate();
+if (NJB_WINDOWS) $t->fixSSLcertificate(); */
+//$t = tidal();
 $conn = $t->connect();
 $sessionId = '';
 $countryCode = '';

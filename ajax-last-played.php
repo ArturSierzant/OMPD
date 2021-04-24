@@ -46,6 +46,10 @@ while ( $album = mysqli_fetch_assoc ($query)) {
 	$albums['album_id'] = $a_id;
 	$tidal_cover = '';
 	if (isTidal($a_id)){
+    if (!$cfg['use_tidal']) { //in case one stopped Tidal subscription
+      $albums = null;
+      continue;
+    }
 		$query1 = mysqli_query($db, "SELECT album, cover, artist_alphabetic, audio_quality FROM tidal_album 
 		WHERE album_id='" . getTidalId($a_id) . "' LIMIT 1");
 		$a = mysqli_fetch_assoc ( $query1 );

@@ -33,7 +33,7 @@ body {
 /* Works on Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #585858 #2b2b2c;
+  scrollbar-color: #585858 #2a2a2c;
 }
 /* Works on Chrome, Edge, and Safari */
 *::-webkit-scrollbar {
@@ -41,7 +41,7 @@ body {
   height: 7px;
 }
 *::-webkit-scrollbar-track {
-  background: #2b2b2c;
+  background: #2a2a2c;
 }
 *::-webkit-scrollbar-thumb {
   background-color: #585858;
@@ -1270,11 +1270,11 @@ tr.album_list td {
   padding: 0;
 }
 tr.year {
-  height: 2.5em;
+  height: 3em;
   background-color: #353638;
 }
 tr.year td {
-  border-bottom: dotted 1px #454749;
+  border-bottom: solid 1px #454749;
   padding: 7px 5px 7px 0;
 }
 tr.odd_ok {

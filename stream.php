@@ -524,14 +524,15 @@ function streamTo() {
 //  | Stream Tidal track                                                     |
 //  +------------------------------------------------------------------------+
 function streamTidal($id) {
-	global $cfg, $db;
+	global $cfg, $db, $t;
 
-	$t = new TidalAPI;
+	/* $t = new TidalAPI;
 	$t->username = $cfg["tidal_username"];
 	$t->password = $cfg["tidal_password"];
 	$t->token = $cfg["tidal_token"];
-	$t->audioQuality = $cfg["tidal_audio_quality"];
-	$t->fixSSLcertificate();
+	$t->audioQuality = $cfg["tidal_audio_quality"]; 
+	$t->fixSSLcertificate();*/
+  //$t = tidal();
 	$conn = $t->connect();
 	if ($conn === true){
 		$trackURL = $t->getStreamURL($id);

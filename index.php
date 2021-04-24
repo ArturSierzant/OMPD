@@ -1142,7 +1142,7 @@ function viewYear() {
 	<td class="space left"></td>
 	<td width="80px"><a <?php echo ($order_bitmap_year == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="index.php?action=viewYear&amp;sort=<?php echo $sort_year; ?>">Year&nbsp;<?php echo $order_bitmap_year; ?></a></td>	
 	<td align="left" class="bar">Graph</td>
-	<td align="center" width="130px">Disc counts&nbsp;</td>
+	<td align="center" width="130px">Number of discs&nbsp;</td>
 </tr>
 
 <?php
@@ -1172,9 +1172,8 @@ function viewYear() {
 	<td><a href="index.php?action=view2&amp;year=Unknown">Unknown</a></td>
 	<td class="bar" style="cursor: pointer;" onClick="window.location.href='<?php echo NJB_HOME_URL ?>index.php?action=view2&amp;year=Unknown';"><div class="out"><div id="yNULL" style="width: 0px;" class="in"></div></div></td>
 	<td align="center"><?php echo $album['counter']; ?> (<?php echo  round($album['counter'] / $all * 100, 1); ?>%)</td>
-	
-	
 </tr>
+
 <?php	
 	}
 	$i=1;
@@ -1190,9 +1189,8 @@ function viewYear() {
 	<td><a href="index.php?action=view2&amp;year=<?php echo $album['year']; ?>"><?php echo $album['year']; ?></a></td>
 	<td class="bar" style="cursor: pointer;" onClick="window.location.href='<?php echo NJB_HOME_URL ?>index.php?action=view2&amp;year=<?php echo $album['year']; ?>';"><div class="out"><div id="y<?php echo $album['year']; ?>" style="width: 0px;" class="in"></div></div></td>
 	<td align="center"><?php echo $album['counter']; ?> (<?php echo  round($album['counter'] / $all * 100, 1); ?>%)</td>
-	
-	
 </tr>
+
 <?php
 	}
 	$query = mysqli_query($db, 'SELECT year,
@@ -1258,7 +1256,7 @@ function viewGenre() {
 	<td class="space left"></td>
 	<td style="width: 200px; max-width: 30%;"><a <?php echo ($order_bitmap_genre == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="index.php?action=viewGenre&amp;sort=<?php echo $sort_genre; ?>">Genre&nbsp;<?php echo $order_bitmap_genre; ?></a></td>	
 	<td align="left" class="bar">Graph</td>
-	<td align="center" width="130px">Disc counts&nbsp;</td>
+	<td align="center" width="130px">Number of discs&nbsp;</td>
 	
 </tr>
 
@@ -1290,8 +1288,10 @@ function viewGenre() {
 	<td><a href="index.php?action=view2&order=artist&sort=asc&genre_id=<?php echo $album['gid'] ?>">Unknown genre</a></td>
 	<td class="bar" style="cursor: pointer;" onClick="window.location.href='<?php echo NJB_HOME_URL ?>index.php?action=view2&order=artist&sort=asc&genre_id=<?php echo $album['gid'] ?>';"><div class="out"><div id="yNULL" style="width: 0px;" class="in"></div></div></td>
 	<td align="center"><?php echo $album['albums']; ?> (<?php echo  round($album['albums'] / $all * 100, 1); ?>%)</td>
-	
-	
+</tr>
+<tr class="line">
+	<td></td>
+	<td colspan="16"></td>
 </tr>
 <?php	
 	}
@@ -1308,8 +1308,10 @@ function viewGenre() {
 	<td><a href="index.php?action=view2&order=artist&sort=asc&genre_id=<?php echo $album['gid'] ?>"><?php echo $album['genre']; ?></a></td>
 	<td class="bar" style="cursor: pointer;" onClick="window.location.href='<?php echo NJB_HOME_URL ?>index.php?action=view2&order=artist&sort=asc&genre_id=<?php echo $album['gid'] ?>';"><div class="out"><div id="y<?php echo $album['gid']; ?>" style="width: 0px;" class="in"></div></div></td>
 	<td align="center"><?php echo $album['albums']; ?> (<?php echo  round($album['albums'] / $all * 100, 1); ?>%)</td>
-
-	
+</tr>
+<tr class="line">
+	<td></td>
+	<td colspan="16"></td>
 </tr>
 <?php
 	}
@@ -1732,72 +1734,13 @@ if ($cfg['show_last_played'] == true) {
 } //recently_played
 
 if ($cfg['use_tidal']) {
-?>
-
-<h1>&nbsp;Suggested new albums from <a href="index.php?action=viewTidal">Tidal</a> <a href="index.php?action=viewNewFromTidal&type=suggested_new">(more...)</a></h1>
-	<script>
-		calcTileSize();
-		var size = $tileSize;
-		var request = $.ajax({  
-		url: "ajax-tidal-new-albums.php",  
-		type: "POST",
-		data: { type: "suggested_new", tileSize : size, limit : 10, offset : 0 },
-		dataType: "html"
-		}); 
-
-	request.done(function(data) {
-		if (data) {
-			$( "#new_tidal" ).html(data);
-		}
-		else {
-			$( "#new_tidal" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
-		}
-	});
-	
-	</script>
-	<div class="full" id="new_tidal">
-		<div style="display: grid; height: 100%;">
-			<span id="albumsLoadingIndicator" style="margin: auto;">
-				<i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading albums from Tidal...</span>
-			</span>
-		</div>
-	</div>
-<?php
+  include 'include/new_albums_tidal.inc.php';
 } //new from Tidal
 
 if ($cfg['use_hra']) {
-?>
-
-<h1>&nbsp;New albums from <a href="index.php?action=viewHRA">HighResAudio</a> <a href="index.php?action=viewNewFromHRA&type=new">(more...)</a></h1>
-	<script>
-		calcTileSize();
-		var size = $tileSize;
-		var request = $.ajax({  
-		url: "ajax-hra-new-albums.php",  
-		type: "POST",
-		data: { type: "new", tileSize : size, limit : 15, offset : 0 },
-		dataType: "html"
-		}); 
-
-	request.done(function(data) {
-		if (data) {
-			$( "#new_HRA" ).html(data);
-		}
-		else {
-			$( "#new_HRA" ).html('<div style="line-height: initial;">Error loading albums from HRA.</div>');
-		}
-	});
-	
-	</script>
-	<div class="full" id="new_HRA">
-		<div style="display: grid; height: 100%;">
-			<span id="albumsLoadingIndicator" style="margin: auto;">
-				<i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading albums from HighResAudio...</span>
-			</span>
-		</div>
-	</div>
-<?php
+  include 'include/new_albums_hra.inc.php';
 } //new from HRA
+
 ?>
 
 
@@ -1832,9 +1775,16 @@ Your database is empty. Please <a href="config.php">update it.</a><br><br>
 </h1>
 </div>
 <?php
-}
-?>
+  if ($cfg['use_tidal']) {
+    include 'include/new_albums_tidal.inc.php';
+  } //new from Tidal
 
+  if ($cfg['use_hra']) {
+    include 'include/new_albums_hra.inc.php';
+  } //new from HRA
+}
+
+?>
 
 <table cellspacing="0" cellpadding="0" class="border">
 	<tr class="line"><td colspan="11"></td></tr>
@@ -1950,7 +1900,7 @@ function viewTidal() {
 //  | View new from Tidal                                                    |
 //  +------------------------------------------------------------------------+
 function viewNewFromTidal() {
-	global $cfg, $db;
+	global $cfg, $db, $t;
 	global $base_size, $spaces, $scroll_bar_correction;
 	
   $type = get('type');
@@ -2009,12 +1959,13 @@ function viewNewFromTidal() {
 
 <?php
 if ($tileSizePHP) $size = $tileSizePHP;
-$t = new TidalAPI;
+/* $t = new TidalAPI;
 $t->username = $cfg["tidal_username"];
 $t->password = $cfg["tidal_password"];
 $t->token = $cfg["tidal_token"];
 $t->audioQuality = $cfg["tidal_audio_quality"];
-$t->fixSSLcertificate();
+$t->fixSSLcertificate(); */
+//$t = tidal();
 $conn = $t->connect();
 if ($conn === true){
   $mediaType = 'album';
@@ -2220,15 +2171,17 @@ function viewNewFromHRA() {
   
     if ($results['data']['results']){
       foreach($results['data']['results'] as $res) {
-        $albums = array();
-        $albums['album_id'] = 'hra_' . $res['id'];
-        $albums['album'] = $res['title'];
-        $albums['cover'] = $res['cover'];
-        $albums['artist_alphabetic'] = $res['artist'];
-        if ($cfg['show_album_format']) {
-          $albums['audio_quality_tag'] = calculateAlbumFormat("",$res['tags']);
+        if ($res['publishingStatus'] == 'published') {
+          $albums = array();
+          $albums['album_id'] = 'hra_' . $res['id'];
+          $albums['album'] = $res['title'];
+          $albums['cover'] = $res['cover'];
+          $albums['artist_alphabetic'] = $res['artist'];
+          if ($cfg['show_album_format']) {
+            $albums['audio_quality_tag'] = calculateAlbumFormat("",$res['tags']);
+          }
+          draw_tile ( $size, $albums, '', 'echo', '' );
         }
-        draw_tile ( $size, $albums, '', 'echo', '' );
       }
       $cfg['items_count'] = $cfg['max_items_per_page'] * 30;
     }
@@ -2272,6 +2225,7 @@ function viewPopular() {
 	elseif	($period == 'year')		$days = 365;
 	elseif	($period == 'overall')	$days = 365 * 1000;
 	elseif	($period == 'artist')	$days = 0;
+	elseif	($period == 'byyear')	$days = 0;
 	else							message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]period');
 	
 	if ($user_id == 0) {
@@ -2296,6 +2250,21 @@ function viewPopular() {
 				ORDER BY counter DESC, album.artist
 				LIMIT 100');
 		}
+    elseif ($period == 'byyear') {
+      $query_pop = mysqli_query($db,"SELECT album.album_id, album.year, COUNT(*) as counter FROM counter left JOIN album on counter.album_id = album.album_id 
+      WHERE counter.album_id NOT LIKE '%\_%' AND year IS NOT NULL
+      GROUP BY year
+      ORDER BY year DESC");
+      
+      $count_year = mysqli_query($db,"SELECT MAX(c.counter) as max_c FROM (SELECT album.album_id, album.year, COUNT(*) as counter FROM counter left JOIN album on counter.album_id = album.album_id 
+      WHERE counter.album_id NOT LIKE '%\_%' AND year IS NOT NULL
+      GROUP BY year) c");
+      $max_played = mysqli_fetch_assoc($count_year)['max_c'];
+      
+      $count_all_played = mysqli_query($db,"SELECT COUNT(*) as counter FROM counter
+      WHERE album_id NOT LIKE '%\_%'");
+      $all_played = mysqli_fetch_assoc($count_all_played)['counter']; 
+    }
 		else {
 			$query_pop = mysqli_query($db, 'SELECT artist, artist_alphabetic, album, image_id, album.album_id, COUNT(*) AS counter
 				FROM counter, album
@@ -2352,18 +2321,54 @@ function viewPopular() {
 <table cellspacing="0" cellpadding="0" class="tab">
 <tr>
 	
-	<td class="<?php echo ($period == 'artist') ? 'tab_on' : 'tab_off'; ?>" onClick="location.href='<?php echo $url; ?>&amp;period=artist';">Artist</td>
+	<td class="<?php echo ($period == 'artist') ? 'tab_on' : 'tab_off'; ?>" onClick="location.href='<?php echo $url; ?>&amp;period=artist';">By Artist</td>
 	<td class="tab_none tabspace"></td>
-	<td class="<?php echo ($period == 'week') ? 'tab_on' : 'tab_off'; ?>" onClick="location.href='<?php echo $url; ?>&amp;period=week';">Week</td>
+  <td class="<?php echo ($period == 'byyear') ? 'tab_on' : 'tab_off'; ?>" onClick="location.href='<?php echo $url; ?>&amp;period=byyear';">By Album Year</td>
 	<td class="tab_none tabspace"></td>
-	<td class="<?php echo ($period == 'month') ? 'tab_on' : 'tab_off'; ?>" onClick="location.href='<?php echo $url; ?>&amp;period=month';">Month</td>
+	<td class="<?php echo ($period == 'week') ? 'tab_on' : 'tab_off'; ?>" onClick="location.href='<?php echo $url; ?>&amp;period=week';">Last Week</td>
 	<td class="tab_none tabspace"></td>
-	<td class="<?php echo ($period == 'year') ? 'tab_on' : 'tab_off'; ?>" onClick="location.href='<?php echo $url; ?>&amp;period=year';">Year</td>
+	<td class="<?php echo ($period == 'month') ? 'tab_on' : 'tab_off'; ?>" onClick="location.href='<?php echo $url; ?>&amp;period=month';">Last Month</td>
+	<td class="tab_none tabspace"></td>
+	<td class="<?php echo ($period == 'year') ? 'tab_on' : 'tab_off'; ?>" onClick="location.href='<?php echo $url; ?>&amp;period=year';">Last Year</td>
 	<td class="tab_none tabspace"></td>
 	<td class="<?php echo ($period == 'overall') ? 'tab_on' : 'tab_off'; ?>" onClick="location.href='<?php echo $url; ?>&amp;period=overall';">Overall</td>
 	<td class="tab_none">&nbsp;</td>
 </tr>
 </table>
+<?php if ($period == 'byyear') {
+?>
+<table width="100%" cellspacing="0" cellpadding="0" class="tab_border">
+<tr class="tab_header">
+	<td class="space left"></td>
+	<td width="80px">Year</td>
+	<td class="bar" align="left">Graph</td>
+	<td width="130px" align="center">Number of plays</td>
+</tr>
+<?php
+$i=1;
+while ($album = mysqli_fetch_assoc($query_pop)) {
+?>
+<tr class="<?php echo ($i++ & 1) ? 'year' : 'year'; ?> mouseover">
+	<td></td>
+	<td><a href="index.php?action=view2&amp;year=<?php echo $album['year']; ?>"><?php echo $album['year']; ?></a></td>
+	<td class="bar" style="cursor: pointer;" onClick="window.location.href='<?php echo NJB_HOME_URL ?>index.php?action=view2&amp;year=<?php echo $album['year']; ?>';"><div class="out"><div id="y<?php echo $album['year']; ?>" style="width: <?php echo round($album['counter'] / $max_played * 200)?>px;" class="in"></div></div></td>
+	<td align="center"><?php echo $album['counter']; ?> (<?php echo  round($album['counter'] / $all_played * 100, 1); ?>%)</td>
+</tr>
+
+<?php
+}
+?>
+<tr class="<?php echo ($i++ & 1) ? 'year' : 'year'; ?> mouseover">
+	<td></td>
+	<td></td>
+	<td></td>
+	<td align="center">Total: <?php echo $all_played; ?></td>
+</tr>
+</table>
+<?php 
+}
+else {
+?>  
 <table width="100%" cellspacing="0" cellpadding="0" class="tab_border">
 <tr class="tab_header">
 	<td class="icon"></td><!-- menu -->
@@ -2372,9 +2377,7 @@ function viewPopular() {
 	<td><?php echo($period == "artist" ? "" : "Album"); ?></td>
 	<td colspan="2"><?php echo($period == "artist" ? "Total albums played" : "Count"); ?></td>
 </tr>
-
 <?php
-
 	
 	$i=0;
 	while ($album = mysqli_fetch_assoc($query_pop)) {
@@ -2459,6 +2462,9 @@ function viewPopular() {
 	}
 ?>
 </table>
+<?php
+}
+?>
 <!--  -->
 	</td>
 </tr>
@@ -2532,6 +2538,13 @@ function viewRecentlyPlayed() {
 	$prevDate = '';
 	$currDate = '';
 	foreach (array_slice($album_multidisc,($page - 1) * $max_item_per_page,$max_item_per_page) as $album_m) {
+    $a_id = $album_m['album_id'];
+    if (isTidal($a_id) && !$cfg['use_tidal']) {
+      continue;
+    }
+		if (isHra($a_id) && !$cfg['use_hra']) {
+      continue;
+    }
 		$ts = $album_m['played_time'];
 		$currDate = date('Y.m.d', $ts);
 		//$start = mktime(0,0,0,$m,$d,$y);
@@ -2541,7 +2554,6 @@ function viewRecentlyPlayed() {
 		
 		
 			$albums = array();
-			$a_id = $album_m['album_id'];
 			$albums['album_id'] = $a_id;
 			$tidal_cover = '';
 			if (isTidal($a_id)){

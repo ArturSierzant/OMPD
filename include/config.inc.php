@@ -103,10 +103,6 @@ $cfg['fix_tidal_freezes'] = false;
 //  +------------------------------------------------------------------------+
 //  | Tidal                                                                  |
 //  +------------------------------------------------------------------------+
-//  | Tidal account is required (username and password below).               |
-//  | Token is also required. You can find instruction how to get it here:   |
-//  | https://github.com/lucaslg26/TidalAPI                                  |
-//  |                                                                        |
 //  | You can play music from Tidal using mpd's Tidal plugin. This requires: |
 //  |  - mpd version >=0.21                                                  |
 //  |  - plugin 'tidal' in mpd.conf with valid username/password/token fields|
@@ -125,9 +121,7 @@ $cfg['fix_tidal_freezes'] = false;
 //  | below.                                                                 |
 //  +------------------------------------------------------------------------+
 
-$cfg['tidal_username'] = "";
-$cfg['tidal_password'] = "";
-$cfg['tidal_token'] = "";
+
 $cfg['tidal_audio_quality'] = "HIGH";
 $cfg['tidal_direct'] = true;
 

@@ -29,6 +29,10 @@
 //  +------------------------------------------------------------------------+
 //  | play.php                                                               |
 //  +------------------------------------------------------------------------+
+
+//$tidalAutoRefresh is set to prevent token refreshing when miniplayer is used
+$tidalAutoRefresh = false;
+
 require_once('include/initialize.inc.php');
 require_once('include/library.inc.php');
 /* require_once('include/play.inc.php'); */
@@ -508,12 +512,13 @@ function addTidalPlaylist() {
 //  +------------------------------------------------------------------------+
 
 function loadTidalPlaylist($favorite_id) {
-	global $cfg, $db;
-	$t = new TidalAPI;
+	global $cfg, $db, $t;
+	/* $t = new TidalAPI;
 	$t->username = $cfg["tidal_username"];
 	$t->password = $cfg["tidal_password"];
 	$t->token = $cfg["tidal_token"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate();
+	if (NJB_WINDOWS) $t->fixSSLcertificate(); */
+  //$t = tidal();
 	$conn = $t->connect();
 
 	if ($conn === true){
