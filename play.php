@@ -2146,6 +2146,16 @@ function playlistStatus() {
 			if (strpos($currentsong['file'],"://") !== false) {
 				$data['isStream'] = (string) 'true';
 				$data['audio_dataformat']	= (string) 'Stream';
+        $data['stream_source']	= (string) '';
+				if (strpos($currentsong['file'],"action=streamTidal") !== false) {
+          $data['stream_source']	= (string) 'Tidal&nbsp;';
+        }
+        elseif (strpos($currentsong['file'],"action=streamHRA") !== false) {
+          $data['stream_source']	= (string) 'HRA&nbsp;';
+        }
+        elseif (strpos($currentsong['file'],"action=streamYouTube") !== false) {
+          $data['stream_source']	= (string) 'YouTube&nbsp;';
+        }
 			}
 			else {
 				$data['audio_dataformat']	= (string) strtoupper(pathinfo($currentsong['file'], PATHINFO_EXTENSION));

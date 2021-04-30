@@ -76,7 +76,7 @@ else	message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br
 //  | Config                                                                 |
 //  +------------------------------------------------------------------------+
 function config() {
-	global $cfg, $db, $update;
+	global $cfg, $db, $update, $t;
 	authenticate('access_logged_in');
 	require_once('include/play.inc.php');
 	
@@ -286,13 +286,28 @@ function config() {
 	<td></td>
 </tr>
 <?php
-	} 
+	}
+$query = mysqli_query($db, 'SELECT * FROM tidal_token LIMIT 1');
+if ($query) $tidal_token = mysqli_fetch_assoc($query);  
+if ($tidal_token['time'] == 0) {
+  $update_info = '<span class="update_info"><br>Not logged in</span>';
+}
+elseif (time() > $tidal_token['expires_after']) {
+  $update_info = '<span class="update_info"><br>Token expired.</span>';
+}
+elseif (time() < $tidal_token['expires_after']) {
+  $tokenStatus = $t->verifyAccessToken();
+  if (isset($tokenStatus['sessionId'])) {
+    $exDate = date('Y-m-d H:i',$tidal_token['expires_after']);
+    $update_info = '<span class="update_info"><br>Logged in, token valid until ' . $exDate . '</span>';
+  }
+}
 ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td class="nowrap"><a href="config.php?action=tidal"><i class="ux ico-tidal icon-small fa-fw"></i>Tidal</a></td>
 	<td></td>
-	<td>Tidal login and status</td>
+	<td>Tidal login and status<?php echo $update_info?></td>
 	<td></td>
 </tr>
 </table>
@@ -1460,6 +1475,7 @@ var interval = 2000,
                   $('#loginTidal > i').removeClass('fa-exclamation-circle icon-nok').addClass('fa-sign-in');
                 }, 2000);
                 timeLeft = 0;
+                xhr.abort();
                 return;
               }
               

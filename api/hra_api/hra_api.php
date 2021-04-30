@@ -263,7 +263,12 @@ class HraAPI {
 
 	function request() {
 		curl_setopt($this->curl, CURLOPT_POST, 0);
-		$server_output = curl_exec($this->curl);
+    for ($i=0; $i<3; $i++) {
+      $server_output = curl_exec($this->curl);
+      if (curl_errno($this->curl) == 0 ) {
+        break;
+      }
+    }
 		$res_json = json_decode($server_output, true);
 		return $res_json;
 	}

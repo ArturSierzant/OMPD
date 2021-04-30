@@ -760,7 +760,16 @@ data: {
 	album_id : '<?php echo $album_id; ?>',
 	image_id : '<?php echo $image_id; ?>',
 	total_time : '<?php echo $total_time["sum_miliseconds"]; ?>',
+  <?php 
+  foreach ($tracks as &$str) {
+    $str = str_replace('"', "'", $str);
+  }
+  foreach ($tracks as &$str) {
+    $str = str_replace("\\", "", $str);
+  }
+  ?>
 	tracks : '<?php echo str_replace("'","\'",json_encode($tracks)); ?>'
+	//tracks : '<?php echo json_encode($tracks,JSON_HEX_APOS|JSON_HEX_QUOT); ?>'
 },  
 dataType: "html"
 }); 

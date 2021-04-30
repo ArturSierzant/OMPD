@@ -996,6 +996,16 @@ function showArtistBio($artist_name, $size) {
 							$i++;
 						}
 					}
+					$artist_links = $t->getArtistLinks($id);
+          $data['artist_links']['links_found'] = 0;
+          if (isset($artist_links['items'])) {
+            foreach($artist_links['items'] as $al){
+              if ($al['siteName'] == 'ALLMUSIC' || $al['siteName'] == 'DISCOGS' || $al['siteName'] == 'FACEBOOK' || $al['siteName'] == 'OFFICIAL_HOMEPAGE' || $al['siteName'] == 'WIKIPEDIA' || $al['siteName'] == 'YOUTUBE' || $al['siteName'] == 'MYSPACE' || $al['siteName'] == 'TWITTER') {
+                $data['artist_links']['links_found']++;
+                $data['artist_links']['items'][] = array('url' => $al['url'], 'siteName' => $al['siteName']);
+              } 
+            }
+          }
 					$data['size'] = $size;
 					/* $data = $t->getArtistAll($id);
 					$data["picture"] = $t->getArtistPicture($data["rows"][0]["modules"][0]["artist"]["picture"]);

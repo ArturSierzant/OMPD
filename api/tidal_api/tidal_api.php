@@ -30,19 +30,19 @@ class TidalAPI {
   public $fixSSLcertificate = false;
   public $deviceCode;
   public $apiKey;
-  //DEL:
-  public $sessionId;
   
   const AUTH_URL = 'https://auth.tidal.com/v1/oauth2';
   const TOKEN_VERIFY_URL = 'https://api.tidal.com/v1/sessions';
   const LOGOUT_URL = 'https://api.tidal.com/v1/logout';
-  const API_URL = "https://api.tidalhifi.com/v1/";
+  const API_URL = "https://api.tidal.com/v1/";
+  const API_V2_URL = "https://api.tidal.com/v2/";
   const RESOURCES_URL = "https://resources.tidal.com/images/";
   
 
   public function __construct(){
     $this->apiKey = array('clientId' => base64_decode('YVI3Z1VhVEsxaWhwWE9FUA=='), 'clientSecret' => base64_decode('ZVZXQkVrdUwyRkNqeGdqT2tSM3lLMFJZWkViY3JNWFJjMmw4ZlUzWkNkRT0='));
-
+    //$this->apiKey = array('clientId' => '', 'clientSecret' => '');
+    
     $this->curl = curl_init();
     curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
     //to fix "SSL certificate problem: unable to get local issuer certificate" under Windows uncomment below lines or use function fixSSLcertificate():
@@ -51,7 +51,6 @@ class TidalAPI {
   }
 
   public function __destruct(){
-    //$this->logout($this->sessionId);
     curl_close($this->curl);
   }
 
@@ -163,63 +162,73 @@ class TidalAPI {
 
   function search($type, $query, $limit = 50) {
     $query = urlencode($query);
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "search/" . $type . "?sessionId=" . $this->sessionId . "&query=" . $query . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "search/" . $type . "?query=" . $query . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
     return $this->request();
   }
 
   function searchAll($query, $limit = 50) {
     $query = urlencode($query);
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "search?sessionId=" . $this->sessionId . "&query=" . $query . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&types=ARTISTS,ALBUMS,TRACKS,PLAYLISTS");
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "search?query=" . $query . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&types=ARTISTS,ALBUMS,TRACKS,PLAYLISTS");
     return $this->request();
   }
 
   function getTrack($track_id) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "tracks/" . $track_id . "?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "tracks/" . $track_id . "?countryCode=" . $this->countryCode);
     return $this->request();
   }
 
   function getAlbum($album_id) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "albums/" . $album_id . "?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "albums/" . $album_id . "?countryCode=" . $this->countryCode);
     return $this->request();
   }
 
   function getAlbumTracks($album_id) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "albums/" . $album_id . "/tracks?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "albums/" . $album_id . "/tracks?countryCode=" . $this->countryCode);
     return $this->request();
   }
     
   function getAlbumInfo($album_id) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/album?albumId=" . $album_id . "&deviceType=BROWSER&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/album?albumId=" . $album_id . "&deviceType=BROWSER&countryCode=" . $this->countryCode);
+    return $this->request();
+  }
+
+  function getAlbumReview($album_id) {
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "albums/" . $album_id . "/review?countryCode=" . $this->countryCode);
     return $this->request();
   }
 
   function getArtistAll($artist_id) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/artist?artistId=" . $artist_id . "&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&deviceType=BROWSER");
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/artist?artistId=" . $artist_id . "&countryCode=" . $this->countryCode . "&deviceType=BROWSER");
     return $this->request();
   }
 
   function getArtistAlbums($artist_id, $limit = 50) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/albums?countryCode=" . $this->countryCode . "&limit=" . $limit);
     return $this->request();
   }
 
   function getArtistEPsAndSingles($artist_id, $limit = 50) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/albums?filter=EPSANDSINGLES&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/albums?filter=EPSANDSINGLES&countryCode=" . $this->countryCode . "&limit=" . $limit);
     return $this->request();
   }
 
   function getArtistTopTracks($artist_id, $limit = 10) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/toptracks?filter=ALL&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/toptracks?filter=ALL&countryCode=" . $this->countryCode . "&limit=" . $limit);
     return $this->request();
   }
 
-  function getArtistBio($artist_id) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/bio?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
+  function getArtistBio($artist_id, $limit = 10) {
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/bio?countryCode=" . $this->countryCode . "&limit=" . $limit);
+    return $this->request();
+  }
+
+  function getArtistLinks($artist_id, $limit = 20) {
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "artists/" . $artist_id . "/links?countryCode=" . $this->countryCode . "&limit=" . $limit);
     return $this->request();
   }
 
   function getRelatedArtists($artist_id) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/artist?artistId=" . $artist_id . "&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&deviceType=BROWSER");
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/artist?artistId=" . $artist_id . "&countryCode=" . $this->countryCode . "&deviceType=BROWSER");
     $artistAll = $this->request();
     foreach ($artistAll["rows"] as $module){
       if ($module["modules"][0]["type"]=='ARTIST_LIST') {
@@ -229,7 +238,7 @@ class TidalAPI {
   }
 
   function getNewAlbums($limit = 100) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/show_more_featured_albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&deviceType=BROWSER");
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/show_more_featured_albums?countryCode=" . $this->countryCode . "&limit=" . $limit . "&deviceType=BROWSER");
     $res = $this->request();
     return $res;
     $s = array_search("featured-new",array_column($res["rows"][0]["modules"][0]["tabs"],"key"));
@@ -237,22 +246,22 @@ class TidalAPI {
   }
 
   function getFeatured($limit = 100, $offset = 0) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/new/albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/new/albums?countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
     return $this->request();
   }	
 
   function getFeaturedRecommended($limit = 100, $offset = 0) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/recommended/albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/recommended/albums?countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
     return $this->request();
   }
 
   function getFeaturedTop($limit = 100, $offset = 0) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/top/albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/top/albums?countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
     return $this->request();
   }
 
   function getFeaturedLocal($limit = 100, $offset = 0) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/local/albums?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "featured/local/albums?countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
     return $this->request();
   }
     
@@ -343,33 +352,59 @@ class TidalAPI {
 
   function getByApiPath($limit, $offset, $apiPath) {
     if ($limit > 50) $limit = 50; //Tidal API limitation
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . $apiPath ."?sessionId=" . $this->sessionId . "&locale=en_US&deviceType=BROWSER&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . $apiPath ."?locale=en_US&deviceType=BROWSER&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
+    return $this->request();
+  }
+
+  function getStreamURL_old($track_id) {
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "tracks/" . $track_id . "/streamUrl?soundQuality=" . $this->audioQuality . "&countryCode=" . $this->countryCode);
     return $this->request();
   }
 
   function getStreamURL($track_id) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "tracks/" . $track_id . "/streamUrl?soundQuality=" . $this->audioQuality . "&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
-    return $this->request();
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "tracks/" . $track_id . "/playbackinfopostpaywall?audioquality=" . $this->audioQuality . "&countryCode=" . $this->countryCode . "&playbackmode=STREAM&assetpresentation=FULL");
+    $res = $this->request();
+    if (strpos($res['manifestMimeType'],"vnd.tidal.bt") !== false) {
+      $manifest = json_decode(base64_decode($res['manifest']),true);
+      $res['manifest_b64_decoded'] = $manifest;
+      $res['url'] = $manifest['urls'][0];
+    }
+    return $res;
   }
 
   function getUserPlaylists() {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "users/" . $this->userId . "/playlists?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "users/" . $this->userId . "/playlists?countryCode=" . $this->countryCode . "&limit=" . $limit);
     return $this->request();
   }
 
   function getUserPlaylistTracks($playlist_id, $limit = 1000) {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "playlists/" . $playlist_id . "/tracks?sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "playlists/" . $playlist_id . "/tracks?countryCode=" . $this->countryCode . "&limit=" . $limit);
     return $this->request();
   }
 
   function getHomePage() {
-    //curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " pages/home?locale=en_US&deviceType=DESKTOP&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " pages/home?locale=en_US&deviceType=BROWSER&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
+    //curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " pages/home?locale=en_US&deviceType=DESKTOP&countryCode=" . $this->countryCode);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " pages/home?locale=en_US&deviceType=BROWSER&countryCode=" . $this->countryCode);
+    return $this->request();
+  }
+
+  function getUserClients() {
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " users/" . $this->userId . "/clients?countryCode=" . $this->countryCode);
+    return $this->request();
+  }
+
+  function getUserSubscription() {
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " users/" . $this->userId . "/subscription?countryCode=" . $this->countryCode);
+    return $this->request();
+  }
+
+  function getUserFeedActivities() {
+    curl_setopt($this->curl, CURLOPT_URL, self::API_V2_URL . " feed/activities/?userId=" . $this->userId . "&countryCode=" . $this->countryCode . '&locale=en-us');
     return $this->request();
   }
 
   function getExplorePage() {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " pages/explore?locale=en_US&deviceType=BROWSER&sessionId=" . $this->sessionId . "&countryCode=" . $this->countryCode);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " pages/explore?locale=en_US&deviceType=BROWSER&countryCode=" . $this->countryCode);
     return $this->request();
   }
 
@@ -404,7 +439,12 @@ class TidalAPI {
   function request() {
     curl_setopt($this->curl, CURLOPT_POST, 0);
     curl_setopt($this->curl, CURLOPT_HTTPHEADER, array('authorization: Bearer ' . $this->token));
-    $server_output = curl_exec($this->curl);
+    for ($i=0; $i<3; $i++) {
+      $server_output = curl_exec($this->curl);
+      if (curl_errno($this->curl) == 0 ) {
+        break;
+      }
+    }
     $res_json = json_decode($server_output, true);
     if (isset($res_json['status']) && ($res_json['status']) != 200) {
       $res_json['return'] = 1;

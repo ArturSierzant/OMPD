@@ -1015,13 +1015,13 @@ div.playlist_status_on_border {
 }
 .pl-track-artist {
   font-size: 1.1em;
-  padding-top: 0.4em;
+  padding-top: 0.35em;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .pl-track-favorites {
   font-size: 1.4em;
-  padding-top: 0.4em;
+  padding-top: 0.35em;
   color: #fdf6e3;
 }
 .pl-favorites {
@@ -1045,6 +1045,12 @@ div.playlist_status_on_border {
 .pl-file-info {
   font-size: 1em;
   padding-top: 0.769em;
+}
+[id$="_block"] {
+  width: 15%;
+}
+#favorites_block {
+  display: inline-block;
 }
 /*  +------------------------------------------------------------------------+
     | Table header & footer                                                  |

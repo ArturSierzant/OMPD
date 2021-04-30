@@ -1067,14 +1067,14 @@ div.playlist_status_on_border	{border: solid 1px rgb(77, 144, 254);}
 	
 .pl-track-artist {
 	font-size: 1.1em;
-	padding-top: 0.5em;
+	padding-top: 0.35em;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	}
 
 .pl-track-favorites {
 	font-size: 1.4em;
-	padding-top: 0.769em;
+	padding-top: 0.35em;
 	color: #4D90FE;
 	cursor: pointer;
 	}
@@ -1091,15 +1091,18 @@ div.playlist_status_on_border	{border: solid 1px rgb(77, 144, 254);}
   text-align: center;
 }
 
-
-
-
-
 .pl-file-info {
 	font-size: 1em;
 	padding-top: 0.769em;
 	}
 
+[id$="_block"] {
+  width: 15%;
+}
+
+#favorites_block {
+  display: inline-block;
+}
 
 
 /*  +------------------------------------------------------------------------+

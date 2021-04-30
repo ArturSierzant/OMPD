@@ -515,7 +515,15 @@ if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
 				});
 				related_artists +='</div>';
 			}
-			artist_bio = artist_bio + related_artists;
+      artist_links = '';
+      if (data["artist_links"]['links_found'] > 0) {
+				artist_links = '<div style="text-transform: uppercase;"><h1>More about artist:</h1></div><div class="artist_bio_text lh3">';
+				$.each(data["artist_links"]["items"], function(index, value){
+					artist_links += '<span class=""><a target="_BLANK" href="' + value["url"] + '">' + (value["siteName"]).replace("_","&nbsp;") + '</a></span>&nbsp;&nbsp;|&nbsp;&nbsp; ';
+				});
+				artist_links +='</div>';
+			}
+			artist_bio = artist_bio + artist_links + related_artists;
 			$( "#searchResultsTB" ).html( artist_bio );
 		}
 		else {

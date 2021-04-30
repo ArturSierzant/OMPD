@@ -142,12 +142,14 @@ if (count($file) == 0) {
 	<div class="pl-fld-name">year</div>
 	
 	<!-- <div class="pl-fld-name">file info</div> -->
-	<div class="pl-track-artist"><span id="lyrics">&nbsp;</span></div>
+	<div id="lyrics_block">
+  <div class="pl-track-artist"><span id="lyrics">&nbsp;</span></div>
 	<div class="pl-fld-name">search</div>
-	
+	</div>
+  <div id="favorites_block">
 	<div class="pl-track-favorites"><span id="favorites">&nbsp;</span></div>
 	<div class="pl-fld-name">favorites/blacklist</div>
-	
+	</div>
 	
 </div>
 
@@ -684,7 +686,7 @@ function evaluateStatus(data) {
 		} */
 		var rel_file = encodeURIComponent(data.relative_file);
 		//console.log ("rel_file=" + rel_file);
-		var params = data.audio_dataformat + '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + '&nbsp;bit - ' + data.audio_sample_rate/1000 + '&nbsp;kHz&nbsp;&bull;&nbsp;<div style="width: 6em; display: inline-flex;">' + data.audio_profile + '</div>';
+		var params = data.stream_source + data.audio_dataformat +  '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + '&nbsp;bit - ' + data.audio_sample_rate/1000 + '&nbsp;kHz&nbsp;&bull;&nbsp;<div style="width: 6em; display: inline-flex;">' + data.audio_profile + '</div>';
 		document.getElementById('parameters').innerHTML = params;
 		
 		
@@ -708,6 +710,15 @@ function evaluateStatus(data) {
 	else {
 		$("#saveCurrentTrack").show();
 	}
+  
+  //move fav/blklist star when it overlaps time bar (long track/album title, etc)
+  var favBottom = $('#favorites_block').position().top + $('#favorites_block').outerHeight(true);
+  var controlTop = $('.media_control').position().top;
+  //console.log('bott=' + favBottom + ' top=' + controlTop);
+  if (favBottom > (controlTop + 7)) {
+    $('#lyrics_block').css("display","inline-block");
+  }
+  
 	evaluateListpos(data.listpos);
 	evaluatePlaytime(data);
 	evaluateRepeat(data.repeat);
@@ -986,6 +997,7 @@ function evaluateTrack(data) {
 	$('#title1_wait_indicator').hide();
 	$('#title_wait_indicator').hide();
 	$('#fileInfoForDbTracks').css('visibility', 'visible');
+  $('#lyrics_block').css("display","block");
 	current_track_id = data.track_id;
 	current_track_mpd_url = data.track_mpd_url;
 	if (previous_track_id != data.track_id && data.track_id != null) {

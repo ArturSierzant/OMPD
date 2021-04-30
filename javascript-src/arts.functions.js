@@ -93,13 +93,19 @@ function calcTileSize() {
 			$('.tile_info').css('font-size', function() { return Math.floor($tileSize/12) + 'px'; });
 	}
 	
-	//if ($containerWidth > 1024 && $containerWidth <=1280) {
-	if ($containerWidth > 1024) {
+	if ($containerWidth > 1024 && $containerWidth <=1280) {
+	//if ($containerWidth > 1024) {
 		$tileCount=7;
 		$tileSize = Math.floor((($containerWidth)/$tileCount) - 1);
 		//$tileSize = Math.floor((($containerWidth/$tileCount) - 1) * 10)/10;
     	$('.tile_info').css('font-size', function() { return Math.floor($tileSize/13) + 'px'; });
     	//$('.tile_info').css('font-size', function() { return '0.8em'; });
+	}
+  //only for dark-wide skin ($useMaxWidth=true)
+  if ($containerWidth > 1280) {
+		$tileCount=9;
+		$tileSize = Math.floor((($containerWidth)/$tileCount) - 1);
+    	$('.tile_info').css('font-size', function() { return Math.floor($tileSize/13) + 'px'; });
 	}
 	//console.log ('tileSize: ' + $tileSize);
 	return [$tileSize,$containerWidth];
