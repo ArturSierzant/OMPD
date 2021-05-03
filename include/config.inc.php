@@ -61,7 +61,7 @@ $cfg['media_dir']                   = '/var/lib/mpd/music/';
 //  +------------------------------------------------------------------------+
 //  | HRA account is required (username and password below).                 |
 //  |                                                                        |
-//  | lang can be "en" or "de".                                              |
+//  | hra_lang can be "en" or "de"                                           |
 //  +------------------------------------------------------------------------+
 
 $cfg['hra_username'] = "";
@@ -112,17 +112,15 @@ $cfg['fix_tidal_freezes'] = false;
 //  | In this case you can choose 'tidal_audio_quality', which can be one of:|
 //  | "LOW" - 96kbps, AAC                                                    |
 //  | "HIGH" - 320kbps, AAC                                                  |
-//  | "LOSSLESS" - lossless codec: FLAC or ALAC, depending on token          |
-//  |   - LOSSLESS requires right token: for some tokens audio stream is     |
-//  |   encrypted and will not play in mpd. Best are tokens from Android     |
-//  |   or iOS. They can be found in the Internet)                           |
+//  | "LOSSLESS" - lossless codec: FLAC/ALAC                                 |
+//  | "HI_RES" - MQA encoded FLAC                                            |
 //  |                                                                        |
 //  | Third method is using upmpdcli-tidal - see section 'Tidal via upmpdcli'|
 //  | below.                                                                 |
 //  +------------------------------------------------------------------------+
 
 
-$cfg['tidal_audio_quality'] = "HIGH";
+$cfg['tidal_audio_quality'] = "LOSSLESS";
 $cfg['tidal_direct'] = true;
 
 

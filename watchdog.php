@@ -52,7 +52,7 @@ cliLog('file on mpd playlist: ' . $file);
 
 
 $counter = 0;
-$maxCounter = 150; //150 * 10000us = 15s
+$maxCounter = 300; //300 * 100000us = 30s (long because of mpd's buffering before play: about 17s for 16/44 flac with default mpd settings) 
 
 while (strpos($file,$track_id) === false && $counter < $maxCounter){
   $counter++;
