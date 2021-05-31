@@ -2060,7 +2060,7 @@ function viewHRA() {
 	$nav['url'][]	= 'index.php';
 	$nav['name'][]	= 'HighResAudio:';
 	require_once('include/header.inc.php');
-
+  echo '<div class="area">';
   showNewHRAAlbumsByCategory('new');
   showNewHRAAlbumsByCategory('rock');
   showNewHRAAlbumsByCategory('blues');
@@ -2068,6 +2068,7 @@ function viewHRA() {
   showNewHRAAlbumsByCategory('pop');
   showNewHRAAlbumsByCategory('jazz');
   showNewHRAAlbumsByCategory('classical');
+  echo '</div>';
 
   require_once('include/footer.inc.php');
 }

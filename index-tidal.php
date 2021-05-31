@@ -44,12 +44,6 @@ require_once('include/header.inc.php');
 
 $tileSize = $_GET['tileSizePHP'];
 
-/* $t = new TidalAPI;
-$t->username = $cfg["tidal_username"];
-$t->password = $cfg["tidal_password"];
-$t->token = $cfg["tidal_token"];
-if (NJB_WINDOWS) $t->fixSSLcertificate(); */
-//$t = tidal();
 $conn = $t->connect();
 $sessionId = '';
 $countryCode = '';
@@ -58,7 +52,7 @@ if ($conn){
   $countryCode = $t->countryCode;
 }
 ?>
-
+<div class="area">
 <h1>&nbsp;Featured new albums <a href="index.php?action=viewNewFromTidal&type=featured_new">(more...)</a></h1>
 <script>
   calcTileSize();
@@ -117,61 +111,7 @@ request.done(function(data) {
   </div>
 </div>
 
-<!--
-<h1>&nbsp;Suggested new tracks <a href="index.php?action=viewNewFromTidal&type=suggested_new">(more...)</a></h1>
-<script>
-  calcTileSize();
-  var size = $tileSize;
-  var request = $.ajax({  
-  url: "ajax-tidal-items.php",  
-  type: "POST",
-  data: { type: "suggested_new_tracks", tileSize : size, limit : 10, offset : 0 },
-  dataType: "json"
-  }); 
 
-request.done(function( data ) {  
-	if (data.tracks_results > 0) { //check if any track recieved
-		$( "#suggested_new_tracks" ).html( data.new_tracks );
-	}
-	else {
-		if (data.return == 1) {
-			$("#topTracksLoadingIndicator").hide();
-			$("#suggested_new_tracks").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Tidal request.<br>Error message:<br><br>' + data.response + '</div>');
-		}
-		else {
-			$("#topTracksLoadingIndicator").hide();
-			$("#suggested_new_tracks").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
-		}
-	}
-  $( "#suggested_new_tracks" ).css("height","auto");
-	setAnchorClick();
-	addFavSubmenuActions();
-}); 
-
-request.fail(function( jqXHR, textStatus ) {  
-	//alert( "Request failed: " + textStatus );	
-}); 
-
-request.always(function() {
-	$('[id^="add_tidal"]').click(function(){
-		$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
-	});
-
-	$('[id^="play_tidal"]').click(function(){
-		$(this).removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
-	});
-	
-});
-
-</script>
-<div id="suggested_new_tracks">
-  <div style="text-align: center;">
-    <span id="albumsLoadingIndicator" style="margin: auto;">
-      <i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left" style="display: inline;">Loading tracks from Tidal...</span>
-    </span>
-  </div>
-</div><br/>
--->
 <h1>&nbsp;Suggested new tracks <a href="index.php?action=viewNewFromTidal&type=suggested_new_tracks">(more...)</a></h1>
 <div id="suggested_new_tracks">
   <div style="text-align: center;">
@@ -241,37 +181,6 @@ request.done(function(data) {
   </div>
 </div>
 
-<!--
-<h1>&nbsp;Featured top albums <a href="index.php?action=viewNewFromTidal&type=featured_top">(more...)</a></h1>
-<script>
-  calcTileSize();
-  var size = $tileSize;
-  var request = $.ajax({  
-  url: "ajax-tidal-new-albums.php",  
-  type: "POST",
-  data: { type: "featured_top", tileSize : size, limit : 10, offset : 0 },
-  dataType: "html"
-  }); 
-
-request.done(function(data) {
-  if (data) {
-    $( "#new_top_tidal" ).html(data);
-  }
-  else {
-    $( "#new_top_tidal" ).html('<h1 class="">Error loading new albums from Tidal.</h1>');
-  }
-});
-
-</script>
-<div class="full" id="new_top_tidal">
-  <div style="display: grid; height: 100%;">
-    <span id="albumsLoadingIndicator" style="margin: auto;">
-      <i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading albums from Tidal...</span>
-    </span>
-  </div>
-</div>
--->
-
 <h1>&nbsp;New albums for you <a href="index.php?action=viewNewFromTidal&type=new_for_you">(more...)</a></h1>
 <script>
   calcTileSize();
@@ -329,53 +238,8 @@ request.done(function(data) {
     </span>
   </div>
 </div>
-<?php
-/*
-?>
-<h1>&nbsp;Suggested artists for you</h1><br/>
-<script>
-  calcTileSize();
-  var size = $tileSize;
-  var request = $.ajax({  
-  url: "ajax-tidal-items.php",  
-  type: "POST",
-  data: { type: "suggested_artists", tileSize : size, limit : 50, offset : 0 },
-  dataType: "json"
-  }); 
 
-request.done(function(data) {
-  if (data["items_count"] > 0) {
-    artists = '<div class="artist_bio_related" style="line-height: initial;">';
-    $.each(data["artists"], function(index, value){
-      img = '<i class="fa fa-user" style="font-size: 6em;"></i>';
-      if (value["picture"]) {
-        img = '<img src="' + value["picture"] + '">';
-      }
-      artists += '<div class="artist_related" onmouseover="return overlib(\'' + value["name"] + '\', CAPTION , \'Go to artist\');" onmouseout="return nd();"><a href="index.php?action=view2&tileSizePHP=' + data["size"] + '&artist=' + encodeURIComponent(value["name"]) + '&order=year"><div class="artist_container_small">' + img + '</div><div>' + value["name"] + '</div></a></div>';
-    });
-    artists +='</div>';
-    $( "#suggested_artists_for_you" ).css("height","auto");
-    $( "#suggested_artists_for_you" ).html(artists);
-  }
-  else {
-    $( "#suggested_artists_for_you" ).html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error loading artists.</div>');
-  }
-});
-
-</script>
-
-<div id="suggested_artists_for_you" class="full">
-  <div style="display: grid; height: 100%;">
-    <span id="albumsLoadingIndicator" style="margin: auto;">
-      <i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading artists from Tidal...</span>
-    </span>
-  </div>
-</div>
-
-<?php 
-*/
-?>
-<h1>&nbsp;Suggested artists for you</h1><br/>
+<h1>&nbsp;Suggested artists for you</h1>
 <div id="suggested_artists_for_you" class="full">
   <div style="display: grid; height: 100%;">
     <span id="albumsLoadingIndicator" style="margin: auto;">
@@ -475,11 +339,12 @@ if ($conn === true){
         
         <td></td>
       </tr>
-    <?php	
+    <?php
     }
   }
 }
 echo '</table>' . "\n";
+echo '</div>'; //<div class="area">
 require_once('include/footer.inc.php');
 
 ?>

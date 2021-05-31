@@ -533,6 +533,7 @@ if (isHra($album_id)) {
 <div class="line">
 	<div class="add-info-left">Source:</div>
 	<div class="add-info-right"><a href="<?php echo $album["source"] ?>" target="new">High<b>Res</b>Audio</a>
+	<!-- <div class="add-info-right"><a href="<?php echo $album["source"] ?>" target="new"><?php echo HRA_LOGO; ?></a> -->
 	</div>
 </div>
 <?php

@@ -134,7 +134,7 @@ elseif ($action == 'removeItem') {
 	<td><?php echo $favorite['stream'] ? 'Stream/title' : 'Title' ?></td>
 	<td<?php if ($favorite['stream'] == false) echo ' class="textspace"'; ?>></td>
 	<td class="_delArtist"><?php echo $favorite['stream'] ? 'Artist' : 'Artist' ?></td>
-	<td class="_delSource">Source</td>
+	<td class="_delSource center">Source</td>
 	<td class="_delFrom">Album</td>
 	<td></td><!-- delete -->
 </tr>
@@ -170,6 +170,16 @@ elseif ($action == 'removeItem') {
 				$artist = $queryUrl['ompd_artist'];
 				$title = $queryUrl['ompd_title'];
 				$extUrl = $queryUrl['ompd_webpage'];
+				$delArtist = false;
+				$delSource = false;
+			}
+      elseif ($a == 'streamHRA') {
+				$artist = $queryUrl['ompd_artist'];
+				$title = $queryUrl['ompd_title'];
+				$album = $queryUrl['ompd_album_title'];
+				//$extUrl = $queryUrl['ompd_webpage'];
+        $extUrl = NJB_HOME_URL . "index.php?action=view3&album_id=hra_". $queryUrl['ompd_album_id'];
+				$extUrlSource = $queryUrl['ompd_shop_url'];
 				$delArtist = false;
 				$delSource = false;
 			}
@@ -259,10 +269,13 @@ elseif ($action == 'removeItem') {
 	<?php echo html($artist); ?>
 	</a>
 	</td>
-	<td class="_delSource">
+	<td class="_delSource center">
 	<?php
-		if ($extUrl && $a == 'streamYouTube') {
-		echo '<a href="' . $extUrl . '" target="_blank"><i class="fa fa-youtube-play fa-fw icon-small"></i></a>';
+  if ($extUrl && $a == 'streamYouTube') {
+  echo '<a href="' . $extUrl . '" target="_blank"><i class="fa fa-youtube-play fa-fw icon-small"></i></a>';
+	}
+  elseif ($extUrl && $a == 'streamHRA') {
+    echo '<a href="' . $extUrlSource . '" target="_blank">' . HRA_LOGO . '</a>';
 	}
 	elseif ($extUrl && ($a == 'streamTidal' || isTidal($favoriteitem['stream_url']))) {
 		echo '<a href="' . $extUrlSource . '" target="_blank"><i class="ux ico-tidal icon-small fa-fw"></i></a>';
@@ -271,8 +284,11 @@ elseif ($action == 'removeItem') {
 	</td>
 	<td class="_delFrom">
 	<?php
-		if ($extUrl && $a == 'streamYouTube') {
-		echo '';
+  if ($extUrl && $a == 'streamYouTube') {
+    echo '';
+	}
+  elseif ($extUrl && $a == 'streamHRA') {
+		echo '<a href="' . $extUrl . '">' . $album . '</a>';
 	}
 	elseif ($extUrl && ($a == 'streamTidal' || isTidal($favoriteitem['stream_url']))) {
 		echo '<a href="' . $extUrl . '">' . $album . '</a>';

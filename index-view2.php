@@ -505,7 +505,7 @@ if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
 			}
 			artist_bio += source;
 			if (data["related_artists"]) {
-				related_artists = '<div style="text-transform: uppercase;"><h1>Related artists:</h1></div><br/><div class="artist_bio_related">';
+				related_artists = '<div style="text-transform: uppercase;"><h1>Related artists:</h1></div><div class="artist_bio_related">';
 				$.each(data["related_artists"], function(index, value){
 					img = '<i class="fa fa-user" style="font-size: 6em;"></i>';
 					if (value["picture"]) {

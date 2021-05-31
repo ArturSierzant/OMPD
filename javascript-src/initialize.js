@@ -85,7 +85,7 @@ function cookie() {
 	var														width = 1024;
 	if		(typeof window.innerWidth == 'number')			width = window.innerWidth;
 	else if	(typeof document.body.clientWidth == 'number')	width = document.body.clientWidth; // IE < 9
-	document.cookie = 'netjukebox_width=' + width;
+	document.cookie = 'netjukebox_width=' + width + ';samesite=strict';
 	if (!getCookie('netjukebox_sid')){
 		document.cookie = 'netjukebox_sid=' + makeSid(40) + '; Max-Age = 31536000';
 	}

@@ -1720,7 +1720,7 @@ div.mpd_title {position: relative;
 
 
 div.area {
-		color: #222222;
+		/* color: #222222; */
 		background-color: (@bg-sub);
 		}
 
@@ -1832,6 +1832,8 @@ div.tile {
 		background-color: #222222;
 		opacity: 0.85;
 		filter: alpha(opacity=85);
+    /* border-radius: 4px; */
+    line-height: 0.2em;
 		}
 
 .tile_info {
@@ -2310,6 +2312,9 @@ h1 {
 	display: none;
 }
 
+.center {
+	text-align: center;
+}
 
 .break-word {
 	word-wrap: break-word;
@@ -2480,9 +2485,10 @@ h1 {
 .artist_bio_related {
   overflow: hidden;
   /* max-height: 100px; */
-  height: 9em;
+  height: 10em;
   white-space: nowrap;
   overflow-x: scroll;
+  padding-top: 1em;
 }
 
 .artist_bio_related img {
@@ -2511,6 +2517,10 @@ h1 {
   border-radius: 10px;
 	background-color: @button-playlist;
 	color: #ffffff;
+}
+
+#suggested_artists_for_you {
+  background-color: (@bg-track);
 }
 
 #timebar_mini {

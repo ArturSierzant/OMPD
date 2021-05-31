@@ -1141,8 +1141,9 @@ function addFavSubmenuActions() {
 	$('[id^=savePlaylistAsName-]').keypress(function(event) {
 		  if ( event.which == 13 ) {
 			var track_id = $(this).attr('id');
-			track_id = track_id.split('-');
-			tid = track_id[1];
+			//track_id = track_id.split('-');
+			//tid = track_id[1];
+			tid = track_id.substring(track_id.indexOf('-') + 1);
 			 $('#playlistSaveAs-' + tid).click();
 		  }
 	});
@@ -1151,8 +1152,9 @@ function addFavSubmenuActions() {
 	$('[id^=savePlaylistComment-]').keypress(function(event) {
 		  if ( event.which == 13 ) {
 			var track_id = $(this).attr('id');
-			track_id = track_id.split('-');
-			tid = track_id[1];
+			//track_id = track_id.split('-');
+			//tid = track_id[1];
+      tid = track_id.substring(track_id.indexOf('-') + 1);
 			 $('#playlistSaveAs-' + tid).click();
 		  }
 	});
@@ -1161,8 +1163,9 @@ function addFavSubmenuActions() {
 	$("[id^=track_addToFavorite]").on("click",function() {
 			var action = '';
 			var track_id = $(this).attr('id');
-			track_id = track_id.split('-');
-			tid = track_id[1];
+			//track_id = track_id.split('-');
+      //tid = track_id[1];
+			tid = track_id.substring(track_id.indexOf('-') + 1);
 			
 			if ($("#save_favorite_star-" + tid).hasClass("fa-star")) {
 				action = 'remove';
@@ -1180,8 +1183,9 @@ function addFavSubmenuActions() {
 	$("[id^=track_addToBlacklist]").on("click",function() {
 			var action = '';
 			var track_id = $(this).attr('id');
-			track_id = track_id.split('-');
-			tid = track_id[1];
+			//track_id = track_id.split('-');
+			//tid = track_id[1];
+      tid = track_id.substring(track_id.indexOf('-') + 1);
 			console.log('tid=' + tid);
 			
 			if ($("#blacklist-star-bg-sub" + tid).hasClass("blackstar-selected")) {

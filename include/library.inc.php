@@ -71,13 +71,13 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 			if (!$cover) {
 				$cover = 'image/no_image.jpg';
 			}
-			$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $cover . '" alt="" width="100%" height="100%">';
+			$res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $cover . '" alt="" width="100%" height="100%">';
 		}
 		elseif (isHra($album['album_id']) && $cfg['use_hra']) {
-			$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $album["cover"] . '" alt="" width="100%" height="100%">';
+			$res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $album["cover"] . '" alt="" width="100%" height="100%">';
 		}
 		else {
-			$res .= '<img onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="image.php?image_id=' . $album['image_id'] . '" alt="" width="100%" height="100%">';
+			$res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="image.php?image_id=' . $album['image_id'] . '" alt="" width="100%" height="100%">';
 		}
 		if ($cfg['show_album_format'] == true && !isTidal($album['album_id']) && !isHra($album['album_id'])) {
 			$query = mysqli_query($db, 'SELECT track.audio_bits_per_sample, track.audio_sample_rate, track.audio_dataformat, track.audio_profile, track.audio_encoder 
@@ -443,6 +443,9 @@ function listOfFavorites($file = true, $stream = true, $track_id = "", $track_mp
 				case "streamYouTube":
 					$track_id = "youtube_" . $output['track_id'];
 					break;
+				case "streamHRA":
+					$track_id = "hra_" . $output['track_id'];
+					break;
 				case "streamTidal":
 					$track_id = "tidal_" . $output['track_id'];
 					break;
@@ -454,6 +457,9 @@ function listOfFavorites($file = true, $stream = true, $track_id = "", $track_mp
 	if ($track_id){
 		if (isTidal($track_id)) {
 			$query = mysqli_query($db,"SELECT favorite_id FROM favoriteitem WHERE favorite_id NOT IN (SELECT favorite_id FROM favorite WHERE name = '" . $cfg['favorite_name'] . "' OR name = '" . $cfg['blacklist_name'] . "') AND (stream_url LIKE '%action=streamTidal%' AND stream_url LIKE '%" . getTidalId($track_id) ."%')");
+		}
+		elseif (isHra($track_id)) {
+			$query = mysqli_query($db,"SELECT favorite_id FROM favoriteitem WHERE favorite_id NOT IN (SELECT favorite_id FROM favorite WHERE name = '" . $cfg['favorite_name'] . "' OR name = '" . $cfg['blacklist_name'] . "') AND (stream_url LIKE '%action=streamHRA%' AND stream_url LIKE '%" . getHraId($track_id) ."%')");
 		}
 		elseif (isYoutube($track_id)) {
 			$query = mysqli_query($db,"SELECT favorite_id FROM favoriteitem WHERE favorite_id NOT IN (SELECT favorite_id FROM favorite WHERE name = '" . $cfg['favorite_name'] . "' OR name = '" . $cfg['blacklist_name'] . "') AND (stream_url LIKE '%action=streamYouTube%' AND stream_url LIKE '%" . getYouTubeId($track_id) ."%')");
@@ -954,12 +960,7 @@ function showArtistBio($artist_name, $size) {
 	global $cfg, $db, $t;
 	$artist_name = moveTheToBegining($artist_name);
 	$data = array();
-  //$t = tidal();
-	/* $t = new TidalAPI;
-	$t->username = $cfg["tidal_username"];
-	$t->password = $cfg["tidal_password"];
-	$t->token = $cfg["tidal_token"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate(); */
+
 	$conn = $t->connect();
 	if ($conn === true){
 		$res = $t->search("artists",$artist_name);
@@ -1659,10 +1660,12 @@ function getHRAMPDUrl($track_id){
 	else {
 		return false;
 	}
+  cliLog('$hraStreamUrl=' . $results["data"]["results"]["tracks"]["artist"]);
 	if ($results["data"]["results"]["tracks"]) {
 		$hraAlbumId = $results["data"]["results"]["tracks"]["album_id"];
 		$album = $h->getAlbum($hraAlbumId);
 		$results["data"]["results"]["tracks"]["productionYear"] = $album["data"]["results"]["productionYear"];
+		$results["data"]["results"]["tracks"]["shop_url"] = $album["data"]["results"]["shop_url"];
 		//$results["data"]["results"]["tracks"]["album_id"] = "zzzzz";
 		$results["data"]["results"]["tracks"]["track_id"] = $track_id;
 		$hraStreamUrl = createHRAMPDUrl($results["data"]["results"]["tracks"]);
@@ -1689,9 +1692,10 @@ function createHRAMPDUrl($tracks){
 	$track_id = $tracks["track_id"];
 	$album_id = $tracks["album_id"];
 	$album_title = $tracks["album_title"];
+	$shop_url = $tracks["shop_url"];
 
 	//streamUrl MUST always be last in url!
-	$hraStreamUrl = NJB_HOME_URL . 'stream.php?action=streamHRA&track_id=' . $track_id . '&ompd_title=' . urlencode($hraTitle) . '&ompd_duration=' . urlencode($hraDuration) . '&ompd_artist=' . urlencode($hraArtist) . '&ompd_thumbnail=' . urlencode($hraThumbnail) . '&ompd_year=' . urlencode($hraYear) . '&ompd_genre=' . urlencode($hraGenre) . '&ompd_album_id=' . urlencode($album_id) . '&ompd_album_title=' . urlencode($album_title) . '&streamUrl=' . urlencode($hraUrl);
+	$hraStreamUrl = NJB_HOME_URL . 'stream.php?action=streamHRA&track_id=' . $track_id . '&ompd_title=' . urlencode($hraTitle) . '&ompd_duration=' . urlencode($hraDuration) . '&ompd_artist=' . urlencode($hraArtist) . '&ompd_thumbnail=' . urlencode($hraThumbnail) . '&ompd_year=' . urlencode($hraYear) . '&ompd_genre=' . urlencode($hraGenre) . '&ompd_album_id=' . urlencode($album_id) . '&ompd_album_title=' . urlencode($album_title) . '&ompd_shop_url=' . urlencode($shop_url) . '&streamUrl=' . urlencode($hraUrl);
 	return $hraStreamUrl;
 }
 
@@ -3259,23 +3263,30 @@ function getAverageColor($img) {
 
 function updateFavoriteStreamStatus($favorite_id) {
 	global $cfg, $db;
-	$files = false;
-	$streams = false;
-	$stream = 0;
-	$query = mysqli_query($db,"SELECT track_id FROM favoriteitem WHERE favorite_id = '" . $favorite_id . "' AND track_id <> ''");
-	if (mysqli_num_rows($query) > 0) {
-		$files = true;
-	}
-	$query = mysqli_query($db,"SELECT stream_url FROM favoriteitem WHERE favorite_id = '" . $favorite_id . "' AND stream_url <> ''");
-	if (mysqli_num_rows($query) > 0) {
-		$streams = true;
-	}
-	if ($files) {
-		$stream = 0;
-	}
-	if (!$files && $streams) {
-		$stream = 1;
-	}
+  if ($favorite_id == $cfg['favorite_id'] || $favorite_id == $cfg['blacklist_id']) {
+    //ensure that Favorites and Blacklist are not marked as stream playlists
+    $files = true;
+    $streams = false;
+  }
+  else {
+    $files = false;
+    $streams = false;
+    $stream = 0;
+    $query = mysqli_query($db,"SELECT track_id FROM favoriteitem WHERE favorite_id = '" . $favorite_id . "' AND track_id <> ''");
+    if (mysqli_num_rows($query) > 0) {
+      $files = true;
+    }
+    $query = mysqli_query($db,"SELECT stream_url FROM favoriteitem WHERE favorite_id = '" . $favorite_id . "' AND stream_url <> ''");
+    if (mysqli_num_rows($query) > 0) {
+      $streams = true;
+    }
+    if ($files) {
+      $stream = 0;
+    }
+    if (!$files && $streams) {
+      $stream = 1;
+    }
+  }
 
 	mysqli_query($db,'UPDATE favorite
 					SET stream			= "' . (int) $stream . '"
@@ -3317,7 +3328,7 @@ function getTrackIdFromUrl($track_mpd_url) {
 }
 
 //  +------------------------------------------------------------------------+
-//  | Create stream url for Tidal/YT for playing in mpd                      |
+//  | Create stream url for streaming services for playing in mpd            |
 //  +------------------------------------------------------------------------+
 
 function createStreamUrlMpd($track_id) {
@@ -3334,6 +3345,9 @@ function createStreamUrlMpd($track_id) {
 			$stream_url_mpd = MPD_TIDAL_URL . getTidalId($track_id);
 		}
 	}
+  if (isHra($track_id)) {
+    $stream_url_mpd = getHRAMPDUrl(getHraId($track_id));
+  }
 	elseif (isYoutube($track_id)){
 		$stream_url_mpd = getYouTubeMPDUrl(getYouTubeId($track_id));
 		$stream_url_mpd = getTrackMpdUrl($stream_url_mpd);
@@ -3353,6 +3367,11 @@ function isInFavorite($track_id, $favorite_id) {
 	if (isTidal($track_id)){
 		$track_id = getTidalId($track_id);
 		$query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE favorite_id = '" . $favorite_id . "' AND (stream_url LIKE '%action=streamTidal&track_id=" . $track_id . "' OR stream_url = '" . mysqli_real_escape_string($db,$cfg['upmpdcli_tidal']) . $track_id . "' OR stream_url LIKE '" .mysqli_real_escape_string($db,MPD_TIDAL_URL) . $track_id . "')");
+		if (mysqli_num_rows($query) > 0) $inFavorite = true;
+	}
+	elseif (isHra($track_id)){
+		$track_id = getHraId($track_id);
+		$query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE favorite_id = '" . $favorite_id . "' AND stream_url LIKE '%action=streamHRA&track_id=" . $track_id . "%'");
 		if (mysqli_num_rows($query) > 0) $inFavorite = true;
 	}
 	elseif (isYoutube($track_id)){

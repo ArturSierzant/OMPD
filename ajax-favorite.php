@@ -39,6 +39,7 @@ if (!$track_id && $track_mpd_url == 'null') {
 
 $addTidalPrefix = false;
 $addYouTubePrefix = false;
+$addHraPrefix = false;
 $track_id = $track_id ? $track_id :  '';
 $track_mpd_url = $track_mpd_url ? $track_mpd_url :  '';
 if ($track_id) {
@@ -54,6 +55,16 @@ if ($track_id) {
 		$track_mpd_url = createStreamUrlMpd($track_id);
 		$track_id = '';
 		$addTidalPrefix = true;
+	}
+	elseif (isHra($track_id)){
+		$hra_track_id = getHraId($track_id);
+		//create fake url to get track_id from it later in action == remove
+		$track_mpd_url = "http://test.it/test.php?track_id=" . $hra_track_id;
+		if ($action == 'add') {
+			$track_mpd_url = createStreamUrlMpd($track_id);
+		}
+		$track_id = '';
+		$addHraPrefix = true;
 	}
 	elseif (isYouTube($track_id)){
 		$yt_track_id = getYouTubeId($track_id);
@@ -85,9 +96,15 @@ if ($action == 'add') {
 		AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['favorite_id']) . "'");
 	}
 	if ($track_mpd_url){
-		$query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE 
-		stream_url='" . mysqli_real_escape_string($db, $track_mpd_url) . "'
-		AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['favorite_id']) . "'");
+/*  $query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE 
+    stream_url='" . mysqli_real_escape_string($db, $track_mpd_url) . "'
+    AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['favorite_id']) . "'");
+ */    
+    $track_id_url = getTrackIdFromUrl($track_mpd_url);
+		if ($track_id_url) {
+      $query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE 
+      stream_url LIKE '%track_id=" . mysqli_real_escape_string($db, $track_id_url) . "%' AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['favorite_id']) . "'");
+    }
 	}
 	if (mysqli_num_rows($query) == 0) {
 		$query = mysqli_query($db,"SELECT MAX(position) as maxPosition FROM favoriteitem WHERE favorite_id = '" .$cfg['favorite_id'] . "'");
@@ -123,6 +140,7 @@ elseif ($action == 'remove') {
 if (!$track_id) {
 	$track_id = getTrackIdFromUrl($track_mpd_url);
 	if ($addTidalPrefix) $track_id = "tidal_" . $track_id;
+	if ($addHraPrefix) $track_id = "hra_" . $track_id;
 	if ($addYouTubePrefix) $track_id = "youtube_" . $track_id;
 }
 $data['track_id'] = $track_id;

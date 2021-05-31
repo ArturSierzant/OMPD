@@ -230,13 +230,17 @@ for ($disc; $disc <= $max_disc; $disc++) {
 					$track_id = getTidalId($tid);
 					$isFavorite = isInFavorite($tid, $cfg['favorite_id']);
 					$isBlacklist = isInFavorite($tid, $cfg['blacklist_id']);
-					
+				}
+				elseif (isHra($tid)){
+					$track_id = getHraId($tid);
+					$isFavorite = isInFavorite($tid, $cfg['favorite_id']);
+					$isBlacklist = isInFavorite($tid, $cfg['blacklist_id']);
 				}
 				else {
 					if ($track['favorite_pos']) $isFavorite = true;
 					if ($track['blacklist_pos']) $isBlacklist = true;
 				}
-				if (!isHra($album_id)){
+				//if (!isHra($album_id)){
 				?>
 					<td onclick="toggleStarSub(<?php echo $i + $disc * 100 ?>,'<?php echo $tid ?>');" class="pl-favorites">
 						<span id="blacklist-star-bg<?php echo $tid ?>" class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
@@ -244,7 +248,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 						</span>
 					</td>
 				<?php 
-				}
+				//}
 				if ($cfg['show_DR']){ ?>
 				<td class="pl-tdr">
 				<?php

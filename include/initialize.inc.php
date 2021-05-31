@@ -60,6 +60,10 @@ define('TIDAL_TOKEN_VERIFY_URL', 'api.tidal.com');
 define('MPD_TIDAL_URL','tidal://track/');
 
 
+//define('HRA_LOGO','<span style="border: 1px solid #777;padding: 0px 3px;color: #777;">H</span><span style="background-color: #777;padding: 0px 3px;color: #111;font-weight: bold;border: 1px solid #777;">R</span><span style="border: 1px solid #777;padding: 0px 3px;color: #777;">A</span>');
+define('HRA_LOGO','H<span style="padding: 0px 3px;font-weight: bold;border: 0px solid;">R</span>A');
+
+
 
 define('NJB_HTTPQ', 0);
 define('NJB_VLC', 1);

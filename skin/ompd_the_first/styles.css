@@ -2075,7 +2075,7 @@ td.iconDel {
 .icon-small 	{font-size: 1.8em;
 			color: #777;
 			vertical-align: middle;
-			margin: 0.2em 0.5em 0.2em 0;
+			margin: 0.2em 0.2em 0.2em 0;
 			text-shadow: #fefefe 1px 1px 0;
 			}
 .icon-small-selected  {
@@ -2515,6 +2515,9 @@ h1 {
 	display: none;
 }
 
+.center {
+	text-align: center;
+}
 
 .break-word {
 	word-wrap: break-word;
