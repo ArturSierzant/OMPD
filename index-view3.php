@@ -42,7 +42,16 @@ if ($album_id == '') {
 
 authenticate('access_media');
 
-if (strpos($album_id, 'tidal_') !== false) {
+//check if album is added to library from streaming services
+$isAdded2library = false;
+$query = mysqli_query($db,"SELECT album_id FROM album_id WHERE path LIKE '" . mysqli_real_escape_string($db,$album_id) . ";%' AND updated = '9'");
+if (mysqli_num_rows($query) > 0) {
+  $isAdded2library = true;
+  $sA = mysqli_fetch_assoc($query);
+  $ompd_album_id = $sA['album_id'];
+}
+
+if (isTidal($album_id)) {
 	$query = mysqli_query($db, 'SELECT *, REPLACE(album_date," 00:00:00","") as year
 	FROM tidal_album
 	WHERE album_id = "' .  mysqli_real_escape_string($db,getTidalId($album_id)) . '" AND artist !=""'); //artist != "" for albums added from tidal playlists
@@ -163,11 +172,11 @@ if ($cfg['show_album_versions'] == true) {
 		
 		$av_ind_pos = stripos($album['album'], $av_indicator);
 		$av_title = substr($album['album'], 0,  $av_ind_pos);
-		$qs = 'SELECT album, image_id, album_id 
-		FROM album 
-		WHERE album LIKE "' . mysqli_real_escape_string($db, $av_title) . '%" AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '" AND album <> "' . mysqli_real_escape_string($db, $album['album']) . '"
+		$qs = 'SELECT album.album, album.image_id, album.album_id, album_id.path, album_id.updated 
+		FROM album LEFT JOIN album_id ON album.album_id = album_id.album_id
+		WHERE album.album LIKE "' . mysqli_real_escape_string($db, $av_title) . '%" AND album.artist = "' . mysqli_real_escape_string($db, $album['artist']) . '" AND album.album <> "' . mysqli_real_escape_string($db, $album['album']) . '"  AND album.album_id <> "' . mysqli_real_escape_string($db, $ompd_album_id) . '"
 		' . $mdqs . '
-		ORDER BY album';
+		ORDER BY album.album';
 		$query_av = mysqli_query($db, $qs);
 		$album_versions_count = mysqli_num_rows($query_av);
 	}
@@ -176,13 +185,13 @@ if ($cfg['show_album_versions'] == true) {
 		$isSet = false;
 		foreach ($cfg['album_versions_indicator'] as $v) {
 			$conjunction = ($isSet ? " OR " : "");
-			$qs = $qs . $conjunction . 'album LIKE "' . mysqli_real_escape_string($db, $album['album']) . $v . '%"' ;
+			$qs = $qs . $conjunction . 'album.album LIKE "' . mysqli_real_escape_string($db, $album['album']) . $v . '%"' ;
 			$isSet = true;
 		}
-		$qsAll = 'SELECT album, image_id, album_id 
-		FROM album 
-		WHERE ((' . $qs . ') AND artist = "' . mysqli_real_escape_string($db, $album['artist']) . '") OR (artist = "' . mysqli_real_escape_string($db, $album['artist']) .'" AND album LIKE "' . mysqli_real_escape_string($db, $album['album']) .'" AND album_id <> "' . mysqli_real_escape_string($db, $album['album_id']) . '") 
-		ORDER BY album';
+		$qsAll = 'SELECT album.album, album.image_id, album.album_id, album_id.updated, album_id.path 
+		FROM album LEFT JOIN album_id ON album.album_id = album_id.album_id
+		WHERE ((' . $qs . ') AND album.artist = "' . mysqli_real_escape_string($db, $album['artist']) . '") OR (album.artist = "' . mysqli_real_escape_string($db, $album['artist']) .'" AND album.album LIKE "' . mysqli_real_escape_string($db, $album['album']) .'" AND album.album_id <> "' . mysqli_real_escape_string($db, $album['album_id']) . '"  AND album.album_id <> "' . mysqli_real_escape_string($db, $ompd_album_id) . '") 
+		ORDER BY album.album';
 		$query_av = mysqli_query($db, $qsAll);
 		$album_versions_count = mysqli_num_rows($query_av);
 	}
@@ -256,6 +265,15 @@ if ($cfg['access_admin'] && $cfg['album_share_stream'] && !isTidal($album_id))
 	$basic[] = '<a href="stream.php?action=shareAlbum&amp;album_id='. $album_id . '&amp;sign=' . $cfg['sign'] . '"><i class="fa fa-fw  fa-share-square-o  icon-small"></i>Share stream</a>';
 if ($cfg['access_admin'] && $cfg['album_share_download'] && !isTidal($album_id))
 	$basic[] = '<a href="download.php?action=shareAlbum&amp;album_id=' . $album_id . '&amp;sign=' . $cfg['sign'] . '"><i class="fa fa-fw  fa-share-square-o  icon-small"></i>Share download</a>';
+if ($cfg['access_admin'] && (isTidal($album_id) || isHra($album_id))) {
+  $libAction = 'Add to Library';
+  $classes = 'fa fa-fw fa-bookmark-o icon-small';
+  if ($isAdded2library) {
+    $libAction = 'Remove from Library';
+    $classes = 'fa fa-fw fa-bookmark icon-small';
+  }
+  $basic[] = '<a id="add2lib" href="javascript: libAction();"><i class="' . $classes . '"></i><span>' . $libAction . '</span></a>';
+}
 
 $count_basic = count($basic);
 $advanced_enabled = (count($advanced) > 1) ? 1 : 0;
@@ -263,7 +281,7 @@ if (10 - $count_basic - $advanced_enabled < count($cfg['search_name']) ) {
 	$basic[] = '<a href="javascript:showHide(\'basic\',\'search\');"><i class="fa fa-fw  fa-search  icon-small"></i>Search...</a>';
 	for ($i = 0; $i < count($cfg['search_name']) && $i < 9; $i++)
 		$search[] = '<a href="ridirect.php?search_id=' . $i . '&amp;album_id=' . $album_id . '" target="_blank"><i class="fa fa-fw  fa-search  icon-small"></i>' . html($cfg['search_name'][$i]) .'</a>';
-	$search[] = '<a href="javascript:showHide(\'basic\',\'search\');"><i class="fa fa-fw  fa-reply  icon-small"></i>Go back</a>';
+	$search[] = '<a href="javascript:showHide(\'basic\',\'search\');"><i class="fa fa-fw fa-reply  icon-small"></i>Go back</a>';
 }
 else {
 	for ($i = 0; $i < count($cfg['search_name']) && $i < 10 - $count_basic; $i++)
@@ -373,8 +391,8 @@ if ($cfg['show_discography_browser'] == true && !in_array($album['artist'],$cfg[
 		}
 	}
 	//echo $search_str;
-	$queryStr = 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id, album_dr FROM album WHERE (' . $search_str . '
-		) ORDER BY year, month, artist_alphabetic, album';
+	$queryStr = 'SELECT album.album, album.artist, album.artist_alphabetic, album.year, album.month, album.genre_id, album.image_id, album.album_id, album.album_dr, album_id.path, album_id.updated FROM album LEFT JOIN album_id ON album.album_id = album_id.album_id WHERE (' . $search_str . '
+		) ORDER BY album.year, album.month, album.artist_alphabetic, album.album';
 	$query = mysqli_query($db, $queryStr);
 	$discCount = mysqli_num_rows($query);
 	if ($discCount > 1 or isTidal($album_id)) {
@@ -384,6 +402,11 @@ if ($cfg['show_discography_browser'] == true && !in_array($album['artist'],$cfg[
 	$thumbCount = 0;
 	while ($discography = mysqli_fetch_assoc($query)){
 		$selected = '';
+    if ($discography['updated'] == '9') { //album is from a streaming service
+      $sA = explode(";",$discography['path']);
+      $discography['album_id'] = $sA[0];
+      $discography['image_id'] = $sA[0];
+    }
 		if ($album_id == $discography['album_id']) {
 			$selected = ' selected';
 			$thumbIDCount = $thumbCount;
@@ -718,17 +741,22 @@ Other versions of this album:
 </tr>
 <?php 
 while ($multidisc = mysqli_fetch_assoc($query_av)) {
-	echo '<tr class="line"><td colspan="4"></td></tr>
-	<tr>
-	<td class="small_cover_md"><a><img src="image.php?image_id=' . rawurlencode($multidisc['image_id']) . '" width="100%"></a></td>
-	<td><a href="index.php?action=view3&amp;album_id=' . rawurlencode($multidisc['album_id']) . '">' . $multidisc['album'] . '</a></td>
-	<td class="icon">
-	<a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;album_id=' . $multidisc['album_id'] . '\',evaluateAdd);"><i id="play_' . $multidisc['album_id'] . '" class="fa fa-fw fa-play-circle-o  icon-small"></i></a>
-	</td>
-	<td class="icon">
-	<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;album_id='. $multidisc['album_id'] . '\',evaluateAdd);"><i id="add_' . $multidisc['album_id'] . '" class="fa fa-fw  fa-plus-circle  icon-small"></i></a>
-	</td>
-	</tr>'; 
+  if ($multidisc['updated'] == '9') { //album is from a streaming service
+      $sA = explode(";",$multidisc['path']);
+      $multidisc['album_id'] = $sA[0];
+      $multidisc['image_id'] = $sA[0];
+    }
+  echo '<tr class="line"><td colspan="4"></td></tr>
+  <tr>
+  <td class="small_cover_md"><a><img src="image.php?image_id=' . rawurlencode($multidisc['image_id']) . '" width="100%"></a></td>
+  <td><a href="index.php?action=view3&amp;album_id=' . rawurlencode($multidisc['album_id']) . '">' . $multidisc['album'] . '</a></td>
+  <td class="icon">
+  <a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;album_id=' . $multidisc['album_id'] . '\',evaluateAdd);"><i id="play_' . $multidisc['album_id'] . '" class="fa fa-fw fa-play-circle-o  icon-small"></i></a>
+  </td>
+  <td class="icon">
+  <a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;album_id='. $multidisc['album_id'] . '\',evaluateAdd);"><i id="add_' . $multidisc['album_id'] . '" class="fa fa-fw  fa-plus-circle  icon-small"></i></a>
+  </td>
+  </tr>'; 
 }
 ?>
 <tr class="line"><td colspan="4"></td></tr>
@@ -791,6 +819,55 @@ $(".sign-play").click(function(){
 playAlbum('<?php echo $album_id; ?>');
 });
 
+function libAction(){
+  var action = "remove";
+  var classes = $("#add2lib i").attr('class');
+  var actionTxt = $("#add2lib span").html();
+  var timeOut = 2000;
+  if ($("#add2lib span").html() == "Add to Library") {
+    action = "add";
+  }
+  $("#add2lib i").removeClass("fa-bookmark-o").removeClass("fa-bookmark").addClass("fa-cog fa-spin");
+  
+  var request = $.ajax({  
+    url: "ajax-library.php",  
+    type: "POST",  
+    data: { 
+      album_id : '<?php echo $album_id; ?>',
+      action : action
+    },  
+    dataType: "json"
+  }); 
+
+  request.done(function(data) {  
+    if (data["result"] == "add_ok") {
+      $("#add2lib i").removeClass("fa-cog fa-spin").addClass("fa-bookmark");
+      $("#add2lib span").html("Remove from Library");
+      window.location.reload();
+    }
+    if (data["result"] == "remove_ok") {
+      $("#add2lib i").removeClass("fa-cog fa-spin").addClass("fa-bookmark-o");
+      $("#add2lib span").html("Add to Library");
+      window.location.reload();
+    }
+    if (data["result"] == "error") {
+      $("#add2lib i").removeClass("fa-cog fa-spin").addClass("fa-exclamation-triangle icon-nok");
+      
+      setTimeout(function(){
+        $("#add2lib i").removeClass('fa-exclamation-triangle icon-nok').addClass(classes);
+      }, timeOut);
+    }
+  }); 
+
+  request.fail(function( jqXHR, textStatus ) {  
+  $("#add2lib i").removeClass("fa-cog fa-spin").addClass("fa-exclamation-triangle icon-nok");
+  $("#add2lib span").html("Error in ajax execution: " + textStatus);
+  setTimeout(function(){
+    $("#add2lib i").removeClass('fa-exclamation-triangle icon-nok').addClass(classes);
+    $("#add2lib span").html(actionTxt);
+		}, timeOut);
+  }); 
+}
 
 function setBarLength() {
 $('#bar_popularity').css('width',function() { return (<?php echo floor($popularity) ?> * 1/100 * $('#bar-popularity-out').width())} );

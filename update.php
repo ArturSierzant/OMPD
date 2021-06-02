@@ -304,10 +304,10 @@ function update($dir_to_update = '') {
 		
 		if ($dir_to_update) {
 			//set all to updated due to prevent deleting all DB in case of previous update failure
-			mysqli_query($db,'UPDATE album SET updated = 1');
+			mysqli_query($db,'UPDATE album SET updated = 1 WHERE updated <> 9');
 			mysqli_query($db,'UPDATE track SET updated = 1');
 			mysqli_query($db,'UPDATE bitmap SET updated = 1');
-			mysqli_query($db,'UPDATE album_id SET updated = 1');
+			mysqli_query($db,'UPDATE album_id SET updated = 1 WHERE updated <> 9');
 			
 			//mark only requested dir to be updated
 			mysqli_query($db,'UPDATE album_id SET updated = 0 WHERE path LIKE "' . mysqli_real_escape_string($db,$dir_to_update) . '%"');
@@ -319,10 +319,10 @@ function update($dir_to_update = '') {
 			cliLog('dir_to_update: ' . 	$dir_to_update);
 		} 
 		else {
-			mysqli_query($db,'UPDATE album SET updated = 0');
+			mysqli_query($db,'UPDATE album SET updated = 0 WHERE updated <> 9');
 			mysqli_query($db,'UPDATE track SET updated = 0');
 			mysqli_query($db,'UPDATE bitmap SET updated = 0');
-			mysqli_query($db,'UPDATE album_id SET updated = 0');
+			mysqli_query($db,'UPDATE album_id SET updated = 0 WHERE updated <> 9');
 		}
 		
 		

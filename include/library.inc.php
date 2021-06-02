@@ -32,7 +32,17 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 		$res = "";
 		$md = "";
 		$maxPlayed = $cfg['max_played'];
-		
+    $isAdded2library = false;
+    
+    //check if album is from a streaming service
+    $query = mysqli_query($db,"SELECT path FROM album_id WHERE album_id = '" . mysqli_real_escape_string($db,$album['album_id']) . "' AND updated = '9'");
+    if (mysqli_num_rows($query) > 0) {
+      $streamAlbum = mysqli_fetch_assoc($query);
+      $sA = explode(";",$streamAlbum['path']);
+      $album['album_id'] = $sA[0];
+      $album['audio_quality'] = $sA[2];
+      $isAdded2library = true;
+    }
 		$playedQuery = mysqli_query($db,"SELECT count(album_id) AS c FROM counter WHERE album_id ='" . $album['album_id'] . "'");
 		$rows = mysqli_fetch_assoc($playedQuery);
 		$played = $rows['c'];
@@ -45,8 +55,6 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 		}
 		$res = '<div title="Go to album \'' . html($album['album']) .  '\'" class="tile pointer" style="width: ' . $size . 'px; height: ' . $size . 'px;">';
 		if (isTidal($album['album_id']) && $cfg['use_tidal']) {
-			//$t = new TidalAPI;
-			//$t = tidal();
       if ($tidal_cover) {
 				$pic = $tidal_cover;
 			}
@@ -109,7 +117,10 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
         $res .= '   <div style = "display: none;" class="tile_format" id="tile_format_' . $album['album_id'] . '"></div>';
       }
 		}
-    
+    /* if ($isAdded2library) {
+				$res .= '   <div class="tile_format" style="left: 5%; right: auto; font-size: 0.6em;"><i class="fa fa-fw fa-heart"></i></div>';
+
+    } */
 		//$res .= '	<div id="tile_title" class="tile_info">';
 		$res .= '	<div class="tile_info" style="cursor: initial;">';
 		$res .= '	<div class="tile_title">' . html($album['album']) . '</div>';
@@ -876,13 +887,7 @@ function getAlbumFromTidal($album_id) {
 	global $cfg, $db, $t;
 
 	$data = array();
-	
-  //$t = tidal();
-	/* $t = new TidalAPI;
-	$t->username = $cfg["tidal_username"];
-	$t->password = $cfg["tidal_password"];
-	$t->token = $cfg["tidal_token"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate(); */
+
 	$conn = $t->connect();
 	if ($conn === true){
 		$results = $t->getAlbum($album_id);

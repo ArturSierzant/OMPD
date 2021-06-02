@@ -1735,11 +1735,11 @@ if ($cfg['show_last_played'] == true) {
 
 if ($cfg['use_tidal']) {
   include 'include/new_albums_tidal.inc.php';
-} //new from Tidal
+} //new albums from Tidal
 
 if ($cfg['use_hra']) {
   include 'include/new_albums_hra.inc.php';
-} //new from HRA
+} //new albums from HRA
 
 ?>
 
