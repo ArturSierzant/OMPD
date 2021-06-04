@@ -167,6 +167,7 @@ function about() {
 	<li> added support for HighResAudio (thanks to <a target="_blank" href="https://github.com/marcbth">marcbth</a>)</li>
 	<li> added badge with audio format info on album cover (thanks to <a target="_blank" href="https://github.com/paradix">paradix</a>)</li>
 	<li> added support for Tidal OAuth2 login</li>
+	<li> added 'Add to Library' for albums from streaming services (Tidal, HRA)</li>
 	<li> added popularity bar on album cover</li>
 	<li> added new popularity category (by album year)</li>
   <li> compatibillity with PHP8</li>

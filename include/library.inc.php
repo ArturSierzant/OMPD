@@ -3384,6 +3384,10 @@ function isInFavorite($track_id, $favorite_id) {
 		$query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE favorite_id = '" . $favorite_id . "' AND stream_url LIKE '%action=streamYouTube&track_id=" . $track_id . "%'");
 		if (mysqli_num_rows($query) > 0) $inFavorite = true;
 	}
+	else{
+		$query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE favorite_id = '" . $favorite_id . "' AND track_id = '" . $track_id . "'");
+		if (mysqli_num_rows($query) > 0) $inFavorite = true;
+	}
 	
 	return $inFavorite;
 }

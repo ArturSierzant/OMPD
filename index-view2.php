@@ -39,17 +39,17 @@ if ($genre_id)
 
 
 
-$title	 	= get('title');
-$artist	 	= get('artist');
-$tidalArtistId	 	= get('tidalArtistId');
-$tag		= get('tag');
-$year		= (get('year') == 'Unknown' ? get('year'): (int) get('year'));
-$dr		= (get('dr') == 'Unknown' ? get('dr'): (int) get('dr'));
-$filter  	= get('filter')				or $filter = 'whole';
-$thumbnail	= 1;
-$order	 	= get('order')				or $order = ($year || $dr ? 'artist' : (in_array(strtolower($artist), $cfg['no_album_artist']) ? 'album' : 'year'));
-$sort	 	= get('sort') == 'desc'		? 'desc' : 'asc';
-$qsType 	= (int) get('qsType')				or $qsType = false;
+$title = get('title');
+$artist = $artistRequested = get('artist');
+$tidalArtistId = get('tidalArtistId');
+$tag = get('tag');
+$year = (get('year') == 'Unknown' ? get('year'): (int) get('year'));
+$dr = (get('dr') == 'Unknown' ? get('dr'): (int) get('dr'));
+$filter = get('filter') or $filter = 'whole';
+$thumbnail = 1;
+$order = get('order') or $order = ($year || $dr ? 'artist' : (in_array(strtolower($artist), $cfg['no_album_artist']) ? 'album' : 'year'));
+$sort = get('sort') == 'desc' ? 'desc' : 'asc';
+$qsType = (int) get('qsType') or $qsType = false;
 
 //$artist = moveTheToEnd($artist);
 
@@ -1208,19 +1208,93 @@ $queryFav = mysqli_query($db,"SELECT * FROM favorite WHERE name='" . $cfg['favor
 $fav_rows = mysqli_num_rows($queryFav);
 
 if ($fav_rows > 0) {
+  $tracks= array();
 	$favorites = mysqli_fetch_assoc($queryFav);
 	$favId = $favorites['favorite_id'];
 	
-	$queryFav = mysqli_query($db, 'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id,  track.miliseconds, track.number
+  $filter_queryFAV = str_replace('artist ','track.artist ',$filter_query);
+  
+  $q = 'SELECT track.artist as track_artist, track.title, track.album_id, track.track_id as tid, track.relative_file, track.miliseconds, track.number, track.genre, track.dr, favoriteitem.favorite_id, album.album
 	FROM track
-	INNER JOIN favoriteitem ON track.track_id = favoriteitem.track_id '
-	. $filter_query . 
-	' AND (favoriteitem.favorite_id = "' . $favId . '") 
-	GROUP BY track.artist');
+	INNER JOIN favoriteitem ON track.track_id = favoriteitem.track_id 
+	LEFT JOIN album ON track.album_id = album.album_id '
+	. $filter_queryFAV . 
+	' AND (favoriteitem.favorite_id = "' . $favId . '")';
+
+  $queryFav = mysqli_query($db, $q);
 	if ($queryFav) {
     $rows = mysqli_num_rows($queryFav);
   }
+  while($row = mysqli_fetch_assoc($queryFav)){
+    $row['blacklist'] = isInFavorite($row['tid'], $cfg['blacklist_id']);
+    $tracks[] = $row;
+  }
+    
+  //favorites tracks from streaming services
+  $queryFavSS = mysqli_query($db, 'SELECT stream_url FROM favoriteitem WHERE favorite_id = "' . $favId . '" AND stream_url <> ""');
+  while ($row = mysqli_fetch_assoc($queryFavSS)) {
+    $tracks1 = array();
+    $url_components = parse_url($row['stream_url']);
+    parse_str($url_components['query'], $params);
+    if ($params['action'] == 'streamTidal') {
+      $track_id = $params['track_id'];
+      $filter_queryFAV = str_replace('artist ','tidal_track.artist ',$filter_query);
+      $queryTidal = mysqli_query($db,'SELECT tidal_track.*, tidal_album.album FROM tidal_track LEFT JOIN tidal_album ON tidal_track.album_id = tidal_album.album_id ' .  $filter_queryFAV. ' AND track_id = ' .$track_id);
+      if (mysqli_num_rows($queryTidal) > 0) {
+        while($tidalRow = mysqli_fetch_assoc($queryTidal)) {
+          $tracks1['track_artist'] = $tidalRow['artist'];
+          $tracks1['title'] = $tidalRow['title'];
+          $tracks1['album_id'] = 'tidal_' . $tidalRow['album_id'];
+          $tracks1['tid'] = 'tidal_' . $tidalRow['track_id'];
+          $tracks1['relative_file'] = '';
+          $tracks1['miliseconds'] = (int) $tidalRow['seconds'] * 1000;
+          $tracks1['number'] = $tidalRow['number'];
+          $tracks1['genre'] = '';
+          $tracks1['dr'] = '';
+          $tracks1['favorite_id'] = $favId;
+          $tracks1['album'] = $tidalRow['album'];
+          $tracks1['blacklist'] = isInFavorite('tidal_' . $tidalRow['track_id'], $cfg['blacklist_id']);
+        }
+        $tracks[] = $tracks1;
+      }
+    }
+    elseif ($params['action'] == 'streamHRA' && strpos($params['ompd_artist'],$artistRequested) !== false) {
+      $tracks1['track_artist'] = $params['ompd_artist'];
+      $tracks1['title'] = $params['ompd_title'];
+      $tracks1['album_id'] = 'hra_' . $params['ompd_album_id'];
+      $tracks1['tid'] = 'hra_' . $params['track_id'];
+      $tracks1['relative_file'] = '';
+      $tracks1['miliseconds'] = (int) $params['ompd_duration'] * 1000;
+      $tracks1['number'] = '';
+      $tracks1['genre'] = $params['ompd_genre'];
+      $tracks1['dr'] = '';
+      $tracks1['favorite_id'] = $favId;
+      $tracks1['album'] = $params['ompd_album_title'];
+      $tracks1['blacklist'] = isInFavorite('hra_' . $params['track_id'], $cfg['blacklist_id']);
+      $tracks[] = $tracks1;
+    }
+    elseif ($params['action'] == 'streamYouTube' && strpos($params['ompd_artist'],$artistRequested) !== false) {
+      $tracks1['track_artist'] = $params['ompd_artist'];
+      $tracks1['title'] = $params['ompd_title'];
+      $tracks1['album_id'] = 'youtube';
+      $tracks1['tid'] = 'youtube_' . $params['track_id'];
+      $tracks1['relative_file'] = '';
+      $tracks1['miliseconds'] = (int) $params['ompd_duration'] * 1000;
+      $tracks1['number'] = '';
+      $tracks1['genre'] = $params['ompd_genre'];
+      $tracks1['dr'] = '';
+      $tracks1['favorite_id'] = $favId;
+      $tracks1['album'] = $params['ompd_webpage'];
+      $tracks1['blacklist'] = isInFavorite('youtube_' . $params['track_id'], $cfg['blacklist_id']);
+      $tracks[] = $tracks1;
+    }
+  }
+  $artistFav = $tracks[0]['track_artist'];
 }
+  /* echo '<pre>';
+  print_r ($tracks);
+  echo '</pre>'; */
+$rows = count($tracks);
 if ($rows > 0) {
 	if($rows > 1) $display_all_tracks = false;
 	$match_found = true;
@@ -1229,7 +1303,8 @@ if ($rows > 0) {
 	$tracksFav = mysqli_fetch_assoc($queryFav);
 ?>
 <h1 onclick='toggleSearchResults("FAV");' class="pointer"><i id="iconSearchResultsFAV" class="fa fa-chevron-circle-down icon-anchor"></i> Favorites tracks by <?php 
-	echo ($tracksFav['track_artist']);
+	//echo ($tracksFav['track_artist']);
+	echo ($artistRequested);
 	?>
 </h1>
 <div id="searchResultsFAV">
@@ -1256,18 +1331,8 @@ if ($rows > 0) {
 <?php
 $i=0;
 $FAV_ids = '';
-$search_string = get('artist');
-$filter_queryFAV = str_replace('artist ','track.artist ',$filter_query);
-$queryFav = mysqli_query($db, 'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.relative_file, track.miliseconds, track.number, track.genre, track.dr, favoriteitem.favorite_id, album.album
-	FROM track
-	INNER JOIN favoriteitem ON track.track_id = favoriteitem.track_id 
-	LEFT JOIN album ON track.album_id = album.album_id '
-	. $filter_queryFAV . 
-	' AND (favoriteitem.favorite_id = "' . $favId . '") 
-	');
 
-//$rowsTA = mysqli_num_rows($queryFav);
-while ($track = mysqli_fetch_assoc($queryFav)) {
+foreach ($tracks as $track) {
 		$resultsFound = true;
 		$FAV_ids = ($FAV_ids == '' ? $track['tid'] : $FAV_ids . ';' . $track['tid']);
 ?>
@@ -1313,7 +1378,18 @@ else {
 		else 							echo html($track['title']); ?>
 <span class="track-list-artist-narrow">by <?php echo html($track['track_artist']); ?></span> 
 </td>
-<td><a href="index.php?action=view3&amp;album_id=<?php echo $track['album_id']; ?>" <?php echo onmouseoverImage($track['image_id']); ?>><?php echo html($track['album']); ?></a></td>
+<td>
+<?php if($track['album_id'] == 'youtube') { ?>
+<a href="<?php echo $track['album']; ?>" <?php echo onmouseoverImage($track['image_id']); ?> target="_blank"><i class="fa fa-youtube-play fa-fw icon-small"></i></a>
+<?php 
+}
+else { ?>
+<a href="index.php?action=view3&amp;album_id=<?php echo $track['album_id']; ?>" <?php echo onmouseoverImage($track['image_id']); ?>><?php echo html($track['album']); ?></a>
+
+<?php 
+}
+?>
+</td>
 
 <td class="time pl-genre"><?php 
 	$album_genres = parseMultiGenre($track['genre']);
@@ -1331,7 +1407,7 @@ else {
 $isFavorite = false;
 $isBlacklist = false;
 if ($track['favorite_id']) $isFavorite = true;
-if ($track['blacklist_id']) $isBlacklist = true;
+if ($track['blacklist']) $isBlacklist = true;
 $tid = $track['tid'];
 ?>
 
