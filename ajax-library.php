@@ -85,7 +85,7 @@ if ($action == "add") {
             "' . $album['artist'] . '",
             "' . $album['artist'] . '",
             "' . $album['title'] . '",
-            ' . (is_null($album['releaseDate']) ? 'NULL' : (int) substr($album['releaseDate'],0,4)) . ',
+            ' . (is_null($album['productionYear']) ? 'NULL' : (int) substr($album['productionYear'],0,4)) . ',
             ' . 'NULL' . ',
             "",
             ' . (int) $album_add_time . ',
