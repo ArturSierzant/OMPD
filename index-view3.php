@@ -395,7 +395,7 @@ if ($cfg['show_discography_browser'] == true && !in_array($album['artist'],$cfg[
 		) ORDER BY album.year, album.month, album.artist_alphabetic, album.album';
 	$query = mysqli_query($db, $queryStr);
 	$discCount = mysqli_num_rows($query);
-	if ($discCount > 1 or isTidal($album_id)) {
+	if ($discCount > 1 || isTidal($album_id) || isHra($album_id)) {
 ?>
 	<div id="discBrowser">
 	<?php 
@@ -406,6 +406,9 @@ if ($cfg['show_discography_browser'] == true && !in_array($album['artist'],$cfg[
       $sA = explode(";",$discography['path']);
       $discography['album_id'] = $sA[0];
       $discography['image_id'] = $sA[0];
+      if (isHra($sA[0])) {
+        $discography['image_id'] = $sA[1];
+      }
     }
 		if ($album_id == $discography['album_id']) {
 			$selected = ' selected';
@@ -745,6 +748,9 @@ while ($multidisc = mysqli_fetch_assoc($query_av)) {
       $sA = explode(";",$multidisc['path']);
       $multidisc['album_id'] = $sA[0];
       $multidisc['image_id'] = $sA[0];
+      if (isHra($sA[0])) {
+        $multidisc['image_id'] = $sA[1];
+      }
     }
   echo '<tr class="line"><td colspan="4"></td></tr>
   <tr>

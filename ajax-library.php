@@ -67,10 +67,48 @@ if ($action == "add") {
       );
 
       $data["ompd_album_id"] = $album["artist"];
-      
+      $data["result"] = "add_ok";
+    }
+    elseif (isHra($album_id)){
+      $h = new HraAPI;
+      $h->username = $cfg["hra_username"];
+      $h->password = $cfg["hra_password"];
+      if (NJB_WINDOWS) $h->fixSSLcertificate();
+      $conn = $h->connect();
+      if ($conn === true){
+        $res = $h->getAlbum(getHraId($album_id));
+        if ($res['data']['results']) {
+          $album = $res['data']['results'];
+          
+            mysqli_query($db,'INSERT INTO album (artist_alphabetic, artist, album, year, month, genre_id, album_add_time, discs, image_id, album_id, updated, album_dr)
+            VALUES (
+            "' . $album['artist'] . '",
+            "' . $album['artist'] . '",
+            "' . $album['title'] . '",
+            ' . (is_null($album['releaseDate']) ? 'NULL' : (int) substr($album['releaseDate'],0,4)) . ',
+            ' . 'NULL' . ',
+            "",
+            ' . (int) $album_add_time . ',
+            1,
+            "' . '' . '",
+            "' . $ompd_album_id . '",
+            9,
+            ' . 'NULL' . ')'); 
+
+            $query = mysqli_query($db, "
+                INSERT INTO album_id
+                    (album_id, path, album_add_time, updated)
+                VALUES
+                    ('" . $ompd_album_id . "',
+                    '" . $album_id . ";https://" . $album['cover']['master']['file_url'] . ";" . $album['tracks'][0]['format'] . "',
+                    '" . $album_add_time . "','9')"
+            );
+          $data["result"] = "add_ok";
+        }
+      }
     }
   }
-  $data["result"] = "add_ok";
+  
 }
 elseif ($action == "remove") {
   $query = mysqli_query($db,"SELECT album_id FROM album_id WHERE path LIKE '" . mysqli_real_escape_string($db,$album_id) . ";%' AND updated = '9'");

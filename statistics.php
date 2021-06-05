@@ -234,6 +234,12 @@ function mediaStatistics() {
 	$query = mysqli_query($db,'SELECT COUNT(discs) AS albums, SUM(discs) AS discs FROM album');
 	$album = mysqli_fetch_assoc($query);
 	
+  $query = mysqli_query($db,'SELECT COUNT(*) AS albums FROM album_id WHERE path LIKE "tidal_%"');
+	$albumTidal = mysqli_fetch_assoc($query);
+  
+  $query = mysqli_query($db,'SELECT COUNT(*) AS albums FROM album_id WHERE path LIKE "hra_%"');
+	$albumHra = mysqli_fetch_assoc($query);
+  
 	$query = mysqli_query($db, 'SELECT album, album_add_time, album_id, image_id, artist, artist_alphabetic
 			FROM album
 			WHERE album_add_time
@@ -322,6 +328,27 @@ function mediaStatistics() {
 	<td align="right"><?php echo $cfg['items_count']; ?></td>
 	<td colspan="5"></td>
 </tr>
+<?php if ($albumTidal['albums'] > 0) { ?>
+<tr class="even mouseover">
+	<td></td>
+	<td>Number of albums from Tidal:</td>
+	<td></td>
+	<td align="right"><?php echo $albumTidal['albums']; ?></td>
+	<td colspan="5"></td>
+</tr>
+<?php } 
+if ($albumHra['albums'] > 0) {
+?>
+<tr class="even mouseover">
+	<td></td>
+	<td>Number of albums from HRA:</td>
+	<td></td>
+	<td align="right"><?php echo $albumHra['albums']; ?></td>
+	<td colspan="5"></td>
+</tr>
+<?php
+}
+?>
 <tr class="odd mouseover">
 	<td></td>
 	<td>Number of discs:</td>

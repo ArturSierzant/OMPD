@@ -41,8 +41,19 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
       $sA = explode(";",$streamAlbum['path']);
       $album['album_id'] = $sA[0];
       $album['audio_quality'] = $sA[2];
+      if (isHra($album['album_id'])) {
+        $album['cover'] = $sA[1];
+      }
       $isAdded2library = true;
     }
+    //do not show albums added from streaming service when one stopped to use that service
+    if (isTidal($album['album_id']) && !$cfg['use_tidal']) {
+      return;
+    }
+    if (isHra($album['album_id']) && !$cfg['use_hra']) {
+      return;
+    }
+    
 		$playedQuery = mysqli_query($db,"SELECT count(album_id) AS c FROM counter WHERE album_id ='" . $album['album_id'] . "'");
 		$rows = mysqli_fetch_assoc($playedQuery);
 		$played = $rows['c'];
@@ -118,7 +129,7 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
       }
 		}
     /* if ($isAdded2library) {
-				$res .= '   <div class="tile_format" style="left: 5%; right: auto; font-size: 0.6em;"><i class="fa fa-fw fa-heart"></i></div>';
+				$res .= '   <div class="tile_format" style="left: 0; right: auto; top: 0; "><i class="fa fa-fw fa-bookmark-o"></i></div>';
 
     } */
 		//$res .= '	<div id="tile_title" class="tile_info">';
