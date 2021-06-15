@@ -160,6 +160,64 @@ function evaluateStatus(data) {
 		if (document.getElementById('artist_mini').innerHTML.indexOf('tileSizePHP') < 0){
 			changeTileSizeInfo();
 		}
+        
+    updateMediaSession(data);
+}
+
+function updateMediaSession(data) {
+    navigator.mediaSession.playbackState = data.isplaying == 1 ? "playing" : "paused"
+}
+
+function getArtworkSource(data) {
+	if (data.album_id) {
+		if (data.thumbnail) {
+			//temporary solution for HRA streams
+			return "image_crop.php?thumbnail=" + encodeURIComponent(data.thumbnail);
+		}
+		else {
+			return "image.php?image_id=" + data.image_id + "&quality=hq&track_id=" + data.track_id;
+		}
+	}
+	else if (data.thumbnail) {
+		return "image_crop.php?thumbnail=" + encodeURIComponent(data.thumbnail);
+	}
+	else if (data.imageFile) {
+		return data.imageFile;
+	}
+	else {
+		return "image/large_file_not_found.png";
+	}
+}
+
+function evaluateMediaSession(data) {
+    
+    if (!this.audioTag) {
+        this.audioTag = document.createElement('audio');
+        document.body.appendChild(this.audioTag);
+        this.audioTag.src = "https://raw.githubusercontent.com/anars/blank-audio/master/10-seconds-of-silence.mp3";
+        this.audioTag.loop = true;
+    }
+    
+    // data.artist, data.title, data.album, data.by, data.album_id, data.image_id
+    if (this.audioTag) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: data.title,
+            artist: data.track_artist_all,
+            album: data.album,
+            artwork: [{ src: getArtworkSource(data) }]
+        });
+        
+        navigator.mediaSession.setActionHandler('previoustrack', () => ajaxRequest('play.php?action=prev&amp;menu=playlist'));
+        navigator.mediaSession.setActionHandler('nexttrack', () => ajaxRequest('play.php?action=next&amp;menu=playlist'));
+        navigator.mediaSession.setActionHandler('play', async () => {
+            ajaxRequest('play.php?action=play&amp;menu=playlist')
+            navigator.mediaSession.playbackState = 'playing';
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+            ajaxRequest('play.php?action=pause&amp;menu=playlist')
+            navigator.mediaSession.playbackState = 'paused';
+        });
+    }
 }
 
 
@@ -182,6 +240,10 @@ function evaluateIsplaying(isplaying, idx) {
 			isplaying = isplaying.state;
 		}
 		if (isplaying == 0) {
+            if (this.audioTag) {
+                this.audioTag.pause();
+                this.audioTagcurrentTime = 0;
+            }
 			// stop
 			$("#time").removeClass();
 			$("#time").addClass("icon-anchor");
@@ -192,6 +254,9 @@ function evaluateIsplaying(isplaying, idx) {
 			previous_miliseconds = 0;
 		}
 		else if (isplaying == 1) {
+            if (this.audioTag) {
+                this.audioTag.play();
+            }
 			// play	
 			$("#time").removeClass();
 			$("#time").addClass("icon-anchor");
@@ -201,6 +266,9 @@ function evaluateIsplaying(isplaying, idx) {
 			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=pause&menu=playlist', evaluateIsplaying);");
 		}
 		else if (isplaying == 3) {
+            if (this.audioTag) {
+                this.audioTag.pause();
+            }
 			// pause
 			$("#time").removeClass();
 			$("#time").addClass("blink_me icon-anchor");
@@ -351,6 +419,8 @@ function evaluateTrack(data) {
 	else {
 		document.getElementById('image_container_mini').innerHTML = '<a href="playlist.php"><img id="image_in_mini" src="<?php echo 'image/'; ?>large_file_not_found.png" alt=""></a>';
 	}
+    
+    evaluateMediaSession(data);
 }
 
 function evaluatePlaytime(data) {

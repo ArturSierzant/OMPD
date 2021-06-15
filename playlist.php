@@ -142,12 +142,14 @@ if (count($file) == 0) {
 	<div class="pl-fld-name">year</div>
 	
 	<!-- <div class="pl-fld-name">file info</div> -->
-	<div class="pl-track-artist"><span id="lyrics">&nbsp;</span></div>
+	<div id="lyrics_block">
+  <div class="pl-track-artist"><span id="lyrics">&nbsp;</span></div>
 	<div class="pl-fld-name">search</div>
-	
+	</div>
+  <div id="favorites_block">
 	<div class="pl-track-favorites"><span id="favorites">&nbsp;</span></div>
 	<div class="pl-fld-name">favorites/blacklist</div>
-	
+	</div>
 	
 </div>
 
@@ -688,7 +690,7 @@ function evaluateStatus(data) {
 		} */
 		var rel_file = encodeURIComponent(data.relative_file);
 		//console.log ("rel_file=" + rel_file);
-		var params = data.audio_dataformat + '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + '&nbsp;bit - ' + data.audio_sample_rate/1000 + '&nbsp;kHz&nbsp;&bull;&nbsp;<div style="width: 6em; display: inline-flex;">' + data.audio_profile + '</div>';
+		var params = data.stream_source + data.audio_dataformat +  '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + '&nbsp;bit - ' + data.audio_sample_rate/1000 + '&nbsp;kHz&nbsp;&bull;&nbsp;<div style="width: 6em; display: inline-flex;">' + data.audio_profile + '</div>';
 		document.getElementById('parameters').innerHTML = params;
 		
 		
@@ -712,15 +714,36 @@ function evaluateStatus(data) {
 	else {
 		$("#saveCurrentTrack").show();
 	}
+  
+  //move fav/blklist star when it overlaps time bar (long track/album title, etc)
+  var favBottom = $('#favorites_block').position().top + $('#favorites_block').outerHeight(true);
+  var controlTop = $('.media_control').position().top;
+  //console.log('bott=' + favBottom + ' top=' + controlTop);
+  if (favBottom > (controlTop + 7)) {
+    $('#lyrics_block').css("display","inline-block");
+  }
+  
 	evaluateListpos(data.listpos);
 	evaluatePlaytime(data);
 	evaluateRepeat(data.repeat);
 	evaluateShuffle(data.shuffle);
 	evaluateIsplaying(data.isplaying, data.listpos);
-    evaluateMediaSession(data);
 	evaluateVolume(data.volume);
 	evaluateGain(data.gain);
 	evaluateConsume(data);
+    updateMediaSession(data);
+}
+
+function updateMediaSession(data) {
+    navigator.mediaSession.playbackState = data.isplaying == 1 ? "playing" : "paused"
+
+    if (data.isplaying == 1) {
+        navigator.mediaSession.setPositionState({
+            duration: data.max/1000,
+            playbackRate: 1,
+            position: data.miliseconds/1000
+        });
+    }
 }
 
 function getArtworkSource(data) {
@@ -745,21 +768,33 @@ function getArtworkSource(data) {
 }
 
 function evaluateMediaSession(data) {
+    
+    if (!this.audioTag) {
+        this.audioTag = document.createElement('audio');
+        document.body.appendChild(this.audioTag);
+        this.audioTag.src = "https://raw.githubusercontent.com/anars/blank-audio/master/10-seconds-of-silence.mp3";
+        this.audioTag.loop = true;
+    }
+    
     // data.artist, data.title, data.album, data.by, data.album_id, data.image_id
     if (this.audioTag) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: data.title,
-            artist: data.artist,
+            artist: data.track_artist_all,
             album: data.album,
             artwork: [{ src: getArtworkSource(data) }]
         });
-
-        navigator.mediaSession.playbackState = data.isplaying ? "playing" : "paused"
-
+        
         navigator.mediaSession.setActionHandler('previoustrack', () => ajaxRequest('play.php?action=prev&amp;menu=playlist'));
         navigator.mediaSession.setActionHandler('nexttrack', () => ajaxRequest('play.php?action=next&amp;menu=playlist'));
-        navigator.mediaSession.setActionHandler('play', () => ajaxRequest('play.php?action=play&amp;menu=playlist'));
-        navigator.mediaSession.setActionHandler('pause', () => ajaxRequest('play.php?action=pause&amp;menu=playlist'));
+        navigator.mediaSession.setActionHandler('play', async () => {
+            ajaxRequest('play.php?action=play&amp;menu=playlist')
+            navigator.mediaSession.playbackState = 'playing';
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+            ajaxRequest('play.php?action=pause&amp;menu=playlist')
+            navigator.mediaSession.playbackState = 'paused';
+        });
     }
 }
 
@@ -875,16 +910,11 @@ function evaluateIsplaying(isplaying, idx) {
 			isplaying = isplaying.state;
 		}
 
-        if (!this.audioTag && isplaying != 0) {
-            this.audioTag = document.createElement('audio');
-            document.body.appendChild(this.audioTag);
-            this.audioTag.src = "https://raw.githubusercontent.com/anars/blank-audio/master/10-seconds-of-silence.mp3";
-            this.audioTag.loop = true;
-        }
-
 		if (isplaying == 0) {
-            this.audioTag.pause();
-            this.audioTag.currentTime = 0;
+            if (this.audioTag) {
+                this.audioTag.pause();
+                this.audioTagcurrentTime = 0;
+            }
 			// stop
 			$("#time").removeClass();
 			$("#time").addClass("icon-anchor");
@@ -899,7 +929,9 @@ function evaluateIsplaying(isplaying, idx) {
 			previous_miliseconds = 0;
 		}
 		else if (isplaying == 1) {
-            this.audioTag.play();
+            if (this.audioTag) {
+                this.audioTag.play();
+            }
 			// play
 			document.getElementById('track' + idx + '_play').style.visibility = 'visible';		
 			$("#time").removeClass();
@@ -912,7 +944,9 @@ function evaluateIsplaying(isplaying, idx) {
 			//$('#track' + idx + '_play').show();
 		}
 		else if (isplaying == 3) {
-            this.audioTag.pause();
+            if (this.audioTag) {
+                this.audioTag.pause();
+            }
 			// pause
 			$("#time").removeClass();
 			$("#time").addClass("blink_me icon-anchor");
@@ -1042,6 +1076,7 @@ function evaluateTrack(data) {
 	$('#title1_wait_indicator').hide();
 	$('#title_wait_indicator').hide();
 	$('#fileInfoForDbTracks').css('visibility', 'visible');
+  $('#lyrics_block').css("display","block");
 	current_track_id = data.track_id;
 	current_track_mpd_url = data.track_mpd_url;
 	if (previous_track_id != data.track_id && data.track_id != null) {
