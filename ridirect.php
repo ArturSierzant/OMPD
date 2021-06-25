@@ -38,6 +38,12 @@ if ($_GET["query_type"] === 'lyrics') {
 				exit();
 };
 
+if ($_GET["query_type"] === 'lyrics_api') {
+				header('Location: api/LyricsCore/?artist=' . rawurlencode($_GET["artist"]) . '&title=' . rawurlencode($_GET["title"]) . '&format=json');
+				exit();
+};
+
+
 
 $search_id	= (int) get('search_id');
 $album_id	= get('album_id');

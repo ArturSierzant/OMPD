@@ -366,6 +366,37 @@ i:active {
   overflow: hidden;
   position: relative;
 }
+#lyrics_container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #171717;
+  /* padding: 5px;
+  overflow-wrap: break-word;
+  overflow-y: scroll; */
+  z-index: 2;
+  opacity: 89%;
+  color: #ffffff;
+  display: none;
+}
+#lyrics_close {
+  position: absolute;
+  right: 5px;
+  padding: 5px;
+  z-index: 3;
+}
+#lyrics_container_text {
+  position: absolute;
+  top: 10px;
+  bottom: 15px;
+  left: 0;
+  right: 0;
+  overflow-y: scroll;
+  z-index: 2;
+  text-align: center;
+}
 #cover-spinner {
   left: 0;
   top: 0;

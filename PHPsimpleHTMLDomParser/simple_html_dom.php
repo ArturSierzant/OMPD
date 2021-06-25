@@ -1515,13 +1515,13 @@ class simple_html_dom
 		$this->remove_noise("'<\s*script\s*>(.*?)<\s*/\s*script\s*>'is");
 
 		// strip out the \r \n's if we are told to.
-		if ($stripRN) {
+		/* if ($stripRN) {
 			$this->doc = str_replace("\r", ' ', $this->doc);
 			$this->doc = str_replace("\n", ' ', $this->doc);
 
 			// set the length of content since we have changed it.
 			$this->size = strlen($this->doc);
-		}
+		} */
 
 		// strip out cdata
 		$this->remove_noise("'<!\[CDATA\[(.*?)\]\]>'is", true);

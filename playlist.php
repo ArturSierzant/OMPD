@@ -106,6 +106,8 @@ if (count($file) == 0) {
 		<img src="image/loader.gif" alt="">
 	</div>
 	-->
+  <div id="lyrics_container"></div>
+  
 	<div id="image">
 		<a href="index.php"><img id="image_in" src="image/transparent.gif" alt=""></a>
 	</div>
@@ -677,8 +679,8 @@ function evaluateStatus(data) {
 			if (data.track_artist) {
 				query_artist = data.track_artist;
 			}
-			document.getElementById('lyrics1').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>' + '&nbsp;&bull;';
-			document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>';
+			document.getElementById('lyrics1').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i id="lyrics1_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>' + '&nbsp;&bull;';
+			document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i id="lyrics_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>';
 		}
 		data.max = data.Time;
 		/* if (title.indexOf("action=streamTo") != -1) {
@@ -960,6 +962,30 @@ function _evaluateFavorite(data) {
 	}
 }
 
+function evaluateLyrics(data) {
+  if (data.result == 'ok') {
+    content = '<div id="lyrics_close"><i class="fa fa-window-close-o icon-small pointer"></i></div>';
+    content += '<div id="lyrics_container_text"></br><b>' + data.response.artist + ' - ' + data.response.title + '</b></br></br>';
+    //content = content + '<b>' + data.response.title + '</b></br></br>';
+    content += data.response.lyrics;
+    //content += '<div style="border-bottom: 1px solid #fff">&nbsp;</div>';
+    content += '</br></br>----------------------------------------------</br></br>';
+    content += 'Source: <a href="' + data.response.url + '" target="_blank">' + data.response.source + '</a></br></br>';
+    content += '<a href="ridirect.php?query_type=lyrics&q=' + data.artist + '+' + data.title + '" target="_blank">Further Search</a></br></br></div>';
+    $("#lyrics_container").html(content);
+    $("#lyrics_container").slideDown("slow");
+    $('#lyrics_container_text').scrollTop(0);
+    $("#lyrics_close").click(function() {
+      $("#lyrics_container").slideUp("slow");
+    });
+  }
+  else {
+    window.open("ridirect.php?query_type=lyrics&q=" + data.artist + "+" + data.title, "_blank");
+  }
+  $( "#lyrics1_search_icon" ).removeClass("fa-cog fa-spin").addClass("fa-search");
+  $( "#lyrics_search_icon" ).removeClass("fa-cog fa-spin").addClass("fa-search");
+}
+
 
 function evaluateTrackVersion(data) {
 	$('#title1_wait_indicator').hide();
@@ -1180,9 +1206,19 @@ function evaluateTrack(data) {
 	var query_artist = '';
 	if (data.track_artist) {
 		query_artist = data.track_artist;
+		query_artist = query_artist.toString().replaceAll("'","");
+		/* query_artist = query_artist.replaceAll("’","");
+		query_artist = query_artist.replaceAll("`",""); */
 	}
-	document.getElementById('lyrics1').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + query_artist + '+' + data.title_core + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>' + '&nbsp;&bull;'; 
-	document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + query_artist + '+' + data.title_core + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>'; 
+  query_title = data.title_core;
+  query_title = query_title.toString().replaceAll("'","");
+  /* query_title = query_title.replaceAll("’","");
+  query_title = query_title.replaceAll("`",""); */
+  //console.log(query_title);
+	//document.getElementById('lyrics1').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + query_artist + '+' + data.title_core + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>' + '&nbsp;&bull;'; 
+	//document.getElementById('lyrics1').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + query_artist + '+' + data.title_core + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>' + '&nbsp;&bull;'; 
+	document.getElementById('lyrics').innerHTML = '<a href="javascript: ajaxRequest(\'ajax-lyrics.php?artist=' + query_artist + '&title=' + query_title + '\',evaluateLyrics);"><i id="lyrics_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>'; 
+	document.getElementById('lyrics1').innerHTML = '<a href="javascript: ajaxRequest(\'ajax-lyrics.php?artist=' + query_artist + '&title=' + query_title + '\',evaluateLyrics);"><i id="lyrics1_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>'; 
 	
 	if (data.inFavorite) {
 		document.getElementById('favorites').innerHTML  = '<i id="favorite_star" class="fa fa-star fa-fw"></i>'; 
@@ -1336,7 +1372,16 @@ $(function () {
 		}, 1000);
 
 	 });
-	
+  
+  $( "#lyrics1" ).click(function( event ) {
+    $( "#lyrics1_search_icon" ).removeClass("fa-search").addClass("fa-cog fa-spin");
+  });
+
+  $( "#lyrics" ).click(function( event ) {
+    $("#lyrics_container").slideUp("slow");
+    $( "#lyrics_search_icon" ).removeClass("fa-search").addClass("fa-cog fa-spin");
+  });
+
 	//resizeCover();
 	
 	$('#pl-track-info-narrow').bind("DOMSubtreeModified",function() {

@@ -93,9 +93,9 @@ $header['head'] .= "\t" . '<link rel="shortcut icon" type="image/png" href="imag
 
 
 if ($cfg['download_font_awesome'])
-	$header['head'] .= "\t" . '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">' . "\n";
+	$header['head'] .= "\t" . '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">' . "\n";
 else
-	$header['head'] .= "\t" . '<link rel="stylesheet" href="fonts/font-awesome-4.5.0/css/font-awesome.min.css">' . "\n";
+	$header['head'] .= "\t" . '<link rel="stylesheet" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">' . "\n";
 
 $header['head'] .= "\t" . '<link rel="stylesheet" type="text/css" href="fonts/525icons/525icons.css">' . "\n";
 $header['head'] .= "\t" . '<link rel="stylesheet" type="text/css" href="fonts/typicons/typicons.css">' . "\n";

@@ -890,7 +890,7 @@ function setSkin($skin) {
 function message($file, $line, $type, $message)	{
   global $cfg, $db;
 
-  if (strpos($file,'initialize.inc.php') !== false) {
+  if (strpos($file,'initialize.inc.php') !== false || strpos($file,'mysqli.inc.php') !== false) {
     require_once(NJB_HOME_DIR . 'include/library.inc.php');
     echo '<html><body style="background-color: #222; color: fff; font-family: verdana;"><br><br>';
     echo str_repeat('-', 70) . "<br>";

@@ -169,6 +169,7 @@ function about() {
 	<li> added support for Tidal OAuth2 login</li>
 	<li> added 'Add to Library' for albums from streaming services (Tidal, HRA)</li>
 	<li> added popularity bar on album cover</li>
+	<li> added displaying lyrics on album cover in 'Now Playing'</li>
 	<li> added new popularity category (by album year)</li>
   <li> compatibillity with PHP8</li>
 	<li> fixed bugs</li>
@@ -462,6 +463,13 @@ function about() {
 	<td>Ping for PHP class</td>
 	<td></td>
 	<td><a href="https://github.com/geerlingguy/Ping" target="_blank">https://github.com/geerlingguy/Ping</a></td>
+	<td></td>
+</tr>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
+	<td>LyricsCore API</td>
+	<td></td>
+	<td><a href="https://github.com/Smile4ever/LyricsCore" target="_blank">https://github.com/Smile4ever/LyricsCore</a></td>
 	<td></td>
 </tr>
 

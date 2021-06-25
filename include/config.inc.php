@@ -94,6 +94,15 @@ $cfg['show_album_popularity'] = false;
 $cfg['fix_tidal_freezes'] = false;
 
 
+//  +------------------------------------------------------------------------+
+//  | Search lyrics in Musixmatch                                            |
+//  +------------------------------------------------------------------------+
+//  | Get free api key from https://developer.musixmatch.com/plans           |
+//  +------------------------------------------------------------------------+
+
+$cfg['musixmatch_api_key'] = "";
+
+
 
 //  +------------------- END OF NEW IN O!MPD 1.07 ---------------------------+
 
