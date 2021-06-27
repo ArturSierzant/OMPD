@@ -30,9 +30,13 @@ $data['result'] = 'error';
 $artistUrl = urlencode($artist);
 $titleUrl = urlencode($title);
 
+if ((!$artist || $artist == 'undefined') || (!$title || $title == 'undefined')) {
+  echo json_encode($data);
+  exit();
+}
 
 if ($cfg['musixmatch_api_key']) {
-  $url = "https://api.musixmatch.com/ws/1.1/track.search?format=json&callback=x&q_track=$titleUrl&q_artist=$artistUrl&page_size=20&page=1&quorum_factor=0.99&apikey=" . $cfg['musixmatch_api_key'];
+  $url = "https://api.musixmatch.com/ws/1.1/track.search?format=json&callback=x&q_track=$titleUrl&q_artist=$artistUrl&page_size=20&page=1&quorum_factor=1&apikey=" . $cfg['musixmatch_api_key'];
   $opts = array(
       'http' => array('ignore_errors' => true)
     );

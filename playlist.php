@@ -679,8 +679,21 @@ function evaluateStatus(data) {
 			if (data.track_artist) {
 				query_artist = data.track_artist;
 			}
-			document.getElementById('lyrics1').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i id="lyrics1_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>' + '&nbsp;&bull;';
-			document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i id="lyrics_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>';
+			/* document.getElementById('lyrics1').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i id="lyrics1_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>' + '&nbsp;&bull;';
+			document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i id="lyrics_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>'; */
+      var query_artist = '';
+      if (data.track_artist) {
+        query_artist = data.track_artist;
+        query_artist = query_artist.toString().replaceAll("'","");
+        query_artist = query_artist.toString().replaceAll('"',"");
+      }
+      query_title = data.title_core;
+      if (query_title) {
+        query_title = query_title.toString().replaceAll("'","");
+        query_title = query_title.toString().replaceAll('"',"");
+      }
+      document.getElementById('lyrics').innerHTML = '<a href="javascript: ajaxRequest(\'ajax-lyrics.php?artist=' + query_artist + '&title=' + query_title + '\',evaluateLyrics);"><i id="lyrics_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>'; 
+      document.getElementById('lyrics1').innerHTML = '<a href="javascript: ajaxRequest(\'ajax-lyrics.php?artist=' + query_artist + '&title=' + query_title + '\',evaluateLyrics);"><i id="lyrics1_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>'; 
 		}
 		data.max = data.Time;
 		/* if (title.indexOf("action=streamTo") != -1) {
@@ -964,7 +977,7 @@ function _evaluateFavorite(data) {
 
 function evaluateLyrics(data) {
   if (data.result == 'ok') {
-    content = '<div id="lyrics_close"><i class="fa fa-window-close-o icon-small pointer"></i></div>';
+    content = '<div id="lyrics_close"><i class="fa fa-times-circle icon-small pointer"></i></div>';
     content += '<div id="lyrics_container_text"></br><b>' + data.response.artist + ' - ' + data.response.title + '</b></br></br>';
     //content = content + '<b>' + data.response.title + '</b></br></br>';
     content += data.response.lyrics;
@@ -1201,17 +1214,19 @@ function evaluateTrack(data) {
 	var params = data.audio_dataformat + '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + '&nbsp;bit - ' + data.audio_sample_rate/1000 + '&nbsp;kHz&nbsp;&bull;&nbsp;' + data.audio_profile;
 	if (data.dr) params = params + '&nbsp;&bull;&nbsp;DR=' + data.dr;
 	params = params + '&nbsp;&bull;<a href="getid3/demos/demo.browse.php?filename=<?php echo $cfg['media_dir']; ?>' + rel_file + '">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;file details</a>';
-	
-	document.getElementById('parameters').innerHTML = params;
-	var query_artist = '';
-	if (data.track_artist) {
-		query_artist = data.track_artist;
-		query_artist = query_artist.toString().replaceAll("'","");
-		/* query_artist = query_artist.replaceAll("’","");
-		query_artist = query_artist.replaceAll("`",""); */
-	}
+
+  document.getElementById('parameters').innerHTML = params;
+  var query_artist = '';
+  if (data.track_artist) {
+    query_artist = data.track_artist;
+    query_artist = query_artist.toString().replaceAll("'","");
+    query_artist = query_artist.toString().replaceAll('"',"");
+  }
   query_title = data.title_core;
-  query_title = query_title.toString().replaceAll("'","");
+  if (query_title) {
+    query_title = query_title.toString().replaceAll("'","");
+    query_title = query_title.toString().replaceAll('"',"");
+  }
   /* query_title = query_title.replaceAll("’","");
   query_title = query_title.replaceAll("`",""); */
   //console.log(query_title);
@@ -1374,6 +1389,7 @@ $(function () {
 	 });
   
   $( "#lyrics1" ).click(function( event ) {
+    $("#lyrics_container").slideUp("slow");
     $( "#lyrics1_search_icon" ).removeClass("fa-search").addClass("fa-cog fa-spin");
   });
 

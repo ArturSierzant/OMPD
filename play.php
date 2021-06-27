@@ -2107,6 +2107,7 @@ function playlistStatus() {
 			$parts = parse_url($currentsong['file']);
 			parse_str($parts['query'], $query);
 			$data['title'] = urldecode($query['ompd_title']);
+      $data['title_core'] = urldecode(findCoreTrackTitle($query['ompd_title']));
 			$data['track_artist'] = urldecode($query['ompd_artist']);
 			$data['year'] = urldecode($query['ompd_year']);
 		}
@@ -2120,6 +2121,7 @@ function playlistStatus() {
 			
 			if (isset($currentsong['Title'])) {
 				$data['title']	= $currentsong['Title'];
+        $data['title_core'] = findCoreTrackTitle($currentsong['Title']);
 			}
 			elseif (strpos($currentsong['file'],'filepath=') !== false){
 				$pos = strpos($currentsong['file'],'filepath=');
@@ -2130,6 +2132,7 @@ function playlistStatus() {
 
 			else {
 				$data['title']	= basename($currentsong['file']);
+				$data['title_core']	= pathinfo($currentsong['file'],PATHINFO_FILENAME);
 			}
 		}
 		if (!isset($data['track_artist'])) $data['track_artist'] = isset($currentsong['Artist']) ? $currentsong['Artist'] : null;
@@ -2175,6 +2178,7 @@ function playlistStatus() {
 				$data['end_time'] = date('H:i', time()+$totalTime);
 				$data['end_in'] = gmdate('H:i:s',$totalTime);
 				$data['total_time'] = gmdate('H:i:s', $totalPlaylistTime);
+        $data['stream_source']	= '';
 			}
 			$audio = array();
 			if ($status['audio']){
@@ -2329,7 +2333,8 @@ function playlistTrack() {
 		$data['onBlacklist'] = (boolean) $onBlacklist; */
 		$data['dr']	= (string) $track['dr'];
 		$data['album_dr']	= (string) $track['album_dr'];
-		$data['title_core'] = $title;
+		//$data['title_core'] = $title;
+		$data['title_core'] = findCoreTrackTitle($title);
 	}
 	else { //track not found in OMPD DB - read info from MPD
 		//require_once('include/play.inc.php');
@@ -2493,6 +2498,7 @@ function playlistTrack() {
 		$data['dr']	= (string) '';
 		$data['album_dr']	= (string) '';
 		//$data['title_core'] = $title;
+		$data['title_core'] = findCoreTrackTitle($title);
 	}
 	
 	$track_id_url = getTrackIdFromUrl($currentsong['file']);
