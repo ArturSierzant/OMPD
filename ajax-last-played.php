@@ -24,16 +24,21 @@ require_once('include/library.inc.php');
 global $cfg, $db;
 
 $size = $_POST["tileSize"];
+$user_id = $_POST["user_id"];
 
 authenticate('access_media');
 
-$query = mysqli_query($db, '
-		SELECT * FROM
-		(SELECT album_id, time FROM counter
-		ORDER BY time DESC
-		LIMIT 20) c
-		GROUP BY c.album_id
-		ORDER BY c.time DESC' );
+
+$query_string = "
+  SELECT * FROM
+  (SELECT album_id, time FROM counter
+  WHERE user_id = $user_id
+  ORDER BY time DESC
+  LIMIT 20) c
+  GROUP BY c.album_id
+  ORDER BY c.time DESC";
+
+$query = mysqli_query($db,$query_string);
 
 $hra_session = false;
 
@@ -94,8 +99,12 @@ while ( $album = mysqli_fetch_assoc ($query)) {
 		$albums['image_id'] = $a['image_id'];
 		$albums['artist_alphabetic'] = $a['artist_alphabetic'];
 	}
-	if ($albums) draw_tile ( $size, $albums, '', 'echo', $tidal_cover );
+	if ($albums) {
+    draw_tile ( $size, $albums, '', 'echo', $tidal_cover );
+  }
 }
-
+if ($c == 0) {
+  echo "<h1>&nbsp;&nbsp;No recently played albums</h1>";
+}
 ?>
 

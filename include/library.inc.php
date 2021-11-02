@@ -90,10 +90,12 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 			if (!$cover) {
 				$cover = 'image/no_image.jpg';
 			}
-			$res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $cover . '" alt="" width="100%" height="100%">';
+			//$res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $cover . '" alt="" width="100%" height="100%">';
+			$res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="image.php?image_id=' . $album['album_id'] . '" alt="" width="100%" height="100%">';
 		}
 		elseif (isHra($album['album_id']) && $cfg['use_hra']) {
-			$res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $album["cover"] . '" alt="" width="100%" height="100%">';
+			//$res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $album["cover"] . '" alt="" width="100%" height="100%">';
+			$res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="image.php?image_id=' . $album['album_id'] . '&image_url=' . urlencode($album["cover"]) . '" alt="" width="100%" height="100%">';
 		}
 		else {
 			$res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="image.php?image_id=' . $album['image_id'] . '" alt="" width="100%" height="100%">';
@@ -202,7 +204,7 @@ function findCoreTrackTitle($title) {
 	$i=0;
 	
 	for ($i=0; $i<$count; $i++) {
-		$pos = strpos($title,strtolower($separator[$i]));
+		$pos = strpos($title,strtolower($separator[$i]),1); //start searching from position 1 to avoid empty results for e.g. "(You Said) You'd Gimme Some More"
 		if ($pos !== false) {
 			$title = trim(substr($title, 0 , $pos));
 			//break;
@@ -1100,7 +1102,7 @@ function getTracksFromTidalAlbum($album_id, $order = '') {
 		return;
 	}
 	
-	if (!$results["totalNumberOfItems"]) {
+	if (!isset($results["totalNumberOfItems"])) {
 		$data['results'] = 0;
 		return safe_json_encode($data);
 	}

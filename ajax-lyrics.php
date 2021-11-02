@@ -45,6 +45,7 @@ if ($cfg['musixmatch_api_key']) {
   $response = file_get_contents($url, false, $context);
   if ($response) {
     $data['url'] = $url;
+    $data['response']['instrumental'] = 0;
     //$data['response_raw'] = $response;
     $data['response'] = json_decode($response, true);
     $tracks = count($data['response']['message']['body']['track_list']);
@@ -58,9 +59,14 @@ if ($cfg['musixmatch_api_key']) {
       if ($data['response']['message']['body']['track_list'][$i]) {
         $data['response']['source'] = "Musixmatch";
         $data['response']['url'] = $data['response']['message']['body']['track_list'][$i]['track']['track_share_url'];
+        $data['response']['title'] = $data['response']['message']['body']['track_list'][$i]['track']['track_name'];
+        $data['response']['artist'] = $data['response']['message']['body']['track_list'][$i]['track']['artist_name'];
+        $data['response']['instrumental'] = $data['response']['message']['body']['track_list'][$i]['track']['instrumental'];
+        if ($data['response']['instrumental'] == 1) {
+          $data['result'] = 'ok';
+          break;
+        }
         if ($data['response']['url']) {
-          $data['response']['title'] = $data['response']['message']['body']['track_list'][$i]['track']['track_name'];
-          $data['response']['artist'] = $data['response']['message']['body']['track_list'][$i]['track']['artist_name'];
           require_once('PHPsimpleHTMLDomParser/simple_html_dom.php');
           $html = new simple_html_dom();
           $urlSearch = $data['response']['url'];

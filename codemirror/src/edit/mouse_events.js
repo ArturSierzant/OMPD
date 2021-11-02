@@ -1,22 +1,23 @@
-import { delayBlurEvent, ensureFocus } from "../display/focus"
-import { operation } from "../display/operations"
-import { visibleLines } from "../display/update_lines"
-import { clipPos, cmp, maxPos, minPos, Pos } from "../line/pos"
-import { getLine, lineAtHeight } from "../line/utils_line"
-import { posFromMouse } from "../measurement/position_measurement"
-import { eventInWidget } from "../measurement/widgets"
-import { normalizeSelection, Range, Selection } from "../model/selection"
-import { extendRange, extendSelection, replaceOneSelection, setSelection } from "../model/selection_updates"
-import { captureRightClick, chromeOS, ie, ie_version, mac, webkit } from "../util/browser"
-import { activeElt } from "../util/dom"
-import { e_button, e_defaultPrevented, e_preventDefault, e_target, hasHandler, off, on, signal, signalDOMEvent } from "../util/event"
-import { dragAndDrop } from "../util/feature_detection"
-import { bind, countColumn, findColumn, sel_mouse } from "../util/misc"
-import { addModifierNames } from "../input/keymap"
-import { Pass } from "../util/misc"
+import { delayBlurEvent, ensureFocus } from "../display/focus.js"
+import { operation } from "../display/operations.js"
+import { visibleLines } from "../display/update_lines.js"
+import { clipPos, cmp, maxPos, minPos, Pos } from "../line/pos.js"
+import { getLine, lineAtHeight } from "../line/utils_line.js"
+import { posFromMouse } from "../measurement/position_measurement.js"
+import { eventInWidget } from "../measurement/widgets.js"
+import { normalizeSelection, Range, Selection } from "../model/selection.js"
+import { extendRange, extendSelection, replaceOneSelection, setSelection } from "../model/selection_updates.js"
+import { captureRightClick, chromeOS, ie, ie_version, mac, webkit, safari } from "../util/browser.js"
+import { getOrder, getBidiPartAt } from "../util/bidi.js"
+import { activeElt } from "../util/dom.js"
+import { e_button, e_defaultPrevented, e_preventDefault, e_target, hasHandler, off, on, signal, signalDOMEvent } from "../util/event.js"
+import { dragAndDrop } from "../util/feature_detection.js"
+import { bind, countColumn, findColumn, sel_mouse } from "../util/misc.js"
+import { addModifierNames } from "../input/keymap.js"
+import { Pass } from "../util/misc.js"
 
-import { dispatchKey } from "./key_events"
-import { commands } from "./commands"
+import { dispatchKey } from "./key_events.js"
+import { commands } from "./commands.js"
 
 const DOUBLECLICK_DELAY = 400
 
@@ -87,7 +88,7 @@ export function onMouseDown(e) {
     if (pos) extendSelection(cm.doc, pos)
     setTimeout(() => display.input.focus(), 20)
   } else if (button == 3) {
-    if (captureRightClick) onContextMenu(cm, e)
+    if (captureRightClick) cm.display.input.onContextMenu(e)
     else delayBlurEvent(cm)
   }
 }
@@ -148,8 +149,12 @@ function leftButtonStartDrag(cm, event, pos, behavior) {
   let dragEnd = operation(cm, e => {
     if (webkit) display.scroller.draggable = false
     cm.state.draggingText = false
-    off(document, "mouseup", dragEnd)
-    off(document, "mousemove", mouseMove)
+    if (cm.state.delayingBlurEvent) {
+      if (cm.hasFocus()) cm.state.delayingBlurEvent = false
+      else delayBlurEvent(cm)
+    }
+    off(display.wrapper.ownerDocument, "mouseup", dragEnd)
+    off(display.wrapper.ownerDocument, "mousemove", mouseMove)
     off(display.scroller, "dragstart", dragStart)
     off(display.scroller, "drop", dragEnd)
     if (!moved) {
@@ -157,8 +162,8 @@ function leftButtonStartDrag(cm, event, pos, behavior) {
       if (!behavior.addNew)
         extendSelection(cm.doc, pos, null, null, behavior.extend)
       // Work around unexplainable focus problem in IE9 (#2127) and Chrome (#3081)
-      if (webkit || ie && ie_version == 9)
-        setTimeout(() => {document.body.focus(); display.input.focus()}, 20)
+      if ((webkit && !safari) || ie && ie_version == 9)
+        setTimeout(() => {display.wrapper.ownerDocument.body.focus({preventScroll: true}); display.input.focus()}, 20)
       else
         display.input.focus()
     }
@@ -171,15 +176,15 @@ function leftButtonStartDrag(cm, event, pos, behavior) {
   if (webkit) display.scroller.draggable = true
   cm.state.draggingText = dragEnd
   dragEnd.copy = !behavior.moveOnDrag
-  // IE's approach to draggable
-  if (display.scroller.dragDrop) display.scroller.dragDrop()
-  on(document, "mouseup", dragEnd)
-  on(document, "mousemove", mouseMove)
+  on(display.wrapper.ownerDocument, "mouseup", dragEnd)
+  on(display.wrapper.ownerDocument, "mousemove", mouseMove)
   on(display.scroller, "dragstart", dragStart)
   on(display.scroller, "drop", dragEnd)
 
-  delayBlurEvent(cm)
+  cm.state.delayingBlurEvent = true
   setTimeout(() => display.input.focus(), 20)
+  // IE's approach to draggable
+  if (display.scroller.dragDrop) display.scroller.dragDrop()
 }
 
 function rangeForUnit(cm, pos, unit) {
@@ -192,6 +197,7 @@ function rangeForUnit(cm, pos, unit) {
 
 // Normal selection, as opposed to text dragging.
 function leftButtonSelect(cm, event, start, behavior) {
+  if (ie) delayBlurEvent(cm)
   let display = cm.display, doc = cm.doc
   e_preventDefault(event)
 
@@ -225,10 +231,10 @@ function leftButtonSelect(cm, event, start, behavior) {
     startSel = doc.sel
   } else if (ourIndex == -1) {
     ourIndex = ranges.length
-    setSelection(doc, normalizeSelection(ranges.concat([ourRange]), ourIndex),
+    setSelection(doc, normalizeSelection(cm, ranges.concat([ourRange]), ourIndex),
                  {scroll: false, origin: "*mouse"})
   } else if (ranges.length > 1 && ranges[ourIndex].empty() && behavior.unit == "char" && !behavior.extend) {
-    setSelection(doc, normalizeSelection(ranges.slice(0, ourIndex).concat(ranges.slice(ourIndex + 1)), 0),
+    setSelection(doc, normalizeSelection(cm, ranges.slice(0, ourIndex).concat(ranges.slice(ourIndex + 1)), 0),
                  {scroll: false, origin: "*mouse"})
     startSel = doc.sel
   } else {
@@ -254,7 +260,7 @@ function leftButtonSelect(cm, event, start, behavior) {
           ranges.push(new Range(Pos(line, leftPos), Pos(line, findColumn(text, right, tabSize))))
       }
       if (!ranges.length) ranges.push(new Range(start, start))
-      setSelection(doc, normalizeSelection(startSel.ranges.slice(0, ourIndex).concat(ranges), ourIndex),
+      setSelection(doc, normalizeSelection(cm, startSel.ranges.slice(0, ourIndex).concat(ranges), ourIndex),
                    {origin: "*mouse", scroll: false})
       cm.scrollIntoView(pos)
     } else {
@@ -269,8 +275,8 @@ function leftButtonSelect(cm, event, start, behavior) {
         anchor = maxPos(oldRange.to(), range.head)
       }
       let ranges = startSel.ranges.slice(0)
-      ranges[ourIndex] = new Range(clipPos(doc, anchor), head)
-      setSelection(doc, normalizeSelection(ranges, ourIndex), sel_mouse)
+      ranges[ourIndex] = bidiSimplify(cm, new Range(clipPos(doc, anchor), head))
+      setSelection(doc, normalizeSelection(cm, ranges, ourIndex), sel_mouse)
     }
   }
 
@@ -304,21 +310,58 @@ function leftButtonSelect(cm, event, start, behavior) {
   function done(e) {
     cm.state.selectingText = false
     counter = Infinity
-    e_preventDefault(e)
-    display.input.focus()
-    off(document, "mousemove", move)
-    off(document, "mouseup", up)
+    // If e is null or undefined we interpret this as someone trying
+    // to explicitly cancel the selection rather than the user
+    // letting go of the mouse button.
+    if (e) {
+      e_preventDefault(e)
+      display.input.focus()
+    }
+    off(display.wrapper.ownerDocument, "mousemove", move)
+    off(display.wrapper.ownerDocument, "mouseup", up)
     doc.history.lastSelOrigin = null
   }
 
   let move = operation(cm, e => {
-    if (!e_button(e)) done(e)
+    if (e.buttons === 0 || !e_button(e)) done(e)
     else extend(e)
   })
   let up = operation(cm, done)
   cm.state.selectingText = up
-  on(document, "mousemove", move)
-  on(document, "mouseup", up)
+  on(display.wrapper.ownerDocument, "mousemove", move)
+  on(display.wrapper.ownerDocument, "mouseup", up)
+}
+
+// Used when mouse-selecting to adjust the anchor to the proper side
+// of a bidi jump depending on the visual position of the head.
+function bidiSimplify(cm, range) {
+  let {anchor, head} = range, anchorLine = getLine(cm.doc, anchor.line)
+  if (cmp(anchor, head) == 0 && anchor.sticky == head.sticky) return range
+  let order = getOrder(anchorLine)
+  if (!order) return range
+  let index = getBidiPartAt(order, anchor.ch, anchor.sticky), part = order[index]
+  if (part.from != anchor.ch && part.to != anchor.ch) return range
+  let boundary = index + ((part.from == anchor.ch) == (part.level != 1) ? 0 : 1)
+  if (boundary == 0 || boundary == order.length) return range
+
+  // Compute the relative visual position of the head compared to the
+  // anchor (<0 is to the left, >0 to the right)
+  let leftSide
+  if (head.line != anchor.line) {
+    leftSide = (head.line - anchor.line) * (cm.doc.direction == "ltr" ? 1 : -1) > 0
+  } else {
+    let headIndex = getBidiPartAt(order, head.ch, head.sticky)
+    let dir = headIndex - index || (head.ch - anchor.ch) * (part.level == 1 ? -1 : 1)
+    if (headIndex == boundary - 1 || headIndex == boundary)
+      leftSide = dir < 0
+    else
+      leftSide = dir > 0
+  }
+
+  let usePart = order[boundary + (leftSide ? -1 : 0)]
+  let from = leftSide == (usePart.level == 1)
+  let ch = from ? usePart.from : usePart.to, sticky = from ? "after" : "before"
+  return anchor.ch == ch && anchor.sticky == sticky ? range : new Range(new Pos(anchor.line, ch, sticky), head)
 }
 
 
@@ -326,8 +369,13 @@ function leftButtonSelect(cm, event, start, behavior) {
 // handlers for the corresponding event.
 function gutterEvent(cm, e, type, prevent) {
   let mX, mY
-  try { mX = e.clientX; mY = e.clientY }
-  catch(e) { return false }
+  if (e.touches) {
+    mX = e.touches[0].clientX
+    mY = e.touches[0].clientY
+  } else {
+    try { mX = e.clientX; mY = e.clientY }
+    catch(e) { return false }
+  }
   if (mX >= Math.floor(cm.display.gutters.getBoundingClientRect().right)) return false
   if (prevent) e_preventDefault(e)
 
@@ -337,12 +385,12 @@ function gutterEvent(cm, e, type, prevent) {
   if (mY > lineBox.bottom || !hasHandler(cm, type)) return e_defaultPrevented(e)
   mY -= lineBox.top - display.viewOffset
 
-  for (let i = 0; i < cm.options.gutters.length; ++i) {
+  for (let i = 0; i < cm.display.gutterSpecs.length; ++i) {
     let g = display.gutters.childNodes[i]
     if (g && g.getBoundingClientRect().right >= mX) {
       let line = lineAtHeight(cm.doc, mY)
-      let gutter = cm.options.gutters[i]
-      signal(cm, type, cm, line, gutter, e)
+      let gutter = cm.display.gutterSpecs[i]
+      signal(cm, type, cm, line, gutter.className, e)
       return e_defaultPrevented(e)
     }
   }
@@ -360,7 +408,7 @@ export function clickInGutter(cm, e) {
 export function onContextMenu(cm, e) {
   if (eventInWidget(cm.display, e) || contextMenuInGutter(cm, e)) return
   if (signalDOMEvent(cm, e, "contextmenu")) return
-  cm.display.input.onContextMenu(e)
+  if (!captureRightClick) cm.display.input.onContextMenu(e)
 }
 
 function contextMenuInGutter(cm, e) {

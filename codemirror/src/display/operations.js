@@ -1,16 +1,16 @@
-import { clipPos } from "../line/pos"
-import { findMaxLine } from "../line/spans"
-import { displayWidth, measureChar, scrollGap } from "../measurement/position_measurement"
-import { signal } from "../util/event"
-import { activeElt } from "../util/dom"
-import { finishOperation, pushOperation } from "../util/operation_group"
+import { clipPos } from "../line/pos.js"
+import { findMaxLine } from "../line/spans.js"
+import { displayWidth, measureChar, scrollGap } from "../measurement/position_measurement.js"
+import { signal } from "../util/event.js"
+import { activeElt } from "../util/dom.js"
+import { finishOperation, pushOperation } from "../util/operation_group.js"
 
-import { ensureFocus } from "./focus"
-import { measureForScrollbars, updateScrollbars } from "./scrollbars"
-import { restartBlink } from "./selection"
-import { maybeScrollWindow, scrollPosIntoView, setScrollLeft, setScrollTop } from "./scrolling"
-import { DisplayUpdate, maybeClipScrollbars, postUpdateDisplay, setDocumentHeight, updateDisplayIfNeeded } from "./update_display"
-import { updateHeightsInViewport } from "./update_lines"
+import { ensureFocus } from "./focus.js"
+import { measureForScrollbars, updateScrollbars } from "./scrollbars.js"
+import { restartBlink } from "./selection.js"
+import { maybeScrollWindow, scrollPosIntoView, setScrollLeft, setScrollTop } from "./scrolling.js"
+import { DisplayUpdate, maybeClipScrollbars, postUpdateDisplay, setDocumentHeight, updateDisplayIfNeeded } from "./update_display.js"
+import { updateHeightsInViewport } from "./update_lines.js"
 
 // Operations are used to wrap a series of changes to the editor
 // state in such a way that each change won't have to update the
@@ -26,7 +26,7 @@ export function startOperation(cm) {
     viewChanged: false,      // Flag that indicates that lines might need to be redrawn
     startHeight: cm.doc.height, // Used to detect need to update scrollbar
     forceUpdate: false,      // Used to force a redraw
-    updateInput: null,       // Whether to reset the input textarea
+    updateInput: 0,       // Whether to reset the input textarea
     typing: false,           // Whether this reset should be careful to leave existing text (for compositing)
     changeObjs: null,        // Accumulated changes, for firing change events
     cursorActivityHandlers: null, // Set of handlers to fire cursorActivity on
@@ -36,7 +36,8 @@ export function startOperation(cm) {
     scrollLeft: null, scrollTop: null, // Intermediate scroll position, not pushed to DOM yet
     scrollToPos: null,       // Used to scroll to a specific position
     focus: false,
-    id: ++nextOpId           // Unique ID
+    id: ++nextOpId,          // Unique ID
+    markArrays: null         // Used by addMarkedSpan
   }
   pushOperation(cm.curOp)
 }
@@ -44,7 +45,7 @@ export function startOperation(cm) {
 // Finish an operation, updating the display and signalling delayed events
 export function endOperation(cm) {
   let op = cm.curOp
-  finishOperation(op, group => {
+  if (op) finishOperation(op, group => {
     for (let i = 0; i < group.ops.length; i++)
       group.ops[i].cm.curOp = null
     endOperations(group)
@@ -102,7 +103,7 @@ function endOperation_R2(op) {
   }
 
   if (op.updatedDisplay || op.selectionChanged)
-    op.preparedSelection = display.input.prepareSelection(op.focus)
+    op.preparedSelection = display.input.prepareSelection()
 }
 
 function endOperation_W2(op) {
@@ -115,7 +116,7 @@ function endOperation_W2(op) {
     cm.display.maxLineChanged = false
   }
 
-  let takeFocus = op.focus && op.focus == activeElt() && (!document.hasFocus || document.hasFocus())
+  let takeFocus = op.focus && op.focus == activeElt()
   if (op.preparedSelection)
     cm.display.input.showSelection(op.preparedSelection, takeFocus)
   if (op.updatedDisplay || op.startHeight != cm.doc.height)

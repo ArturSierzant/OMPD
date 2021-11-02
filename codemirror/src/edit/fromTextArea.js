@@ -1,7 +1,7 @@
-import { CodeMirror } from "./CodeMirror"
-import { activeElt } from "../util/dom"
-import { off, on } from "../util/event"
-import { copyObj } from "../util/misc"
+import { CodeMirror } from "./CodeMirror.js"
+import { activeElt } from "../util/dom.js"
+import { off, on } from "../util/event.js"
+import { copyObj } from "../util/misc.js"
 
 export function fromTextArea(textarea, options) {
   options = options ? copyObj(options) : {}
@@ -48,7 +48,7 @@ export function fromTextArea(textarea, options) {
       textarea.style.display = ""
       if (textarea.form) {
         off(textarea.form, "submit", save)
-        if (typeof textarea.form.submit == "function")
+        if (!options.leaveSubmitMethodAlone && typeof textarea.form.submit == "function")
           textarea.form.submit = realSubmit
       }
     }

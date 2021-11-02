@@ -113,6 +113,17 @@ define('NJB_HOME_DIR', str_replace('\\', '/', $temp) . '/');
 
 require_once(NJB_HOME_DIR . 'include/config.inc.php');
 
+// ensure if $cfg['media_dir'] ends with / or \
+if (substr($cfg['media_dir'], -1) != '/' && substr($cfg['media_dir'], -1) != chr(92)) {
+    if (strpos($cfg['media_dir'], chr(92)) !== false) {
+      $cfg['media_dir'] .= chr(92);
+    }
+    else {
+      $cfg['media_dir'] .= '/';
+    }
+}
+
+
 if ($cfg['timezone'] != '') {
     date_default_timezone_set($cfg['timezone']);
 }

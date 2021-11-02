@@ -1,13 +1,13 @@
-import { loadMode } from "../display/mode_state"
-import { runInOp } from "../display/operations"
-import { regChange } from "../display/view_tracking"
-import { Line, updateLine } from "../line/line_data"
-import { findMaxLine } from "../line/spans"
-import { getLine } from "../line/utils_line"
-import { estimateLineHeights } from "../measurement/position_measurement"
-import { addClass, rmClass } from "../util/dom"
-import { lst } from "../util/misc"
-import { signalLater } from "../util/operation_group"
+import { loadMode } from "../display/mode_state.js"
+import { runInOp } from "../display/operations.js"
+import { regChange } from "../display/view_tracking.js"
+import { Line, updateLine } from "../line/line_data.js"
+import { findMaxLine } from "../line/spans.js"
+import { getLine } from "../line/utils_line.js"
+import { estimateLineHeights } from "../measurement/position_measurement.js"
+import { addClass, rmClass } from "../util/dom.js"
+import { lst } from "../util/misc.js"
+import { signalLater } from "../util/operation_group.js"
 
 // DOCUMENT DATA STRUCTURE
 
@@ -94,6 +94,7 @@ export function attachDoc(cm, doc) {
   estimateLineHeights(cm)
   loadMode(cm)
   setDirectionClass(cm)
+  cm.options.direction = doc.direction
   if (!cm.options.lineWrapping) findMaxLine(cm)
   cm.options.mode = doc.modeOption
   regChange(cm)

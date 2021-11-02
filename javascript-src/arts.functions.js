@@ -488,6 +488,7 @@ function resizeImgContainer() {
     if ($('#image_container').css('height')) {
       diff = $('#image_container').css('height').replace('px','') - $('#image_in').css('height').replace('px','');
       $('#pl-track-info-narrow').css('position','relative');
+      //$('#pl-track-info-narrow').css('lineHeight', diff/3 + 'px');
       $('#pl-track-info-narrow').css('top','-' + diff/2 + 'px');
     }
 		

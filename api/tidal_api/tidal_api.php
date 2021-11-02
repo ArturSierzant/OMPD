@@ -383,28 +383,28 @@ class TidalAPI {
   }
 
   function getHomePage() {
-    //curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " pages/home?locale=en_US&deviceType=DESKTOP&countryCode=" . $this->countryCode);
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " pages/home?locale=en_US&deviceType=BROWSER&countryCode=" . $this->countryCode);
+    //curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/home?locale=en_US&deviceType=DESKTOP&countryCode=" . $this->countryCode);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/home?locale=en_US&deviceType=BROWSER&countryCode=" . $this->countryCode);
     return $this->request();
   }
 
   function getUserClients() {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " users/" . $this->userId . "/clients?countryCode=" . $this->countryCode);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "users/" . $this->userId . "/clients?countryCode=" . $this->countryCode);
     return $this->request();
   }
 
   function getUserSubscription() {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " users/" . $this->userId . "/subscription?countryCode=" . $this->countryCode);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "users/" . $this->userId . "/subscription?countryCode=" . $this->countryCode);
     return $this->request();
   }
 
   function getUserFeedActivities() {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_V2_URL . " feed/activities/?userId=" . $this->userId . "&countryCode=" . $this->countryCode . '&locale=en-us');
+    curl_setopt($this->curl, CURLOPT_URL, self::API_V2_URL . "feed/activities/?userId=" . $this->userId . "&countryCode=" . $this->countryCode . '&locale=en-us');
     return $this->request();
   }
 
   function getExplorePage() {
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . " pages/explore?locale=en_US&deviceType=BROWSER&countryCode=" . $this->countryCode);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/explore?locale=en_US&deviceType=BROWSER&countryCode=" . $this->countryCode);
     return $this->request();
   }
 

@@ -43,9 +43,10 @@ $quality	= get('quality') == 'hq' ? 'hq' : 'lq';
 //$quality	= 'hq';
 $image	 	= get('image');
 $image_path	= get('image_path');
+$image_url	= get('image_url');
 $mime	 	= get('mime');
 
-if		(isset($image_id))		image($image_id, $quality, $track_id);
+if		(isset($image_id))		image($image_id, $quality, $track_id, $image_url);
 elseif	(isset($image))			resampleImage($image);
 elseif	(isset($image_path))	streamImage($image_path, $mime);
 elseif	($cfg['image_share'])	shareImage();
@@ -57,7 +58,7 @@ exit();
 //  +------------------------------------------------------------------------+
 //  | Image                                                                  |
 //  +------------------------------------------------------------------------+
-function image($image_id, $quality, $track_id) {
+function image($image_id, $quality, $track_id, $image_url) {
 	global $cfg, $db, $t;
 	require_once('getid3/getid3/getid3.php');
 	/* $query  = mysqli_query($db,'SELECT image, image_front FROM bitmap WHERE image_id = "' . mysqli_real_escape_string($db,$image_id) . '" LIMIT 1');
@@ -74,6 +75,13 @@ function image($image_id, $quality, $track_id) {
 		
 		$rows = mysqli_fetch_assoc($picQuery);
 		$pic = $rows['cover'];
+    if (!$pic) {
+      $album = $t->getAlbum($album_id);
+      $pic = $album['cover'];
+      if (!isset($pic)) {
+        imageError();
+      }
+    }
 		
 		header('Cache-Control: max-age=31536000');
 		if ($quality == 'hq') {
@@ -97,7 +105,12 @@ function image($image_id, $quality, $track_id) {
 	}
 	elseif (isHra($track_id) || isHra($image_id)) {
 		header('Cache-Control: max-age=31536000');
-		$data = file_get_contents($image_id);
+    if ($image_url) {
+      $data = file_get_contents($image_url);
+    }
+    else {
+      $data = file_get_contents($image_id);
+    }
 		if ($data) {
 			streamData($data, false, false, '"never_expire"');
 		}

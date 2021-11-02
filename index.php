@@ -1707,7 +1707,8 @@ if ($cfg['show_last_played'] == true) {
 		var request = $.ajax({  
 		url: "ajax-last-played.php",  
 		type: "POST",
-		data: { tileSize : size },
+		data: { tileSize : size,
+            user_id : <?php echo $cfg['user_id']; ?>},
 		dataType: "html"
 		}); 
 
@@ -2507,14 +2508,17 @@ function viewRecentlyPlayed() {
 	}
 	$page = (get('page') ? get('page') : 1);
 	$max_item_per_page = $cfg['max_items_per_page'];
-	
+	$uid = $cfg['user_id'];
 	if ($type == 'day') {
-		$query_rp = mysqli_query($db, '
+		$query_rp = mysqli_query($db, "
 		SELECT album_id, time FROM counter
-		ORDER BY time DESC' );
+    WHERE user_id = $uid
+		ORDER BY time DESC");
 	}
 	else {
-    $query_rp = mysqli_query($db, 'SELECT album_id, max(time) as time FROM counter GROUP BY album_id ORDER BY max(time) DESC' );
+    $query_rp = mysqli_query($db, "SELECT album_id, max(time) as time FROM counter
+    WHERE user_id = $uid
+    GROUP BY album_id ORDER BY max(time) DESC");
 	}
 	$album_multidisc = array();
 	while ( $album = mysqli_fetch_assoc ($query_rp)) {

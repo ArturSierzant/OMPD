@@ -1,23 +1,23 @@
-import CodeMirror from "../edit/CodeMirror"
-import { docMethodOp } from "../display/operations"
-import { Line } from "../line/line_data"
-import { clipPos, clipPosArray, Pos } from "../line/pos"
-import { visualLine } from "../line/spans"
-import { getBetween, getLine, getLines, isLine, lineNo } from "../line/utils_line"
-import { classTest } from "../util/dom"
-import { splitLinesAuto } from "../util/feature_detection"
-import { createObj, map, isEmpty, sel_dontScroll } from "../util/misc"
-import { ensureCursorVisible, scrollToCoords } from "../display/scrolling"
+import CodeMirror from "../edit/CodeMirror.js"
+import { docMethodOp } from "../display/operations.js"
+import { Line } from "../line/line_data.js"
+import { clipPos, clipPosArray, Pos } from "../line/pos.js"
+import { visualLine } from "../line/spans.js"
+import { getBetween, getLine, getLines, isLine, lineNo } from "../line/utils_line.js"
+import { classTest } from "../util/dom.js"
+import { splitLinesAuto } from "../util/feature_detection.js"
+import { createObj, map, isEmpty, sel_dontScroll } from "../util/misc.js"
+import { ensureCursorVisible, scrollToCoords } from "../display/scrolling.js"
 
-import { changeLine, makeChange, makeChangeFromHistory, replaceRange } from "./changes"
-import { computeReplacedSel } from "./change_measurement"
-import { BranchChunk, LeafChunk } from "./chunk"
-import { directionChanged, linkedDocs, updateDoc } from "./document_data"
-import { copyHistoryArray, History } from "./history"
-import { addLineWidget } from "./line_widget"
-import { copySharedMarkers, detachSharedMarkers, findSharedMarkers, markText } from "./mark_text"
-import { normalizeSelection, Range, simpleSelection } from "./selection"
-import { extendSelection, extendSelections, setSelection, setSelectionReplaceHistory, setSimpleSelection } from "./selection_updates"
+import { changeLine, makeChange, makeChangeFromHistory, replaceRange } from "./changes.js"
+import { computeReplacedSel } from "./change_measurement.js"
+import { BranchChunk, LeafChunk } from "./chunk.js"
+import { directionChanged, linkedDocs, updateDoc } from "./document_data.js"
+import { copyHistoryArray, History } from "./history.js"
+import { addLineWidget } from "./line_widget.js"
+import { copySharedMarkers, detachSharedMarkers, findSharedMarkers, markText } from "./mark_text.js"
+import { normalizeSelection, Range, simpleSelection } from "./selection.js"
+import { extendSelection, extendSelections, setSelection, setSelectionReplaceHistory, setSimpleSelection } from "./selection_updates.js"
 
 let nextDocId = 0
 let Doc = function(text, mode, firstLine, lineSep, direction) {
@@ -86,6 +86,7 @@ Doc.prototype = createObj(BranchChunk.prototype, {
   getRange: function(from, to, lineSep) {
     let lines = getBetween(this, clipPos(this, from), clipPos(this, to))
     if (lineSep === false) return lines
+    if (lineSep === '') return lines.join('')
     return lines.join(lineSep || this.lineSeparator())
   },
 
@@ -137,14 +138,14 @@ Doc.prototype = createObj(BranchChunk.prototype, {
     let out = []
     for (let i = 0; i < ranges.length; i++)
       out[i] = new Range(clipPos(this, ranges[i].anchor),
-                         clipPos(this, ranges[i].head))
+                         clipPos(this, ranges[i].head || ranges[i].anchor))
     if (primary == null) primary = Math.min(ranges.length - 1, this.sel.primIndex)
-    setSelection(this, normalizeSelection(out, primary), options)
+    setSelection(this, normalizeSelection(this.cm, out, primary), options)
   }),
   addSelection: docMethodOp(function(anchor, head, options) {
     let ranges = this.sel.ranges.slice(0)
     ranges.push(new Range(clipPos(this, anchor), clipPos(this, head || anchor)))
-    setSelection(this, normalizeSelection(ranges, ranges.length - 1), options)
+    setSelection(this, normalizeSelection(this.cm, ranges, ranges.length - 1), options)
   }),
 
   getSelection: function(lineSep) {
@@ -197,7 +198,10 @@ Doc.prototype = createObj(BranchChunk.prototype, {
     for (let i = 0; i < hist.undone.length; i++) if (!hist.undone[i].ranges) ++undone
     return {undo: done, redo: undone}
   },
-  clearHistory: function() {this.history = new History(this.history.maxGeneration)},
+  clearHistory: function() {
+    this.history = new History(this.history)
+    linkedDocs(this, doc => doc.history = this.history, true)
+  },
 
   markClean: function() {
     this.cleanGeneration = this.changeGeneration(true)
@@ -216,7 +220,7 @@ Doc.prototype = createObj(BranchChunk.prototype, {
             undone: copyHistoryArray(this.history.undone)}
   },
   setHistory: function(histData) {
-    let hist = this.history = new History(this.history.maxGeneration)
+    let hist = this.history = new History(this.history)
     hist.done = copyHistoryArray(histData.done.slice(0), null, true)
     hist.undone = copyHistoryArray(histData.undone.slice(0), null, true)
   },

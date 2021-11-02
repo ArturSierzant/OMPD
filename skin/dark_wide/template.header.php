@@ -625,7 +625,7 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id, player_h
 	</td>
 	<?php if (mysqli_num_rows($query2)>1) { ?>
 	<td class="menu_top menu_top_config" id="playerProfile" onclick='javascript: toggleChangePlayer();'>
-		<div><i id="iconPlayerToggler" class="fa fa-music fa-lg"></i></div>
+		<div><i id="iconPlayerToggler" class="fa fa-hdd-o fa-lg"></i></div>
 		<div id="activePlayer"><?php echo $player1; ?></div>
 	</td>
 	<?php }; ?>

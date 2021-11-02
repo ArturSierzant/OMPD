@@ -1,14 +1,14 @@
-import { lst } from "./misc"
+import { lst } from "./misc.js"
 
 // BIDI HELPERS
 
 export function iterateBidiSections(order, from, to, f) {
-  if (!order) return f(from, to, "ltr")
+  if (!order) return f(from, to, "ltr", 0)
   let found = false
   for (let i = 0; i < order.length; ++i) {
     let part = order[i]
     if (part.from < to && part.to > from || from == to && part.to == from) {
-      f(Math.max(part.from, from), Math.min(part.to, to), part.level == 1 ? "rtl" : "ltr")
+      f(Math.max(part.from, from), Math.min(part.to, to), part.level == 1 ? "rtl" : "ltr", i)
       found = true
     }
   }
@@ -175,27 +175,30 @@ let bidiOrdering = (function() {
         for (++i; i < len && countsAsLeft.test(types[i]); ++i) {}
         order.push(new BidiSpan(0, start, i))
       } else {
-        let pos = i, at = order.length
+        let pos = i, at = order.length, isRTL = direction == "rtl" ? 1 : 0
         for (++i; i < len && types[i] != "L"; ++i) {}
         for (let j = pos; j < i;) {
           if (countsAsNum.test(types[j])) {
-            if (pos < j) order.splice(at, 0, new BidiSpan(1, pos, j))
+            if (pos < j) { order.splice(at, 0, new BidiSpan(1, pos, j)); at += isRTL }
             let nstart = j
             for (++j; j < i && countsAsNum.test(types[j]); ++j) {}
             order.splice(at, 0, new BidiSpan(2, nstart, j))
+            at += isRTL
             pos = j
           } else ++j
         }
         if (pos < i) order.splice(at, 0, new BidiSpan(1, pos, i))
       }
     }
-    if (order[0].level == 1 && (m = str.match(/^\s+/))) {
-      order[0].from = m[0].length
-      order.unshift(new BidiSpan(0, 0, m[0].length))
-    }
-    if (lst(order).level == 1 && (m = str.match(/\s+$/))) {
-      lst(order).to -= m[0].length
-      order.push(new BidiSpan(0, len - m[0].length, len))
+    if (direction == "ltr") {
+      if (order[0].level == 1 && (m = str.match(/^\s+/))) {
+        order[0].from = m[0].length
+        order.unshift(new BidiSpan(0, 0, m[0].length))
+      }
+      if (lst(order).level == 1 && (m = str.match(/\s+$/))) {
+        lst(order).to -= m[0].length
+        order.push(new BidiSpan(0, len - m[0].length, len))
+      }
     }
 
     return direction == "rtl" ? order.reverse() : order

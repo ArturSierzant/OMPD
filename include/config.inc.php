@@ -72,9 +72,9 @@ $cfg['hra_lang'] = "en";
 
 
 //  +------------------------------------------------------------------------+
-//  | Album format badge settings                                            |
+//  | Album format badge and album popularity bar settings                   |
 //  +------------------------------------------------------------------------+
-//  | Show album format badge and popularity on album cover                  |
+//  | Show album format badge and popularity bar on album cover              |
 //  +------------------------------------------------------------------------+
 
 $cfg['show_album_format'] = false; 
@@ -98,6 +98,7 @@ $cfg['fix_tidal_freezes'] = false;
 //  | Search lyrics in Musixmatch                                            |
 //  +------------------------------------------------------------------------+
 //  | Get free api key from https://developer.musixmatch.com/plans           |
+//  | 'Free' plan is enough.                                                 |
 //  +------------------------------------------------------------------------+
 
 $cfg['musixmatch_api_key'] = "";
@@ -566,7 +567,7 @@ $cfg['separator'][] = 	" Four";
 $cfg['separator'][] = 	" II";
 $cfg['separator'][] = 	" III";
 $cfg['separator'][] = 	" IV";
-$cfg['separator'][] = 	" V";
+//$cfg['separator'][] = 	" V";
 $cfg['separator'][] = 	" VI";
 $cfg['separator'][] = 	" VII";
 $cfg['separator'][] = 	" VIII";

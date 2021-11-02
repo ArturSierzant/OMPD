@@ -110,7 +110,7 @@ function config() {
 	if ($cfg['access_playlist'] || $cfg['access_play'] || $cfg['access_add'] || $cfg['access_admin']) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td class="nowrap"><a href="config.php?action=playerProfile"><i class="fa fa-music fa-fw icon-small"></i>Player&nbsp;profile</a></td>
+	<td class="nowrap"><a href="config.php?action=playerProfile"><i class="fa fa-hdd-o fa-fw icon-small"></i>Player&nbsp;profile</a></td>
 	<td></td>
 	<td><?php echo html($cfg['player_name']); ?></td>
 	<td></td>
@@ -372,7 +372,7 @@ function playerProfile() {
 		$check = ($player['player_id'] == $default['player_id']) ? '<i class="fa fa-check-circle-o fa-fw icon-small"></i>' : '<i class="fa fa-circle-o fa-fw icon-small"></i>'; ?>
 <tr class="<?php if ($player['player_id'] == $cfg['player_id']) echo 'select'; else echo ($i & 1) ? 'even' : 'odd'; $i++; ?>">
 	<td class="space"></td>
-	<td><a href="config.php?action=setPlayerProfile&amp;player_id=<?php echo $player['player_id']; ?>&amp;sign=<?php echo $cfg['sign']; ?>"><i class="fa fa-music fa-fw icon-small"></i><?php echo html($player['player_name']); ?></a>
+	<td><a href="config.php?action=setPlayerProfile&amp;player_id=<?php echo $player['player_id']; ?>&amp;sign=<?php echo $cfg['sign']; ?>"><i class="fa fa-hdd-o fa-fw icon-small"></i><?php echo html($player['player_name']); ?></a>
 	</td>
 	<td><?php if ($cfg['access_admin']) echo '<a href="config.php?action=setDefaultPlayerProfile&amp;player_id=' . $player['player_id'] . '&amp;sign=' . $cfg['sign'] . '" onMouseOver="return overlib(\'Set default player profile\');" onMouseOut="return nd();">' . $check . '</a>'; ?></td>
 	<td><?php if ($cfg['access_admin']) echo '<a href="config.php?action=deletePlayerProfile&amp;player_id=' . $player['player_id'] . '&amp;sign=' . $cfg['sign'] . '" onClick="return confirm(\'Are you sure you want to delete player profile: ' . addslashes(html($player['player_name'])) . '?\');" onMouseOver="return overlib(\'Delete\');" onMouseOut="return nd();"><i class="fa fa-times-circle fa-fw icon-small"></i></a>'; ?></td>

@@ -1,9 +1,9 @@
-import { countColumn } from "../util/misc"
-import { copyState, innerMode, startState } from "../modes"
-import StringStream from "../util/StringStream"
+import { countColumn } from "../util/misc.js"
+import { copyState, innerMode, startState } from "../modes.js"
+import StringStream from "../util/StringStream.js"
 
-import { getLine, lineNo } from "./utils_line"
-import { clipPos } from "./pos"
+import { getLine, lineNo } from "./utils_line.js"
+import { clipPos } from "./pos.js"
 
 class SavedContext {
   constructor(state, lookAhead) {
@@ -18,12 +18,23 @@ class Context {
     this.doc = doc
     this.line = line
     this.maxLookAhead = lookAhead || 0
+    this.baseTokens = null
+    this.baseTokenPos = 1
   }
 
   lookAhead(n) {
     let line = this.doc.getLine(this.line + n)
     if (line != null && n > this.maxLookAhead) this.maxLookAhead = n
     return line
+  }
+
+  baseToken(n) {
+    if (!this.baseTokens) return null
+    while (this.baseTokens[this.baseTokenPos] <= n)
+      this.baseTokenPos += 2
+    let type = this.baseTokens[this.baseTokenPos + 1]
+    return {type: type && type.replace(/( |^)overlay .*/, ""),
+            size: this.baseTokens[this.baseTokenPos] - n}
   }
 
   nextLine() {
@@ -60,6 +71,7 @@ export function highlightLine(cm, line, context, forceToEnd) {
 
   // Run overlays, adjust style array.
   for (let o = 0; o < cm.state.overlays.length; ++o) {
+    context.baseTokens = st
     let overlay = cm.state.overlays[o], i = 1, at = 0
     context.state = true
     runMode(cm, line.text, overlay.mode, context, (end, style) => {
@@ -83,8 +95,10 @@ export function highlightLine(cm, line, context, forceToEnd) {
         }
       }
     }, lineClasses)
+    context.state = state
+    context.baseTokens = null
+    context.baseTokenPos = 1
   }
-  context.state = state
 
   return {styles: st, classes: lineClasses.bgClass || lineClasses.textClass ? lineClasses : null}
 }
@@ -143,7 +157,7 @@ function callBlankLine(mode, state) {
   if (inner.mode.blankLine) return inner.mode.blankLine(inner.state)
 }
 
-export function readToken(mode, stream, state, inner) {
+function readToken(mode, stream, state, inner) {
   for (let i = 0; i < 10; i++) {
     if (inner) inner[0] = innerMode(mode, state).mode
     let style = mode.token(stream, state)
@@ -184,7 +198,7 @@ function extractLineClasses(type, output) {
     let prop = lineClass[1] ? "bgClass" : "textClass"
     if (output[prop] == null)
       output[prop] = lineClass[2]
-    else if (!(new RegExp("(?:^|\s)" + lineClass[2] + "(?:$|\s)")).test(output[prop]))
+    else if (!(new RegExp("(?:^|\\s)" + lineClass[2] + "(?:$|\\s)")).test(output[prop]))
       output[prop] += " " + lineClass[2]
   }
   return type

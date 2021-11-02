@@ -1,19 +1,20 @@
-import { sawCollapsedSpans } from "../line/saw_special_spans"
-import { heightAtLine, visualLineEndNo, visualLineNo } from "../line/spans"
-import { getLine, lineNumberFor } from "../line/utils_line"
-import { displayHeight, displayWidth, getDimensions, paddingVert, scrollGap } from "../measurement/position_measurement"
-import { mac, webkit } from "../util/browser"
-import { activeElt, removeChildren, contains } from "../util/dom"
-import { hasHandler, signal } from "../util/event"
-import { indexOf } from "../util/misc"
+import { sawCollapsedSpans } from "../line/saw_special_spans.js"
+import { heightAtLine, visualLineEndNo, visualLineNo } from "../line/spans.js"
+import { getLine, lineNumberFor } from "../line/utils_line.js"
+import { displayHeight, displayWidth, getDimensions, paddingVert, scrollGap } from "../measurement/position_measurement.js"
+import { mac, webkit } from "../util/browser.js"
+import { activeElt, removeChildren, contains } from "../util/dom.js"
+import { hasHandler, signal } from "../util/event.js"
+import { signalLater } from "../util/operation_group.js"
+import { indexOf } from "../util/misc.js"
 
-import { buildLineElement, updateLineForChanges } from "./update_line"
-import { startWorker } from "./highlight_worker"
-import { maybeUpdateLineNumberWidth } from "./line_numbers"
-import { measureForScrollbars, updateScrollbars } from "./scrollbars"
-import { updateSelection } from "./selection"
-import { updateHeightsInViewport, visibleLines } from "./update_lines"
-import { adjustView, countDirtyView, resetView } from "./view_tracking"
+import { buildLineElement, updateLineForChanges } from "./update_line.js"
+import { startWorker } from "./highlight_worker.js"
+import { maybeUpdateLineNumberWidth } from "./line_numbers.js"
+import { measureForScrollbars, updateScrollbars } from "./scrollbars.js"
+import { updateSelection } from "./selection.js"
+import { updateHeightsInViewport, visibleLines } from "./update_lines.js"
+import { adjustView, countDirtyView, resetView } from "./view_tracking.js"
 
 // DISPLAY DRAWING
 
@@ -74,7 +75,8 @@ function selectionSnapshot(cm) {
 function restoreSelection(snapshot) {
   if (!snapshot || !snapshot.activeElt || snapshot.activeElt == activeElt()) return
   snapshot.activeElt.focus()
-  if (snapshot.anchorNode && contains(document.body, snapshot.anchorNode) && contains(document.body, snapshot.focusNode)) {
+  if (!/^(INPUT|TEXTAREA)$/.test(snapshot.activeElt.nodeName) &&
+      snapshot.anchorNode && contains(document.body, snapshot.anchorNode) && contains(document.body, snapshot.focusNode)) {
     let sel = window.getSelection(), range = document.createRange()
     range.setEnd(snapshot.anchorNode, snapshot.anchorOffset)
     range.collapse(false)
@@ -172,6 +174,8 @@ export function postUpdateDisplay(cm, update) {
       update.visible = visibleLines(cm.display, cm.doc, viewport)
       if (update.visible.from >= cm.display.viewFrom && update.visible.to <= cm.display.viewTo)
         break
+    } else if (first) {
+      update.visible = visibleLines(cm.display, cm.doc, viewport)
     }
     if (!updateDisplayIfNeeded(cm, update)) break
     updateHeightsInViewport(cm)
@@ -248,9 +252,11 @@ function patchDisplay(cm, updateNumbersFrom, dims) {
   while (cur) cur = rm(cur)
 }
 
-export function updateGutterSpace(cm) {
-  let width = cm.display.gutters.offsetWidth
-  cm.display.sizer.style.marginLeft = width + "px"
+export function updateGutterSpace(display) {
+  let width = display.gutters.offsetWidth
+  display.sizer.style.marginLeft = width + "px"
+  // Send an event to consumers responding to changes in gutter width.
+  signalLater(display, "gutterChanged", display)
 }
 
 export function setDocumentHeight(cm, measure) {

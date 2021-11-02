@@ -1,5 +1,6 @@
 {
-  "background_color": "black",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "description": "Free, opensource mpd client",
   "display": "standalone",
   "icons": [

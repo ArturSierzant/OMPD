@@ -29,10 +29,28 @@ export function countColumn(string, end, tabSize, startIndex, startValue) {
 }
 
 export class Delayed {
-  constructor() {this.id = null}
+  constructor() {
+    this.id = null
+    this.f = null
+    this.time = 0
+    this.handler = bind(this.onTimeout, this)
+  }
+  onTimeout(self) {
+    self.id = 0
+    if (self.time <= +new Date) {
+      self.f()
+    } else {
+      setTimeout(self.handler, self.time - +new Date)
+    }
+  }
   set(ms, f) {
-    clearTimeout(this.id)
-    this.id = setTimeout(f, ms)
+    this.f = f
+    const time = +new Date + ms
+    if (!this.id || time < this.time) {
+      clearTimeout(this.id)
+      this.id = setTimeout(this.handler, ms)
+      this.time = time
+    }
   }
 }
 
@@ -43,7 +61,7 @@ export function indexOf(array, elt) {
 }
 
 // Number of pixels added to scroller and sizer to hide scrollbar
-export let scrollerGap = 30
+export let scrollerGap = 50
 
 // Returned or thrown by various protocols to signal 'I'm not
 // handling this'.
@@ -134,12 +152,17 @@ export function skipExtendingChars(str, pos, dir) {
 }
 
 // Returns the value from the range [`from`; `to`] that satisfies
-// `pred` and is closest to `from`. Assumes that at least `to` satisfies `pred`.
+// `pred` and is closest to `from`. Assumes that at least `to`
+// satisfies `pred`. Supports `from` being greater than `to`.
 export function findFirst(pred, from, to) {
+  // At any point we are certain `to` satisfies `pred`, don't know
+  // whether `from` does.
+  let dir = from > to ? -1 : 1
   for (;;) {
-    if (Math.abs(from - to) <= 1) return pred(from) ? from : to
-    let mid = Math.floor((from + to) / 2)
+    if (from == to) return from
+    let midF = (from + to) / 2, mid = dir < 0 ? Math.ceil(midF) : Math.floor(midF)
+    if (mid == from) return pred(mid) ? from : to
     if (pred(mid)) to = mid
-    else from = mid
+    else from = mid + dir
   }
 }

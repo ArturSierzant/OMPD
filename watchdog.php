@@ -36,11 +36,16 @@ $time2wait = 500000;
 cliLog('----------------------------------------------');
 cliLog('Watchdog for track_id: ' . $track_id);
 cliLog('Time: ' . time());
+cliLog('host: ' . $host);
+cliLog('port: ' . $port);
+
+//usleep(100000);
 
 $status = mpd("status",$host,$port);
 cliLog('state: ' . $status['state']);
 if ($status['state'] != 'play') {
   cliLog('State <> "play" -> exiting function');
+  cliLog('Time: ' . time());
   cliLog('END of watchdog for track_id: ' . $track_id);
   cliLog('----------------------------------------------');
   return;
@@ -56,7 +61,9 @@ $maxCounter = 300; //300 * 100000us = 30s (long because of mpd's buffering befor
 
 while (strpos($file,$track_id) === false && $counter < $maxCounter){
   $counter++;
-  cliLog('Waiting for track to be loaded, attempt: ' . $counter);
+  if ($counter % 20 == 0) {
+    cliLog('Waiting for track to be loaded, attempt: ' . $counter);
+  }
   $song = mpd("currentsong",$host,$port);
   $file = $song['file'];
   //cliLog('  Track on mpd: ' . $file);
@@ -65,7 +72,7 @@ while (strpos($file,$track_id) === false && $counter < $maxCounter){
 
 cliLog('End of waiting:');
 cliLog('  Track: ' . $file);
-cliLog('  Counter: ' . $counter);
+cliLog('  Attempts counter: ' . $counter);
 
 cliLog('Checking if stream is playing...');
 $status = mpd("status",$host,$port);
@@ -127,14 +134,26 @@ function mpd($command,$player_host="",$player_port="") {
   $time_start = microtime(true);
 	
 	$soket = @fsockopen($player_host, $player_port, $error_no, $error_string, $timeout);
-	if (!$soket)
-		return false; 
+  cliLog("fsockopen error: $error_no $error_string");
+	if (!$soket) {
+    cliLog('mpd connection error');
+    return false; 
+  }
 	
 	$write = @fwrite($soket, $command . "\n");
-	if (!$write)
+  cliLog("mpd socket write command: $command result: $write ");
+  /* stream_set_timeout($soket, 2);
+  $res = fread($soket, 2000);
+  $info = stream_get_meta_data($soket);
+  if ($info['timed_out']) {
+      return false;
+  } */
+  if ($write === false) {
+    fclose($soket);
 		return false;
-	
-	$line = trim(fgets($soket, 1024));
+  }
+	//$line = trim(fgets($soket, 1024));
+	$line = trim(fgets($soket, 2048));
 	//if (substr($line, 0, 3) == 'ACK')			{fclose($soket); return false;}
 	//if (substr($line, 0, 6) != 'OK MPD') 	{fclose($soket); return false;}
 	

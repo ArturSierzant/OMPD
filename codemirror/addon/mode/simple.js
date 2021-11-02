@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
@@ -68,6 +68,7 @@
     var flags = "";
     if (val instanceof RegExp) {
       if (val.ignoreCase) flags = "i";
+      if (val.unicode) flags += "u"
       val = val.source;
     } else {
       val = String(val);
@@ -136,11 +137,10 @@
             state.indent.pop();
           var token = rule.token
           if (token && token.apply) token = token(matches)
-          if (matches.length > 2) {
-            state.pending = [];
+          if (matches.length > 2 && rule.token && typeof rule.token != "string") {
             for (var j = 2; j < matches.length; j++)
               if (matches[j])
-                state.pending.push({text: matches[j], token: rule.token[j - 1]});
+                (state.pending || (state.pending = [])).push({text: matches[j], token: rule.token[j - 1]});
             stream.backUp(matches[0].length - (matches[1] ? matches[1].length : 0));
             return token[0];
           } else if (token && token.join) {

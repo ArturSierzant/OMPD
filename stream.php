@@ -525,14 +525,10 @@ function streamTo() {
 //  +------------------------------------------------------------------------+
 function streamTidal($id) {
 	global $cfg, $db, $t;
-
-	/* $t = new TidalAPI;
-	$t->username = $cfg["tidal_username"];
-	$t->password = $cfg["tidal_password"];
-	$t->token = $cfg["tidal_token"];
-	$t->audioQuality = $cfg["tidal_audio_quality"]; 
-	$t->fixSSLcertificate();*/
-  //$t = tidal();
+  cliLog('======================================================');
+  cliLog('New Tidal stream for track ' . $id);
+  cliLog('======================================================');
+  
 	$conn = $t->connect();
 	if ($conn === true){
 		$trackURL = $t->getStreamURL($id);
@@ -540,6 +536,7 @@ function streamTidal($id) {
 			//get 8 bytes of stream to make sure that stream is ready
 			$stream = file_get_contents($trackURL["url"], NULL, NULL, 0, 8);
 			if (strlen($stream) > 0) {
+				cliLog('trackURL: ' . $trackURL["url"]);
 				cliLog('timestamp: ' . time() . ' stream: ' . $stream . ' iteration: ' . $i);
 				break;
 			}
@@ -551,7 +548,11 @@ function streamTidal($id) {
       $handle = popen('curl "' . NJB_HOME_URL . 'watchdog.php?host=' . $_SERVER['REMOTE_ADDR'] . '&port=6600&track_id=' . $id .'&logWD=' . $logWD .' " &', 'r');
     }
     
+    cliLog('About to redirect...');
+    header("Cache-Control: no-cache, must-revalidate");
+    header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
     header("Location: " . $trackURL["url"]);
+    cliLog('Redirect done.');
     exit;
 	}
 	else {  

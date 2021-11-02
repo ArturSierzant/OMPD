@@ -1,4 +1,6 @@
 {
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "short_name": "O!MPD",
   "name": "O!MPD - Surf Your Music Collection",
   "start_url": "index.php",
