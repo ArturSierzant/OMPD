@@ -686,8 +686,8 @@ function addSelectUrl() {
 						return 'add_error';
 					}
 					$tidal_tracks = getTracksFromTidalAlbum($album_id);
+          $tidal_tracks = json_decode($tidal_tracks, true);
 				}
-        $tidal_tracks = json_decode($tidal_tracks, true);
 				$tidal_tracks['track_id'] = $id;
 				$mpdCommand = mpdAddTidalTrack('tidal_' . $id);
 				

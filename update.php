@@ -67,9 +67,9 @@ else {
 	$cfg['force_filename_update'] = true;
 }
 
-if (substr($cfg['media_dir'],-1) != "/"){
+/* if (substr($cfg['media_dir'],-1) != "/"){
 	$cfg['media_dir'] = $cfg['media_dir'] . "/";
-}
+} */
 
 $flag	= (int) getpost('flag');
 
