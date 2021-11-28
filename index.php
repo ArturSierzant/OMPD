@@ -2061,7 +2061,52 @@ function viewHRA() {
 	$nav['url'][]	= 'index.php';
 	$nav['name'][]	= 'HighResAudio:';
 	require_once('include/header.inc.php');
-  echo '<div class="area">';
+  ?>
+  <div>
+  <h1 onclick='toggleSearchResults("GE");' class="pointer" id="hraGenres"><i id="iconSearchResultsGE" class="fa fa-chevron-circle-down icon-anchor"></i> New albums by genre</h1>
+  <div id="searchResultsGE">
+  <span id="albumsLoadingIndicator">
+    <i class="fa fa-cog fa-spin icon-small"></i> Loading genre list...
+  </span>
+  </div>
+  </div>
+  <script>
+  $('#hraGenres').click(function() {
+    var request = $.ajax({  
+      url: "ajax-hra-search.php",
+      type: "POST",
+      data: { search : "genre" },
+      dataType: "json"
+    }); 
+
+    request.done(function( data ) {  
+      if (data.genre_results > 0) { //check if any genre recieved
+        $( "#searchResultsGE" ).html( data.genreList );
+      }
+      else {
+        if (data.return == 1) {
+          $("#albumsLoadingIndicator").hide();
+          $("#searchResultsGE").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution HighResAudio request.<br>Error message:<br><br>' + data.response + '</div>');
+        }
+        else {
+          $("#albumsLoadingIndicator").hide();
+          $("#searchResultsGE").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on HighResAudio.</span>');
+        }
+      }
+      changeTileSizeInfo();
+    }); 
+
+    request.fail(function( jqXHR, textStatus ) {  
+      $("#albumsLoadingIndicator").hide();
+      $("#searchResultsGE").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution HRA request.</div>');
+    }); 
+
+    request.always(function() {
+    });
+  });
+  </script>
+  <div class="area">
+  <?php
   showNewHRAAlbumsByCategory('new');
   showNewHRAAlbumsByCategory('rock');
   showNewHRAAlbumsByCategory('blues');
@@ -2086,15 +2131,21 @@ function viewNewFromHRA() {
 	global $base_size, $spaces, $scroll_bar_correction;
 	
   $type = get('type');
-	
+  $prefix = get('prefix');
+  $genreM = "";
+  if ($prefix) {
+    $exploded = explode("/",$prefix);
+    $counter = count($exploded);
+    if ($counter == 6) { // with subgenre
+      $genreM = $exploded[4] . " > ";
+    }
+  }
   authenticate('access_media');
 	
 	// formattedNavigator
 	$nav			= array();
 	$nav['name'][]	= 'Library';
 	$nav['url'][]	= 'index.php';
-	//$nav['name'][]	= 'New albums from HighResAudio:';
-	//require_once('include/header.inc.php');
   $nav['name'][]	= 'HighResAudio';
 	$nav['url'][]	= 'index.php?action=viewHRA';
   switch ($type) {
@@ -2133,6 +2184,10 @@ function viewNewFromHRA() {
       require_once('include/header.inc.php');
       echo ('<h1>New R&B albums</h1>');
       break;
+    default:
+      $nav['name'][]	= 'New ' . $genreM . $type . ' albums:';
+      require_once('include/header.inc.php');
+      echo ('<h1>New ' . $genreM . $type . ' albums</h1>');
   }
 ?>
 
@@ -2169,8 +2224,9 @@ function viewNewFromHRA() {
     case "rb":
       $results = $h->getCategorieContent("R & B", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
       break;
+    default:
+      $results = $h->getCategorieContent($prefix, $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
   }
-  
     if ($results['data']['results']){
       foreach($results['data']['results'] as $res) {
         if ($res['publishingStatus'] == 'published') {
@@ -2185,7 +2241,12 @@ function viewNewFromHRA() {
           draw_tile ( $size, $albums, '', 'echo', '' );
         }
       }
-      $cfg['items_count'] = $cfg['max_items_per_page'] * 30;
+      if (isset($results['data']['totalCount'])){
+        $cfg['items_count'] = $results['data']['totalCount'];
+      }
+      else {
+        $cfg['items_count'] = $cfg['max_items_per_page'] * 30;
+      }
     }
     else {
       $albums = null;
@@ -2193,6 +2254,9 @@ function viewNewFromHRA() {
   }
   else {
   $albums = null;
+  }
+  if ($albums === null) {
+    echo ('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on HRA.</span>');
   }
 ?>
 </div>

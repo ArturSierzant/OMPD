@@ -236,26 +236,26 @@ class HraAPI {
   function getCategorieContent($categorie, $limit=30, $offset=0) {
     switch ($categorie) {
     case "new":
-      $categorie = "\/HIGHRES AUDIO\/Musicstore\/Neue Alben hinzugefügt";
+      $categorie = "/HIGHRES AUDIO/Musicstore/Neue Alben hinzugefügt";
       break;
     case "pop":
-      $categorie = "\/HIGHRES AUDIO\/Musicstore\/Genre\/Pop";
+      $categorie = "/HIGHRES AUDIO/Musicstore/Genre/Pop";
       break;
     case "rock":
-      $categorie = "\/HIGHRES AUDIO\/Musicstore\/Genre\/Rock";
+      $categorie = "/HIGHRES AUDIO/Musicstore/Genre/Rock";
       break;
     case "jazz":
-      $categorie = "\/HIGHRES AUDIO\/Musicstore\/Genre\/Jazz";
+      $categorie = "/HIGHRES AUDIO/Musicstore/Genre/Jazz";
       break;
     case "classical":
-      $categorie = "\/HIGHRES AUDIO\/Musicstore\/Genre\/Classical";
+      $categorie = "/HIGHRES AUDIO/Musicstore/Genre/Classical";
       break;
     case "blues":
-      $categorie = "\/HIGHRES AUDIO\/Musicstore\/Genre\/Blues";
+      $categorie = "/HIGHRES AUDIO/Musicstore/Genre/Blues";
       break;
     }
     
-    //$categorie = "\/HIGHRES AUDIO\/Musicstore\/Genre\/R&B";
+    //$categorie = "/HIGHRES AUDIO/Musicstore/Genre/R&B/Contemporary";
 
 		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/categories/ListCategorieContent/?category=" . urlencode($categorie) . "&limit=" . $limit . "&offset=" . $offset . "&lang=" . $this->lang);
 		return $this->request();

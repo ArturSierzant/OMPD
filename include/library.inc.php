@@ -654,7 +654,7 @@ function checkTidalAuthStatus() {
 function logoutTidal() {
   global $cfg, $db, $t;
   $res = $t->logout();
-  if ($res['logout_status'] === true) {
+  if ($res['logout_status'] === true || strpos($res['error'],'User does not have a valid session') !== false) {
     //reset token in DB
     $sql = 'UPDATE tidal_token SET
             time = 0,
@@ -674,6 +674,7 @@ function logoutTidal() {
       $errors['error'] = "Error while resetting token in DB.";
       return ($errors);
     }
+    $res['return'] = 0;
   }
   return $res;
 }
@@ -1453,6 +1454,51 @@ function showArtistsFromHRA($searchStr, $size) {
 	
 	echo safe_json_encode($data);
 }
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Genre from HRA                                                         |
+//  +------------------------------------------------------------------------+
+function showGenreFromHRA() {
+	global $cfg, $db;
+	$data = array();
+	
+	$h = new HraAPI;
+	if (NJB_WINDOWS) $h->fixSSLcertificate();
+	$results = $h->getAllGenres();
+	if (!$results['data']) {
+		$data['genre_results'] = 0;
+	}
+	if ($results['data']) {
+    $sorted = array();
+    foreach ($results['data']['results'] as $genre) {
+      $subsorted = array();
+      foreach($genre['subgenre'] as $subgenre) {
+        $subsorted[$subgenre['title']] = $subgenre['prefix'];
+      }
+      ksort($subsorted);
+      $sorted[$genre['title']] = array(0 => $genre['prefix'], 1 => $subsorted);
+    } 
+    ksort($sorted);
+    $data['genre_results'] = count($sorted);
+		$genreList = '<table class="border" cellspacing="0" cellpadding="0">';
+		$genreList .= '<tr class="header"><td></td><td>Genre</td><td>Subgenre</td></tr>';
+		foreach ($sorted as $key=>$value) {
+			$genreList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=viewNewFromHRA&amp;type=' . rawurlencode($key) . '&amp;prefix=' . rawurlencode($value[0]). '">' . html($key) . '</a></td><td class= "lh2">';
+      foreach($value[1] as $key=>$value) {
+        $genreList .= '<a href="index.php?action=viewNewFromHRA&amp;type=' . rawurlencode($key) . '&amp;prefix=' . rawurlencode($value). '">' . html($key) . '</a> | ';
+      }
+      $genreList .= '</td></tr>';
+      $genreList .= '<tr class="line"><td></td><td></td><td></td></tr>';
+			}
+		$genreList .= '</table>';
+		$data['genreList'] = $genreList;
+	}
+	
+	echo safe_json_encode($data);
+}
+
 
 
 //  +------------------------------------------------------------------------+

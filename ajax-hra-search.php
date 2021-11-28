@@ -44,4 +44,7 @@ elseif ($search == 'artists') {
 	if ($searchStr) $searchStr = moveTheToBegining($searchStr);
 	showArtistsFromHRA($searchStr, $size);
 }
+elseif ($search == 'genre') {
+	showGenreFromHRA();
+}
 ?>

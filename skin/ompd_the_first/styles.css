@@ -2539,6 +2539,10 @@ h1 {
 
 }
 
+.lh2 {
+	line-height: 2em;
+}
+
 .lh3 {
 	line-height: 3em;
 }

@@ -206,8 +206,6 @@ elseif ($dr) {
 	$rst = mysqli_fetch_assoc($queryDR);
 	$minDR = $rst['minDR'];
 	
-	
-	
 	$nav = array();
 	$nav['name'][]	= 'Library';
 	$nav['url'][]	= 'index.php';
@@ -226,7 +224,7 @@ elseif ($dr) {
 	require_once('include/header.inc.php');
 	
 	if ($dr == 'Unknown') $filter_query = 'WHERE album_dr is null ';
-	else $filter_query = 'WHERE album_dr = ' . (int) $dr;
+	else $filter_query = 'WHERE album_dr = ' . (int) $dr . ' ';
 	$url			= 'index.php?action=view2&amp;dr=' . $dr;
 	$list_url		= 'index.php?action=view2&amp;thumbnail=0&amp;dr=' . $dr . '&amp;order=' . $order . '&amp;sort=' . $sort;
 	$thumbnail_url	= 'index.php?action=view2&amp;thumbnail=1&amp;dr=' . $dr . '&amp;order=' . $order . '&amp;sort=' . $sort;
@@ -873,7 +871,6 @@ request.done(function( data ) {
 		$( "#searchResultsHRA" ).html( data.albums );
 	}
 	else {
-		//var jsonObj = JSON.parse(data);
 		if (data.return == 1) {
 			$("#searchResultsHRA").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution HighResAudio request.<br>Error message:<br><br>' + data.response + '</div>');
 		}
@@ -982,7 +979,7 @@ function ytSearch(){
 <?php
 }
 
-if ($filter == 'whole' && !$genre_id && !$year && !$isVA) {
+if ($filter == 'whole' && !$genre_id && !$year && !$isVA && !$dr) {
 //  +------------------------------------------------------------------------+
 //  | track artist                                                           |
 //  +------------------------------------------------------------------------+

@@ -195,10 +195,14 @@ function importFavorite($favorite_id, $host, $port, $mode) {
 		
 		if ($isStream == 0 && $track['track_id']) {
 			$position = $i + $offset + 1;
-			mysqli_query($db,'INSERT INTO favoriteitem (track_id, position, favorite_id)
+			/* mysqli_query($db,'INSERT INTO favoriteitem (track_id, position, favorite_id)
 				VALUES ("' . mysqli_real_escape_string($db,$track['track_id']) . '",
 				' . (int) $position . ',
-				' . (int) $favorite_id . ')');
+				' . (int) $favorite_id . ')'); */
+        mysqli_query($db,'INSERT INTO favoriteitem (stream_url, track_id, position, favorite_id)
+        VALUES ("", "' . mysqli_real_escape_string($db,$track['track_id']) . '",
+        ' . (int) $position . ',
+        ' . (int) $favorite_id . ')');
 		}
 	
 		

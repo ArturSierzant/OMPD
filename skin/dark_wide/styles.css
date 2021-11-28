@@ -2208,6 +2208,9 @@ h1 {
   color: rgba(44, 62, 80, 0.5);
   font-size: 0.9em;
 }
+.lh2 {
+  line-height: 2em;
+}
 .lh3 {
   line-height: 3em;
 }

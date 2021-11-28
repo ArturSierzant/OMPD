@@ -40,9 +40,8 @@ class TidalAPI {
   
 
   public function __construct(){
-    $this->apiKey = array('clientId' => base64_decode('YVI3Z1VhVEsxaWhwWE9FUA=='), 'clientSecret' => base64_decode('ZVZXQkVrdUwyRkNqeGdqT2tSM3lLMFJZWkViY3JNWFJjMmw4ZlUzWkNkRT0='));
-    //$this->apiKey = array('clientId' => '', 'clientSecret' => '');
-    
+    //$this->apiKey = array('clientId' => base64_decode('YVI3Z1VhVEsxaWhwWE9FUA=='), 'clientSecret' => base64_decode('ZVZXQkVrdUwyRkNqeGdqT2tSM3lLMFJZWkViY3JNWFJjMmw4ZlUzWkNkRT0='));
+    $this->apiKey = array('clientId' => base64_decode('T21EdHJ6Rmd5VlZMNnVXNTZPbkZBMkNPaWFicW0='), 'clientSecret' => base64_decode('enhlbjFyM3BPMGhndE9DN2o2dHdNbzlVQXFuZ0dybVJpV3BWN1FDMXpKOD0='));
     $this->curl = curl_init();
     curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
     //to fix "SSL certificate problem: unable to get local issuer certificate" under Windows uncomment below lines or use function fixSSLcertificate():

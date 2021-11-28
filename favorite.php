@@ -863,16 +863,6 @@ function importFavorite($favorite_id, $mode) {
 	$hasFiles = 0;
 	$isFavStream = 0;
 	
-	/* for ($i = 0; $i < count($file); $i++) {
-		if (preg_match('#^(ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://#', $file[$i])) {
-			$hasStream = 1;
-		}
-		else {
-			$hasFiles = 1;
-		}
-	} */
-	
-	
 	if (count($file) > 0) {
 		
 		$query = mysqli_query($db,'SELECT stream FROM favorite WHERE favorite_id = ' . (int) $favorite_id);
