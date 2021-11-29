@@ -234,32 +234,49 @@ class HraAPI {
 	}
   
   function getCategorieContent($categorie, $limit=30, $offset=0) {
-    switch ($categorie) {
-    case "new":
-      $categorie = "/HIGHRES AUDIO/Musicstore/Neue Alben hinzugefügt";
-      break;
-    case "pop":
-      $categorie = "/HIGHRES AUDIO/Musicstore/Genre/Pop";
-      break;
-    case "rock":
-      $categorie = "/HIGHRES AUDIO/Musicstore/Genre/Rock";
-      break;
-    case "jazz":
-      $categorie = "/HIGHRES AUDIO/Musicstore/Genre/Jazz";
-      break;
-    case "classical":
-      $categorie = "/HIGHRES AUDIO/Musicstore/Genre/Classical";
-      break;
-    case "blues":
-      $categorie = "/HIGHRES AUDIO/Musicstore/Genre/Blues";
-      break;
+    $exploded = explode("/",$categorie);
+    $counter = count($exploded);
+    //if $categorie is 'prefix' from getAllGenres, 
+    //e.g. /HIGHRES AUDIO/Musicstore/Genre/Instrumental/Compilations:
+    if ($counter > 1) {
+    $genre = "&genre=" . urlencode($exploded[4]);
+      if ($counter == 6) { // with subgenre
+        $subgenre = "/" . urlencode($exploded[5]);
+      }
+      $categorie = "/HIGHRES%20AUDIO/Musicstore/" . $genre . $subgenre;
     }
+    else {
+      switch ($categorie) {
+      case "new":
+        //$categorie = "/HIGHRES%20AUDIO/Musicstore/Neue%20Alben%20hinzugefügt";
+        $categorie = "/HIGHRES%20AUDIO/Musicstore/";
+        break;
+      case "pop":
+        $categorie = "/HIGHRES%20AUDIO/Musicstore/&genre=Pop";
+        break;
+      case "rock":
+        $categorie = "/HIGHRES%20AUDIO/Musicstore/&genre=Rock";
+        break;
+      case "jazz":
+        $categorie = "/HIGHRES%20AUDIO/Musicstore/&genre=Jazz";
+        break;
+      case "classical":
+        $categorie = "/HIGHRES%20AUDIO/Musicstore/&genre=Classical";
+        break;
+      case "blues":
+        $categorie = "/HIGHRES%20AUDIO/Musicstore/&genre=Blues";
+        break;
+      case "R & B":
+        $categorie = "/HIGHRES%20AUDIO/Musicstore/&genre=R%26B";
+        break;
+      }
+    }
+    //$categorie = "/HIGHRES%20AUDIO/Musicstore/&genre=Latin/Alternativo%20%26%20Rock%20Latino";
     
-    //$categorie = "/HIGHRES AUDIO/Musicstore/Genre/R&B/Contemporary";
-
-		curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/categories/ListCategorieContent/?category=" . urlencode($categorie) . "&limit=" . $limit . "&offset=" . $offset . "&lang=" . $this->lang);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/categories/ListCategorieContent/?category=" . $categorie . "&limit=" . $limit . "&offset=" . $offset . "&lang=" . $this->lang);
 		return $this->request();
 	}
+
 
 	function request() {
 		curl_setopt($this->curl, CURLOPT_POST, 0);

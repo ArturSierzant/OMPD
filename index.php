@@ -2189,11 +2189,11 @@ function viewNewFromHRA() {
       require_once('include/header.inc.php');
       echo ('<h1>New ' . $genreM . $type . ' albums</h1>');
   }
+	//echo "<div>Prefix: $prefix</div>";
 ?>
 
 <div class="albums_container">
 <?php
-	
 	if ($tileSizePHP) $size = $tileSizePHP;
   $h = new HraAPI;
   $h->username = $cfg["hra_username"];
@@ -2226,7 +2226,8 @@ function viewNewFromHRA() {
       break;
     default:
       $results = $h->getCategorieContent($prefix, $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
-  }
+    }
+    //$results = $h->getCategorieContent($prefix, $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
     if ($results['data']['results']){
       foreach($results['data']['results'] as $res) {
         if ($res['publishingStatus'] == 'published') {
