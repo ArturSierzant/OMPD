@@ -234,45 +234,25 @@ class HraAPI {
 	}
   
   function getCategorieContent($categorie, $limit=30, $offset=0) {
-    $exploded = explode("/",$categorie);
-    $counter = count($exploded);
-    //if $categorie is 'prefix' from getAllGenres, 
-    //e.g. /HIGHRES AUDIO/Musicstore/Genre/Instrumental/Compilations:
-    if ($counter > 1) {
-    $genre = "&genre=" . urlencode($exploded[4]);
-      if ($counter == 6) { // with subgenre
-        $subgenre = "/" . urlencode($exploded[5]);
-      }
-      $categorie = "/HIGHRES%20AUDIO/Musicstore/" . $genre . $subgenre;
-    }
-    else {
-      switch ($categorie) {
-      case "new":
-        //$categorie = "/HIGHRES%20AUDIO/Musicstore/Neue%20Alben%20hinzugefügt";
-        $categorie = "/HIGHRES%20AUDIO/Musicstore/";
-        break;
-      case "pop":
-        $categorie = "/HIGHRES%20AUDIO/Musicstore/&genre=Pop";
-        break;
-      case "rock":
-        $categorie = "/HIGHRES%20AUDIO/Musicstore/&genre=Rock";
-        break;
-      case "jazz":
-        $categorie = "/HIGHRES%20AUDIO/Musicstore/&genre=Jazz";
-        break;
-      case "classical":
-        $categorie = "/HIGHRES%20AUDIO/Musicstore/&genre=Classical";
-        break;
-      case "blues":
-        $categorie = "/HIGHRES%20AUDIO/Musicstore/&genre=Blues";
-        break;
-      case "R & B":
-        $categorie = "/HIGHRES%20AUDIO/Musicstore/&genre=R%26B";
-        break;
-      }
-    }
     //$categorie = "/HIGHRES%20AUDIO/Musicstore/&genre=Latin/Alternativo%20%26%20Rock%20Latino";
     
+    $exploded = explode("/",$categorie);
+    $counter = count($exploded);
+    
+    if (strpos($categorie,"/Genre/") !== false) {
+      $genre = "&genre=" . urlencode($exploded[4]);
+      if ($counter == 6) { // with subgenre
+        $genre .= "/" . urlencode($exploded[5]);
+      }
+      $categorie = "/HIGHRES%20AUDIO/Musicstore/" . $genre . "&sort=-releaseDate";
+    }
+    else {
+      $categorie = "";
+      for ($i =1; $i<$counter; $i++) {
+        $categorie .= "/" . urlencode($exploded[$i]);
+      }
+        $categorie .= "&sort=-releaseDate";
+    }
     curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "vault/categories/ListCategorieContent/?category=" . $categorie . "&limit=" . $limit . "&offset=" . $offset . "&lang=" . $this->lang);
 		return $this->request();
 	}

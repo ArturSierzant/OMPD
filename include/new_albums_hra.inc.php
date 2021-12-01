@@ -1,11 +1,11 @@
-<h1>&nbsp;New albums from <a href="index.php?action=viewHRA">HighResAudio</a> <a href="index.php?action=viewNewFromHRA&type=new">(more...)</a></h1>
+<h1>&nbsp;New albums from <a href="index.php?action=viewHRA">HighResAudio</a> <a href="index.php?action=viewNewFromHRA&categoryName=New%20albums&prefix=/HIGHRES%20AUDIO/Musicstore/">(more...)</a></h1>
 	<script>
 		calcTileSize();
 		var size = $tileSize;
 		var request = $.ajax({  
 		url: "ajax-hra-new-albums.php",  
 		type: "POST",
-		data: { type: "new", tileSize : size, limit : 15, offset : 0 },
+		data: { categoryName: "New albums", prefix: "/HIGHRES AUDIO/Musicstore/", tileSize : size, limit : 15, offset : 0 },
 		dataType: "html"
 		}); 
 

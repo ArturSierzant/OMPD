@@ -23,7 +23,7 @@ require_once('include/library.inc.php');
 
 global $cfg, $db;
 
-$type = $_POST["type"];
+$prefix = $_POST["prefix"];
 $size = $_POST["tileSize"];
 $limit = $_POST["limit"];
 $offset = $_POST["offset"];
@@ -34,29 +34,7 @@ authenticate('access_media');
 $h = new HraAPI;
 if (NJB_WINDOWS) $t->fixSSLcertificate();
 
-switch ($type){
-  case "new":
-    $results = $h->getCategorieContent("new", $limit, $offset);
-    break;
-  case "pop":
-    $results = $h->getCategorieContent("pop", $limit, $offset);
-    break;
-  case "rock":
-    $results = $h->getCategorieContent("rock", $limit, $offset);
-    break;
-  case "jazz":
-    $results = $h->getCategorieContent("jazz", $limit, $offset);
-    break;
-  case "classical":
-    $results = $h->getCategorieContent("classical", $limit, $offset);
-    break;
-  case "blues":
-    $results = $h->getCategorieContent("blues", $limit, $offset);
-    break;
-  case "rb":
-    $results = $h->getCategorieContent("R & B", $limit, $offset);
-    break;
-}
+$results = $h->getCategorieContent($prefix, $limit, $offset);
 if ($results['data']['results']){
   foreach($results['data']['results'] as $res) {
     if ($res['publishingStatus'] == 'published') {

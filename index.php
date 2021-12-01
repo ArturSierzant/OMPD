@@ -2107,13 +2107,12 @@ function viewHRA() {
   </script>
   <div class="area">
   <?php
-  showNewHRAAlbumsByCategory('new');
-  showNewHRAAlbumsByCategory('rock');
-  showNewHRAAlbumsByCategory('blues');
-  showNewHRAAlbumsByCategory('rb');
-  showNewHRAAlbumsByCategory('pop');
-  showNewHRAAlbumsByCategory('jazz');
-  showNewHRAAlbumsByCategory('classical');
+  showNewHRAAlbumsByCategory('New albums', '/HIGHRES AUDIO/Musicstore/');
+  showNewHRAAlbumsByCategory('Editors Choice', '/HIGHRES AUDIO/Musicstore/Editors Choice');
+  showNewHRAAlbumsByCategory('High-Res Essentials', '/HIGHRES AUDIO/Musicstore/High-Res Essentials');
+  showNewHRAAlbumsByCategory('Bestsellers', '/HIGHRES AUDIO/Musicstore/Bestsellers');
+  showNewHRAAlbumsByCategory('Top albums', '/HIGHRES AUDIO/Musicstore/Top Alben');
+  showNewHRAAlbumsByCategory('Listening tips', '/HIGHRES AUDIO/Musicstore/Hörtipps');
   echo '</div>';
 
   require_once('include/footer.inc.php');
@@ -2130,14 +2129,20 @@ function viewNewFromHRA() {
 	global $cfg, $db;
 	global $base_size, $spaces, $scroll_bar_correction;
 	
-  $type = get('type');
+  //$type = get('type');
   $prefix = get('prefix');
-  $genreM = "";
+  $categoryName = get('categoryName');
+  $genreM = '';
   if ($prefix) {
-    $exploded = explode("/",$prefix);
-    $counter = count($exploded);
-    if ($counter == 6) { // with subgenre
-      $genreM = $exploded[4] . " > ";
+    if (strpos($prefix,"/Genre/") !== false) {
+      $exploded = explode("/",$prefix);
+      $counter = count($exploded);
+      $genreM = $exploded[4];
+      $categoryName = "New " . $genreM . " albums";
+      if ($counter == 6) { // with subgenre
+        $subgenre = $exploded[5];
+        $categoryName = 'New ' . $genreM . ' > ' . $subgenre . ' albums';
+      }
     }
   }
   authenticate('access_media');
@@ -2148,47 +2153,16 @@ function viewNewFromHRA() {
 	$nav['url'][]	= 'index.php';
   $nav['name'][]	= 'HighResAudio';
 	$nav['url'][]	= 'index.php?action=viewHRA';
-  switch ($type) {
-    case "new":
-      $nav['name'][]	= 'New albums:';
-      require_once('include/header.inc.php');
-      echo ('<h1>New albums</h1>');
-      break;
-    case "pop":
-      $nav['name'][]	= 'New pop albums:';
-      require_once('include/header.inc.php');
-      echo ('<h1>New pop albums</h1>');
-      break;
-    case "rock":
-      $nav['name'][]	= 'New rock albums:';
-      require_once('include/header.inc.php');
-      echo ('<h1>New rock albums</h1>');
-      break;
-    case "jazz":
-      $nav['name'][]	= 'New jazz albums:';
-      require_once('include/header.inc.php');
-      echo ('<h1>New jazz albums</h1>');
-      break;
-    case "classical":
-      $nav['name'][]	= 'New classical albums:';
-      require_once('include/header.inc.php');
-      echo ('<h1>New classical albums</h1>');
-      break;
-    case "blues":
-      $nav['name'][]	= 'New blues albums:';
-      require_once('include/header.inc.php');
-      echo ('<h1>New blues albums</h1>');
-      break;
-    case "rb":
-      $nav['name'][]	= 'New R&B albums:';
-      require_once('include/header.inc.php');
-      echo ('<h1>New R&B albums</h1>');
-      break;
-    default:
-      $nav['name'][]	= 'New ' . $genreM . $type . ' albums:';
-      require_once('include/header.inc.php');
-      echo ('<h1>New ' . $genreM . $type . ' albums</h1>');
+  if ($subgenre) {
+    $nav['name'][]	= $genreM;
+    $nav['url'][]	= 'index.php?action=viewNewFromHRA&amp;prefix=' . urlencode("/" . $exploded[1] . "/" . $exploded[2] . "/" . $exploded[3] . "/" . $exploded[4]);
+    $nav['name'][]	= $subgenre;
   }
+  else {
+    $nav['name'][]	= $categoryName . ':';
+  }
+      require_once('include/header.inc.php');
+      echo ('<h1>' . $categoryName . '</h1>');
 	//echo "<div>Prefix: $prefix</div>";
 ?>
 
@@ -2202,32 +2176,7 @@ function viewNewFromHRA() {
   $conn = $h->connect();
   if ($conn === true) {
     $curr_page = (get('page') ? get('page') : 1);
-    switch ($type){
-    case "new":
-      $results = $h->getCategorieContent("new", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
-      break;
-    case "pop":
-      $results = $h->getCategorieContent("pop", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
-      break;
-    case "rock":
-      $results = $h->getCategorieContent("rock", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
-      break;
-    case "jazz":
-      $results = $h->getCategorieContent("jazz", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
-      break;
-    case "classical":
-      $results = $h->getCategorieContent("classical", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
-      break;
-    case "blues":
-      $results = $h->getCategorieContent("blues", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
-      break;
-    case "rb":
-      $results = $h->getCategorieContent("R & B", $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
-      break;
-    default:
-      $results = $h->getCategorieContent($prefix, $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
-    }
-    //$results = $h->getCategorieContent($prefix, $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
+    $results = $h->getCategorieContent($prefix, $cfg['max_items_per_page'], $cfg['max_items_per_page'] * ($curr_page - 1));
     if ($results['data']['results']){
       foreach($results['data']['results'] as $res) {
         if ($res['publishingStatus'] == 'published') {

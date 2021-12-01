@@ -1485,9 +1485,9 @@ function showGenreFromHRA() {
 		$genreList = '<table class="border" cellspacing="0" cellpadding="0">';
 		$genreList .= '<tr class="header"><td></td><td>Genre</td><td>Subgenre</td></tr>';
 		foreach ($sorted as $key=>$value) {
-			$genreList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=viewNewFromHRA&amp;type=' . rawurlencode($key) . '&amp;prefix=' . rawurlencode($value[0]). '">' . html($key) . '</a></td><td class= "lh2">';
+			$genreList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=viewNewFromHRA&amp;prefix=' . rawurlencode($value[0]). '">' . html($key) . '</a></td><td class= "lh2">';
       foreach($value[1] as $key=>$value) {
-        $genreList .= '<a href="index.php?action=viewNewFromHRA&amp;type=' . rawurlencode($key) . '&amp;prefix=' . rawurlencode($value). '">' . html($key) . '</a> | ';
+        $genreList .= '<a href="index.php?action=viewNewFromHRA&amp;prefix=' . rawurlencode($value). '">' . html($key) . '</a> | ';
       }
       $genreList .= '</td></tr>';
       $genreList .= '<tr class="line"><td></td><td></td><td></td></tr>';
@@ -1644,23 +1644,17 @@ function getTracksFromHraAlbum($album_id, $order = '') {
 //  | New albums from HRA                                                    |
 //  +------------------------------------------------------------------------+
 
-function showNewHRAAlbumsByCategory($category) {
-  $categoryName = $category;
-  if ($category == 'rb') {
-    $categoryName = 'R&B';
-  }
-  if ($category == 'new') {
-    $categoryName = '';
-  }
+function showNewHRAAlbumsByCategory($categoryName, $prefix) {
+  $category = str_replace(" ", "_", $categoryName);
   echo '
-  <h1>&nbsp;New ' . $categoryName . ' albums <a href="index.php?action=viewNewFromHRA&type=' . $category . '">(more...)</a></h1>
+  <h1>&nbsp;' . $categoryName . ' <a href="index.php?action=viewNewFromHRA&prefix=' . urlencode($prefix) . '&categoryName=' . urlencode($categoryName) . '">(more...)</a></h1>
 	<script>
 		calcTileSize();
 		var size = $tileSize;
 		var request = $.ajax({  
 		url: "ajax-hra-new-albums.php",  
 		type: "POST",
-		data: { type: "' . $category . '", tileSize : size, limit : 10, offset : 0 },
+		data: { prefix: "' . $prefix . '", tileSize : size, limit : 10, offset : 0 },
 		dataType: "html"
 		}); 
 
