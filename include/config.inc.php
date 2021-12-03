@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2020 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -623,15 +623,10 @@ $cfg['artist_separator'][] = 	" + ";
 //  +------------------------------------------------------------------------+
 unset($cfg['quick_search']);
 
-$cfg['quick_search'][1] = array("Polish Artists","comment LIKE '%polish%'");
-$cfg['quick_search'][2] = array("Female voices","comment LIKE '%ladies%'");
-$cfg['quick_search'][3] = array("Live Concerts","comment LIKE '%live%'");
-$cfg['quick_search'][4] = array("High Audio Quality","comment LIKE '%hda%' or comment LIKE '%cd%'");
-$cfg['quick_search'][5] = array("HD Audio","audio_bits_per_sample > 16 OR audio_sample_rate > 48000");
-$cfg['quick_search'][6] = array("Japanese Editions","album LIKE '%japan%' OR comment LIKE '%SHM-CD%'");
+$cfg['quick_search'][1] = array("Live Concerts","album LIKE '%live%'");
+$cfg['quick_search'][2] = array("HD Audio","audio_bits_per_sample > 16 OR audio_sample_rate > 48000");
+$cfg['quick_search'][3] = array("Japanese Editions","album LIKE '%japan%' OR comment LIKE '%SHM-CD%'");
 $cfg['quick_search'][7] = array("Pop of the 80's","genre ='Pop' and ((album.year BETWEEN 1980 AND 1989) or comment like '%80s%')");
-$cfg['quick_search'][8] = array("AOR","comment like '%AOR%'");
-
 
 
 

@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2020 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -84,7 +84,7 @@ function about() {
 <tr class="header header_bigger">
 	<td class="space"></td>
 	<td colspan="3" style="white-space: normal;">
-	O!MPD&nbsp;<?php echo html(NJB_VERSION); ?>,&nbsp;Copyright&nbsp;&copy;&nbsp;2015-2020&nbsp;Artur&nbsp;Sier&#380;ant<br>
+	O!MPD&nbsp;<?php echo html(NJB_VERSION); ?>,&nbsp;Copyright&nbsp;&copy;&nbsp;2015-2021&nbsp;Artur&nbsp;Sier&#380;ant<br>
 	
 	</td>
 	<td class="space"></td>
@@ -101,7 +101,7 @@ function about() {
 	This is free software, and you are welcome to redistribute it<br>
 	under certain <a href="about.php?action=license#conditions">conditions</a>.
 	<br><br>
-	O!MPD is fork of netjukebox&nbsp;Copyright&nbsp;&copy;&nbsp;2001-2012&nbsp;Willem&nbsp;Bartels <a href="http://www.netjukebox.nl/">http://www.netjukebox.nl</a>
+	O!MPD is fork of netjukebox&nbsp;Copyright&nbsp;&copy;&nbsp;2001-2012&nbsp;Willem&nbsp;Bartels <a href="http://www.netjukebox.nl/" target = "_blank">http://www.netjukebox.nl</a>
 	</td>
 	<td></td>
 </tr>
@@ -160,7 +160,7 @@ function about() {
 <tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
-	<td style="vertical-align: top;">v1.07 <br>202?.??.??</td>
+	<td style="vertical-align: top;">v1.07 <br>2021.12.03</td>
 	<td></td>
 	<td>
 	<ul style="padding-left: 1em;">

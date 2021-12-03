@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2020 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -38,7 +38,7 @@ header('X-Accel-Buffering: no');
 
 define('NJB_START_TIME', microtime(true));
 
-define('NJB_VERSION', '1.06');
+define('NJB_VERSION', '1.07');
 define('NJB_DATABASE_VERSION', 50);
 define('NJB_IMAGE_SIZE', 300);
 define('NJB_IMAGE_QUALITY', 85);
