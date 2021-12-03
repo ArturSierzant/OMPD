@@ -32,6 +32,7 @@ $search = $_POST["search"];
 $searchStr = $_POST["searchStr"];
 $ajax = $_POST["ajax"];
 $artist = $_POST["artist"];
+$showGenre = $_POST["showGenre"];
 
 if ($search == 'albums') {
 	showAlbumsFromHRA($searchStr, $size);
@@ -45,6 +46,6 @@ elseif ($search == 'artists') {
 	showArtistsFromHRA($searchStr, $size);
 }
 elseif ($search == 'genre') {
-	showGenreFromHRA();
+	showGenreFromHRA($showGenre);
 }
 ?>

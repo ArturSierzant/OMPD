@@ -1460,43 +1460,72 @@ function showArtistsFromHRA($searchStr, $size) {
 //  +------------------------------------------------------------------------+
 //  | Genre from HRA                                                         |
 //  +------------------------------------------------------------------------+
-function showGenreFromHRA() {
-	global $cfg, $db;
-	$data = array();
-	
-	$h = new HraAPI;
-	if (NJB_WINDOWS) $h->fixSSLcertificate();
-	$results = $h->getAllGenres();
-	if (!$results['data']) {
-		$data['genre_results'] = 0;
-	}
-	if ($results['data']) {
+function showGenreFromHRA($showGenre = '') {
+  global $cfg, $db;
+  $data = array();
+
+  $h = new HraAPI;
+  if (NJB_WINDOWS) $h->fixSSLcertificate();
+  $results = $h->getAllGenres();
+  if (!$results['data']) {
+    $data['genre_results'] = 0;
+  }
+  if ($results['data']) {
     $sorted = array();
     foreach ($results['data']['results'] as $genre) {
-      $subsorted = array();
-      foreach($genre['subgenre'] as $subgenre) {
-        $subsorted[$subgenre['title']] = $subgenre['prefix'];
+      if ($showGenre) {
+        if ($showGenre == $genre['title']) {
+          $subsorted = array();
+          foreach($genre['subgenre'] as $subgenre) {
+            $subsorted[$subgenre['title']] = $subgenre['prefix'];
+          }
+          ksort($subsorted);
+          $sorted[$genre['title']] = array(0 => $genre['prefix'], 1 => $subsorted);
+        }
       }
-      ksort($subsorted);
-      $sorted[$genre['title']] = array(0 => $genre['prefix'], 1 => $subsorted);
-    } 
+      else {
+        $subsorted = array();
+        foreach($genre['subgenre'] as $subgenre) {
+          $subsorted[$subgenre['title']] = $subgenre['prefix'];
+        }
+        ksort($subsorted);
+        $sorted[$genre['title']] = array(0 => $genre['prefix'], 1 => $subsorted);
+      }
+    }
     ksort($sorted);
     $data['genre_results'] = count($sorted);
-		$genreList = '<table class="border" cellspacing="0" cellpadding="0">';
-		$genreList .= '<tr class="header"><td></td><td>Genre</td><td>Subgenre</td></tr>';
-		foreach ($sorted as $key=>$value) {
-			$genreList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=viewNewFromHRA&amp;prefix=' . rawurlencode($value[0]). '">' . html($key) . '</a></td><td class= "lh2">';
-      foreach($value[1] as $key=>$value) {
-        $genreList .= '<a href="index.php?action=viewNewFromHRA&amp;prefix=' . rawurlencode($value). '">' . html($key) . '</a> | ';
+    $genreList = '<table class="border" cellspacing="0" cellpadding="0">';
+    if ($showGenre) {
+      foreach ($sorted as $key=>$value) {
+        $genreList .= '<tr class="artist_list"><td class="space"></td><td class= "lh2">';
+        if (count($value[1])>0) {
+          foreach($value[1] as $key=>$value) {
+            $genreList .= '<a href="index.php?action=viewNewFromHRA&amp;prefix=' . rawurlencode($value). '">' . html($key) . '</a> | ';
+          }
+        }
+        else {
+          $genreList .= 'No subgenres found.';
+        }
+        $genreList .= '</td></tr>';
+        $genreList .= '<tr class="line"><td></td><td></td></tr>';
       }
-      $genreList .= '</td></tr>';
-      $genreList .= '<tr class="line"><td></td><td></td><td></td></tr>';
-			}
-		$genreList .= '</table>';
-		$data['genreList'] = $genreList;
-	}
-	
-	echo safe_json_encode($data);
+    }
+    else {
+      $genreList .= '<tr class="header"><td></td><td>Genre</td><td class="space"></td><td>Subgenre</td></tr>';
+      foreach ($sorted as $key=>$value) {
+        $genreList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=viewNewFromHRA&amp;prefix=' . rawurlencode($value[0]). '">' . html($key) . '</a></td><td></td><td class= "lh2">';
+        foreach($value[1] as $key=>$value) {
+          $genreList .= '<a href="index.php?action=viewNewFromHRA&amp;prefix=' . rawurlencode($value). '">' . html($key) . '</a> | ';
+        }
+        $genreList .= '</td></tr>';
+        $genreList .= '<tr class="line"><td></td><td></td><td></td><td></td></tr>';
+      }
+    }
+    $genreList .= '</table>';
+    $data['genreList'] = $genreList;
+  }
+
+  echo safe_json_encode($data);
 }
 
 

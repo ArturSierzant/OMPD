@@ -2161,11 +2161,52 @@ function viewNewFromHRA() {
   else {
     $nav['name'][]	= $categoryName . ':';
   }
-      require_once('include/header.inc.php');
-      echo ('<h1>' . $categoryName . '</h1>');
-	//echo "<div>Prefix: $prefix</div>";
+  require_once('include/header.inc.php');
 ?>
+ <div>
+  <h1 onclick='toggleSearchResults("GE");' class="pointer" id="hraGenres"><i id="iconSearchResultsGE" class="fa fa-chevron-circle-down icon-anchor"></i> Show subgenres for <?php echo $genreM; ?></h1>
+  <div id="searchResultsGE">
+  <span id="albumsLoadingIndicator">
+    <i class="fa fa-cog fa-spin icon-small"></i> Loading subgenre list...
+  </span>
+  </div>
+  </div>
+  <script>
+  $('#hraGenres').click(function() {
+    var request = $.ajax({  
+      url: "ajax-hra-search.php",
+      type: "POST",
+      data: { search : "genre", showGenre : "<?php echo $genreM; ?>"},
+      dataType: "json"
+    }); 
 
+    request.done(function( data ) {  
+      if (data.genre_results > 0) { //check if any genre recieved
+        $( "#searchResultsGE" ).html( data.genreList );
+      }
+      else {
+        if (data.return == 1) {
+          $("#albumsLoadingIndicator").hide();
+          $("#searchResultsGE").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution HighResAudio request.<br>Error message:<br><br>' + data.response + '</div>');
+        }
+        else {
+          $("#albumsLoadingIndicator").hide();
+          $("#searchResultsGE").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on HighResAudio.</span>');
+        }
+      }
+      changeTileSizeInfo();
+    }); 
+
+    request.fail(function( jqXHR, textStatus ) {  
+      $("#albumsLoadingIndicator").hide();
+      $("#searchResultsGE").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution HRA request.</div>');
+    }); 
+
+    request.always(function() {
+    });
+  });
+  </script>
+<h1><?php echo $categoryName; ?></h1>
 <div class="albums_container">
 <?php
 	if ($tileSizePHP) $size = $tileSizePHP;
