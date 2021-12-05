@@ -1,12 +1,3 @@
--- phpMyAdmin SQL Dump
--- version 3.3.5
--- http://www.phpmyadmin.net
---
--- Host: 127.0.0.1
--- Czas wygenerowania: 18 Lip 2014, 04:53
--- Wersja serwera: 5.1.36
--- Wersja PHP: 5.3.14
-
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 
@@ -15,14 +6,10 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
 
---
--- Baza danych: `ompd`
---
-
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `album`
+-- Table structure for `album`
 --
 
 CREATE TABLE IF NOT EXISTS `album` (
@@ -51,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `album` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `bitmap`
+-- Table structure for `bitmap`
 --
 
 CREATE TABLE IF NOT EXISTS `bitmap` (
@@ -76,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `bitmap` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `cache`
+-- Table structure for `cache`
 --
 
 CREATE TABLE IF NOT EXISTS `cache` (
@@ -100,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `cache` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `counter`
+-- Table structure for `counter`
 --
 
 CREATE TABLE IF NOT EXISTS `counter` (
@@ -119,7 +106,7 @@ CREATE TABLE IF NOT EXISTS `counter` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `country`
+-- Table structure for `country`
 --
 
 CREATE TABLE IF NOT EXISTS `country` (
@@ -132,7 +119,7 @@ CREATE TABLE IF NOT EXISTS `country` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `favorite`
+-- Table structure for `favorite`
 --
 
 CREATE TABLE IF NOT EXISTS `favorite` (
@@ -149,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `favorite` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `favoriteitem`
+-- Table structure for `favoriteitem`
 --
 
 CREATE TABLE IF NOT EXISTS `favoriteitem` (
@@ -163,7 +150,7 @@ CREATE TABLE IF NOT EXISTS `favoriteitem` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `genre`
+-- Table structure for `genre`
 --
 
 CREATE TABLE IF NOT EXISTS `genre` (
@@ -177,7 +164,7 @@ CREATE TABLE IF NOT EXISTS `genre` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `player`
+-- Table structure for `player`
 --
 
 CREATE TABLE IF NOT EXISTS `player` (
@@ -196,7 +183,7 @@ CREATE TABLE IF NOT EXISTS `player` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `random`
+-- Table structure for `random`
 --
 
 CREATE TABLE IF NOT EXISTS `random` (
@@ -213,7 +200,7 @@ CREATE TABLE IF NOT EXISTS `random` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `server`
+-- Table structure for `server`
 --
 
 CREATE TABLE IF NOT EXISTS `server` (
@@ -225,7 +212,7 @@ CREATE TABLE IF NOT EXISTS `server` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `session`
+-- Table structure for `session`
 --
 
 CREATE TABLE IF NOT EXISTS `session` (
@@ -258,7 +245,7 @@ CREATE TABLE IF NOT EXISTS `session` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `share_download`
+-- Table structure for `share_download`
 --
 
 CREATE TABLE IF NOT EXISTS `share_download` (
@@ -275,7 +262,7 @@ CREATE TABLE IF NOT EXISTS `share_download` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `share_stream`
+-- Table structure for `share_stream`
 --
 
 CREATE TABLE IF NOT EXISTS `share_stream` (
@@ -292,7 +279,7 @@ CREATE TABLE IF NOT EXISTS `share_stream` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `track`
+-- Table structure for `track`
 --
 
 CREATE TABLE IF NOT EXISTS `track` (
@@ -346,7 +333,7 @@ CREATE TABLE IF NOT EXISTS `track` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `tidal_album`
+-- Table structure for `tidal_album`
 --
 
 CREATE TABLE IF NOT EXISTS `tidal_album` (
@@ -369,7 +356,7 @@ CREATE TABLE IF NOT EXISTS `tidal_album` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `tidal_track`
+-- Table structure for `tidal_track`
 --
 
 CREATE TABLE IF NOT EXISTS `tidal_track` (
@@ -389,7 +376,7 @@ CREATE TABLE IF NOT EXISTS `tidal_track` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tidal_token`
+-- Table structure for `tidal_token`
 --
 
 CREATE TABLE `tidal_token` (
@@ -408,7 +395,7 @@ CREATE TABLE `tidal_token` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `user`
+-- Table structure for `user`
 --
 
 CREATE TABLE IF NOT EXISTS `user` (
@@ -436,7 +423,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla  `update_progress`
+-- Table structure for `update_progress`
 --
 
 CREATE TABLE IF NOT EXISTS `update_progress` (
@@ -451,7 +438,7 @@ CREATE TABLE IF NOT EXISTS `update_progress` (
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla tabeli `album_id`
+-- Table structure for `album_id`
 --
 
 CREATE TABLE IF NOT EXISTS `album_id` (
@@ -462,6 +449,20 @@ CREATE TABLE IF NOT EXISTS `album_id` (
   UNIQUE KEY `album_id` (`album_id`),
   KEY `album` (`album_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for `config`
+--
+
+CREATE TABLE IF NOT EXISTS `config` (
+  `name` CHAR(255) NOT NULL,
+  `index` TINYINT UNSIGNED NOT NULL DEFAULT '0',
+  `value` TEXT NOT NULL DEFAULT '',
+   PRIMARY KEY (`name`, `index`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 
 -- --------------------------------------------------------
 
@@ -740,7 +741,7 @@ INSERT INTO `tidal_token`(`time`, `access_token`, `refresh_token`, `token_type`,
 -- Default server
 --
 
-INSERT INTO `server` VALUES ('database_version', '50');
+INSERT INTO `server` VALUES ('database_version', '51');
 INSERT INTO `server` VALUES ('escape_char_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('getid3_hash', 'd41d8cd98f00b204e9800998ecf8427e');
 INSERT INTO `server` VALUES ('image_quality', '0');

@@ -3563,5 +3563,31 @@ function calculateAlbumFormat($album_information, $hra_tag = "") {
 	}
 }
 
+//  +------------------------------------------------------------------------+
+//  | Set config item in DB and load into $cfg                               |
+//  +------------------------------------------------------------------------+
+function setConfigItem($name, $value, $default_value = '') {
+	global $cfg, $db;
+	
+	$query = mysqli_query($db, "SELECT * FROM config WHERE name='$name'");
+  $items_count = mysqli_num_rows($query);
+  if ($items_count > 0) {
+    $config = mysqli_fetch_assoc ($query);
+    $cfg[$name] = $config['value'];
+  }
+  else {
+    if ($value) {
+      $sql = "INSERT INTO config (name, value) VALUES ('" . $db->real_escape_string($name) ."', '" . $db->real_escape_string($value) . "')";
+      mysqli_query($db, $sql);
+      $cfg[$name] = $value;
+    }
+    else {
+      $sql = "INSERT INTO config (name, value) VALUES ('" . $db->real_escape_string($name) ."', '" . $db->real_escape_string($default_value) . "')";
+      mysqli_query($db, $sql);
+      $cfg[$name] = $default_value;
+    }
+  }
+}
+
 
 ?>

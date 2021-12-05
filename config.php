@@ -66,6 +66,7 @@ elseif	($action == 'externalStorage')			externalStorage();
 elseif	($action == 'deleteExternalStorage')	{deleteExternalStorage();		externalStorage();}
 elseif	($action == 'editSettings')			editSettings();
 elseif	($action == 'tidal')			editTidal();
+elseif	($action == 'hra')			editHRA();
 
 else	message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]action');
 
@@ -277,16 +278,6 @@ function config() {
 <?php
 	}
   
-	if ($cfg['access_admin'] && $cfg['php_info']) { ?>
-<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
-	<td></td>
-	<td class="nowrap"><a href="phpinfo.php"><i class="fa fa-info-circle fa-fw icon-small"></i>PHP&nbsp;information</a></td>
-	<td></td>
-	<td>Enabled in the configuration file</td>
-	<td></td>
-</tr>
-<?php
-	}
 $query = mysqli_query($db, 'SELECT * FROM tidal_token LIMIT 1');
 if ($query) $tidal_token = mysqli_fetch_assoc($query);  
 if ($tidal_token['time'] == 0) {
@@ -310,6 +301,27 @@ elseif (time() < $tidal_token['expires_after']) {
 	<td>Tidal login and status<?php echo $update_info?></td>
 	<td></td>
 </tr>
+
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
+	<td class="nowrap"><a href="config.php?action=hra"><span class="sign track_title_mini">H<span style="padding: 0px 1px;font-weight: bold;border: 0px solid;">R</span>A</span> HighResAudio</a></td>
+	<td></td>
+	<td>HighResAudio settings</td>
+	<td></td>
+</tr>
+
+<?php 
+if ($cfg['access_admin'] && $cfg['php_info']) { ?>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
+	<td class="nowrap"><a href="phpinfo.php"><i class="fa fa-info-circle fa-fw icon-small"></i>PHP&nbsp;information</a></td>
+	<td></td>
+	<td>Enabled in the configuration file</td>
+	<td></td>
+</tr>
+<?php
+	}
+?>
 </table>
 <?php
 	require_once('include/footer.inc.php');
@@ -1607,6 +1619,120 @@ function refreshToken(){
 </script>
 <?php
   require_once('include/footer.inc.php');
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | HRA login                                                              |
+//  +------------------------------------------------------------------------+
+function editHRA() {
+  global $cfg, $db;
+  authenticate('access_logged_in');
+
+  // formattedNavigator
+  $nav			= array();
+  $nav['name'][]	= 'Configuration';
+  $nav['url'][]	= 'config.php';
+  $nav['name'][]	= 'HighResAudio';
+  require_once('include/header.inc.php');
+
+  $query = mysqli_query($db, "SELECT * FROM config where name like 'hra_%'");
+  if ($query) {
+    while ($hra = mysqli_fetch_assoc($query)) {
+      $a = $hra['name'];
+      $$a = $hra['value'];
+    }
+  }
+?>
+<h1>HighResAudio account and settings</h1>
+<table cellspacing="0" cellpadding="0" class="border">
+<tr class="textspace"><td colspan="4"></td></tr>
+<tr>
+  <td class="space"></td>
+	<td style="width:0.1%; white-space: nowrap;">Username:</td>
+	<td class="textspace"></td>
+	<td><input type="text" id="hra_username" value="<?php echo $hra_username; ?>" maxlength="255" class="edit"></td>
+  <td class="space"></td>
+</tr>
+<tr class="textspace"><td colspan="5"></td></tr>
+<tr>
+  <td></td>
+	<td>Password:</td>
+	<td></td>
+	<td><input type="text" id="hra_password" value="<?php echo $hra_password; ?>" maxlength="255" class="edit"></td>
+  <td class="space"></td>
+</tr>
+<tr class="textspace"><td colspan="5"></td></tr>
+<tr>
+	<td></td>
+	<td>Language:</td>
+	<td></td>
+	<td>
+    <select id="hra_lang">
+    <option value="en" <?php if ($hra_lang == 'en') echo 'selected'; ?>>English</option>
+    <option value="de" <?php if ($hra_lang == 'de') echo 'selected'; ?>>Deutsch</option>
+    </select>
+  </td>
+  <td class="space"></td>
+</tr>
+<tr>
+<tr class="textspace"><td colspan="5"></td></tr>
+<tr>
+  <td></td>
+	<td>
+  <div class="buttons">
+  <span id="saveHRAsettings" onmouseover="return overlib('Save settings');" onmouseout="return nd();">&nbsp;<i class="fa fa-floppy-o fa-fw"></i> Save settings</span>
+  </div>
+  </td>
+	<td></td>
+	<td></td>
+  <td class="space"></td>
+</tr>
+</table>
+<script>
+$('#saveHRAsettings').click(function() {
+  $('#saveHRAsettings > i').removeClass('fa-floppy-o').addClass('fa-cog fa-spin');
+  saveHRAsettings();
+});
+
+function saveHRAsettings(){
+  var config = {};
+  config['hra_username'] =  $('#hra_username').val();
+  config['hra_password'] =  $('#hra_password').val();
+  config['hra_lang'] =  $('#hra_lang').val();
+  $.ajax({
+    url: "ajax-save-config.php",  
+    type: "POST",  
+    data: { settings : config },  
+    dataType: "json",
+    success: function(json) {
+      if (json.return == 1) {
+        $('#saveHRAsettings > i').removeClass('fa-cog fa-spin').addClass('fa-exclamation-circle icon-nok');
+        setTimeout(function() {
+          $('#saveHRAsettings > i').removeClass('fa-exclamation-circle icon-nok').addClass('fa-floppy-o');
+        }, 2000);
+        return;
+      }
+      else {
+        $('#saveHRAsettings > i').removeClass('fa-cog fa-spin').addClass('fa-check-square');
+        setTimeout(function() {
+          $('#saveHRAsettings > i').removeClass('fa-check-square').addClass('fa-floppy-o');
+        }, 2000);
+        return;
+      }
+      //location.reload();
+    },
+    error: function() {
+      $('#saveHRAsettings > i').removeClass('fa-cog fa-spin').addClass('fa-exclamation-circle icon-nok');
+        setTimeout(function() {
+          $('#saveHRAsettings > i').removeClass('fa-exclamation-circle icon-nok').addClass('fa-floppy-o');
+        }, 2000);
+    }
+  });
+};
+</script>
+<?php
+require_once('include/footer.inc.php');
 }
 
 ?>

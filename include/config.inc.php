@@ -54,58 +54,19 @@ $cfg['media_dir']                   = '/var/lib/mpd/music/';
 
 
 
-//  +------------------- NEW IN O!MPD 1.07 ----------------------------------+
+//  +------------------- NEW IN O!MPD 1.08 ----------------------------------+
+
 
 //  +------------------------------------------------------------------------+
 //  | HighResAudio                                                           |
 //  +------------------------------------------------------------------------+
-//  | HRA account is required (username and password below).                 |
 //  |                                                                        |
-//  | hra_lang can be "en" or "de"                                           |
+//  | HRA setings were moved to GUI: Settings->HRA                           |
+//  |                                                                        |
 //  +------------------------------------------------------------------------+
 
-$cfg['hra_username'] = "";
-$cfg['hra_password'] = "";
-$cfg['hra_lang'] = "en";
 
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Album format badge and album popularity bar settings                   |
-//  +------------------------------------------------------------------------+
-//  | Show album format badge and popularity bar on album cover              |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_album_format'] = false; 
-$cfg['show_album_popularity'] = false; 
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Fix TIDAL freezes                                                      |
-//  +------------------------------------------------------------------------+
-//  | Sometimes songs from TIDAL freeze at the beginning. To avoid this      |
-//  | set fix_tidal_freezes to true. Everytime stream starts a watchdog      |
-//  | will be started to do STOP/PLAY stream when it freezes.                |
-//  | It requires curl to be installed and avaialble for web server          |
-//  +------------------------------------------------------------------------+
-
-$cfg['fix_tidal_freezes'] = false;
-
-
-//  +------------------------------------------------------------------------+
-//  | Search lyrics in Musixmatch                                            |
-//  +------------------------------------------------------------------------+
-//  | Get free api key from https://developer.musixmatch.com/plans           |
-//  | 'Free' plan is enough.                                                 |
-//  +------------------------------------------------------------------------+
-
-$cfg['musixmatch_api_key'] = "";
-
-
-
-//  +------------------- END OF NEW IN O!MPD 1.07 ---------------------------+
+//  +------------------- END OF NEW IN O!MPD 1.08 ---------------------------+
 
 
 
@@ -129,9 +90,23 @@ $cfg['musixmatch_api_key'] = "";
 //  | below.                                                                 |
 //  +------------------------------------------------------------------------+
 
-
 $cfg['tidal_audio_quality'] = "LOSSLESS";
 $cfg['tidal_direct'] = true;
+
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Fix TIDAL freezes                                                      |
+//  +------------------------------------------------------------------------+
+//  | Sometimes songs from TIDAL freeze at the beginning. To avoid this      |
+//  | set fix_tidal_freezes to true. Everytime stream starts a watchdog      |
+//  | will be started to do STOP/PLAY stream when it freezes.                |
+//  | It requires curl to be installed and avaialble for web server          |
+//  +------------------------------------------------------------------------+
+
+$cfg['fix_tidal_freezes'] = false;
+
 
 
 
@@ -501,6 +476,18 @@ $cfg['show_quick_play']					= true;
 
 
 //  +------------------------------------------------------------------------+
+//  | Album format badge and album popularity bar settings                   |
+//  +------------------------------------------------------------------------+
+//  | Show album format badge and popularity bar on album cover              |
+//  +------------------------------------------------------------------------+
+
+$cfg['show_album_format'] = false; 
+$cfg['show_album_popularity'] = false; 
+
+
+
+
+//  +------------------------------------------------------------------------+
 //  | If you have problem with displaying some icons, set this to true       |
 //  +------------------------------------------------------------------------+
 
@@ -626,7 +613,7 @@ unset($cfg['quick_search']);
 $cfg['quick_search'][1] = array("Live Concerts","album LIKE '%live%'");
 $cfg['quick_search'][2] = array("HD Audio","audio_bits_per_sample > 16 OR audio_sample_rate > 48000");
 $cfg['quick_search'][3] = array("Japanese Editions","album LIKE '%japan%' OR comment LIKE '%SHM-CD%'");
-$cfg['quick_search'][7] = array("Pop of the 80's","genre ='Pop' and ((album.year BETWEEN 1980 AND 1989) or comment like '%80s%')");
+$cfg['quick_search'][4] = array("Pop of the 80's","genre ='Pop' and ((album.year BETWEEN 1980 AND 1989) or comment like '%80s%')");
 
 
 
@@ -653,6 +640,17 @@ $cfg['favorite_comment'] 				= 'My favorites tracks';
 
 $cfg['lyrics_search'] 					= 'lyrics';
 
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Search lyrics in Musixmatch                                            |
+//  +------------------------------------------------------------------------+
+//  | Get free api key from https://developer.musixmatch.com/plans           |
+//  | 'Free' plan is enough.                                                 |
+//  +------------------------------------------------------------------------+
+
+$cfg['musixmatch_api_key'] = "";
 
 
 
@@ -1019,30 +1017,6 @@ unset($cfg['image_service_url']);
 unset($cfg['image_service_process']);
 unset($cfg['image_service_urldecode']);
 
-/*
-$cfg['image_AWSAccessKeyId']	    = '';
-$cfg['image_AWSSecretAccessKey']    = '';
-$cfg['image_AWSAssociateTag']       = 'free-usage-tier';
-
-$cfg['image_service_name'][]        = 'Amazon';
-$cfg['image_service_charset'][]     = 'UTF-8';
-$cfg['image_service_url'][]         = 'http://ecs.amazonaws.com/onca/xml?Service=AWSECommerceService&AWSAccessKeyId=%awsaccesskeyid&AssociateTag=%associatetag&Operation=ItemSearch&ResponseGroup=Images&SearchIndex=Music&Type=Lite&Artist=%artist&Title=%album&Timestamp=%timestamp';
-$cfg['image_service_process'][]     = 'amazon';
-$cfg['image_service_urldecode'][]   =  null;
-
-$cfg['image_service_name'][]        = 'Amazon (uk)';
-$cfg['image_service_charset'][]     = 'UTF-8';
-$cfg['image_service_url'][]         = 'http://ecs.amazonaws.co.uk/onca/xml?Service=AWSECommerceService&AWSAccessKeyId=%awsaccesskeyid&AssociateTag=%associatetag&Operation=ItemSearch&ResponseGroup=Images&SearchIndex=Music&Type=Lite&Artist=%artist&Title=%album&Timestamp=%timestamp';
-$cfg['image_service_process'][]     = 'amazon';
-$cfg['image_service_urldecode'][]   = null;
-
-$cfg['image_service_name'][]        = 'Amazon (de)';
-$cfg['image_service_charset'][]     = 'UTF-8';
-$cfg['image_service_url'][]         = 'http://ecs.amazonaws.de/onca/xml?Service=AWSECommerceService&AWSAccessKeyId=%awsaccesskeyid&AssociateTag=%associatetag&Operation=ItemSearch&ResponseGroup=Images&SearchIndex=Music&Type=Lite&Artist=%artist&Title=%album&Timestamp=%timestamp';
-$cfg['image_service_process'][]     = 'amazon';
-$cfg['image_service_urldecode'][]   = null;
-*/
-
 $cfg['image_service_name'][]        = 'Slothradio';
 $cfg['image_service_charset'][]     = 'UTF-8';
 $cfg['image_service_url'][]         = 'http://www.slothradio.com/covers/?adv=1&artist=%artist&album=%album&genre=p&imgsize=x&locale=us&sort=salesrank';
@@ -1066,16 +1040,6 @@ $cfg['image_service_charset'][]     = 'UTF-8';
 $cfg['image_service_url'][]         = 'http://images.google.com/images?gbv=1&q=%artist+%album';
 $cfg['image_service_process'][]     = '#/imgres\?imgurl=(http://.+?)&amp;.+?&amp;h=([0-9]+?)&amp;w=([0-9]+?)&amp;#s';
 $cfg['image_service_urldecode'][]   = true;
-
-/*
-$cfg['image_lastfm_api_key']        = '';
-
-$cfg['image_service_name'][]        = 'Last.fm';
-$cfg['image_service_charset'][]     = 'UTF-8';
-$cfg['image_service_url'][]         = 'http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=%api_key&artist=%artist&album=%album'; 
-$cfg['image_service_process'][]     = 'lastfm';
-$cfg['image_service_urldecode'][]   = null;
-*/
 
 
 

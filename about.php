@@ -160,6 +160,19 @@ function about() {
 <tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
+	<td style="vertical-align: top;">v1.08 <br>202?.??.??</td>
+	<td></td>
+	<td>
+	<ul style="padding-left: 1em;">
+	<li> HRA settings moved to from config.inc.php to GUI</li>
+	<li> fixed bugs</li>
+	</ul>
+	<br>
+	</td>
+	<td></td>
+</tr>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td>&nbsp;</td>
 	<td style="vertical-align: top;">v1.07 <br>2021.12.03</td>
 	<td></td>
 	<td>
