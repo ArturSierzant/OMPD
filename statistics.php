@@ -333,7 +333,7 @@ function mediaStatistics() {
 	<td></td>
 	<td>Number of albums from Tidal:</td>
 	<td></td>
-	<td align="right"><?php echo $albumTidal['albums']; ?></td>
+	<td align="right"><a href="index.php?action=viewAlbumsFromStreamingService&service=Tidal"><?php echo $albumTidal['albums']; ?></a></td>
 	<td colspan="5"></td>
 </tr>
 <?php } 
@@ -343,7 +343,7 @@ if ($albumHra['albums'] > 0) {
 	<td></td>
 	<td>Number of albums from HRA:</td>
 	<td></td>
-	<td align="right"><?php echo $albumHra['albums']; ?></td>
+	<td align="right"><a href="index.php?action=viewAlbumsFromStreamingService&service=HRA"><?php echo $albumHra['albums']; ?></a></td>
 	<td colspan="5"></td>
 </tr>
 <?php

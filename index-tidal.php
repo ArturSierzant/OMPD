@@ -344,6 +344,21 @@ if ($conn === true){
   }
 }
 echo '</table>' . "\n";
+
+$query = mysqli_query($db,"SELECT * FROM album WHERE album_id IN (SELECT album_id FROM album_id WHERE path LIKE 'tidal_%') LIMIT 15");
+if (mysqli_num_rows($query) > 0) {
+?>
+<h1>&nbsp;Albums from Tidal added to local library <a href="index.php?action=viewAlbumsFromStreamingService&service=Tidal">(more...)</a></h1>
+<div class="albums_container">
+<?php
+while ($album = mysqli_fetch_assoc($query)){
+    draw_tile($tileSize, $album);
+  }
+?>
+</div>
+
+<?php
+}
 echo '</div>'; //<div class="area">
 require_once('include/footer.inc.php');
 

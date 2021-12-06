@@ -44,6 +44,7 @@ else {$base_size = 150;}
 
 $cfg['menu']	= 'Library';
 $action 		= get('action');
+$service 		= get('service');
 $tileSizePHP	= get('tileSizePHP')	or $tileSizePHP = false;
 
 if		($action == '')					home();
@@ -68,6 +69,7 @@ elseif	($action == 'viewPopular')		viewPopular();
 elseif	($action == 'viewRecentlyPlayed')	viewRecentlyPlayed();
 elseif	($action == 'viewPlayedAtDay')	viewPlayedAtDay();
 elseif	($action == 'viewTidalAlbums')	viewTidalAlbums();
+elseif	($action == 'viewAlbumsFromStreamingService')	viewAlbumsFromStreamingService($service);
 else	message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]action');
 exit();
 
@@ -2051,7 +2053,7 @@ else {
 //  +------------------------------------------------------------------------+
 function viewHRA() {
 	global $cfg, $db;
-	global $base_size, $spaces, $scroll_bar_correction;
+	global $base_size, $spaces, $scroll_bar_correction, $tileSize;
 	
 	authenticate('access_media');
 	
@@ -2113,6 +2115,21 @@ function viewHRA() {
   showNewHRAAlbumsByCategory('Bestsellers', '/HIGHRES AUDIO/Musicstore/Bestsellers');
   showNewHRAAlbumsByCategory('Top albums', '/HIGHRES AUDIO/Musicstore/Top Alben');
   showNewHRAAlbumsByCategory('Listening tips', '/HIGHRES AUDIO/Musicstore/Hörtipps');
+  
+  $query = mysqli_query($db,"SELECT * FROM album WHERE album_id IN (SELECT album_id FROM album_id WHERE path LIKE 'hra_%') LIMIT 15");
+  if (mysqli_num_rows($query) > 0) {
+  ?>
+  <h1>&nbsp;Albums from HRA added to local library <a href="index.php?action=viewAlbumsFromStreamingService&service=HRA">(more...)</a></h1>
+  <div class="albums_container">
+  <?php
+  while ($album = mysqli_fetch_assoc($query)){
+      draw_tile($tileSizePHP, $album);
+    }
+  ?>
+  </div>
+
+  <?php
+  }
   echo '</div>';
 
   require_once('include/footer.inc.php');
@@ -2877,7 +2894,50 @@ function viewPlayedAtDay() {
 	require_once('include/footer.inc.php');
 }
 
+//  +------------------------------------------------------------------------+
+//  | View albums added to library from streaming services                   |
+//  +------------------------------------------------------------------------+
+function viewAlbumsFromStreamingService($service) {
+	global $cfg, $db;
+	global $base_size, $spaces, $scroll_bar_correction, $tileSizePHP;
+	
+  $type = get('type');
+  authenticate('access_media');
+	
+	// formattedNavigator
+	$nav			= array();
+	$nav['name'][]	= 'Library';
+	$nav['url'][]	= 'index.php';
+  if ($service == 'HRA') {
+    $nav['name'][]	= 'HighResAudio';
+  }
+  else {
+    $nav['name'][]	= $service;
+  }
+	$nav['url'][]	= 'index.php?action=view' . $service;
+  $nav['name'][] = "Albums from $service added to local library:";
+  require_once('include/header.inc.php');
+  echo ("<h1>Albums from $service in library</h1>");
+  if ($tileSizePHP) $size = $tileSizePHP;
+  echo '<div class="albums_container">';
+  
+  $query = mysqli_query($db,"SELECT * FROM album WHERE album_id IN (SELECT album_id FROM album_id WHERE path LIKE '" . strtolower($service) . "_%')");
+  
+  while ($album = mysqli_fetch_assoc($query)){
+    draw_tile($size, $album);
+  }
+  echo '</div>';
 
+?>
+
+<table cellspacing="0" cellpadding="0" class="border">
+<tr class="<?php echo $class; ?> smallspace"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
+<tr class="line"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
+</table>
+
+<?php
+	require_once('include/footer.inc.php');
+}
 
 
 ?>
