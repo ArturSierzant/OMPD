@@ -3573,10 +3573,16 @@ function setConfigItem($name, $value, $default_value = '') {
   $items_count = mysqli_num_rows($query);
   if ($items_count > 0) {
     $config = mysqli_fetch_assoc ($query);
-    $cfg[$name] = $config['value'];
+    $val = $config['value'];
+    if ($val === 'true') $val = true;
+    if ($val === 'false') $val = false;
+    $cfg[$name] = $val;
+    //$cfg[$name] = $config['value'];
   }
   else {
-    if ($value) {
+    if (isset($value)) {
+      if ($value === true) $value = 'true';
+      if ($value === false) $value = 'false';
       $sql = "INSERT INTO config (name, value) VALUES ('" . $db->real_escape_string($name) ."', '" . $db->real_escape_string($value) . "')";
       mysqli_query($db, $sql);
       $cfg[$name] = $value;

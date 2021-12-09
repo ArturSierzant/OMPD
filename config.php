@@ -65,6 +65,7 @@ elseif 	($action == 'cacheDeleteProfile')		{cacheDeleteProfile();			batchTransco
 elseif	($action == 'externalStorage')			externalStorage();
 elseif	($action == 'deleteExternalStorage')	{deleteExternalStorage();		externalStorage();}
 elseif	($action == 'editSettings')			editSettings();
+elseif	($action == 'settings')			settings();
 elseif	($action == 'tidal')			editTidal();
 elseif	($action == 'hra')			editHRA();
 
@@ -170,7 +171,17 @@ function config() {
 	if ($cfg['access_admin']) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
-	<td class="nowrap"><a href="config.php?action=editSettings"><i class="fa fa-cogs fa-fw icon-small"></i>Settings</a></td>
+	<td class="nowrap"><a href="config.php?action=settings"><i class="fa fa-cog fa-fw icon-small"></i>Settings</a></td>
+	<td></td>
+	<td>Edit basic settings</td>
+	<td></td>
+</tr>
+<?php
+	}
+		if ($cfg['access_admin']) { ?>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
+	<td class="nowrap"><a href="config.php?action=editSettings"><i class="fa fa-cogs fa-fw icon-small"></i>Advanced settings</a></td>
 	<td></td>
 	<td>Edit configuration file (<?php echo choose_config_file(); ?>)</td>
 	<td></td>
@@ -1293,6 +1304,26 @@ function deleteExternalStorage() {
 
 //  +------------------------------------------------------------------------+
 //  | Edit settings                                                          |
+//  +------------------------------------------------------------------------+
+function settings() {
+  global $cfg, $db;
+  authenticate('access_admin');
+
+  // formattedNavigator
+  $nav			= array();
+  $nav['name'][]	= 'Configuration';
+  $nav['url'][]	= 'config.php';
+  $nav['name'][]	= 'Settings';
+
+  require_once('include/header.inc.php');
+  require_once('include/settings_gui.inc.php');
+  require_once('include/footer.inc.php');
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Edit advanced settings (config.inc.php or config.local.inc.php)        |
 //  +------------------------------------------------------------------------+
 function editSettings() {
 	global $cfg, $db;

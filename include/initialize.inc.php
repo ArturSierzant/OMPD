@@ -241,7 +241,7 @@ if (NJB_SCRIPT != 'message.php' && NJB_SCRIPT != 'cache.php')
 
 
 //  +------------------------------------------------------------------------+
-//  | Initialize configuration in DB                                         |
+//  | Initialize configuration in DB and load into $cfg.                     |
 //  +------------------------------------------------------------------------+
 
 if (isset($db)) {

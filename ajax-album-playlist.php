@@ -86,7 +86,12 @@ for ($disc; $disc <= $max_disc; $disc++) {
 			$tracks[$key]["number"] = $t["trackNumber"]; 
 			$tracks[$key]["track_artist"] = $t["artist"]; 
 			$tracks[$key]["title"] = $t["title"]; 
-			$tracks[$key]["track_id"] = "hra_" . $t["playlistAdd"]; 
+      if (isset($t["playlistAdd"])) { 
+        $tracks[$key]["track_id"] = "hra_" . $t["playlistAdd"];
+      }
+      else {
+        $tracks[$key]["track_id"] = "hra_" . $t["id"];
+      }
 			$tracks[$key]["miliseconds"] = 1000 * $t["playtime"]; 
 			if ($t['genre']) {
 				$tracks[$key]["genre"] = $t["genre"]; 

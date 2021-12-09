@@ -25,4 +25,23 @@ setConfigItem('hra_username',$cfg['hra_username'],'');
 setConfigItem('hra_password',$cfg['hra_password'],'');
 setConfigItem('hra_lang',$cfg['hra_lang'],'en');
 
+//  +------------------------------------------------------------------------+
+//  | Display options                                                        |
+//  +------------------------------------------------------------------------+
+
+setConfigItem('show_suggested',$cfg['show_suggested'],'true');
+setConfigItem('show_last_played',$cfg['show_last_played'],'true');
+setConfigItem('show_miniplayer',$cfg['show_miniplayer'],'true');
+setConfigItem('show_quick_play',$cfg['show_quick_play'],'true');
+setConfigItem('show_album_format',$cfg['show_album_format'],'false');
+setConfigItem('show_album_popularity',$cfg['show_album_popularity'],'false');
+setConfigItem('show_discography_browser',$cfg['show_discography_browser'],'true');
+setConfigItem('show_album_versions',$cfg['show_album_versions'],'true');
+setConfigItem('show_composer',$cfg['show_composer'],'false');
+setConfigItem('show_multidisc',$cfg['show_multidisc'],'true');
+setConfigItem('group_multidisc',$cfg['group_multidisc'],'true');
+setConfigItem('show_DR',$cfg['show_DR'],'false');
+//setConfigItem('max_items_per_page',$cfg['max_items_per_page'],'63');
+
+
 ?>

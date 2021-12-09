@@ -61,10 +61,23 @@ $cfg['media_dir']                   = '/var/lib/mpd/music/';
 //  | HighResAudio                                                           |
 //  +------------------------------------------------------------------------+
 //  |                                                                        |
-//  | HRA setings were moved to GUI: Settings->HRA                           |
+//  | HRA setings were moved to GUI: Config->HRA                           |
 //  |                                                                        |
 //  +------------------------------------------------------------------------+
 
+//  +------------------------------------------------------------------------+
+//  | Options moved to GUI: Config->Settings:                                |
+//  +------------------------------------------------------------------------+
+//  | - Start page display options                                           |
+//  | - Miniplayer                                                           |
+//  | - Display quick play and add at albums covers                          |
+//  | - Album format badge and album popularity bar                          |
+//  | - Discography browser                                                  |
+//  | - Other versions of album                                              |
+//  | - Track composer                                                       |
+//  | - Multi-disc                                                           |
+//  | - Track dynamic range                                                  |
+//  +------------------------------------------------------------------------+
 
 //  +------------------- END OF NEW IN O!MPD 1.08 ---------------------------+
 
@@ -194,25 +207,6 @@ $cfg['upmpdcli_tidal'] = "";
 
 
 
-//  +------------------------------------------------------------------------+
-//  | Track dynamic range                                                    |
-//  +------------------------------------------------------------------------+
-//  | Show DR colum for track in Now Playing, album view and search results. |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_DR'] = false;
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Track composer                                                         |
-//  +------------------------------------------------------------------------+
-//  | Show track composer in Now Playing.                                    |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_composer'] = false;
-
-
 
 //  +------------------------------------------------------------------------------+
 //  | Play audio from Youtube                                                      |
@@ -252,25 +246,6 @@ $cfg['default_search_name'] = 'Google';
 
 
 
-//  +------------------------------------------------------------------------+
-//  | Discography browser                                                    |
-//  +------------------------------------------------------------------------+
-//  | Show thumbnails of all albums for given artist in album view           |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_discography_browser'] = true;
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Miniplayer                                                             |
-//  +------------------------------------------------------------------------+
-//  | Show miniplayer at bottom of every the page                            |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_miniplayer']					= true;
-
-
 
 //  +------------------------------------------------------------------------+
 //  | Various artists                                                        |
@@ -282,19 +257,6 @@ unset($cfg['VA']);
 $cfg['VA'][]           = 'Various Artists';
 $cfg['VA'][]           = 'VA';
 $cfg['VA'][]           = 'Różni wykonawcy';
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Multi-disc                                                             |
-//  +------------------------------------------------------------------------+
-//  | Show all of the multi-disc albums in album view and group multi-disc   |
-//  | albums into one in search results                                      |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_multidisc'] = true;
-$cfg['group_multidisc'] = true;
 
 
 
@@ -314,17 +276,6 @@ $cfg['multidisk_indicator'][] = "CD#";
 $cfg['multidisk_indicator'][] = " CD";
 $cfg['multidisk_indicator'][] = " Vol.";
 $cfg['multidisk_indicator'][] = " Part ";
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Other versions of album                                                |
-//  +------------------------------------------------------------------------+
-//  | Show other versions of album in album view                             |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_album_versions'] = true;
 
 
 
@@ -450,39 +401,6 @@ $cfg['ignore_media_dir_access_error'] 	= false;
 $cfg['proxy_enable'] 					= false;
 $cfg['proxy_server'] 					= '192.168.1.1';
 $cfg['proxy_port'] 						= '80'; 
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Start page display options                                             |
-//  +------------------------------------------------------------------------+
-//  | Choose what panels to show at start page                               |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_suggested']					= true;
-$cfg['show_last_played']				= true;
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Display quick play and add at albums covers                            |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_quick_play']					= true;
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Album format badge and album popularity bar settings                   |
-//  +------------------------------------------------------------------------+
-//  | Show album format badge and popularity bar on album cover              |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_album_format'] = false; 
-$cfg['show_album_popularity'] = false; 
 
 
 
