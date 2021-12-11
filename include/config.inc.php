@@ -40,20 +40,6 @@ $cfg['mysqli_auto_create_db']       = true;
 
 
 
-//  +------------------------------------------------------------------------+
-//  | Media directory                                                        |
-//  +------------------------------------------------------------------------+
-//  | Use a UNIX style directory scheme with a trailing slash.               |
-//  |                                                                        |
-//  | Windows:        'D:/Media/';                                           |
-//  | Linux/Unix/OSX: '/var/lib/mpd/music/';                                 |
-//  +------------------------------------------------------------------------+
-
-$cfg['media_dir']                   = '/var/lib/mpd/music/';
-
-
-
-
 //  +------------------- NEW IN O!MPD 1.08 ----------------------------------+
 
 
@@ -61,13 +47,14 @@ $cfg['media_dir']                   = '/var/lib/mpd/music/';
 //  | HighResAudio                                                           |
 //  +------------------------------------------------------------------------+
 //  |                                                                        |
-//  | HRA setings were moved to GUI: Config->HRA                           |
+//  | HRA setings were moved to GUI: Config->HRA                             |
 //  |                                                                        |
 //  +------------------------------------------------------------------------+
 
 //  +------------------------------------------------------------------------+
 //  | Options moved to GUI: Config->Settings:                                |
 //  +------------------------------------------------------------------------+
+//  | - Media directory                                                      |
 //  | - Start page display options                                           |
 //  | - Miniplayer                                                           |
 //  | - Display quick play and add at albums covers                          |
@@ -77,6 +64,12 @@ $cfg['media_dir']                   = '/var/lib/mpd/music/';
 //  | - Track composer                                                       |
 //  | - Multi-disc                                                           |
 //  | - Track dynamic range                                                  |
+//  | - Pagination settings                                                  |
+//  | - Playback settings                                                    |
+//  | - Update settings                                                      |
+//  | - Login and authenticate settings                                      |
+//  | - Youtube search settings                                              |
+//  | - Album features                                                       |
 //  +------------------------------------------------------------------------+
 
 //  +------------------- END OF NEW IN O!MPD 1.08 ---------------------------+
@@ -124,20 +117,6 @@ $cfg['fix_tidal_freezes'] = false;
 
 
 //  +------------------------------------------------------------------------+
-//  | Default login                                                          |
-//  +------------------------------------------------------------------------+
-//  | Default username/password that will be automatically entered           |
-//  | into login form. If empty, $cfg['anonymous_user'] will be used         |
-//  | as username                                                            |
-//  +------------------------------------------------------------------------+
-
-$cfg['default_username'] = '';
-$cfg['default_password'] = '';
-
-
-
-
-//  +------------------------------------------------------------------------+
 //  | Internet stations image                                                |
 //  +------------------------------------------------------------------------+
 //  | Path to images for radio stations and other streams.                   |
@@ -155,32 +134,6 @@ $cfg['default_password'] = '';
 //  +------------------------------------------------------------------------+
 
 $cfg['stream_covers_dir'] = 'covers/';
-
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Youtube search                                                         |
-//  +------------------------------------------------------------------------+
-//  | Show Youtube search results.                                           |
-//  |                                                                        |
-//  | O!MPD uses Google API to perform YouTube searches.                     |
-//  | Google API requires valid API key to be saved as $cfg['youtube_key'].  |
-//  | You can:                                                               |
-//  |  - use your own key (there is a lot tutorials in internet how to get   |
-//  |    one - it's easy and free)                                           |
-//  |  - use key provided by O!MPD - but it has day limit of uses            |
-//  |                                                                        |
-//  | Alternatively you can set $cfg['youtube_key'] = "". In that case       |
-//  | O!MPD will search YT results by asking google.com and parsing html     |
-//  | answer. Results list is usually limited to about 10 positions. But it  |
-//  | may stop working when Google changes layout of page with results.      |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_youtube_results'] = true;
-$cfg['youtube_key'] = "AIzaSyCasdVt44uKVWymVBVtILwtu1Sgyx2sdl0";
-$cfg['youtube_max_results'] = "30";
 
 
 
@@ -295,27 +248,6 @@ $cfg['album_versions_indicator'][] = " [";
 $cfg['album_versions_indicator'][] = ", ";
 $cfg['album_versions_indicator'][] = ": ";
 
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Multi-genre separator                                                  |
-//  +------------------------------------------------------------------------+
-//  | String separating genres and styles in GENRE and STYLE tags            |
-//  +------------------------------------------------------------------------+
-
-$cfg['multigenre_separator'] = "; ";
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Use STYLE tag                                                          |
-//  +------------------------------------------------------------------------+
-//  | Add values from STYLE tag to genres                                    |
-//  +------------------------------------------------------------------------+
-
-$cfg['style_enable'] = false;
 
 
 
@@ -482,25 +414,6 @@ $cfg['separator'][] = 	" aka ";
 
 
 
-//  +------------------------------------------------------------------------+
-//  | Use COMMENT as tags and display it in album view                       |
-//  +------------------------------------------------------------------------+
-
-$cfg['show_comments_as_tags']		= true;
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Tag separator                                                          |
-//  +------------------------------------------------------------------------+
-//  | Separator in COMMENT splitting COMMENT into tags                       |
-//  +------------------------------------------------------------------------+
-
-$cfg['tags_separator'] = 	";";
-
-
-
 
 //  +------------------------------------------------------------------------+
 //  | Multiple artists                                                       |
@@ -591,17 +504,7 @@ $cfg['misc_tracks_misc_artists_folder']	= 'Various Tracks';
 //  +------------------------------------------------------------------------+
 
 $cfg['misc_tracks_folder']				= 'Various Tracks of ';
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Pagination settings                                                    |
-//  +------------------------------------------------------------------------+
-//  | Number of albums displayed per page                                    |
-//  +------------------------------------------------------------------------+
-
-$cfg['max_items_per_page']				= 63; 
+ 
 
 
 
@@ -790,16 +693,6 @@ $cfg['cache_expire_zip']            = 14400; // 3600 * 4
 
 
 //  +------------------------------------------------------------------------+
-//  | Album features                                                         |
-//  +------------------------------------------------------------------------+
-
-$cfg['album_download']              = true;
-$cfg['album_copy']                  = true; //available when $cfg['external_storage'] points existing directory
-
-
-
-
-//  +------------------------------------------------------------------------+
 //  | Image                                                                  |
 //  +------------------------------------------------------------------------+
 //  | $cfg['image_read_embedded'] = true;                                    |
@@ -972,19 +865,6 @@ $cfg['ip_tools']                    = 'http://www.infosniper.net/index.php?ip_ad
 
 
 
-//  +------------------------------------------------------------------------+
-//  | add_autoplay: Automatic start playing when "add" a track or album      |
-//  | to a empty playlist                                                    |
-//  | play_queue: Will queue files to the playlist with "play" and start     |
-//  | playing the last queued track or album.                                |
-//  +------------------------------------------------------------------------+
-
-$cfg['add_autoplay']                = true;
-$cfg['play_queue']                  = false;
-$cfg['play_queue_limit']            = 250;
-
-
-
 
 //  +------------------------------------------------------------------------+
 //  | Auto suggest limit (search results)                                    |
@@ -1069,10 +949,6 @@ $cfg['album_copy_char_limit']                       = array('"', '*', ':', '<', 
 //  | Authenticate                                                           |
 //  +------------------------------------------------------------------------+
 
-$cfg['anonymous_user']              = 'anonymous';
-$cfg['session_lifetime']            = 604800; // 3600 * 24 * 7;
-$cfg['share_stream_lifetime']       = 604800;
-$cfg['share_download_lifetime']     = 604800;
 $cfg['login_delay']                 = 2000;
 
 
@@ -1126,7 +1002,7 @@ $cfg['php_info']                    = true;
 //  | For testing some stuff (on my system only) - should be set to off      |
 //  +------------------------------------------------------------------------+
 
-$cfg['testing']				              = 'off';
+$cfg['testing']                     = 'off';
 
 
 

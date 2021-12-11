@@ -37,11 +37,52 @@ setConfigItem('show_album_format',$cfg['show_album_format'],'false');
 setConfigItem('show_album_popularity',$cfg['show_album_popularity'],'false');
 setConfigItem('show_discography_browser',$cfg['show_discography_browser'],'true');
 setConfigItem('show_album_versions',$cfg['show_album_versions'],'true');
+setConfigItem('album_download',$cfg['album_download'],'false');
+setConfigItem('album_copy',$cfg['album_copy'],'false');
 setConfigItem('show_composer',$cfg['show_composer'],'false');
 setConfigItem('show_multidisc',$cfg['show_multidisc'],'true');
 setConfigItem('group_multidisc',$cfg['group_multidisc'],'true');
 setConfigItem('show_DR',$cfg['show_DR'],'false');
-//setConfigItem('max_items_per_page',$cfg['max_items_per_page'],'63');
+setConfigItem('max_items_per_page',$cfg['max_items_per_page'],'63');
+
+//  +------------------------------------------------------------------------+
+//  | Playback options                                                       |
+//  +------------------------------------------------------------------------+
+
+setConfigItem('add_autoplay',$cfg['add_autoplay'],'true');
+setConfigItem('play_queue',$cfg['play_queue'],'false');
+setConfigItem('play_queue_limit',$cfg['play_queue_limit'],'250');
+
+//  +------------------------------------------------------------------------+
+//  | Update options                                                         |
+//  +------------------------------------------------------------------------+
+
+setConfigItem('media_dir',$cfg['media_dir'],'/var/lib/mpd/music/');
+setConfigItem('style_enable',$cfg['style_enable'],'false');
+setConfigItem('show_comments_as_tags',$cfg['show_comments_as_tags'],'false');
+setConfigItem('tags_separator',$cfg['tags_separator'],';');
+setConfigItem('multigenre_separator',$cfg['multigenre_separator'],';');
+
+//  +------------------------------------------------------------------------+
+//  | Login options                                                          |
+//  +------------------------------------------------------------------------+
+
+setConfigItem('default_username',$cfg['default_username'],'');
+setConfigItem('default_password',$cfg['default_password'],'');
+setConfigItem('anonymous_user',$cfg['anonymous_user'],'anonymous');
+setConfigItem('session_lifetime',$cfg['session_lifetime'],'31536000'); //3600s * 24h * 365d 
+//setConfigItem('mpd_password',$cfg['mpd_password'],'');
+
+//  +------------------------------------------------------------------------+
+//  | Youtube options                                                        |
+//  +------------------------------------------------------------------------+
+
+setConfigItem('show_youtube_results',$cfg['show_youtube_results'],'true');
+setConfigItem('youtube_key',$cfg['youtube_key'],'AIzaSyCasdVt44uKVWymVBVtILwtu1Sgyx2sdl0');
+setConfigItem('youtube_max_results',$cfg['youtube_max_results'],'30');
+
+
+//setConfigItem('quick_search',serialize($cfg['quick_search']),'');
 
 
 ?>

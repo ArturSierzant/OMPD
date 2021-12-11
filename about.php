@@ -164,7 +164,7 @@ function about() {
 	<td></td>
 	<td>
 	<ul style="padding-left: 1em;">
-	<li> HRA settings moved to from config.inc.php to GUI</li>
+	<li> most of settings from config.inc.php moved to Config -> Settings</li>
 	<li> fixed bugs</li>
 	</ul>
 	<br>

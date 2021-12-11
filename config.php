@@ -173,7 +173,7 @@ function config() {
 	<td></td>
 	<td class="nowrap"><a href="config.php?action=settings"><i class="fa fa-cog fa-fw icon-small"></i>Settings</a></td>
 	<td></td>
-	<td>Edit basic settings</td>
+	<td>Edit settings</td>
 	<td></td>
 </tr>
 <?php
@@ -304,7 +304,8 @@ elseif (time() < $tidal_token['expires_after']) {
     $update_info = '<span class="update_info"><br>Logged in, token valid until ' . $exDate . '</span>';
   }
 }
-?>
+
+if ($cfg['access_admin']) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
 	<td class="nowrap"><a href="config.php?action=tidal"><i class="ux ico-tidal icon-small fa-fw"></i>Tidal</a></td>
@@ -321,7 +322,8 @@ elseif (time() < $tidal_token['expires_after']) {
 	<td></td>
 </tr>
 
-<?php 
+<?php
+}
 if ($cfg['access_admin'] && $cfg['php_info']) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td></td>
@@ -1333,7 +1335,7 @@ function editSettings() {
 	$nav			= array();
 	$nav['name'][]	= 'Configuration';
 	$nav['url'][]	= 'config.php';
-	$nav['name'][]	= 'Settings (' . choose_config_file() . ')';
+	$nav['name'][]	= 'Advanced settings (' . choose_config_file() . ')';
 	
 	require_once('include/header.inc.php');
 	require_once('include/settings.inc.php');
@@ -1409,9 +1411,12 @@ elseif (time() < $tidal_token['expires_after']) {
     $exDate = date('Y-m-d H:i',$tidal_token['expires_after']);
     $tLeft = $tidal_token['expires_after'] - time();
     $m = floor(($tLeft%3600)/60);
+    ($m == 1 ? $mt=" minute" : $mt=" minutes");
     $h = floor(($tLeft%86400)/3600);
+    ($h == 1 ? $ht=" hour " : $ht=" hours ");
     $d = floor(($tLeft%2592000)/86400);
-    $tLeft = $d . " days " . $h . " hours " . $m . " minutes";
+    ($d == 1 ? $dt=" day " : $dt=" days ");
+    $tLeft = $d . $dt . $h . $ht . $m . $mt;
 ?>
 <tr class="even">
   <td></td>

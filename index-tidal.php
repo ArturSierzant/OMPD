@@ -345,7 +345,7 @@ if ($conn === true){
 }
 echo '</table>' . "\n";
 
-$query = mysqli_query($db,"SELECT * FROM album WHERE album_id IN (SELECT album_id FROM album_id WHERE path LIKE 'tidal_%') LIMIT 15");
+$query = mysqli_query($db,"SELECT * FROM album WHERE album_id IN (SELECT album_id FROM album_id WHERE path LIKE 'tidal_%') ORDER BY album_add_time DESC LIMIT 14");
 if (mysqli_num_rows($query) > 0) {
 ?>
 <h1>&nbsp;Albums from Tidal added to local library <a href="index.php?action=viewAlbumsFromStreamingService&service=Tidal">(more...)</a></h1>

@@ -2116,7 +2116,7 @@ function viewHRA() {
   showNewHRAAlbumsByCategory('Top albums', '/HIGHRES AUDIO/Musicstore/Top Alben');
   showNewHRAAlbumsByCategory('Listening tips', '/HIGHRES AUDIO/Musicstore/Hörtipps');
   
-  $query = mysqli_query($db,"SELECT * FROM album WHERE album_id IN (SELECT album_id FROM album_id WHERE path LIKE 'hra_%') LIMIT 15");
+  $query = mysqli_query($db,"SELECT * FROM album WHERE album_id IN (SELECT album_id FROM album_id WHERE path LIKE 'hra_%') ORDER BY album_add_time DESC LIMIT 14");
   if (mysqli_num_rows($query) > 0) {
   ?>
   <h1>&nbsp;Albums from HRA added to local library <a href="index.php?action=viewAlbumsFromStreamingService&service=HRA">(more...)</a></h1>
@@ -2921,7 +2921,7 @@ function viewAlbumsFromStreamingService($service) {
   if ($tileSizePHP) $size = $tileSizePHP;
   echo '<div class="albums_container">';
   
-  $query = mysqli_query($db,"SELECT * FROM album WHERE album_id IN (SELECT album_id FROM album_id WHERE path LIKE '" . strtolower($service) . "_%')");
+  $query = mysqli_query($db,"SELECT * FROM album WHERE album_id IN (SELECT album_id FROM album_id WHERE path LIKE '" . strtolower($service) . "_%') ORDER BY album_add_time DESC");
   
   while ($album = mysqli_fetch_assoc($query)){
     draw_tile($size, $album);
