@@ -44,6 +44,9 @@ $cfg['sign']				= rawurlencode(get('sign'));				// required for header
 $cfg['img']					= 'skin/' . rawurlencode($skin) . '/img/';	// required for header
 $cfg['skin']				= $skin;									// required for header
 
+if (!isset($cfg['max_items_per_page'])) $cfg['max_items_per_page'] = 63; //required for template.footer.php
+
+
 if (validateSkin($skin) == false)
 	exit('<h1>Wrong value</h1><p>Unsupported input value for <i>skin</i></p>');
 

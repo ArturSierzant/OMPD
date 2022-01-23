@@ -37,14 +37,7 @@ flush();
 
 authenticate('access_statistics');
 
-// formattedNavigator
-$nav			= array();
-$nav['name'][]	= 'Configuration';
-$nav['url'][]	= 'config.php';
-$nav['name'][]	= 'Media statistics';
-$nav['url'][]	= 'statistics.php';
-$nav['name'][]	= $title;
-require_once('include/header.inc.php');
+
 
 $action	 			= get('action');
 $audio_dataformat 	= get('audio_dataformat');
@@ -56,15 +49,15 @@ $tileSizePHP = get('tileSizePHP');
 if	($audio_dataformat)	{
 	$title = $audio_dataformat . ' audio';
 	//$onmouseoverImage = true;
-	$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
+	$query3 = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
 		FROM track, album 
 		WHERE track.audio_dataformat = "' . mysqli_real_escape_string($db,$audio_dataformat) . '"
 		AND track.album_id = album.album_id 
 		GROUP BY album.album_id 
 		ORDER BY album.artist_alphabetic, album.album');
-	$cfg['items_count'] = $album_count = mysqli_num_rows($query);
+	$cfg['items_count'] = $album_count = mysqli_num_rows($query3);
 	if ($album_count > $max_item_per_page) {
-			$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
+			$query3 = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
 			FROM track, album 
 			WHERE track.audio_dataformat = "' . mysqli_real_escape_string($db,$audio_dataformat) . '"
 			AND track.album_id = album.album_id 
@@ -76,7 +69,7 @@ if	($audio_dataformat)	{
 elseif ($video_dataformat) {
 	$title = $video_dataformat . ' video';
 	$onmouseoverImage = true;
-	$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
+	$query3 = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
 		FROM track, album 
 		WHERE track.video_dataformat = "' . mysqli_real_escape_string($db,$video_dataformat) . '"
 		AND track.album_id = album.album_id 
@@ -86,12 +79,12 @@ elseif ($video_dataformat) {
 elseif ($action == 'all') {
 	$title = 'All';
 	//$onmouseoverImage = true;
-	$query = mysqli_query($db,'SELECT artist_alphabetic, album, album.image_id, album.album_id
+	$query3 = mysqli_query($db,'SELECT artist_alphabetic, album, album.image_id, album.album_id
 		FROM album 
 		ORDER BY artist_alphabetic, album');
-	$cfg['items_count'] = $album_count = mysqli_num_rows($query);
+	$cfg['items_count'] = $album_count = mysqli_num_rows($query3);
 	if ($album_count > $max_item_per_page) {
-			$query = mysqli_query($db,'SELECT artist_alphabetic, album, album.image_id, album.album_id
+			$query3 = mysqli_query($db,'SELECT artist_alphabetic, album, album.image_id, album.album_id
 		FROM album 
 		ORDER BY artist_alphabetic, album
 			LIMIT ' . ($page - 1) * $max_item_per_page . ','  . ($max_item_per_page));
@@ -100,14 +93,14 @@ elseif ($action == 'all') {
 elseif ($action == 'unique_played') {
 	$title = 'Played albums';
 	//$onmouseoverImage = true;
-	$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
+	$query3 = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
 		FROM album RIGHT JOIN (SELECT DISTINCT counter.album_id FROM counter WHERE counter.album_id NOT LIKE "tidal_%") as c
 		ON album.album_id = c.album_id
     WHERE album.album IS NOT NULL
 		ORDER BY album.artist_alphabetic, album.album');
-	$cfg['items_count'] = $album_count = mysqli_num_rows($query);
+	$cfg['items_count'] = $album_count = mysqli_num_rows($query3);
 	if ($album_count > $max_item_per_page) {
-			$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
+			$query3 = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
 			FROM album RIGHT JOIN (SELECT DISTINCT counter.album_id FROM counter WHERE counter.album_id NOT LIKE "tidal_%") as c
 			ON album.album_id = c.album_id
       WHERE album.album IS NOT NULL
@@ -119,17 +112,19 @@ elseif ($action == 'unique_played') {
 elseif ($action == 'not_played') {
 	$title = 'Never played albums';
 	//$onmouseoverImage = true;
-	$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
+	$query3 = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
 		FROM album 
 		WHERE album_id NOT IN  
 		(SELECT DISTINCT counter.album_id FROM counter)
-		ORDER BY album.artist_alphabetic, album.album');
-	$cfg['items_count'] = $album_count = mysqli_num_rows($query);
+		AND album.updated <> 9
+    ORDER BY album.artist_alphabetic, album.album');
+	$cfg['items_count'] = $album_count = mysqli_num_rows($query3);
 	if ($album_count > $max_item_per_page) {
-			$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
+			$query3 = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.image_id, album.album_id
 			FROM album 
 			WHERE album_id NOT IN  
 			(SELECT DISTINCT counter.album_id FROM counter)
+      AND album.updated <> 9
 			ORDER BY album.artist_alphabetic, album.album
 			LIMIT ' . ($page - 1) * $max_item_per_page . ','  . ($max_item_per_page));
 	}
@@ -137,14 +132,14 @@ elseif ($action == 'not_played') {
 elseif ($action == 'noImageFront') {
 	$title = 'No image_front file';
 	//$onmouseoverImage = false;
-	$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id
+	$query3 = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id
 		FROM album, bitmap
 		WHERE image_front = ""
 		AND album.album_id = bitmap.album_id 
 		ORDER BY album.artist_alphabetic, album.album');
-	$cfg['items_count']  = $noImageFrontCount = mysqli_num_rows($query);
+	$cfg['items_count']  = $noImageFrontCount = mysqli_num_rows($query3);
 	if ($noImageFrontCount > $max_item_per_page) {
-		$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id
+		$query3 = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id
 		FROM album, bitmap
 		WHERE image_front = ""
 		AND album.album_id = bitmap.album_id 
@@ -155,7 +150,7 @@ elseif ($action == 'noImageFront') {
 elseif ($action == 'imageError') {
 	$title = 'image_front file error';
 	//$onmouseoverImage = false;
-	$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id
+	$query3 = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id
 		FROM album, bitmap
 		WHERE flag = "10"
 		AND album.album_id = bitmap.album_id 
@@ -164,14 +159,14 @@ elseif ($action == 'imageError') {
 elseif ($action == 'noImageFrontCover') {
 	$title = 'image_front file has less then ' . $cfg['image_front_cover_treshold'] . 'px';
 	//$onmouseoverImage = false;
-	$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id, album.image_id
+	$query3 = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id, album.image_id
 		FROM album, bitmap
 		WHERE image_front_width * image_front_height < ' . $cfg['image_front_cover_treshold'] . '
 		AND album.album_id = bitmap.album_id 
 		ORDER BY album.artist_alphabetic, album.album');
-		$cfg['items_count']  = $noImageFrontCoverCount = mysqli_num_rows($query);
+		$cfg['items_count']  = $noImageFrontCoverCount = mysqli_num_rows($query3);
 	if ($noImageFrontCoverCount > $max_item_per_page) {
-		$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id, album.image_id
+		$query3 = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id, album.image_id
 		FROM album, bitmap
 		WHERE image_front_width * image_front_height < ' . $cfg['image_front_cover_treshold'] . '
 		AND album.album_id = bitmap.album_id 
@@ -182,7 +177,7 @@ elseif ($action == 'noImageFrontCover') {
 elseif ($action == 'noImageBackCover') {
 	$title = 'No ' . $cfg['image_back'] . ' for cover';
 	$onmouseoverImage = false;
-	$query = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id
+	$query3 = mysqli_query($db,'SELECT album.artist_alphabetic, album.album, album.album_id
 		FROM album, bitmap
 		WHERE image_back = ""
 		AND album.album_id = bitmap.album_id 
@@ -196,12 +191,21 @@ elseif 	($action == 'deleteFile')				deleteFile();
 elseif	($action == '')							mediaStatistics();
 else											message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]action');
 
+// formattedNavigator
+$nav			= array();
+$nav['name'][]	= 'Configuration';
+$nav['url'][]	= 'config.php';
+$nav['name'][]	= 'Media statistics';
+$nav['url'][]	= 'statistics.php';
+$nav['name'][]	= $title;
+require_once('include/header.inc.php');
+
 ?>
 
 
 <div class="albums_container">
 <?php
-	while ($album = mysqli_fetch_assoc($query)) {		
+	while ($album = mysqli_fetch_assoc($query3)) {		
 			if ($album) {
 				if ($tileSizePHP) $size = $tileSizePHP;
 				draw_tile($size,$album);
@@ -228,61 +232,61 @@ function mediaStatistics() {
 	@ob_flush();
 	flush();
 	
-	$query = mysqli_query($db,'SELECT artist FROM album GROUP BY artist');
+	$query3 = mysqli_query($db,'SELECT artist FROM album GROUP BY artist');
 	$artists = mysqli_affected_rows($db);
 	
-	$query = mysqli_query($db,'SELECT COUNT(discs) AS albums, SUM(discs) AS discs FROM album');
-	$album = mysqli_fetch_assoc($query);
+	$query3 = mysqli_query($db,'SELECT COUNT(discs) AS albums, SUM(discs) AS discs FROM album');
+	$album = mysqli_fetch_assoc($query3);
 	
-  $query = mysqli_query($db,'SELECT COUNT(*) AS albums FROM album_id WHERE path LIKE "tidal_%"');
-	$albumTidal = mysqli_fetch_assoc($query);
+  $query3 = mysqli_query($db,'SELECT COUNT(*) AS albums FROM album_id WHERE path LIKE "tidal_%"');
+	$albumTidal = mysqli_fetch_assoc($query3);
   
-  $query = mysqli_query($db,'SELECT COUNT(*) AS albums FROM album_id WHERE path LIKE "hra_%"');
-	$albumHra = mysqli_fetch_assoc($query);
+  $query3 = mysqli_query($db,'SELECT COUNT(*) AS albums FROM album_id WHERE path LIKE "hra_%"');
+	$albumHra = mysqli_fetch_assoc($query3);
   
-	$query = mysqli_query($db, 'SELECT album, album_add_time, album_id, image_id, artist, artist_alphabetic
+	$query3 = mysqli_query($db, 'SELECT album, album_add_time, album_id, image_id, artist, artist_alphabetic
 			FROM album
 			WHERE album_add_time
 			');
-	$album_multidisc = albumMultidisc($query);
+	$album_multidisc = albumMultidisc($query3);
 	
-	$query = mysqli_query($db,'SELECT COUNT(relative_file) AS all_tracks,
+	$query3 = mysqli_query($db,'SELECT COUNT(relative_file) AS all_tracks,
 		SUM(miliseconds) AS sum_miliseconds,
 		SUM(filesize) AS sum_size
 		FROM track');
-	$track = mysqli_fetch_assoc($query);
+	$track = mysqli_fetch_assoc($query3);
 	$total_miliseconds = $track['sum_miliseconds'];
 	
-	$query = mysqli_query($db,'SELECT
+	$query3 = mysqli_query($db,'SELECT
 		SUM(filesize) AS sum_size
 		FROM cache');
-	$cache = mysqli_fetch_assoc($query);
+	$cache = mysqli_fetch_assoc($query3);
 	
 	$database_size = 0;
-	$query = mysqli_query($db,'SHOW TABLE STATUS');
-	while ($database = mysqli_fetch_assoc($query))
+	$query3 = mysqli_query($db,'SHOW TABLE STATUS');
+	while ($database = mysqli_fetch_assoc($query3))
 		$database_size += $database['Data_length'] + $database['Index_length'];
 		
-	$query = mysqli_query($db,'SELECT artist, title, COUNT(artist) AS n1, COUNT(title) AS n2
+	$query3 = mysqli_query($db,'SELECT artist, title, COUNT(artist) AS n1, COUNT(title) AS n2
 		FROM track
 		GROUP BY artist, title
 		HAVING n1 > 1 AND n2 > 1');
 	$duplicate_name = mysqli_affected_rows($db);
 	
-	$query = mysqli_query($db,'SELECT COUNT(*) as played FROM counter WHERE album_id NOT LIKE "%\_%"');
-	$rsPlayed = mysqli_fetch_assoc($query);
+	$query3 = mysqli_query($db,'SELECT COUNT(*) as played FROM counter WHERE album_id NOT LIKE "%\_%"');
+	$rsPlayed = mysqli_fetch_assoc($query3);
 	$total_played_albums = $rsPlayed['played'];
 	
-	$query = mysqli_query($db,'SELECT COUNT(c.album_id) as played FROM (SELECT DISTINCT album_id FROM counter WHERE album_id NOT LIKE "%\_%") as c');
-	$rsPlayedUnique = mysqli_fetch_assoc($query);
+	$query3 = mysqli_query($db,'SELECT COUNT(c.album_id) as played FROM (SELECT DISTINCT album_id FROM counter WHERE album_id NOT LIKE "%\_%") as c');
+	$rsPlayedUnique = mysqli_fetch_assoc($query3);
 	$unique_played_albums = $rsPlayedUnique['played'];
 	
-	/* $query = mysqli_query($db,'SELECT COUNT(c.album_id) as not_played FROM (SELECT DISTINCT album.album_id FROM album WHERE album.album_id NOT IN 
+	/* $query3 = mysqli_query($db,'SELECT COUNT(c.album_id) as not_played FROM (SELECT DISTINCT album.album_id FROM album WHERE album.album_id NOT IN 
 	(SELECT DISTINCT counter.album_id FROM counter)) as c');
-	$rsNotPlayed = mysqli_fetch_assoc($query);
+	$rsNotPlayed = mysqli_fetch_assoc($query3);
 	$not_played_albums = $rsNotPlayed['not_played'];
 	 */
-	$query = mysqli_query($db,'SELECT SUBSTRING_INDEX( track_id, "_", -1 ) AS hash, filesize, COUNT( SUBSTRING_INDEX( track_id, "_", -1 ) ) AS n1, COUNT( filesize ) AS n2
+	$query3 = mysqli_query($db,'SELECT SUBSTRING_INDEX( track_id, "_", -1 ) AS hash, filesize, COUNT( SUBSTRING_INDEX( track_id, "_", -1 ) ) AS n1, COUNT( filesize ) AS n2
 	FROM track
 	GROUP BY filesize, hash
 	HAVING n1 > 1 AND n2 > 1');
@@ -379,8 +383,8 @@ $max_year = 0;
 $histogram = array();
 $histogram_year = array();
 $date = new DateTime();
-$query = mysqli_query($db,'SELECT album_add_time FROM album ORDER BY album_add_time DESC');
-while ($rs = mysqli_fetch_assoc($query)) {
+$query3 = mysqli_query($db,'SELECT album_add_time FROM album ORDER BY album_add_time DESC');
+while ($rs = mysqli_fetch_assoc($query3)) {
 	$date->setTimestamp($rs['album_add_time']);
 	$period = $date->format('Y-m');
 	$period_year = $date->format('Y');
@@ -587,8 +591,8 @@ if ($isHidden) {
 
 <?php
 	$i = 0;
-	$query = mysqli_query($db,'SELECT audio_dataformat FROM track WHERE audio_dataformat != ""  GROUP BY audio_dataformat ORDER BY audio_dataformat');
-	while($track = mysqli_fetch_assoc($query)) {
+	$query3 = mysqli_query($db,'SELECT audio_dataformat FROM track WHERE audio_dataformat != ""  GROUP BY audio_dataformat ORDER BY audio_dataformat');
+	while($track = mysqli_fetch_assoc($query3)) {
 		$audio_dataformat = $track['audio_dataformat'];
 		$track = mysqli_fetch_assoc(mysqli_query($db,'SELECT SUM(miliseconds) AS sum_miliseconds FROM track WHERE audio_dataformat = "' . mysqli_real_escape_string($db,$audio_dataformat) . '"')); ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
@@ -779,12 +783,12 @@ function duplicateContent() {
 <table cellspacing="0" cellpadding="0" class="border">
 <?php
 	$i=0;
-	$query = mysqli_query($db,'SELECT SUBSTRING_INDEX(track_id, "_", -1) AS hash, filesize, COUNT(SUBSTRING_INDEX(track_id, "_", -1)) AS n1, COUNT(filesize) AS n2
+	$query3 = mysqli_query($db,'SELECT SUBSTRING_INDEX(track_id, "_", -1) AS hash, filesize, COUNT(SUBSTRING_INDEX(track_id, "_", -1)) AS n1, COUNT(filesize) AS n2
 		FROM track
 		GROUP BY filesize, hash
 		HAVING n1 > 1 AND n2 > 1
 		ORDER BY filesize');
-	while ($track = mysqli_fetch_assoc($query)) {
+	while ($track = mysqli_fetch_assoc($query3)) {
 		if ($i > 1) echo '<tr class="line"><td colspan="11"></td></tr>'; ?>
 <tr class="header">
 	<td class="space"></td>
@@ -804,11 +808,11 @@ function duplicateContent() {
 	$hash = $track['hash'];
 	$filesize = $track['filesize'];
 	$i=0;
-	$query2 = mysqli_query($db,'SELECT relative_file, miliseconds, track_id FROM track
+	$query32 = mysqli_query($db,'SELECT relative_file, miliseconds, track_id FROM track
 		WHERE SUBSTRING_INDEX(track_id, "_", -1) = "' . mysqli_real_escape_string($db,$hash) . '"
 		AND filesize = ' . (int) $filesize . '
 		ORDER BY relative_file');
-	while ($track = mysqli_fetch_assoc($query2)) { ?>
+	while ($track = mysqli_fetch_assoc($query32)) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 	<td></td>
 	<td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id=' . $track['track_id'] . '\');" onMouseOver="return overlib(\'Insert and play track\');" onMouseOut="return nd();"><i class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
@@ -861,13 +865,13 @@ function duplicateName() {
 <tr class="line"><td colspan="7"></td></tr>
 <?php
 	$i=0;
-	$query = mysqli_query($db,'SELECT artist, title, COUNT(artist) AS n1, COUNT(title) AS n2
+	$query3 = mysqli_query($db,'SELECT artist, title, COUNT(artist) AS n1, COUNT(title) AS n2
 		FROM track
 		GROUP BY artist, title
 		HAVING n1 > 1
 		AND n2 > 1
 		ORDER BY artist, title');
-	while ($track = mysqli_fetch_assoc($query)) { ?>
+	while ($track = mysqli_fetch_assoc($query3)) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 	<td></td>
 	<td><a href="statistics.php?action=duplicateFileName&amp;artist=<?php echo rawurlencode($track['artist']); ?>&amp;title=<?php echo rawurlencode($track['title']); ?>"><?php echo html($track['artist']); ?></a></td>
@@ -924,11 +928,11 @@ function duplicateFileName() {
 <tr class="line"><td colspan="11"></td></tr>
 <?php
 	$i=0;
-	$query = mysqli_query($db,'SELECT relative_file, filesize, miliseconds, track_id FROM track
+	$query3 = mysqli_query($db,'SELECT relative_file, filesize, miliseconds, track_id FROM track
 		WHERE artist	= "' . mysqli_real_escape_string($db,$artist) . '"
 		AND title		= "' . mysqli_real_escape_string($db,$title) . '"
 		ORDER BY relative_file');
-	while ($track = mysqli_fetch_assoc($query)) { ?>
+	while ($track = mysqli_fetch_assoc($query3)) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 	<td></td>
 	<td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id=' . $track['track_id'] . '\');" onMouseOver="return overlib(\'Insert and play track\');" onMouseOut="return nd();"><i class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
@@ -983,8 +987,8 @@ function fileError() {
 <tr class="line"><td colspan="13"></td></tr>
 <?php
 	$i=0;
-	$query = mysqli_query($db,'SELECT relative_file, filesize, error, track_id FROM track WHERE error != "" ORDER BY relative_file');
-	while ($track = mysqli_fetch_assoc($query)) { ?>
+	$query3 = mysqli_query($db,'SELECT relative_file, filesize, error, track_id FROM track WHERE error != "" ORDER BY relative_file');
+	while ($track = mysqli_fetch_assoc($query3)) { ?>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>_error mouseover">
 	<td></td>
 	<td></td>
@@ -1020,10 +1024,10 @@ function deleteFile() {
 	$relative_file	= get('relative_file');
 	$file			= $cfg['media_dir'] . $relative_file;
 	
-	$query = mysqli_query($db,'SELECT relative_file
+	$query3 = mysqli_query($db,'SELECT relative_file
 		FROM track
 		WHERE relative_file	= BINARY "' . mysqli_real_escape_string($db,$relative_file) . '"');
-	$track = mysqli_fetch_assoc($query);
+	$track = mysqli_fetch_assoc($query3);
 	
 	if ($track == false)
 		message(__FILE__, __LINE__, 'error', '[b]Error[/b][br]relative_file not found in database');

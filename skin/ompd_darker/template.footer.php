@@ -121,8 +121,6 @@ else {
 	<a href="<?php echo $url_last_page ?>"><span><i class="fa fa-angle-double-right"></i></span></a>
 <?php }?>
 
-
-
 </div>
 
 <?php 

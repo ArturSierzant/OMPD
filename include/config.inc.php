@@ -822,7 +822,7 @@ $cfg['search_charset'][]            = 'UTF-8';
 //  | For the Last.fm web services a "API key" is needed. Get this key free  |
 //  | from:  http://www.last.fm/api/account                                  |
 //  +------------------------------------------------------------------------+
-unset($cfg['image_service_name']);
+/* unset($cfg['image_service_name']);
 unset($cfg['image_service_charset']);
 unset($cfg['image_service_url']);
 unset($cfg['image_service_process']);
@@ -852,7 +852,7 @@ $cfg['image_service_url'][]         = 'http://images.google.com/images?gbv=1&q=%
 $cfg['image_service_process'][]     = '#/imgres\?imgurl=(http://.+?)&amp;.+?&amp;h=([0-9]+?)&amp;w=([0-9]+?)&amp;#s';
 $cfg['image_service_urldecode'][]   = true;
 
-
+ */
 
 
 //  +------------------------------------------------------------------------+

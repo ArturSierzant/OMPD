@@ -36,6 +36,7 @@ if (isset($cfg['footer']) && $cfg['footer'] == 'close') {
 	echo '<!-- end of file -->' . "\n";
 	exit();
 }
+
 $footer = ($cfg['username'] != '') ? '| <a href="index.php?authenticate=logout">Logout: ' . html($cfg['username']) . '</a> ' : '';
 $footer .= '| <a href="about.php">O!MPD ' . html(NJB_VERSION) . '</a> ';
 $footer .= '| Script execution time: <span id="execution_time">' . executionTime() . '</span> |';

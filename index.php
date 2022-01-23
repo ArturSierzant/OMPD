@@ -1144,7 +1144,7 @@ function viewYear() {
 	<td class="space left"></td>
 	<td width="80px"><a <?php echo ($order_bitmap_year == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="index.php?action=viewYear&amp;sort=<?php echo $sort_year; ?>">Year&nbsp;<?php echo $order_bitmap_year; ?></a></td>	
 	<td align="left" class="bar">Graph</td>
-	<td align="center" width="130px">Number of discs&nbsp;</td>
+	<td align="center" width="130px">Discs count&nbsp;</td>
 </tr>
 
 <?php
@@ -1258,7 +1258,7 @@ function viewGenre() {
 	<td class="space left"></td>
 	<td style="width: 200px; max-width: 30%;"><a <?php echo ($order_bitmap_genre == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="index.php?action=viewGenre&amp;sort=<?php echo $sort_genre; ?>">Genre&nbsp;<?php echo $order_bitmap_genre; ?></a></td>	
 	<td align="left" class="bar">Graph</td>
-	<td align="center" width="130px">Number of discs&nbsp;</td>
+	<td align="center" width="130px">Discs count&nbsp;</td>
 	
 </tr>
 
@@ -1381,7 +1381,7 @@ function viewDR() {
 	<td class="space left"></td>
 	<td width="80px"><a <?php echo ($order_bitmap_dr == '<span class="typcn"></span>') ? '':'class="sort_selected"';?> href="index.php?action=viewDR&amp;sort=<?php echo $sort_dr; ?>">DR&nbsp;<?php echo $order_bitmap_dr; ?></a></td>	
 	<td align="left" class="bar">Graph</td>
-	<td align="center" width="130px">Disc counts&nbsp;</td>
+	<td align="center" width="130px">Discs count&nbsp;</td>
 	
 </tr>
 
