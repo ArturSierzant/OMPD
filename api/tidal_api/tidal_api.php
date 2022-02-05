@@ -39,8 +39,8 @@ class TidalAPI {
   const RESOURCES_URL = "https://resources.tidal.com/images/";
   
 
-  public function __construct(){
-    $this->apiKey = array('clientId' => base64_decode('OFNFWldhNEoxTlZDNVU1WQ=='), 'clientSecret' => base64_decode('b3dVWURreGRkeis5RnB2R1gyNERseEVDTnRGRU1CeGlwVTBsQmZyYnE2MD0='));
+  public function __construct($tidal_client_id, $tidal_client_secret){
+    $this->apiKey = array('clientId' => $tidal_client_id, 'clientSecret' => $tidal_client_secret);
     $this->curl = curl_init();
     curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
     //to fix "SSL certificate problem: unable to get local issuer certificate" under Windows uncomment below lines or use function fixSSLcertificate():

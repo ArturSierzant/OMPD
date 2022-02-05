@@ -26,6 +26,17 @@ setConfigItem('hra_password',$cfg['hra_password'],'');
 setConfigItem('hra_lang',$cfg['hra_lang'],'en');
 
 //  +------------------------------------------------------------------------+
+//  | Tidal                                                                  |
+//  +------------------------------------------------------------------------+
+
+setConfigItem('tidal_client_id',$cfg['tidal_client_id'],'');
+setConfigItem('tidal_client_secret',$cfg['tidal_client_secret'],'');
+setConfigItem('tidal_audio_quality',$cfg['tidal_audio_quality'],'LOSSLESS');
+setConfigItem('fix_tidal_freezes',$cfg['fix_tidal_freezes'],'false');
+setConfigItem('tidal_direct',$cfg['tidal_direct'],'true');
+setConfigItem('upmpdcli_tidal',$cfg['upmpdcli_tidal'],'');
+
+//  +------------------------------------------------------------------------+
 //  | Display options                                                        |
 //  +------------------------------------------------------------------------+
 

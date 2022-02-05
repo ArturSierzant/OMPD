@@ -86,7 +86,7 @@ $cfg['sign_validated']		= false;
 $cfg['align']				= false;
 
 //Tidal object
-$t							= null;
+$t = null;
 //$tidalAutoRefresh is set in play.php to prevent token refreshing 
 //when miniplayer is used
 if (!isset($tidalAutoRefresh)) $tidalAutoRefresh = true;

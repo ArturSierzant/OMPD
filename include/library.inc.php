@@ -532,7 +532,7 @@ function listOfFavorites($file = true, $stream = true, $track_id = "", $track_mp
 
 function tidal() {
   global $cfg, $db;
-  $t = new TidalAPI;
+  $t = new TidalAPI($cfg['tidal_client_id'], $cfg['tidal_client_secret']);
   $t->userId = $cfg['tidal_userid'];
   $t->countryCode = $cfg['tidal_countryCode'];
   $t->token = $cfg["tidal_token"];
@@ -3592,6 +3592,19 @@ function setConfigItem($name, $value, $default_value = '') {
       mysqli_query($db, $sql);
       $cfg[$name] = $default_value;
     }
+  }
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Set checkboxes                                                         |
+//  +------------------------------------------------------------------------+
+function setChkBox ($value, $item) {
+  if ($value === true) {
+    echo '<i data-name="' . $item . '" data-val="true" id="cfg_' . $item . '" class="fa fa-check-circle-o fa-fw icon-small"></i>';
+  }
+  if ($value === false) {
+    echo '<i data-name="' . $item . '" data-val="false" id="cfg_' . $item . '" class="fa fa-circle-o fa-fw icon-small"></i>';
   }
 }
 

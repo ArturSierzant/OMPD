@@ -70,48 +70,11 @@ $cfg['mysqli_auto_create_db']       = true;
 //  | - Login and authenticate settings                                      |
 //  | - Youtube search settings                                              |
 //  | - Album features                                                       |
+//  | - Tidal settings                                                       |
 //  +------------------------------------------------------------------------+
 
 //  +------------------- END OF NEW IN O!MPD 1.08 ---------------------------+
 
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Tidal                                                                  |
-//  +------------------------------------------------------------------------+
-//  | You can play music from Tidal using mpd's Tidal plugin. This requires: |
-//  |  - mpd version >=0.21                                                  |
-//  |  - plugin 'tidal' in mpd.conf with valid username/password/token fields|
-//  |                                                                        |
-//  | If your mpd doesn't support Tidal, you can set 'tidal_direct' to true. |
-//  | It will force O!MPD to get stream from Tidal and pass it to mpd.       |
-//  | In this case you can choose 'tidal_audio_quality', which can be one of:|
-//  | "LOW" - 96kbps, AAC                                                    |
-//  | "HIGH" - 320kbps, AAC                                                  |
-//  | "LOSSLESS" - lossless codec: FLAC/ALAC                                 |
-//  | "HI_RES" - MQA encoded FLAC                                            |
-//  |                                                                        |
-//  | Third method is using upmpdcli-tidal - see section 'Tidal via upmpdcli'|
-//  | below.                                                                 |
-//  +------------------------------------------------------------------------+
-
-$cfg['tidal_audio_quality'] = "LOSSLESS";
-$cfg['tidal_direct'] = true;
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Fix TIDAL freezes                                                      |
-//  +------------------------------------------------------------------------+
-//  | Sometimes songs from TIDAL freeze at the beginning. To avoid this      |
-//  | set fix_tidal_freezes to true. Everytime stream starts a watchdog      |
-//  | will be started to do STOP/PLAY stream when it freezes.                |
-//  | It requires curl to be installed and avaialble for web server          |
-//  +------------------------------------------------------------------------+
-
-$cfg['fix_tidal_freezes'] = false;
 
 
 
@@ -134,29 +97,6 @@ $cfg['fix_tidal_freezes'] = false;
 //  +------------------------------------------------------------------------+
 
 $cfg['stream_covers_dir'] = 'covers/';
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Tidal via upmpdcli                                                     |
-//  +------------------------------------------------------------------------+
-//  | O!MPD can play Tidal's music using streams prepared by upmpdcli-tidal. |
-//  | Enter here url of that stream. Basicaly it consists of ip address      |
-//  | of computer where upmpdlci is installed, port number and some control  |
-//  | string, e.g.:                                                          |
-//  |                                                                        |
-//  | http://192.168.1.100:49149/tidal/track?version=1&trackId=              |
-//  |                                                                        |
-//  | All you have to change in above url is ip address and port.            |
-//  | Port should be the same as plgmicrohttpport in /etc/upmpdcli.conf      |
-//  |                                                                        |
-//  | Using Tidal via upmpdcli lets you use mpd without Tidal plugin.        |
-//  |                                                                        |
-//  | Section 'Tidal' above must also be defined.                            |
-//  +------------------------------------------------------------------------+
-
-$cfg['upmpdcli_tidal'] = "";
 
 
 

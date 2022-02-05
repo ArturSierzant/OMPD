@@ -21,15 +21,6 @@
 
 global $cfg, $db;
 
-function setChkBox ($value, $item) {
-  if ($value === true) {
-    echo '<i data-name="' . $item . '" data-val="true" id="cfg_' . $item . '" class="fa fa-check-circle-o fa-fw icon-small"></i>';
-  }
-  if ($value === false) {
-    echo '<i data-name="' . $item . '" data-val="false" id="cfg_' . $item . '" class="fa fa-circle-o fa-fw icon-small"></i>';
-  }
-  
-}
 ?>
 <table cellspacing="0" cellpadding="0" class="border">
 <tr class="header">

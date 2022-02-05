@@ -1361,13 +1361,139 @@ function editTidal() {
 
   $query = mysqli_query($db, 'SELECT * FROM tidal_token LIMIT 1');
   if ($query) $tidal_token = mysqli_fetch_assoc($query);
+  
+  $queryT = mysqli_query($db, "SELECT * FROM config where name like '%tidal_%'");
+  if ($queryT) {
+    while ($tidal = mysqli_fetch_assoc($queryT)) {
+      $a = $tidal['name'];
+      $$a = $tidal['value'];
+    }
+  }
 ?>
+
 <table cellspacing="0" cellpadding="0" class="border">
 <tr class="header">
   <td class="space"></td>
-  <td style="width:0.1%; white-space: nowrap;">Tidal account login status</td>
+  <td style="width:0.1%; white-space: nowrap;">Tidal settings</td>
+  <td class="textspace"></td>
   <td></td>
   <td class="space"></td>
+</tr>
+<tr class="even">
+<td></td>
+<td colspan="4"><b>client_id</b> and <b>client_secret</b> are required to login to Tidal. You can try to find them in the Internet or get your own from FireTV stick (or other limited input devices). Instructions can be found <a href="https://ompd.pl/getting-tidal-login-data" target="_blank">here</a>.</td>
+</tr>
+<tr class="even">
+  <td></td>
+	<td>client_id:</td>
+  <td></td>
+	<td><input type="text" id="tidal_client_id" value="<?php echo $tidal_client_id; ?>" maxlength="255" class="edit"></td>
+  <td class="space"></td>
+</tr>
+<tr class="even">
+  <td></td>
+	<td>client_secret:</td>
+  <td></td>
+	<td><input type="text" id="tidal_client_secret" value="<?php echo $tidal_client_secret; ?>" maxlength="255" class="edit"></td>
+  <td class="space"></td>
+</tr>
+<tr class="even">
+	<td></td>
+	<td>Audio quality:</td>
+  <td></td>
+	<td>
+    <select id="tidal_audio_quality">
+    <option value="LOW" <?php if ($tidal_audio_quality == 'LOW') echo 'selected'; ?>>LOW (96kbps, AAC)</option>
+    <option value="HIGH" <?php if ($tidal_audio_quality == 'HIGH') echo 'selected'; ?>>HIGH (320kbps, AAC)</option>
+    <option value="LOSSLESS" <?php if ($tidal_audio_quality == 'LOSSLESS') echo 'selected'; ?>>LOSSLESS</option>
+    <option value="HI_RES" <?php if ($tidal_audio_quality == 'HI_RES') echo 'selected'; ?>>HI_RES</option>
+    </select>
+  </td>
+  <td class="space"></td>
+</tr>
+<tr class="even">
+	<td></td>
+	<td>Fix Tidal freezes:</td>
+  <td></td>
+	<td>
+    <?php setChkBox($cfg['fix_tidal_freezes'],'fix_tidal_freezes');?>
+  </td>
+  <td class="space"></td>
+</tr>
+<tr>
+<tr class="even">
+  <td></td>
+	<td>
+  <div class="buttons">
+  <span id="saveTidalSettings" onmouseover="return overlib('Save settings');" onmouseout="return nd();">&nbsp;<i class="fa fa-floppy-o fa-fw"></i> Save settings</span>
+  </div>
+  </td>
+  <td></td>
+	<td></td>
+  <td class="space"></td>
+</tr>
+<script>
+$("i[id^='cfg_']").click(function() {
+  if ($(this).hasClass("fa-check-circle-o")) {
+    $(this).removeClass("fa-check-circle-o").addClass("fa-circle-o");
+    $(this).attr("data-val","false");
+  }
+  else if ($(this).hasClass("fa-circle-o")) {
+    $(this).removeClass("fa-circle-o").addClass("fa-check-circle-o");
+    $(this).attr("data-val","true");
+  }
+})
+
+$('#saveTidalSettings').click(function() {
+  $('#saveTidalSettings > i').removeClass('fa-floppy-o').addClass('fa-cog fa-spin');
+  saveTidalSettings();
+});
+
+function saveTidalSettings(){
+  var config = {};
+  config['tidal_client_id'] =  $('#tidal_client_id').val();
+  config['tidal_client_secret'] =  $('#tidal_client_secret').val();
+  config['tidal_audio_quality'] =  $('#tidal_audio_quality').val();
+  config['fix_tidal_freezes'] =  $('#fix_tidal_freezes').val();
+  $("i[id^='cfg_']").each(function(){
+      config[$(this).attr("data-name")] = $(this).attr("data-val");
+    })
+  $.ajax({
+    url: "ajax-save-config.php",  
+    type: "POST",  
+    data: { settings : config },  
+    dataType: "json",
+    success: function(json) {
+      if (json.return == 1) {
+        $('#saveTidalSettings > i').removeClass('fa-cog fa-spin').addClass('fa-exclamation-circle icon-nok');
+        setTimeout(function() {
+          $('#saveTidalSettings > i').removeClass('fa-exclamation-circle icon-nok').addClass('fa-floppy-o');
+        }, 2000);
+        return;
+      }
+      else {
+        $('#saveTidalSettings > i').removeClass('fa-cog fa-spin').addClass('fa-check-square');
+        setTimeout(function() {
+          $('#saveTidalSettings > i').removeClass('fa-check-square').addClass('fa-floppy-o');
+        }, 2000);
+        return;
+      }
+      //location.reload();
+    },
+    error: function() {
+      $('#saveTidalSettings > i').removeClass('fa-cog fa-spin').addClass('fa-exclamation-circle icon-nok');
+        setTimeout(function() {
+          $('#saveTidalSettings > i').removeClass('fa-exclamation-circle icon-nok').addClass('fa-floppy-o');
+        }, 2000);
+    }
+  });
+};
+</script>
+
+
+<tr class="header">
+  <td class="space"></td>
+  <td colspan="4" style="width:0.1%; white-space: nowrap;">Tidal account login and status</td>
 </tr>
 
 <?php
@@ -1376,6 +1502,7 @@ if (!$query) {
 <tr class="even">
   <td></td>
   <td>Fatal error: </td>
+  <td></td>
   <td>token table not found in DB</td>
   <td></td>
 </tr>
@@ -1387,6 +1514,7 @@ elseif ($tidal_token['time'] == 0) {
 <tr class="even">
   <td></td>
   <td>Login status:</td>
+  <td></td>
   <td id="loginStatusInfo">not logged in</td>
   <td></td>
 </tr>
@@ -1398,6 +1526,7 @@ elseif (time() > $tidal_token['expires_after']) {
 <tr class="even">
   <td></td>
   <td>Token expired:</td>
+  <td></td>
   <td>try to refresh token</td>
   <td></td>
 </tr>
@@ -1421,24 +1550,28 @@ elseif (time() < $tidal_token['expires_after']) {
 <tr class="even">
   <td></td>
   <td>Login status:</td>
+  <td></td>
   <td>logged in</td>
   <td></td>
 </tr>
 <tr class="even">
   <td></td>
   <td>Token status:</td>
+  <td></td>
   <td>valid</td>
   <td></td>
 </tr>
 <tr class="even">
   <td></td>
   <td>Last token refresh: </td>
+  <td></td>
   <td><?php echo date('Y-m-d H:i',$tidal_token['time']); ?></td>
   <td></td>
 </tr>
 <tr class="even">
   <td></td>
   <td>Token valid until: </td>
+  <td></td>
   <td><?php echo $exDate; ?> (<?php echo $tLeft; ?> left)</td>
   <td></td>
 </tr>
@@ -1449,6 +1582,7 @@ elseif (time() < $tidal_token['expires_after']) {
 <tr class="even">
   <td></td>
   <td>Token is invalid:</td>
+  <td></td>
   <td><?php echo $tokenStatus['response']; ?><br><br>
   Try to refresh token or logout and login to Tidal again.</td>
   <td></td>
@@ -1464,6 +1598,7 @@ if ($showLogin) {
   <td><div class="buttons">
   <span id="loginTidal" onmouseover="return overlib('Login to Tidal');" onmouseout="return nd();">&nbsp;<i class="fa fa-sign-in fa-fw"></i> Tidal login</span>
   </div></td>
+  <td></td>
   <td id="loginInfo">Login to Tidal and start using Tidal in O!MPD.</td>
   <td></td>
 </tr>
@@ -1476,6 +1611,7 @@ if ($showRefresh) {
   <td><div class="buttons">
   <span id="refreshToken" onmouseover="return overlib('Refresh token');" onmouseout="return nd();">&nbsp;<i class="fa fa-refresh fa-fw"></i> Refresh token</span></div>
   </div></td>
+  <td></td>
   <td id="refreshInfo">No need to use this button when token is valid. When token expires it should be refreshed automatically. In case something is wrong with autorefreshing, you can try to do it manually. </td>
   <td></td>
 </tr>
@@ -1485,6 +1621,7 @@ if ($showRefresh) {
   <td><div class="buttons">
   <span id="logoutTidal" onmouseover="return overlib('Logout from Tidal');" onmouseout="return nd();">&nbsp;<i class="fa fa-sign-out fa-fw"></i> Tidal logout</span>
   </div></td>
+  <td></td>
   <td id="logoutInfo">Logout Tidal session and stop using Tidal in O!MPD.</td>
   <td></td>
 </tr>
