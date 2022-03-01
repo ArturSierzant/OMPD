@@ -92,8 +92,30 @@ setConfigItem('show_youtube_results',$cfg['show_youtube_results'],'true');
 setConfigItem('youtube_key',$cfg['youtube_key'],'AIzaSyCasdVt44uKVWymVBVtILwtu1Sgyx2sdl0');
 setConfigItem('youtube_max_results',$cfg['youtube_max_results'],'30');
 
+//  +------------------------------------------------------------------------+
+//  | Quick search                                                           |
+//  +------------------------------------------------------------------------+
 
-//setConfigItem('quick_search',serialize($cfg['quick_search']),'');
-
+$query = mysqli_query($db, "SELECT * FROM config WHERE name='quick_search'");
+$items_count = mysqli_num_rows($query);
+if ($items_count > 0) { //copy from DB
+  unset($cfg['quick_search']);
+  while ($quick_search = mysqli_fetch_assoc($query)) {
+    $cfg['quick_search'][$quick_search['index']] = json_decode($quick_search['value'],true);
+  }
+}
+else {
+  if (isset($cfg['quick_search'])) { //copy from existing $cfg 
+    foreach($cfg['quick_search'] as $key => $value) {
+      setConfigItem('quick_search', $cfg['quick_search'][$key], $value, $key); 
+    }
+  }
+  else { //set default values
+    setConfigItem('quick_search',$cfg['quick_search'][1], array("Live Concerts","album LIKE '%live%'") , 1);
+    setConfigItem('quick_search',$cfg['quick_search'][2], array("HD Audio","audio_bits_per_sample > 16 OR audio_sample_rate > 48000"), 2);
+    setConfigItem('quick_search',$cfg['quick_search'][3], array("Japanese Editions","album LIKE '%japan%' OR comment LIKE '%SHM-CD%'"), 3);
+    setConfigItem('quick_search',$cfg['quick_search'][4], array("Pop of the 80's","genre ='Pop' and ((album.year BETWEEN 1980 AND 1989) or comment like '%80s%')"), 4);
+  }
+}
 
 ?>

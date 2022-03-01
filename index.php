@@ -2181,7 +2181,7 @@ function viewNewFromHRA() {
   require_once('include/header.inc.php');
 ?>
  <div>
-  <h1 onclick='toggleSearchResults("GE");' class="pointer" id="hraGenres"><i id="iconSearchResultsGE" class="fa fa-chevron-circle-down icon-anchor"></i> Show subgenres for <?php echo $genreM; ?></h1>
+  <h1 onclick='toggleSearchResults("GE");' class="pointer" id="hraGenres"><i id="iconSearchResultsGE" class="fa fa-chevron-circle-down icon-anchor"></i> Show subgenres<?php echo $genreM ? " for " . $genreM : ""; ?></h1>
   <div id="searchResultsGE">
   <span id="albumsLoadingIndicator">
     <i class="fa fa-cog fa-spin icon-small"></i> Loading subgenre list...

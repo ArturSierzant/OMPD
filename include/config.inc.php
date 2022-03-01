@@ -71,6 +71,7 @@ $cfg['mysqli_auto_create_db']       = true;
 //  | - Youtube search settings                                              |
 //  | - Album features                                                       |
 //  | - Tidal settings                                                       |
+//  | - Quick search                                                         |
 //  +------------------------------------------------------------------------+
 
 //  +------------------- END OF NEW IN O!MPD 1.08 ---------------------------+
@@ -373,18 +374,6 @@ $cfg['artist_separator'][] = 	" Featuring ";
 $cfg['artist_separator'][] = 	" + ";
 //$cfg['artist_separator'][] = 	", ";
 
-
-
-
-//  +------------------------------------------------------------------------+
-//  | Quick search                                                           |
-//  +------------------------------------------------------------------------+
-unset($cfg['quick_search']);
-
-$cfg['quick_search'][1] = array("Live Concerts","album LIKE '%live%'");
-$cfg['quick_search'][2] = array("HD Audio","audio_bits_per_sample > 16 OR audio_sample_rate > 48000");
-$cfg['quick_search'][3] = array("Japanese Editions","album LIKE '%japan%' OR comment LIKE '%SHM-CD%'");
-$cfg['quick_search'][4] = array("Pop of the 80's","genre ='Pop' and ((album.year BETWEEN 1980 AND 1989) or comment like '%80s%')");
 
 
 

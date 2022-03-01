@@ -281,6 +281,52 @@ global $cfg, $db;
 </tr>
 
 
+<tr class="header">
+  <td class="space"></td>
+	<td>Quick search</td>
+	<td class="textspace"></td>
+	<td></td>
+  <td class="space"></td>
+</tr>
+<tr class="even">
+  <td></td>
+  <td colspan="4">More info about quick search can be found <a href="https://ompd.pl/quick-search" target="_blank">here</a>.</td>
+</tr>
+<tr class="textspace"><td colspan="5">
+<table cellspacing="0" cellpadding="0" class="border" id="qs">
+<tr class="header" id="qs_header">
+  <td class="space"></td>
+  <td class="icon">#&nbsp;</td>
+  <td>Name</td>
+  <td style="width: 100%;">Query</td>
+  <td class="icon"></td>
+</tr>
+<?php 
+$query = mysqli_query($db, "SELECT * FROM config WHERE name='quick_search'");
+while ($quick_search = mysqli_fetch_assoc($query)) {
+  $idx = $quick_search['index'];
+  $value = json_decode($quick_search['value']);
+?>
+<tr class="even" id="qs_row_<?php echo $idx; ?>">
+<td></td>
+<td class="icon"><?php echo $idx; ?>&nbsp;</td>
+<td><input id="qs_name_<?php echo $idx; ?>" type="text" value="<?php echo $value[0]; ?>" size="12"></td>
+<td><input id="qs_value_<?php echo $idx; ?>" type="text" value="<?php echo $value[1]; ?>" style="width: 100%;"></td>
+<td><i class="fa fa-times-circle fa-fw icon-small pointer" id="qs_del_<?php echo $idx; ?>"></i></td>
+</tr>
+<?php
+  }
+?>
+<tr class="even" id="qs_add">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><i class="fa fa-plus-circle fa-fw icon-small pointer" id="qs_add_new"></i></td>
+</tr>
+</table>
+</td></tr>
+
 <tr class="textspace"><td colspan="5"></td></tr>
 </table>
 
@@ -311,6 +357,28 @@ $("i[id^='cfg_']").click(function() {
   }
 })
 
+$("i[id^='qs_del_']").click(function() {
+  var iId = $(this).attr("id");
+  var splitted = iId.split("_");
+  var idx = splitted[2];
+  $("#qs_row_" + idx).remove();
+})
+
+$("#qs_add_new").click(function() {
+  var iId = $('#qs tr').last().prev().attr("id");
+  if (iId == "qs_header") {
+    idx = 1;
+  } else {
+    var splitted = iId.split("_");
+    var idx = parseInt(splitted[2]) + 1;
+  }
+  var newRow = '<tr class="even" id="qs_row_' + idx + '"><td></td><td class="icon">' + idx + '&nbsp;</td><td><input id="qs_name_' + idx + '" type="text" value="" size="12"></td><td><input id="qs_value_' + idx + '" type="text" value="" style="width: 100%;"></td><td><i class="fa fa-times-circle fa-fw icon-small pointer" id="qs_del_' + idx + '"></i></td></tr>';
+  $('#qs_add').before(newRow);
+  $('#qs_del_' + idx).click(function() {
+    $("#qs_row_" + idx).remove();
+  })
+})
+
 function validateNumber(item, value){
   //validate number-type input
   console.log ("validating: " + item + " " + value);
@@ -333,13 +401,26 @@ $("#saveSettings").click(function(){
   validateNumber($("#cfg_session_lifetime"),31536000);
   validateNumber($("#cfg_youtube_max_results"),30);
   var config = {};
-    $("i[id^='cfg_']").each(function(){
-      config[$(this).attr("data-name")] = $(this).attr("data-val");
-    })
-    $("input[id^='cfg_']").each(function(){
-      config[$(this).attr("data-name")] = $(this).val();
-    })
-    //console.log(config);
+  var qs = {};
+  qs[0] = 'empty'; //indicates that quick_search has no values
+  
+  $("i[id^='cfg_']").each(function(){
+    config[$(this).attr("data-name")] = $(this).attr("data-val");
+  })
+  
+  $("input[id^='cfg_']").each(function(){
+    config[$(this).attr("data-name")] = $(this).val();
+  })
+  
+  $("input[id^='qs_name_']").each(function(){
+    qs[0] = 1; //indicates that quick_search has some settings
+    var splitted = $(this).attr("id").split("_");
+    var idx = splitted[2];
+    qs[idx] = [$(this).val(),$('#qs_value_' + idx).val()];
+  })
+  config['quick_search'] = qs;
+  //console.log(config);
+  
   $.ajax ({
     url: "ajax-save-config.php",  
     type: "POST",  

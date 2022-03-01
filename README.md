@@ -23,7 +23,7 @@ While netjukebox also supports VideoLAN and Winamp/httpQ, O!MPD supports O!nly M
 * suggestions of albums to listen
 * statistics for played music and whole collection
 * skins
-* support for TIDAL
+* support for TIDAL and HighResAudio
 
 ## O!MPD requirements
 

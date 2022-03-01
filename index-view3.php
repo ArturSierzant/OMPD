@@ -30,7 +30,7 @@
 //  | View 3                                                                 |
 //  +------------------------------------------------------------------------+
 
-global $cfg, $db;
+global $cfg, $db, $t;
 
 $album_id = get('album_id');
 //$albumType = 'local';
@@ -84,6 +84,17 @@ if (isTidal($album_id)) {
 			$total_time['sum_miliseconds'] = $album['seconds'] * 1000;
 		}
 	}
+  //TODO: getting copyright data - move to DB?
+  $tmpAlbum = $t->getAlbum(getTidalId($album_id));
+  if (isset($tmpAlbum['copyright'])) {
+    $pattern = "/[1-2][0-9]{3}/";
+    if (preg_match($pattern, $tmpAlbum['copyright'], $matches) && isset($album['year'])) {
+      preg_match($pattern, $album['year'], $matchesYear);
+      if ($matchesYear[0] != $matches[0]) {
+        $album['copyright'] = "(&copy; " . $matches[0] . ")";
+      }
+    }
+  }
 }
 elseif (isHra($album_id)) {
 	$h = new HraAPI;
@@ -508,7 +519,13 @@ $popularity = round($played['counter'] / $max_played['counter'] * 100);
 <?php if ($album['year'] != '') { ?>
 <div class="line">
 	<div class="add-info-left"><a href="index.php?action=viewYear">Year:</a></div>
-	<div class="add-info-right"><a href="<?php echo 'index.php?action=view2&order=artist&sort=asc&year=' . $album['year'];?>"><?php echo trim($album['year']);?></a></div>
+	<div class="add-info-right"><a href="<?php echo 'index.php?action=view2&order=artist&sort=asc&year=' . $album['year'];?>"><?php echo trim($album['year']);?></a>
+  <?php 
+  if (isset($album['copyright'])) {
+    echo " " . $album['copyright'];
+  }
+  ?>
+  </div>
 </div>
 <?php }; ?>
 

@@ -35,8 +35,7 @@ global $cfg, $db;
 authenticate('access_media');
 $genre_id = get('genre_id');
 if ($genre_id)
-	genreNavigator($genre_id);
-
+  genreNavigator($genre_id);
 
 
 $title = get('title');
@@ -420,7 +419,19 @@ if ($qsType) {
 	$query_str = ('SELECT album, album.artist, artist_alphabetic, album.year, month, genre_id, image_id, album.album_id FROM album, track WHERE album.album_id=track.album_id AND (' . $cfg['quick_search'][$qsType][1] . ') GROUP BY track.album_id ' . $order_query);		
 	$order_bitmap_artist = '<span class="fa fa-sort-alpha-asc"></span>';
 	$sort_album = 'desc';
-	$query = mysqli_query($db, $query_str);	
+	$query = mysqli_query($db, $query_str);
+  if (!$query) {
+  ?>
+  <h1>Error in query</h1>
+  <br><div><b>Query string:</b></div><br>
+  <div><code><?php echo $query_str; ?></code></div>
+  <br><div><b>Your part of query:</b></div><br>
+  <div><code><?php echo $cfg['quick_search'][$qsType][1]; ?></code></div>
+  <br><div>Try to correct it <a href="config.php?action=settings#qs_header">here</a></div><br>
+  <?php
+    require_once('include/footer.inc.php');
+    exit();
+  }
 }
 
 

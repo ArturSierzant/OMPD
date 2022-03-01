@@ -3566,31 +3566,59 @@ function calculateAlbumFormat($album_information, $hra_tag = "") {
 //  +------------------------------------------------------------------------+
 //  | Set config item in DB and load into $cfg                               |
 //  +------------------------------------------------------------------------+
-function setConfigItem($name, $value, $default_value = '') {
+function setConfigItem($name, $value, $default_value = '', $index = '') {
 	global $cfg, $db;
-	
-	$query = mysqli_query($db, "SELECT * FROM config WHERE name='$name'");
-  $items_count = mysqli_num_rows($query);
-  if ($items_count > 0) {
-    $config = mysqli_fetch_assoc ($query);
-    $val = $config['value'];
-    if ($val === 'true') $val = true;
-    if ($val === 'false') $val = false;
-    $cfg[$name] = $val;
-    //$cfg[$name] = $config['value'];
-  }
-  else {
-    if (isset($value)) {
-      if ($value === true) $value = 'true';
-      if ($value === false) $value = 'false';
-      $sql = "INSERT INTO config (name, value) VALUES ('" . $db->real_escape_string($name) ."', '" . $db->real_escape_string($value) . "')";
-      mysqli_query($db, $sql);
-      $cfg[$name] = $value;
+  
+  if ( $index == '') {
+    $query = mysqli_query($db, "SELECT * FROM config WHERE name='$name'");
+    $items_count = mysqli_num_rows($query);
+    if ($items_count > 0) {
+      $config = mysqli_fetch_assoc ($query);
+      $val = $config['value'];
+      if ($val === 'true') $val = true;
+      if ($val === 'false') $val = false;
+      $cfg[$name] = $val;
+      //$cfg[$name] = $config['value'];
     }
     else {
-      $sql = "INSERT INTO config (name, value) VALUES ('" . $db->real_escape_string($name) ."', '" . $db->real_escape_string($default_value) . "')";
-      mysqli_query($db, $sql);
-      $cfg[$name] = $default_value;
+      if (isset($value)) {
+        if ($value === true) $value = 'true';
+        if ($value === false) $value = 'false';
+        $sql = "INSERT INTO config (name, value) VALUES ('" . $db->real_escape_string($name) ."', '" . $db->real_escape_string($value) . "')";
+        mysqli_query($db, $sql);
+        $cfg[$name] = $value;
+      }
+      else {
+        $sql = "INSERT INTO config (name, value) VALUES ('" . $db->real_escape_string($name) ."', '" . $db->real_escape_string($default_value) . "')";
+        mysqli_query($db, $sql);
+        $cfg[$name] = $default_value;
+      }
+    }
+  }
+  else { //$cfg item is an array
+    //error_log("$name - $index" . "\n",3,"/var/log/nginx/error.log");
+    $query = mysqli_query($db, "SELECT * FROM config WHERE name='$name' AND `index`=$index");
+    $items_count = mysqli_num_rows($query);
+    if ($items_count > 0) {
+      $config = mysqli_fetch_assoc ($query);
+      $val = $config['value'];
+      if ($val === 'true') $val = true;
+      if ($val === 'false') $val = false;
+      $cfg[$name][$index] = json_decode($val,true);
+    }
+    else {
+      if (isset($value)) {
+        if ($value === true) $value = 'true';
+        if ($value === false) $value = 'false';
+        $sql = "INSERT INTO config (name, value, `index`) VALUES ('" . $db->real_escape_string($name) ."', '" . $db->real_escape_string(safe_json_encode($value)) . "', '" . $index . "')";
+        mysqli_query($db, $sql);
+        $cfg[$name][$index] = $value;
+      }
+      else {
+        $sql = "INSERT INTO config (name, value, `index`) VALUES ('" . $db->real_escape_string($name) ."', '" . $db->real_escape_string(safe_json_encode($default_value)) . "'," . $index . ")";
+        mysqli_query($db, $sql);
+        $cfg[$name][$index] = $default_value;
+      }
     }
   }
 }
@@ -3601,10 +3629,10 @@ function setConfigItem($name, $value, $default_value = '') {
 //  +------------------------------------------------------------------------+
 function setChkBox ($value, $item) {
   if ($value === true) {
-    echo '<i data-name="' . $item . '" data-val="true" id="cfg_' . $item . '" class="fa fa-check-circle-o fa-fw icon-small"></i>';
+    echo '<i data-name="' . $item . '" data-val="true" id="cfg_' . $item . '" class="fa fa-check-circle-o fa-fw icon-small pointer"></i>';
   }
   if ($value === false) {
-    echo '<i data-name="' . $item . '" data-val="false" id="cfg_' . $item . '" class="fa fa-circle-o fa-fw icon-small"></i>';
+    echo '<i data-name="' . $item . '" data-val="false" id="cfg_' . $item . '" class="fa fa-circle-o fa-fw icon-small pointer"></i>';
   }
 }
 
