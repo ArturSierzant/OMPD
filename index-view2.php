@@ -156,7 +156,9 @@ if ($genre_id || $title) {
 	else
 		message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br]order');
 	
-	$query = mysqli_query($db, 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query);
+  $queryString = 'SELECT album, artist, artist_alphabetic, year, month, genre_id, image_id, album_id FROM album ' . $filter_query . ' ' . $order_query;
+  //echo $queryString;
+	$query = mysqli_query($db, $queryString);
 
 	$url			= 'index.php?action=view2&amp;genre_id=' . rawurlencode($genre_id);
 	$list_url		= 'index.php?action=view2&amp;thumbnail=0&amp;genre_id=' . rawurlencode($genre_id) . '&amp;filter=' . $filter . '&amp;order=' . $order;
@@ -416,7 +418,7 @@ if ($tag) {
 if ($qsType) {
 
 	$order_query = 'ORDER BY album.artist, year, album';
-	$query_str = ('SELECT album, album.artist, artist_alphabetic, album.year, month, genre_id, image_id, album.album_id FROM album, track WHERE album.album_id=track.album_id AND (' . $cfg['quick_search'][$qsType][1] . ') GROUP BY track.album_id ' . $order_query);		
+	$query_str = ('SELECT album, album.artist, artist_alphabetic, album.year, month, genre_id, image_id, album.album_id FROM track LEFT JOIN album ON album.album_id=track.album_id WHERE (' . $cfg['quick_search'][$qsType][1] . ') GROUP BY track.album_id ' . $order_query);		
 	$order_bitmap_artist = '<span class="fa fa-sort-alpha-asc"></span>';
 	$sort_album = 'desc';
 	$query = mysqli_query($db, $query_str);

@@ -784,20 +784,36 @@ function importFavorite($favorite_id, $mode) {
 	
 	if ($url != '') {
 		if ($mode == 'addUrl' || $mode == 'importUrl') {
-			$file = array();
-			
-			if (preg_match('#\.(m3u|pls)$#', strtolower($url))) {
-				$items = @file($url, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-				//message(__FILE__, __LINE__, 'error', '[b]Failed to open url:[/b][br]' . $url);
-				if ($items) {
-					foreach ($items as $item) {
-						// pls:		
-						// File1=http://example.com:80
-						// m3u:
-						// http://example.com:80
-						if (preg_match('#^(?:File[0-9]{1,3}=|)((?:tidal|ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://.+)#', $item, $match))
-							$file[] = $match[1];
-						//print_r($item) . '<br>';
+      $file = array();
+      $extensions="";
+      foreach ($cfg['media_extension'] as $extension){
+        $extensions .= "|\." . $extension; 
+      }
+      $extensions = ltrim($extensions, '|');
+      if (preg_match('#\.(m3u|pls)$#', strtolower($url))) {
+        $items = @file($url, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        //message(__FILE__, __LINE__, 'error', '[b]Failed to open url:[/b][br]' . $url);
+        if ($items) {
+          foreach ($items as $item) {
+            // pls:		
+            // File1=http://example.com:80
+            // m3u:
+            // http://example.com:80
+            if (preg_match('#^(?:File[0-9]{1,3}=|)((?:tidal|ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://.+)#', $item, $match)){
+              $file[] = $match[1];
+              //print_r($match[1]) . '<br>';
+            }
+            // match file in pls playlist
+            elseif (preg_match('#^(?:File[0-9]{1,3}=).*(' . $extensions . ')$#', $item, $match)){
+              $exploded=explode("=",$item);
+              $file[] = ltrim(str_replace($exploded[0],"",$item),"=");
+              //print_r($item) . '<br>';
+            }
+            // match file in m3u playlist
+            elseif (preg_match('#' . $extensions . '$#', $item, $match)){
+              $file[] = $item;
+              //print_r($item) . '<br>';
+            }
 					}
 				}
 				else {
@@ -886,7 +902,7 @@ function importFavorite($favorite_id, $mode) {
 	
 			
 	for ($i = 0; $i < count($file); $i++) {
-		$query = mysqli_query($db,'SELECT track_id FROM track WHERE relative_file = "' . mysqli_real_escape_string($db,$file[$i]) . '"');
+		$query = mysqli_query($db,'SELECT track_id FROM track WHERE relative_file = "' . mysqli_real_escape_string($db,str_replace($cfg['media_dir'],"",$file[$i])) . '"');
 		$track = mysqli_fetch_assoc($query);
 		$isStream = 0;
 		if (preg_match('#^(tidal|ftp|http|https|mms|mmst|pnm|rtp|rtsp|sdp)://#', strtolower($file[$i]))) {

@@ -1413,7 +1413,8 @@ function editTidal() {
 </tr>
 <tr class="even">
 	<td></td>
-	<td>Fix Tidal freezes:</td>
+	<td>Fix Tidal freezes:<br>
+  (requires <b>curl</b>)</td>
   <td></td>
 	<td>
     <?php setChkBox($cfg['fix_tidal_freezes'],'fix_tidal_freezes');?>

@@ -44,12 +44,12 @@ if ($action == "add") {
 
       mysqli_query($db,'INSERT INTO album (artist_alphabetic, artist, album, year, month, genre_id, album_add_time, discs, image_id, album_id, updated, album_dr)
             VALUES (
-            "' . $album['artist_alphabetic'] . '",
-            "' . $album['artist'] . '",
-            "' . $album['album'] . '",
+            "' . mysqli_real_escape_string($db,$album['artist_alphabetic']) . '",
+            "' . mysqli_real_escape_string($db,$album['artist']) . '",
+            "' . mysqli_real_escape_string($db,$album['album']) . '",
             ' . (is_null($album['album_date']) ? 'NULL' : (int) substr($album['album_date'],0,4)) . ',
             ' . 'NULL' . ',
-            ' . (int) $album['genre_id'] . ',
+            ' . (int) mysqli_real_escape_string($db,$album['genre_id']) . ',
             ' . (int) $album_add_time . ',
             ' . (int) $album['discs'] . ',
             "' . '' . '",
@@ -82,9 +82,9 @@ if ($action == "add") {
           
             mysqli_query($db,'INSERT INTO album (artist_alphabetic, artist, album, year, month, genre_id, album_add_time, discs, image_id, album_id, updated, album_dr)
             VALUES (
-            "' . $album['artist'] . '",
-            "' . $album['artist'] . '",
-            "' . $album['title'] . '",
+            "' . mysqli_real_escape_string($db,$album['artist']) . '",
+            "' . mysqli_real_escape_string($db,$album['artist']) . '",
+            "' . mysqli_real_escape_string($db,$album['title']) . '",
             ' . (is_null($album['productionYear']) ? 'NULL' : (int) substr($album['productionYear'],0,4)) . ',
             ' . 'NULL' . ',
             "",

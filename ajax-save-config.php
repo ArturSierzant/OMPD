@@ -40,7 +40,7 @@ foreach($settings as $key=>$value) {
       foreach($value as $key1=>$value1) {
         if ($key1 != 0) { //ommit first row that indicates if qs has values
           if (($value1[0])) { //don't save empty query string
-            $sql = "INSERT INTO config (name, `index`, value) VALUES ('" . $db->real_escape_string($key) ."'," . $idx . ", '" . $db->real_escape_string(json_encode($value1)) . "')";
+            $sql = "INSERT INTO config (name, `index`, value) VALUES ('" . $db->real_escape_string($key) ."'," . $idx . ", '" . $db->real_escape_string(json_encode(str_replace('"',"'",$value1))) . "')";
             $res = mysqli_query($db, $sql);
             $idx++;
           }
