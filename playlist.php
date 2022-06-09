@@ -655,7 +655,11 @@ function initialize() {
 	ajaxRequest('play.php?action=playlistTrack&track_id=' + track_id[<?php echo $listpos; ?>] + '&menu=playlist', evaluateTrack);
 	ajaxRequest('play.php?action=playlistStatus&track_id=' + track_id[<?php echo $listpos; ?>] + '&menu=playlist', evaluateStatus);
 	//ajaxRequest('ajax-track-version.php?track_id=' + track_id[<?php echo $listpos; ?>] + '&menu=playlist', evaluateTrackVersion);
+
+
 }
+
+
 
 
 function evaluateStatus(data) {
@@ -742,8 +746,72 @@ function evaluateStatus(data) {
 	evaluateVolume(data.volume);
 	evaluateGain(data.gain);
 	evaluateConsume(data);
+    updateMediaSession(data);
 }
 
+function updateMediaSession(data) {
+    navigator.mediaSession.playbackState = data.isplaying == 1 ? "playing" : "paused"
+
+    if (data.isplaying == 1) {
+        navigator.mediaSession.setPositionState({
+            duration: data.max/1000,
+            playbackRate: 1,
+            position: data.miliseconds/1000
+        });
+    }
+}
+
+function getArtworkSource(data) {
+	if (data.album_id) {
+		if (data.thumbnail) {
+			//temporary solution for HRA streams
+			return "image_crop.php?thumbnail=" + encodeURIComponent(data.thumbnail);
+		}
+		else {
+			return "image.php?image_id=" + data.image_id + "&quality=hq&track_id=" + data.track_id;
+		}
+	}
+	else if (data.thumbnail) {
+		return "image_crop.php?thumbnail=" + encodeURIComponent(data.thumbnail);
+	}
+	else if (data.imageFile) {
+		return data.imageFile;
+	}
+	else {
+		return "image/large_file_not_found.png";
+	}
+}
+
+function evaluateMediaSession(data) {
+    
+    if (!this.audioTag) {
+        this.audioTag = document.createElement('audio');
+        document.body.appendChild(this.audioTag);
+        this.audioTag.src = "https://raw.githubusercontent.com/anars/blank-audio/master/10-seconds-of-silence.mp3";
+        this.audioTag.loop = true;
+    }
+    
+    // data.artist, data.title, data.album, data.by, data.album_id, data.image_id
+    if (this.audioTag) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: data.title,
+            artist: data.track_artist_all,
+            album: data.album,
+            artwork: [{ src: getArtworkSource(data) }]
+        });
+        
+        navigator.mediaSession.setActionHandler('previoustrack', () => ajaxRequest('play.php?action=prev&amp;menu=playlist'));
+        navigator.mediaSession.setActionHandler('nexttrack', () => ajaxRequest('play.php?action=next&amp;menu=playlist'));
+        navigator.mediaSession.setActionHandler('play', async () => {
+            ajaxRequest('play.php?action=play&amp;menu=playlist')
+            navigator.mediaSession.playbackState = 'playing';
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+            ajaxRequest('play.php?action=pause&amp;menu=playlist')
+            navigator.mediaSession.playbackState = 'paused';
+        });
+    }
+}
 
 function evaluateListpos(listpos) {
 	if (previous_listpos != listpos) {
@@ -856,7 +924,12 @@ function evaluateIsplaying(isplaying, idx) {
 			idx = isplaying.idx;
 			isplaying = isplaying.state;
 		}
+
 		if (isplaying == 0) {
+            if (this.audioTag) {
+                this.audioTag.pause();
+                this.audioTagcurrentTime = 0;
+            }
 			// stop
 			$("#time").removeClass();
 			$("#time").addClass("icon-anchor");
@@ -871,6 +944,9 @@ function evaluateIsplaying(isplaying, idx) {
 			previous_miliseconds = 0;
 		}
 		else if (isplaying == 1) {
+            if (this.audioTag) {
+                this.audioTag.play();
+            }
 			// play
 			document.getElementById('track' + idx + '_play').style.visibility = 'visible';		
 			$("#time").removeClass();
@@ -883,6 +959,9 @@ function evaluateIsplaying(isplaying, idx) {
 			//$('#track' + idx + '_play').show();
 		}
 		else if (isplaying == 3) {
+            if (this.audioTag) {
+                this.audioTag.pause();
+            }
 			// pause
 			$("#time").removeClass();
 			$("#time").addClass("blink_me icon-anchor");
@@ -1337,7 +1416,9 @@ function evaluateTrack(data) {
 	changeTileSizeInfo();
 	resizeImgContainer();
 	getFavoritesList(current_track_id,current_track_mpd_url);
-	
+
+
+    evaluateMediaSession(data);
 	/* spinnerImg.stop();
 	$('#image').css('position', 'relative');*/
 	//$("#waitIndicatorImg").hide(); 
