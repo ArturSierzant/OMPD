@@ -86,6 +86,16 @@ if (isTidal($album_id)) {
 	}
   //TODO: getting copyright data - move to DB?
   $tmpAlbum = $t->getAlbum(getTidalId($album_id));
+  /* if (isset($tmpAlbum['releaseDate'])) {
+    $pattern = "/[1-2][0-9]{3}/";
+    if (preg_match($pattern, $tmpAlbum['releaseDate'], $matches) && isset($album['year'])) {
+      preg_match($pattern, $album['year'], $matchesYear);
+      if ($matchesYear[0] != $matches[0]) {
+        $album['copyright'] = "(&copy; " . $matches[0] . ")";
+      }
+    }
+  }
+  else */
   if (isset($tmpAlbum['copyright'])) {
     $pattern = "/[1-2][0-9]{3}/";
     if (preg_match($pattern, $tmpAlbum['copyright'], $matches) && isset($album['year'])) {

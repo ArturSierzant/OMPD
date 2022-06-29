@@ -114,7 +114,7 @@ else {
     setConfigItem('quick_search',$cfg['quick_search'][1], array("Live Concerts","album LIKE '%live%'") , 1);
     setConfigItem('quick_search',$cfg['quick_search'][2], array("HD Audio","audio_bits_per_sample > 16 OR audio_sample_rate > 48000"), 2);
     setConfigItem('quick_search',$cfg['quick_search'][3], array("Japanese Editions","album LIKE '%japan%' OR comment LIKE '%SHM-CD%'"), 3);
-    setConfigItem('quick_search',$cfg['quick_search'][4], array("Pop of the 80's","genre ='Pop' and ((album.year BETWEEN 1980 AND 1989) or comment like '%80s%')"), 4);
+    setConfigItem('quick_search',$cfg['quick_search'][4], array("Pop of the 80's","genre regexp '(^|[^[:space:]])pop($|[^[:space:]])' and ((album.year BETWEEN 1980 AND 1989) or comment like '%80s%')"), 4);
   }
 }
 

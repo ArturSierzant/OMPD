@@ -742,55 +742,10 @@ $cfg['search_charset'][]            = 'UTF-8';
 
 
 //  +------------------------------------------------------------------------+
-//  | Image services                                                         |
-//  +------------------------------------------------------------------------+
-//  | For the Amazon web services a AWSAccessKeyId, SecretAccessKey and      |
-//  | AssociateTag are required.                                             |
-//  | Get these from: http://aws.amazon.com                                  |
-//  |                                                                        |
-//  | For the Last.fm web services a "API key" is needed. Get this key free  |
-//  | from:  http://www.last.fm/api/account                                  |
-//  +------------------------------------------------------------------------+
-/* unset($cfg['image_service_name']);
-unset($cfg['image_service_charset']);
-unset($cfg['image_service_url']);
-unset($cfg['image_service_process']);
-unset($cfg['image_service_urldecode']);
-
-$cfg['image_service_name'][]        = 'Slothradio';
-$cfg['image_service_charset'][]     = 'UTF-8';
-$cfg['image_service_url'][]         = 'http://www.slothradio.com/covers/?adv=1&artist=%artist&album=%album&genre=p&imgsize=x&locale=us&sort=salesrank';
-$cfg['image_service_process'][]     = '#<!-- RESULT ITEM START -->.+?><img src="(http://.+?)" width="([0-9]+?)" height="([0-9]+?)"#s';
-$cfg['image_service_urldecode'][]   = false;
-
-$cfg['image_service_name'][]        = 'Slothradio (uk)';
-$cfg['image_service_charset'][]     = 'UTF-8';
-$cfg['image_service_url'][]         = 'http://www.slothradio.com/covers/?adv=1&artist=%artist&album=%album&genre=p&imgsize=x&locale=uk&sort=salesrank';
-$cfg['image_service_process'][]     = '#<!-- RESULT ITEM START -->.+?><img src="(http://.+?)" width="([0-9]+?)" height="([0-9]+?)"#s';
-$cfg['image_service_urldecode'][]   = false;
-
-$cfg['image_service_name'][]        = 'Slothradio (de)';
-$cfg['image_service_charset'][]     = 'UTF-8';
-$cfg['image_service_url'][]         = 'http://www.slothradio.com/covers/?adv=1&artist=%artist&album=%album&genre=p&imgsize=x&locale=de&sort=salesrank';
-$cfg['image_service_process'][]     = '#<!-- RESULT ITEM START -->.+?><img src="(http://.+?)" width="([0-9]+?)" height="([0-9]+?)"#s';
-$cfg['image_service_urldecode'][]   = false;
-
-$cfg['image_service_name'][]        = 'Google';
-$cfg['image_service_charset'][]     = 'UTF-8';
-$cfg['image_service_url'][]         = 'http://images.google.com/images?gbv=1&q=%artist+%album';
-$cfg['image_service_process'][]     = '#/imgres\?imgurl=(http://.+?)&amp;.+?&amp;h=([0-9]+?)&amp;w=([0-9]+?)&amp;#s';
-$cfg['image_service_urldecode'][]   = true;
-
- */
-
-
-//  +------------------------------------------------------------------------+
 //  | Internet ip tools                                                      |
 //  +------------------------------------------------------------------------+
 
 $cfg['ip_tools']                    = 'http://www.infosniper.net/index.php?ip_address=%ip&map_source=1&overview_map=1&lang=1&map_type=1&zoom_level=5';
-// $cfg['ip_tools']                    = 'http://ip-lookup.net/index.php?ip=%ip';
-
 
 
 

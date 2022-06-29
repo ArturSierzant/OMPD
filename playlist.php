@@ -577,10 +577,12 @@ var previous_shuffle		= -1;
 var previous_gain			= -1;
 var previous_miliseconds	= -1;
 var previous_track_id		= 'ff';
+var previous_track_title		= 'ff';
 //var previous_volume			= -1;
 var playtime				= <?php echo safe_json_encode($playtime); ?>;
 var track_id				= <?php echo safe_json_encode($track_id); ?>;
 var current_track_id		= '';
+var current_track_title		= '';
 var current_track_mpd_url		= '';
 var timer_id				= 0;
 var timer_function			= 'ajaxRequest("play.php?action=playlistStatus&menu=playlist", evaluateStatus)';
@@ -659,28 +661,22 @@ function initialize() {
 
 
 function evaluateStatus(data) {
-	
 	// data.hash, data.miliseconds, data.listpos, data.volume
 	// data.isplaying, data.repeat, data.shuffle, data.gain
-	
-	if (previous_hash != data.hash) {
-		//window.location.href="<?php echo NJB_HOME_URL ?>playlist.php";
+  current_track_title = data.title;
+  if (previous_hash != data.hash) {
 		window.location.href = "playlist.php?scrollTo=" + $(window).scrollTop();
-		//location.reload(false);
-		//window.location.href = window.location.href;
-		//history.go();
 	}
 	data.max = playtime[data.listpos];
 	if (!current_track_id || current_track_id.indexOf('tidal_') > -1) { //track not found in DB, get data from MPD
-		if (current_track_id.indexOf('tidal_') == -1) {
+		if (current_track_id && current_track_id.indexOf('tidal_') == -1) {
 			var title = data.title;
 			document.getElementById('title1').innerHTML = document.getElementById('title').innerHTML =  title;
-			var query_artist = '';
+			/* var query_artist = '';
 			if (data.track_artist) {
 				query_artist = data.track_artist;
-			}
-			/* document.getElementById('lyrics1').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i id="lyrics1_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>' + '&nbsp;&bull;';
-			document.getElementById('lyrics').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + encodeURIComponent(query_artist) + '+' + encodeURIComponent(data.title) + '" target="_blank"><i id="lyrics_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>'; */
+			} */
+			
       var query_artist = '';
       if (data.track_artist) {
         query_artist = data.track_artist;
@@ -688,14 +684,22 @@ function evaluateStatus(data) {
         query_artist = query_artist.toString().replaceAll('"',"");
       }
       query_title = data.title_core;
-      if (query_title) {
+      if (query_title && query_artist) {
         query_title = query_title.toString().replaceAll("'","");
         query_title = query_title.toString().replaceAll('"',"");
+      }
+      else {
+        query_title = title.toString().replaceAll("'","");
+        query_title = title.toString().replaceAll('"',"");
       }
       document.getElementById('lyrics').innerHTML = '<a href="javascript: ajaxRequest(\'ajax-lyrics.php?artist=' + query_artist + '&title=' + query_title + '\',evaluateLyrics);"><i id="lyrics_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>'; 
       document.getElementById('lyrics1').innerHTML = '<a href="javascript: ajaxRequest(\'ajax-lyrics.php?artist=' + query_artist + '&title=' + query_title + '\',evaluateLyrics);"><i id="lyrics1_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>&nbsp;&bull;'; 
 		}
-		data.max = data.Time;
+    else if ((previous_track_title != current_track_title) && current_track_id.indexOf('tidal_') == -1) { //title changed in radio stream
+      var title = data.title;
+      document.getElementById('title1').innerHTML = document.getElementById('title').innerHTML =  title;
+    }
+    data.max = data.Time;
 		/* if (title.indexOf("action=streamTo") != -1) {
 			title = data.name; 
 		} */
@@ -703,26 +707,8 @@ function evaluateStatus(data) {
 		//console.log ("rel_file=" + rel_file);
 		var params = data.stream_source + data.audio_dataformat +  '&nbsp;&bull;&nbsp;' + data.audio_bits_per_sample + '&nbsp;bit - ' + data.audio_sample_rate/1000 + '&nbsp;kHz&nbsp;&bull;&nbsp;<div style="width: 6em; display: inline-flex;">' + data.audio_profile + '</div>';
 		document.getElementById('parameters').innerHTML = params;
-		
-		
-		/* $('#favorites').html('&nbsp;');
-		$('#favorites1').html('&nbsp;'); */
-		
-		
-		//$("#saveCurrentPlaylist").click();
-		
-		/* $("#saveCurrentTrack").hide();
-		$("#trackOptions").hide();
-		$('#saveCurrentPlaylist i').removeClass("fa-circle-o fa-check-circle-o").addClass("fa-check-circle-o");
-		$('#saveCurrentTrack i').removeClass("fa-check-circle-o fa-circle-o").addClass("fa-circle-o"); */
-		
-		/* if (data.isStream == 'true') {
-			$('#lyrics').html('&nbsp;');
-			$('#lyrics1').html('&nbsp;');
-			$('#fileInfoForDbTracks').css('visibility', 'hidden');
-		} */
 	}
-	else {
+  else {
 		$("#saveCurrentTrack").show();
 	}
   
@@ -734,7 +720,9 @@ function evaluateStatus(data) {
     $('#lyrics_block').css("display","inline-block");
   }
   
-	evaluateListpos(data.listpos);
+  previous_track_title = current_track_title;
+	
+  evaluateListpos(data.listpos);
 	evaluatePlaytime(data);
 	evaluateRepeat(data.repeat);
 	evaluateShuffle(data.shuffle);
@@ -1226,19 +1214,14 @@ function evaluateTrack(data) {
   var query_artist = '';
   if (data.track_artist) {
     query_artist = data.track_artist;
-    query_artist = query_artist.toString().replaceAll("'","");
-    query_artist = query_artist.toString().replaceAll('"',"");
+    query_artist = query_artist.toString().replace(/'/g,"");
+    query_artist = query_artist.toString().replace(/"/g,"");
   }
   query_title = data.title_core;
   if (query_title) {
-    query_title = query_title.toString().replaceAll("'","");
-    query_title = query_title.toString().replaceAll('"',"");
+    query_title = query_title.toString().replace(/'/g,"");
+    query_title = query_title.toString().replace(/"/g,"");
   }
-  /* query_title = query_title.replaceAll("’","");
-  query_title = query_title.replaceAll("`",""); */
-  //console.log(query_title);
-	//document.getElementById('lyrics1').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + query_artist + '+' + data.title_core + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>' + '&nbsp;&bull;'; 
-	//document.getElementById('lyrics1').innerHTML = '<a href="ridirect.php?query_type=lyrics&q=' + query_artist + '+' + data.title_core + '" target="_blank"><i class="fa fa-search"></i>&nbsp;Lyrics</a>' + '&nbsp;&bull;'; 
 	document.getElementById('lyrics').innerHTML = '<a href="javascript: ajaxRequest(\'ajax-lyrics.php?artist=' + query_artist + '&title=' + query_title + '\',evaluateLyrics);"><i id="lyrics_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>'; 
 	document.getElementById('lyrics1').innerHTML = '<a href="javascript: ajaxRequest(\'ajax-lyrics.php?artist=' + query_artist + '&title=' + query_title + '\',evaluateLyrics);"><i id="lyrics1_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>&nbsp;&bull;'; 
 	

@@ -505,12 +505,13 @@ if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
 			if(data["picture"]) {
 				//pic = '<?php echo TIDAL_RESOURCES_URL; ?>' + data["picture"] + '/480x480.jpg';
 				pic = data["picture"];
-				img = '<img src="' + pic + '">'
+				img = '<img src="' + pic + '">';
+				//img = '<img src="image.php?source=inet&image_url=' + pic + '">';
 			}
 			else {
 				img='<div class="artist_bio_pic_not_found"><i class="fa fa-user"></i></div>';
 			}
-			var artist_bio = '<div style="background-image: url(' + pic + '); background-position: 10000px -50px;" class="artist_bio_pic">' + img + '</div>';
+      var artist_bio = '<div style="background-image: url(' + pic + '); background-position: 10000px -50px;" class="artist_bio_pic">' + img + '</div>';
 			if (bio) {
 				artist_bio += '<div class="artist_bio_text">' + bio + '</div>';
 			}

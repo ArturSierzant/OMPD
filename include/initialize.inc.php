@@ -216,11 +216,9 @@ if (function_exists('json_encode') == false)
 	message(__FILE__, __LINE__, 'error', '[b]JSON not loaded[/b][list][*]Compile PHP with JSON support.[*]Or use a loadable module in the php.ini[/list]');
 if (function_exists('ctype_alnum') == false)
 	message(__FILE__, __LINE__, 'error', '[b]CTYPE not loaded[/b][list][*]Compile PHP with CTYPE support.[*]Or use a loadable module in the php.ini[/list]');
-if ($cfg['use_hra'] || $cfg['use_tidal']) {
-  if (function_exists('curl_init') == false)
-    message(__FILE__, __LINE__, 'error', '[b]CURL not loaded[/b][list][*]Compile PHP with CURL support.[*]Or use a loadable module in the php.ini[/list]');
-}
-  
+if (function_exists('curl_init') == false)
+  message(__FILE__, __LINE__, 'error', '[b]CURL not loaded[/b][list][*]Compile PHP with CURL support.[*]Or use a loadable module in the php.ini[/list]');
+
 
 
 

@@ -112,36 +112,6 @@ function play() {
 	}
 }
 
-function play_old() {
-	global $cfg, $db;
-	authenticate('access_play');
-	require_once('include/play.inc.php');
-	
-	if ($cfg['player_type'] == NJB_HTTPQ) {
-		httpq('play');
-		if (get('menu') == 'playlist') {
-			echo (httpq('getlistlength')) ? '1' : '0';
-		}
-	}
-	elseif ($cfg['player_type'] == NJB_VLC)
-		vlc('pl_play');
-	elseif ($cfg['player_type'] == NJB_MPD) {
-		//mpd('stop');
-		$status = mpd('status');
-		mpd('play');
-		if ($status['state'] == 'stop') {
-			$current_song = $status['song'];
-			mpd('play ' . $current_song);
-			//echo $current_song;
-		}
-		if (get('menu') == 'playlist') {
-			//$status = mpd('status');
-			//echo ($status['playlistlength']) ? '1' : '0';
-			echo $status['song'];
-		}
-	}
-}
-
 
 
 
@@ -163,34 +133,6 @@ function pause() {
 		if ($status['state'] == 'pause')	$data['state'] = '3'; // pause
 		$data['idx'] = $status['song'];
 		echo safe_json_encode($data);
-	}
-}
-
-
-function pause_old() {
-	global $cfg, $db;
-	authenticate('access_play');
-	require_once('include/play.inc.php');
-	
-	if ($cfg['player_type'] == NJB_HTTPQ) {
-		$isplaying = httpq('isplaying');
-		httpq('pause');
-		if (get('menu') == 'playlist') {
-			if ($isplaying == 0)	echo '0'; // stop
-			if ($isplaying == 3)	echo '1'; // play
-			if ($isplaying == 1)	echo '3'; // pause
-		}
-	}
-	elseif ($cfg['player_type'] == NJB_VLC)
-		vlc('pl_pause');
-	elseif ($cfg['player_type'] == NJB_MPD) {
-		$status = mpd('status');
-		mpd('pause');
-		if (get('menu') == 'playlist') {
-			if ($status['state'] == 'stop')		echo '0'; // stop
-			if ($status['state'] == 'pause')	echo '1'; // play
-			if ($status['state'] == 'play')		echo '3'; // pause
-		}
 	}
 }
 
@@ -218,25 +160,6 @@ function stop() {
 	}
 }
 
-function stop_old() {
-	global $cfg, $db;
-	authenticate('access_play');
-	require_once('include/play.inc.php');
-	
-	if ($cfg['player_type'] == NJB_HTTPQ) {
-		httpq('stop');
-		if (get('menu') == 'playlist')
-			echo '0';
-	}
-	elseif ($cfg['player_type'] == NJB_VLC) 
-		vlc('pl_stop');
-	elseif ($cfg['player_type'] == NJB_MPD) {
-		mpd('stop');
-		if (get('menu') == 'playlist')
-			echo '0';
-	}
-}
-
 
 
 
@@ -250,10 +173,14 @@ function prev_() {
 	
 	$data = array();
 	$status = mpd('status');
-	if ($status['state'] == 'stop') {
+	/* if ($status['state'] == 'stop') {
 		mpd('play');
 	}
-	mpd('previous');
+	mpd('previous'); */
+  if ($status['song'] > 0) {
+    mpd('stop');
+    mpd('play ' . $status['song'] - 1);
+  }
 	if (get('menu') == 'playlist') {
 		$status = mpd('status');
 		if ($status['state'] == 'stop')		$data['state'] = '0'; // stop
@@ -292,10 +219,17 @@ function next_() {
 	
 	$data = array();
 	$status = mpd('status');
+	/*
 	if ($status['state'] == 'stop') {
 		mpd('play');
 	}
-	mpd('next');
+	mpd('next'); */
+  
+  if ($status['song'] < $status['playlistlength'] - 1) {
+    mpd('stop');
+    mpd('play ' . $status['song'] + 1);
+  }
+  
 	if (get('menu') == 'playlist') {
 		$status = mpd('status');
 		if ($status['state'] == 'stop')		$data['state'] = '0'; // stop

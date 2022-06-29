@@ -45,10 +45,12 @@ $image	 	= get('image');
 $image_path	= get('image_path');
 $image_url	= get('image_url');
 $mime	 	= get('mime');
+$source	 	= get('source');
 
 if		(isset($image_id))		image($image_id, $quality, $track_id, $image_url);
 elseif	(isset($image))			resampleImage($image);
 elseif	(isset($image_path))	streamImage($image_path, $mime);
+elseif	(isset($source))	streamImageFromUrl($image_url);
 elseif	($cfg['image_share'])	shareImage();
 exit();
 
@@ -224,72 +226,23 @@ function image($image_id, $quality, $track_id, $image_url) {
 }
 
 
-/* 
 
 //  +------------------------------------------------------------------------+
-//  | Resample image                                                         |
+//  | Stream image from url                                                  |
 //  +------------------------------------------------------------------------+
-function resampleImage($image, $size = NJB_IMAGE_SIZE) {
+function streamImageFromUrl($image_url) {
 	global $cfg, $db;
-	authenticate('access_admin', true);
-	
-	if (substr($image, 0, 7) != 'http://' && substr($image, 0, 8) != 'https://')
-		imageError();
-	
-	$extension = substr(strrchr($image, '.'), 1);
-	$extension = strtolower($extension);
-	
-	if		($extension == 'jpg')	$src_image = @imageCreateFromJpeg($image) 	or imageError();
-	elseif	($extension == 'jpeg')	$src_image = @imageCreateFromJpeg($image)	or imageError();
-	elseif	($extension == 'png')	$src_image = @imageCreateFromPng($image)	or imageError();
-	else {
-		$imagesize = @getimagesize($image) or imageError();
-		if ($imagesize[2] == IMAGETYPE_JPEG) {
-			$src_image = @imageCreateFromJpeg($image) or imageError();
-			$extension = 'jpg';
-		}
-		elseif ($imagesize[2] == IMAGETYPE_PNG) {
-			$src_image = @imageCreateFromJpeg($image) or imageError();
-			$extension = 'png';
-		}
-		else
-			imageCreateFromPng('image/image_error.png');
-		
-	}
-	
-	if (($extension == 'jpg' || $extension == 'jpeg') && imageSX($src_image) == $size && imageSY($src_image) == $size) {
-		$data = @file_get_contents($image) or imageError();
-	}
-	elseif (imageSY($src_image) / imageSX($src_image) <= 1) {
-		// Crops from left and right to get a squire image.
-		$sourceWidth		= imageSY($src_image);
-		$sourceHeight		= imageSY($src_image);
-		$sourceX			= round((imageSX($src_image) - imageSY($src_image)) / 2);
-		$sourceY			= 0;
-	}
-	else {
-		// Crops from top and bottom to get a squire image.
-		$sourceWidth		= imageSX($src_image);
-		$sourceHeight		= imageSX($src_image);
-		$sourceX			= 0;
-		$sourceY			= round((imageSY($src_image) - imageSX($src_image)) / 2);
-	}
-	if (isset($sourceWidth)) {
-		$dst_image = ImageCreateTrueColor($size, $size);
-		imageCopyResampled($dst_image, $src_image, 0, 0, $sourceX, $sourceY, $size, $size, $sourceWidth, $sourceHeight);
-		ob_start();
-		imageJpeg($dst_image, NULL, NJB_IMAGE_QUALITY);
-		$data = ob_get_contents();
-		ob_end_clean();
-		imageDestroy($dst_image);
-	}
-	imageDestroy($src_image);
-	
-	header('Cache-Control: max-age=600');
-	streamData($data, 'image/jpeg');
+	$data = file_get_contents($image_url);
+  if ($data) {
+    header('Cache-Control: max-age=31536000');
+    streamData($data, false, false, '"never_expire"');
+  }
+  else {
+    header('Cache-Control: max-age=31536000');
+    imageError();
+  }
 }
 
- */
 
 
 //  +------------------------------------------------------------------------+

@@ -215,7 +215,7 @@ function postProcessDiscNumber($numberString) {
 
 function parseYear($data) {
 	//for FLAC:
-    if (isset($data['comments']['originalyear'][0])) {
+  if (isset($data['comments']['originalyear'][0])) {
         return postProcessYear($data['comments']['originalyear'][0]);
     }
 	if (isset($data['comments']['originaldate'][0])) {
@@ -257,10 +257,11 @@ function parseYear($data) {
 
 function postProcessYear($yearString) {
     if (preg_match('#[1][9][0-9]{2}|[2][0-9]{3}#', $yearString, $match)) {
-        $yearString = $match[0];
-		return intval($yearString);
+      $yearString = $match[0];
+      return intval($yearString);
     }
-	return $yearString;
+	//return $yearString;
+	return 'NULL';
 }
 
 function parseComment($data) {
