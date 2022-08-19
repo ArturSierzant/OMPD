@@ -2275,6 +2275,24 @@ h1 {
     opacity: 1.0;
   }
 }
+
+.timebar-stream-anim {
+  animation: timebar-stream 8s linear infinite;
+  left: -30px;
+  position: relative;
+}
+
+@keyframes timebar-stream {
+  0% {
+    width: 30px;
+    left: : 0;
+  }
+  100% {
+    width: 30px;
+    left: 100%;
+  }
+}
+
 #discBrowser {
   overflow: hidden;
   white-space: nowrap;

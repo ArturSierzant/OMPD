@@ -27,8 +27,22 @@ $data['artist'] = $artist = get('artist');
 $data['title'] = $title = get('title');
 $data['result'] = 'error';
 
-$artistUrl = urlencode($artist);
+
+
+//for data from radio stream (%A0 is urlencoded &nbsp;):
+if ($artist == '%A0' || $artist == '') {
+  //try to find artist and title in $title:
+  $t = explode("-", $title);
+  if (count($t) > 1) {
+    $artist = $t[0];
+    $title = $t[1];
+    $data['artist'] = $artist;
+    $data['title'] = $title;
+  }
+}
+
 $titleUrl = urlencode($title);
+$artistUrl = urlencode($artist);
 
 if ((!$artist || $artist == 'undefined') || (!$title || $title == 'undefined')) {
   echo json_encode($data);

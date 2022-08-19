@@ -155,7 +155,7 @@ function evaluateStatus(data) {
 	
 	evaluateListpos(data.listpos);
 	evaluatePlaytime(data);
-	evaluateIsplaying(data.isplaying, data.listpos);
+	evaluateIsplaying(data.isplaying, data.listpos, data.Time);
 	//set changeTileSizeInfo to properly count popularity on cover 
 		if (document.getElementById('artist_mini').innerHTML.indexOf('tileSizePHP') < 0){
 			changeTileSizeInfo();
@@ -175,10 +175,25 @@ function evaluateListpos(listpos) {
 	}
 }
 
-function evaluateIsplaying(isplaying, idx) {
+function evaluateIsplaying(isplaying, idx, duration) {
+    console.log("duration: " + duration);
+    console.log("isplaying: " + isplaying);
+  if (!duration) {
+    switch(isplaying){
+      case 1:
+        $("#timebar_mini").addClass("timebar-stream-anim");
+        break;
+      /* default:
+        $("#timebar_mini").removeClass("timebar-stream-anim"); */
+    }
+  }
+  else {
+    $("#timebar_mini").removeClass("timebar-stream-anim");
+  }
 	if (previous_isplaying != isplaying) {
 		if (isplaying.state){
 			idx = isplaying.idx;
+      duration = isplaying.duration;
 			isplaying = isplaying.state;
 		}
 		if (isplaying == 0) {
@@ -189,6 +204,7 @@ function evaluateIsplaying(isplaying, idx) {
 			$("#play").addClass("playlist_status_off");
 			$("#play").html('<i class="fa fa-play sign-ctrl"></i>');
 			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=play&menu=playlist', evaluateIsplaying);");
+      $("#timebar_mini").removeClass("timebar-stream-anim");
 			previous_miliseconds = 0;
 		}
 		else if (isplaying == 1) {
@@ -199,6 +215,9 @@ function evaluateIsplaying(isplaying, idx) {
 			$("#play").removeClass();
 			$("#play").addClass("playlist_status_off");
 			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=pause&menu=playlist', evaluateIsplaying);");
+      if (!duration) {
+        $("#timebar_mini").addClass("timebar-stream-anim");
+      }
 		}
 		else if (isplaying == 3) {
 			// pause
@@ -208,6 +227,7 @@ function evaluateIsplaying(isplaying, idx) {
 			$("#play").removeClass();
 			$("#play").addClass("playlist_status_off");
 			$("#play").attr("onclick","javascript:ajaxRequest('play.php?action=play&menu=playlist', evaluateIsplaying);");
+      $("#timebar_mini").removeClass("timebar-stream-anim");
 		}
 		previous_isplaying = isplaying;
 		console.log('isplaying:' + isplaying + '; idx: ' + idx);

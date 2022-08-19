@@ -108,6 +108,7 @@ function play() {
 		if ($status['state'] == 'play')		$data['state'] = '1'; // play
 		if ($status['state'] == 'pause')	$data['state'] = '3'; // pause
 		$data['idx'] = $status['song'];
+		$data['duration'] = $status['duration'];
 		echo safe_json_encode($data);
 	}
 }
@@ -132,6 +133,7 @@ function pause() {
 		if ($status['state'] == 'play')		$data['state'] = '1'; // play
 		if ($status['state'] == 'pause')	$data['state'] = '3'; // pause
 		$data['idx'] = $status['song'];
+    $data['duration'] = $status['duration'];
 		echo safe_json_encode($data);
 	}
 }
@@ -156,6 +158,7 @@ function stop() {
 		if ($status['state'] == 'play')		$data['state'] = '1'; // play
 		if ($status['state'] == 'pause')	$data['state'] = '3'; // pause
 		$data['idx'] = $status['song'];
+    $data['duration'] = $status['duration'];
 		echo safe_json_encode($data);
 	}
 }
@@ -187,6 +190,7 @@ function prev_() {
 		if ($status['state'] == 'play')		$data['state'] = '1'; // play
 		if ($status['state'] == 'pause')	$data['state'] = '3'; // pause
 		$data['idx'] = $status['song'];
+    $data['duration'] = $status['duration'];
 		echo safe_json_encode($data);
 	}
 }
@@ -236,6 +240,7 @@ function next_() {
 		if ($status['state'] == 'play')		$data['state'] = '1'; // play
 		if ($status['state'] == 'pause')	$data['state'] = '3'; // pause
 		$data['idx'] = $status['song'];
+    $data['duration'] = $status['duration'];
 		echo safe_json_encode($data);
 	}
 }
@@ -2395,7 +2400,9 @@ function playlistTrack() {
 		$data['by']			= (string) '';
 		$data['image_id']	= (string) '';
 		$data['album_id']	= (string) $album_id;
-		$data['year']	= postProcessYear($currentsong['Date']);
+		//$data['year']	= postProcessYear($currentsong['Date']);
+		$y = postProcessYear($currentsong['Date']);
+		$data['year'] = $y == 'NULL' ? '' : $y;
 		$data['genre']	= (string) trim($currentsong['Genre']);
 		if (empty($data['genre'])) $data['genre'] = '&nbsp;';
 		$query = mysqli_query($db,'SELECT genre, genre_id FROM genre WHERE genre = "' . $data['genre'] . '" LIMIT 1');

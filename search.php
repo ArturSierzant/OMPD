@@ -496,7 +496,6 @@ function track_title() {
 	ORDER BY track.artist, track.title'); */
 	
 	$rows = mysqli_num_rows($query);
-	
 	if ($rows > 0) {
 		$match_found = true;
 		if ($group_found == 'none')	$group_found = 'TT';

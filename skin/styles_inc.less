@@ -2399,6 +2399,23 @@ h1 {
     100% { opacity: 1.0; }
 }
 
+.timebar-stream-anim {
+  animation: timebar-stream 8s linear infinite;
+  left: -30px;
+  position: relative;
+}
+
+@keyframes timebar-stream {
+  0% {
+    width: 30px;
+    left: : 0;
+  }
+  100% {
+    width: 30px;
+    left: 100%;
+  }
+}
+
 #discBrowser {
 	overflow: hidden;
 	white-space:nowrap;
@@ -2439,6 +2456,7 @@ h1 {
 	background-color: (@bg-banner);
 	max-width: 1280px;
 	border-top: 1px solid lighten(@bg-banner, 10%);
+  overflow: hidden;
 }
 
 #image_container_mini, #image_in_mini {
