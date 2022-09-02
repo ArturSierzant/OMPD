@@ -188,7 +188,12 @@ function parseTrackNumber($data) {
 function postProcessTrackNumber($numberString) {
     //support for track_number in form: 01/11
     $numbers = explode("/", $numberString);
-    return $numbers[0];
+    if (is_numeric($numbers[0])){
+      return $numbers[0];
+    }
+    else {
+      return 'NULL';
+    }
 }
 
 function parseDiscNumber($data) {
@@ -210,7 +215,12 @@ function parseDiscNumber($data) {
 function postProcessDiscNumber($numberString) {
     //support for part_of_a_set/discnumber in form: 01/02
     $numbers = explode("/", $numberString);
-    return $numbers[0];
+    if (is_numeric($numbers[0])) {
+      return $numbers[0];
+    }
+    else {
+      return '1';
+    }
 }
 
 function parseYear($data) {

@@ -2271,18 +2271,46 @@ h1 {
   }
 }
 .timebar-stream-anim {
-  animation: timebar-stream 8s linear infinite;
-  left: -30px;
+  animation: timebar-stream 10s linear infinite;
+  left: -10%;
   position: relative;
 }
 @keyframes timebar-stream {
   0% {
-    width: 30px;
-    left: : 0;
+    width: 10%;
+    left: -10%;
   }
   100% {
-    width: 30px;
+    width: 10%;
     left: 100%;
+  }
+}
+@keyframes timebar-stream-2 {
+  0% {
+    width: 0;
+    left: 0;
+  }
+  50% {
+    width: 100%;
+    left: 0;
+  }
+  100% {
+    width: 0;
+    left: 100%;
+  }
+}
+@keyframes timebar-stream-3 {
+  0% {
+    width: 10%;
+    left: 0;
+  }
+  50% {
+    width: 10%;
+    left: 90%;
+  }
+  100% {
+    width: 10%;
+    left: 0;
   }
 }
 #discBrowser {
