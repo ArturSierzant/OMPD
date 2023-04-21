@@ -1762,6 +1762,7 @@ if ($cfg['use_hra']) {
 	krsort($album_multidisc);
 	foreach (array_slice($album_multidisc,0,$cfg['max_items_per_page']) as $album_m) {
 		draw_tile($size,$album_m,$album_m['allDiscs']);
+		//draw_tile($size,$album_m,'allDiscs');
 	}
 ?>
 </div>

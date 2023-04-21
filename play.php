@@ -749,8 +749,8 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	$favorite_id	= get('favorite_id');
 	$random				= get('random');
 	$insertType		= get('insertType');
-	//$md					= isset(get('md')) ? get('md') : '';
-	$md						= get('md');
+	$md					  = get('md') !== null ? get('md') : '';
+	//$md						= get('md');
 	$isYoutube 		= false;
 	$isHRA 		= false;
   $multidiscs_count = 1;
@@ -837,13 +837,16 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 						$mds_updateCounter[] = $album_md['album_id'];
 					};
 					if ($mds != ''){
-						$select_md = ' track.album_id IN (' . $mds . ') ';
+						$select_md_1 = ' WHERE track.album_id IN (' . $mds . ') ';
+						$select_md_2 = ' track.album_id IN (' . $mds . ') AND ';
 					}
 				}
-				//check if multidiscs have different values for 'disc' to keep right track order in playlist (prior update procedure always put '1' as 'disc', no mater what value of 'part_of_set'/'discnumber' tag was)
+        cliLog ("select_md -> " . $select_md_1);
+        cliLog ("select_md -> " . $select_md_2);
+				//check if multidiscs have different values for 'disc' to keep right track order in playlist (prior update procedure always put '1' as 'disc', no matter what value of 'part_of_set'/'discnumber' tag was)
 				$query = mysqli_query($db,'SELECT disc 
 				FROM track LEFT JOIN album ON track.album_id = album.album_id 
-				WHERE ' . $select_md . ' GROUP BY disc');
+				' . $select_md_1 . ' GROUP BY disc');
         if ($query) {
           $multidiscs_count = mysqli_num_rows($query);
 				}
@@ -854,7 +857,7 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 				
 				$query_str = 'SELECT relative_file, track_id 
 				FROM track LEFT JOIN album ON track.album_id = album.album_id 
-				WHERE ' . $select_md . ' AND track.track_id NOT IN 
+				WHERE ' . $select_md_2 . ' track.track_id NOT IN 
 				(SELECT track_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") 
 				ORDER BY ' . $order_by;
 			}

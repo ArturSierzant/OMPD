@@ -199,12 +199,12 @@ i:active {
     width: 0;
   }
   /*.tile 	{
-			width: 7em; 
-			height: 7em;
-			display:inline-block; 
-			margin: 1px;
-			}
-	*/
+      width: 7em; 
+      height: 7em;
+      display:inline-block; 
+      margin: 1px;
+      }
+  */
   #pl-track-info {
     display: none;
   }
@@ -331,12 +331,12 @@ i:active {
     width: 0;
   }
   /*.tile 	{
-			width: 7em; 
-			height: 7em;
-			display: inline-block; 
-			margin: 1px;
-			}
-	*/
+      width: 7em; 
+      height: 7em;
+      display: inline-block; 
+      margin: 1px;
+      }
+  */
   #pl-track-info {
     display: block;
   }
@@ -856,6 +856,7 @@ td.menu_bottom_right {
   text-align: center;
   white-space: nowrap;
   line-height: 1.2em;
+  border-radius: 4px;
 }
 #fixedMenu {
   background: inherit;

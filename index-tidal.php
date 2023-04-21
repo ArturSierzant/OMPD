@@ -210,7 +210,7 @@ request.done(function(data) {
   </div>
 </div>
 
-<h1>&nbsp;Suggested albums for you <a href="index.php?action=viewNewFromTidal&type=suggested_for_you">(more...)</a></h1>
+<h1 id="suggested_for_you_header">&nbsp;Suggested albums for you <a href="index.php?action=viewNewFromTidal&type=suggested_for_you">(more...)</a></h1>
 <script>
   calcTileSize();
   var size = $tileSize;
@@ -223,7 +223,12 @@ request.done(function(data) {
 
 request.done(function(data) {
   if (data) {
-    $( "#suggested_for_you" ).html(data);
+    if (data.indexOf("No albums found") > 0) {
+      $('[id^="suggested_for_you"]').hide();
+    }
+    else {
+      $( "#suggested_for_you" ).html(data);
+    }
   }
   else {
     $( "#suggested_for_you" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
@@ -239,7 +244,7 @@ request.done(function(data) {
   </div>
 </div>
 
-<h1>&nbsp;Suggested artists for you</h1>
+<h1 id="suggested_artists_for_you_header">&nbsp;Suggested artists for you</h1>
 <div id="suggested_artists_for_you" class="full">
   <div style="display: grid; height: 100%;">
     <span id="albumsLoadingIndicator" style="margin: auto;">
@@ -274,7 +279,8 @@ if ($conn === true){
   else {
 ?>
   <script>
-    $("#suggested_artists_for_you").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
+    $('[id^="suggested_artists_for_you"]').hide();
+    //$("#suggested_artists_for_you").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
   </script>
 <?php
   }

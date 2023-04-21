@@ -856,6 +856,7 @@ td.menu_bottom_right {
   text-align: center;
   white-space: nowrap;
   line-height: 1.2em;
+  border-radius: 4px;
 }
 #fixedMenu {
   background: inherit;

@@ -690,7 +690,7 @@ function showAlbumsFromTidal($artist, $size, $ajax, $tidalArtistId) {
 	//$artist = replaceAnds($artist);
 	$sql = "SELECT MIN(last_update_time) as min_last_update_time 
 	FROM tidal_album 
-	WHERE artist LIKE '" . mysqli_real_escape_string($db,$artist) . "'
+	WHERE artist LIKE '%" . mysqli_real_escape_string($db,$artist) . "%'
 	AND last_update_time > 0";
 	$query = mysqli_query($db, $sql);
 	$res = mysqli_fetch_assoc($query);
@@ -698,7 +698,7 @@ function showAlbumsFromTidal($artist, $size, $ajax, $tidalArtistId) {
 	
 	$sql = "SELECT MAX(last_update_time) as min_last_update_time 
 	FROM tidal_album 
-	WHERE artist LIKE '" . mysqli_real_escape_string($db,$artist) . "'
+	WHERE artist LIKE '%" . mysqli_real_escape_string($db,$artist) . "%'
 	AND last_update_time > 0";
 	$query = mysqli_query($db, $sql);
 	$res = mysqli_fetch_assoc($query);
@@ -1844,9 +1844,10 @@ function getYouTubeMPDUrl($url, $title = ''){
 		$js = json_decode($output[0],true);
 		$id = $js['id'];
 		$f = $cfg['youtube_audio_format_name'];
-		preg_match_all('!\d+!', $f, $matches_f);
+		preg_match('!\d+!', $f, $matches_f);
 		
 		$format = array_search($matches_f[0], array_column($js['formats'], 'format_id'));
+		//$format = array_search('140', array_column($js['formats'], 'format_id'));
 		
 		//$format = array_search($f, array_column($js['formats'], 'format'));
 
@@ -2725,7 +2726,7 @@ function updateCounter($album_id, $flag){
 			SET time = 			' . (int) time() . '
 			WHERE album_id = 	"' . mysqli_real_escape_string($db, $album_id) . '"
 			AND sid =			BINARY "' . mysqli_real_escape_string($db, $cfg['sid']) . '"
-			AND flag =			' . (int) $flag . ',
+			AND flag =			' . (int) $flag . '
 			AND time =			' . (int) $counter_time);
 	}
 }

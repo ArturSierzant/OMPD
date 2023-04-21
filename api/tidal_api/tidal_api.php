@@ -266,7 +266,7 @@ class TidalAPI {
   function getSuggestedNew($limit = 50, $offset = 0, $getMore = false) {
     $res = $this->getHomePage();
     foreach($res['rows'] as $key => $row){
-      if ($row['modules'][0]['title'] == 'Suggested New Albums') {
+      if (strtolower($row['modules'][0]['title']) == 'suggested new albums') {
         if ($getMore) {
           $apiPath = $res['rows'][$key]['modules'][0]['pagedList']['dataApiPath'];
           $more = $this->getByApiPath($limit, $offset, $apiPath);
@@ -283,7 +283,7 @@ class TidalAPI {
   function getNewForYou($limit = 50, $offset = 0, $getMore = false) {
     $res = $this->getHomePage();
     foreach($res['rows'] as $key => $row){
-      if ($row['modules'][0]['title'] == 'New Releases For You') {
+      if (strtolower($row['modules'][0]['title']) == 'new releases for you') {
         if ($getMore) {
           $apiPath = $res['rows'][$key]['modules'][0]['pagedList']['dataApiPath'];
           $more = $this->getByApiPath($limit, $offset, $apiPath);
@@ -300,7 +300,7 @@ class TidalAPI {
   function getSuggestedForYou($limit = 50, $offset = 0, $getMore = false) {
     $res = $this->getExplorePage();
     foreach($res['rows'] as $key => $row){
-      if ($row['modules'][0]['title'] == 'Suggested Albums for You') {
+      if (strtolower($row['modules'][0]['title']) == 'suggested albums for you') {
         if ($getMore) {
           $apiPath = $res['rows'][$key]['modules'][0]['pagedList']['dataApiPath'];
           $more = $this->getByApiPath($limit, $offset, $apiPath);
@@ -317,7 +317,7 @@ class TidalAPI {
   function getSuggestedArtistsForYou($limit = 50, $offset = 0, $getMore = false) {
     $res = $this->getExplorePage();
     foreach($res['rows'] as $key => $row){
-      if ($row['modules'][0]['title'] == 'Suggested Artists for You') {
+      if (strtolower($row['modules'][0]['title']) == 'suggested artists for you') {
         if ($getMore) {
           $apiPath = $res['rows'][$key]['modules'][0]['pagedList']['dataApiPath'];
           $more = $this->getByApiPath($limit, $offset, $apiPath);
@@ -334,7 +334,7 @@ class TidalAPI {
   function getSuggestedNewTracks($limit = 50, $offset = 0, $getMore = false) {
     $res = $this->getHomePage();
     foreach($res['rows'] as $key => $row){
-      if ($row['modules'][0]['title'] == 'Suggested New Tracks') {
+      if (strtolower($row['modules'][0]['title']) == 'suggested new tracks') {
         if ($getMore) {
           $apiPath = $res['rows'][$key]['modules'][0]['pagedList']['dataApiPath'];
           $more = $this->getByApiPath($limit, $offset, $apiPath);
