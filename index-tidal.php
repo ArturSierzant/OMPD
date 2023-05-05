@@ -50,199 +50,82 @@ $countryCode = '';
 if ($conn){
   $sessionId = $t->sessionId;
   $countryCode = $t->countryCode;
+  $hp = $t->getHomePage();
+  if (strtolower($hp['title']) != 'home') {
+    echo ("Error getting Home Page from Tidal");
+    require_once('include/footer.inc.php');
+    exit();
+  }
 }
 ?>
 <div class="area">
-<h1>&nbsp;Featured new albums <a href="index.php?action=viewNewFromTidal&type=featured_new">(more...)</a></h1>
-<script>
-  calcTileSize();
-  var size = $tileSize;
-  var request = $.ajax({  
-  url: "ajax-tidal-new-albums.php",  
-  type: "POST",
-  data: { type: "featured_new", tileSize : size, limit : 10, offset : 0, sessionId : "<?php echo $sessionId; ?>", countryCode : "<?php echo $countryCode; ?>" },
-  dataType: "html"
-  }); 
-
-request.done(function(data) {
-  if (data) {
-    $( "#new_tidal" ).html(data);
-  }
-  else {
-    $( "#new_tidal" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
-  }
-});
-
-</script>
-<div class="full" id="new_tidal">
-  <div style="display: grid; height: 100%;">
-    <span id="albumsLoadingIndicator" style="margin: auto;">
-      <i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading albums from Tidal...</span>
-    </span>
-  </div>
-</div>
-
-<h1>&nbsp;Suggested new albums <a href="index.php?action=viewNewFromTidal&type=suggested_new">(more...)</a></h1>
-<script>
-  calcTileSize();
-  var size = $tileSize;
-  var request = $.ajax({  
-  url: "ajax-tidal-new-albums.php",  
-  type: "POST",
-  data: { type: "suggested_new", tileSize : size, limit : 10, offset : 0, sessionId : "<?php echo $sessionId; ?>", countryCode : "<?php echo $countryCode; ?>" },
-  dataType: "html"
-  }); 
-
-request.done(function(data) {
-  if (data) {
-    $( "#suggested_new" ).html(data);
-  }
-  else {
-    $( "#suggested_new" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
-  }
-});
-
-</script>
-<div class="full" id="suggested_new">
-  <div style="display: grid; height: 100%;">
-    <span id="albumsLoadingIndicator" style="margin: auto;">
-      <i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading albums from Tidal...</span>
-    </span>
-  </div>
-</div>
-
-
-<h1>&nbsp;Suggested new tracks <a href="index.php?action=viewNewFromTidal&type=suggested_new_tracks">(more...)</a></h1>
-<div id="suggested_new_tracks">
-  <div style="text-align: center;">
-    <span id="tracksLoadingIndicator" style="margin: auto;">
-      <i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left" style="display: inline;">Loading tracks from Tidal...</span>
-    </span>
-  </div>
-</div><br/>
 <?php
-if ($conn === true){
-  $newTracks = $t->getSuggestedNewTracks(5, 0, false);
-  if ($newTracks['items']){
+
+foreach($hp['rows'] as $key => $row){
+  $mod = $hp['rows'][$key]['modules'][0];
+  if ($mod['type'] == 'ALBUM_LIST') {
+    $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal&type=album_list&apiPath=' . urlencode($mod['showMore']['apiPath']) . '"> (more...)</a>';
+    if (strtolower($mod['preTitle']) == 'because you listened to') {
+      $cover = $t->albumCoverToURL($mod['header']['item']['cover'],'lq');
+      $headerTitile = '<img class="pointer" style="width: 3em; float: left; margin: 0 7px 5px 0;" src="' . $cover . '" onclick=\'location.href="index.php?action=view3&album_id=tidal_' . $mod['header']['item']['id'] .'"\'><div style="line-height: 1.5em">Because you listened to <br><a href="index.php?&action=view3&album_id=tidal_' . $mod['header']['item']['id'] . '"> `' . urldecode($mod['title']) . '`</a> by <a href="index.php?action=view2&artist=' . $mod['header']['item']['artists'][0]['name'] .'">' . urldecode($mod['header']['item']['artists'][0]['name']) . '</a>';
+    }
+    echo '<h1>' . $headerTitile . '</h1>';
+    echo '<div class="full" id="' . $mod['id'] . '">';
+    foreach($mod['pagedList']['items'] as $res) {
+      $albums = array();
+      $albums['album_id'] = 'tidal_' . $res['id'];
+      $albums['album'] = $res['title'];
+      $albums['cover'] = $t->albumCoverToURL($res['cover'],'lq');
+      $albums['artist_alphabetic'] = $res['artists'][0]['name'];
+      if ($cfg['show_album_format']) {
+        $albums['audio_quality'] = $res['audioQuality'];
+      }
+      draw_tile ( $tileSize, $albums, '', 'echo', $res['cover'] );
+    }
+    echo '</div>';
+  } //ALBUM_LIST
+  
+  //if ($mod['type'] == 'MIX_LIST' || $mod['type'] == 'PLAYLIST_LIST') {
+  /* if ($mod['type'] == 'MIX_LIST') {
+    $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal&type=mix_list&apiPath=' . urlencode($mod['showMore']['apiPath']) . '"> (more...)</a>';
+    echo '<h1>&nbsp;' . $headerTitile . '</h1>';
+    echo '<div class="full" id="' . $mod['id'] . '">';
+    foreach($mod['pagedList']['items'] as $res) {
+      $albums = array();
+      $albums['album_id'] = 'tidal_' . $res['id'];
+      $albums['album'] = $res['title'];
+      $albums['cover'] = $res['images']['SMALL']['url'];
+      $albums['artist_alphabetic'] = $res['subTitle'];
+      draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $res['images']['SMALL']['url'] );
+    }
+    echo '</div>';
+  } //MIX_LIST
+   */
+  
+  if ($mod['type'] == 'TRACK_LIST') {
+    $divId = str_replace(' ','_',$mod['title']);
+    $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal&type=track_list&apiPath=' . urlencode($mod['showMore']['apiPath']) . '"> (more...)</a>';
+    
+    $newTracks = $mod['pagedList'];
     $tracksList = tidalTracksList($newTracks);
+ 
+    echo '<h1>&nbsp;' . $headerTitile . '</h1>';
+    echo '<div id="' . $divId . '">';
+    echo ($tracksList);
+    echo '</div>';
 ?>
   <script>
-    $( "#suggested_new_tracks" ).html(<?php echo safe_json_encode($tracksList); ?>);
-    $( "#suggested_new_tracks" ).css("height","auto");
+    $( "#<?php echo $divId; ?>" ).css("height","auto");
     setAnchorClick();
     addFavSubmenuActions();
   </script>
 <?php
-  }
-  else {
-?>
-  <script>
-    $("#suggested_new_tracks").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
-  </script>
-<?php
-  }
-}
-else {
-?>
-  <script>
-    $("#suggested_new_tracks").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Tidal request.<br>Error message:<br><br><?php echo $conn["error"];?></div>');
-  </script>
-<?php
-}
+    
+  } //TRACK_LIST
+} //foreach
+
 ?>
 
-
-<h1>&nbsp;Featured local albums <a href="index.php?action=viewNewFromTidal&type=featured_local">(more...)</a></h1>
-<script>
-  calcTileSize();
-  var size = $tileSize;
-  var request = $.ajax({  
-  url: "ajax-tidal-new-albums.php",  
-  type: "POST",
-  data: { type: "featured_local", tileSize : size, limit : 10, offset : 0, sessionId : "<?php echo $sessionId; ?>", countryCode : "<?php echo $countryCode; ?>" },
-  dataType: "html"
-  }); 
-
-request.done(function(data) {
-  if (data) {
-    $( "#new_local_tidal" ).html(data);
-  }
-  else {
-    $( "#new_local_tidal" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
-  }
-});
-
-</script>
-<div class="full" id="new_local_tidal">
-  <div style="display: grid; height: 100%;">
-    <span id="albumsLoadingIndicator" style="margin: auto;">
-      <i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading albums from Tidal...</span>
-    </span>
-  </div>
-</div>
-
-<h1>&nbsp;New albums for you <a href="index.php?action=viewNewFromTidal&type=new_for_you">(more...)</a></h1>
-<script>
-  calcTileSize();
-  var size = $tileSize;
-  var request = $.ajax({  
-  url: "ajax-tidal-new-albums.php",  
-  type: "POST",
-  data: { type: "new_for_you", tileSize : size, limit : 10, offset : 0, sessionId : "<?php echo $sessionId; ?>", countryCode : "<?php echo $countryCode; ?>" },
-  dataType: "html"
-  }); 
-
-request.done(function(data) {
-  if (data) {
-    $( "#new_for_you" ).html(data);
-  }
-  else {
-    $( "#new_for_you" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
-  }
-});
-
-</script>
-<div class="full" id="new_for_you">
-  <div style="display: grid; height: 100%;">
-    <span id="albumsLoadingIndicator" style="margin: auto;">
-      <i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading albums from Tidal...</span>
-    </span>
-  </div>
-</div>
-
-<h1 id="suggested_for_you_header">&nbsp;Suggested albums for you <a href="index.php?action=viewNewFromTidal&type=suggested_for_you">(more...)</a></h1>
-<script>
-  calcTileSize();
-  var size = $tileSize;
-  var request = $.ajax({  
-  url: "ajax-tidal-new-albums.php",  
-  type: "POST",
-  data: { type: "suggested_for_you", tileSize : size, limit : 10, offset : 0, sessionId : "<?php echo $sessionId; ?>", countryCode : "<?php echo $countryCode; ?>" },
-  dataType: "html"
-  }); 
-
-request.done(function(data) {
-  if (data) {
-    if (data.indexOf("No albums found") > 0) {
-      $('[id^="suggested_for_you"]').hide();
-    }
-    else {
-      $( "#suggested_for_you" ).html(data);
-    }
-  }
-  else {
-    $( "#suggested_for_you" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
-  }
-});
-
-</script>
-<div class="full" id="suggested_for_you">
-  <div style="display: grid; height: 100%;">
-    <span id="albumsLoadingIndicator" style="margin: auto;">
-      <i class="fa fa-cog fa-spin icon-small"></i> <span class="add-info-left">Loading albums from Tidal...</span>
-    </span>
-  </div>
-</div>
 
 <h1 id="suggested_artists_for_you_header">&nbsp;Suggested artists for you</h1>
 <div id="suggested_artists_for_you" class="full">

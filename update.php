@@ -44,6 +44,10 @@ ignore_user_abort(true);
 
 register_shutdown_function('fatalErrorHandle');
 
+//prevent stopping update process after force_restart_timeout (default 180s) 
+//when OPcache is enabled 
+//ini_set('opcache.force_restart_timeout', 180000);
+
 //exit();
 cliLog("Update started");
 
@@ -310,8 +314,8 @@ function update($dir_to_update = '') {
 			mysqli_query($db,'UPDATE album_id SET updated = 1 WHERE updated <> 9');
 			
 			//mark only requested dir to be updated
-			mysqli_query($db,'UPDATE album_id SET updated = 0 WHERE path LIKE "' . mysqli_real_escape_string($db,$dir_to_update) . '%"');
-			mysqli_query($db,'UPDATE album SET updated = 0 WHERE album_id IN
+			mysqli_query($db,'UPDATE album_id SET updated = 0 WHERE updated <> 9 AND path LIKE "' . mysqli_real_escape_string($db,$dir_to_update) . '%"');
+			mysqli_query($db,'UPDATE album SET updated = 0 WHERE updated <> 9 AND album_id IN
 			(SELECT album_id FROM album_id WHERE path LIKE "' . mysqli_real_escape_string($db,$dir_to_update) . '%" )');
 			mysqli_query($db,'UPDATE bitmap SET updated = 0 WHERE album_id IN
 			(SELECT album_id FROM album_id WHERE path LIKE "' . mysqli_real_escape_string($db,$dir_to_update) . '%" )');

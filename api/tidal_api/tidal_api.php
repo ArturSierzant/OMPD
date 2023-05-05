@@ -329,8 +329,8 @@ class TidalAPI {
       }
     }
     return false;
-  }
-
+  }  
+  
   function getSuggestedNewTracks($limit = 50, $offset = 0, $getMore = false) {
     $res = $this->getHomePage();
     foreach($res['rows'] as $key => $row){
@@ -370,7 +370,7 @@ class TidalAPI {
     return $res;
   }
 
-  function getUserPlaylists() {
+  function getUserPlaylists($limit = 50) {
     curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "users/" . $this->userId . "/playlists?countryCode=" . $this->countryCode . "&limit=" . $limit);
     return $this->request();
   }

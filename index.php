@@ -65,6 +65,7 @@ elseif	($action == 'viewHRA')			viewHRA();
 elseif	($action == 'viewNewFromHRA')			viewNewFromHRA();
 elseif	($action == 'viewTidal')			viewTidal();
 elseif	($action == 'viewNewFromTidal')			viewNewFromTidal();
+elseif	($action == 'viewMoreFromTidal')			viewMoreFromTidal();
 elseif	($action == 'viewPopular')		viewPopular();
 elseif	($action == 'viewRecentlyPlayed')	viewRecentlyPlayed();
 elseif	($action == 'viewPlayedAtDay')	viewPlayedAtDay();
@@ -2022,6 +2023,83 @@ if ($conn === true){
     }
     elseif ($mediaType == 'track') {
       $tracksList = tidalTracksList($results);
+      echo '<div>';
+      echo $tracksList;
+    }
+  }
+  else {
+    echo ('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
+  }
+}
+else {
+  echo('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Tidal request.<br>Error message:<br><br>' . $conn["error"] . '</div>');
+}
+?>
+</div>
+
+<table cellspacing="0" cellpadding="0" class="border">
+
+<tr class="<?php echo $class; ?> smallspace"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
+<tr class="line"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
+
+</table>
+
+<?php
+	require_once('include/footer.inc.php');
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | View more items from Tidal                                             |
+//  +------------------------------------------------------------------------+
+function viewMoreFromTidal() {
+  global $cfg, $db, $t;
+  global $base_size, $spaces, $scroll_bar_correction;
+
+  $type = get('type');
+  $apiPath = get('apiPath');
+
+  authenticate('access_media');
+
+  // formattedNavigator
+  $nav			= array();
+  $nav['name'][]	= 'Library';
+  $nav['url'][]	= 'index.php';
+  $nav['name'][]	= 'Tidal';
+  $nav['url'][]	= 'index.php?action=viewTidal';
+
+$conn = $t->connect();
+if ($conn === true){
+  //$mediaType = 'album';
+  $curr_page = (get('page') ? get('page') : 1);
+  //50 is Tidal limitation for getting data by dataApiPath
+  $tidalMaxItemPerPage = $cfg['max_items_per_page'];
+  if ($tidalMaxItemPerPage > 50) $tidalMaxItemPerPage = 50;
+  $results = $t->getByApiPath($tidalMaxItemPerPage, $tidalMaxItemPerPage * ($curr_page - 1), $apiPath);
+  
+  $nav['name'][] = $results['title'] . ':';
+  require_once('include/header.inc.php');
+  echo ('<h1>' . $results['title'] .'</h1>');
+  if ($tileSizePHP) $size = $tileSizePHP;
+  
+  if ($results['rows']){
+    if ($type == 'album_list'){
+      echo '<div class="albums_container">';
+      foreach($results['rows'][0]['modules'][0]['pagedList']['items'] as $res) {
+        $albums = array();
+        $albums['album_id'] = 'tidal_' . $res['id'];
+        $albums['album'] = $res['title'];
+        $albums['cover'] = $t->albumCoverToURL($res['cover'],'lq');
+        $albums['artist_alphabetic'] = $res['artists'][0]['name'];
+        if ($cfg['show_album_format']) {
+          $albums['audio_quality'] = $res['audioQuality'];
+        }
+        draw_tile ( $size, $albums, '', 'echo', '' );
+      }
+      $cfg['items_count'] = $results['totalNumberOfItems'];
+    }
+    elseif ($type == 'track_list') {
+      $tracksList = tidalTracksList($results['rows'][0]['modules'][0]['pagedList']);
       echo '<div>';
       echo $tracksList;
     }

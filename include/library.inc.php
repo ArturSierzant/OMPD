@@ -156,7 +156,73 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 		else {
 			return $res;
 		}
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Tile for Tidal items (not album)                                       |
+//  +------------------------------------------------------------------------+
+function draw_Tidal_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover = '') {
+		global $db,$cfg, $t;
+		$res = "";
+		$md = "";
+		$maxPlayed = $cfg['max_played'];
+    $isAdded2library = false;
+
+		$res = '<div title="Go to album \'' . html($album['album']) .  '\'" class="tile pointer" style="width: ' . $size . 'px; height: ' . $size . 'px;">';
+		$pic = $tidal_cover;
+		
+			$res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $tidal_cover . '" alt="" width="100%" height="100%">';
+/* 		if ($cfg['show_album_format'] == true && !isTidal($album['album_id']) && !isHra($album['album_id'])) {
+			$query = mysqli_query($db, 'SELECT track.audio_bits_per_sample, track.audio_sample_rate, track.audio_dataformat, track.audio_profile, track.audio_encoder 
+				FROM track left join album on album.album_id = track.album_id where album.album_id = "' .  mysqli_real_escape_string($db,$album['album_id']) . '"LIMIT 1');
+			$album_info = mysqli_fetch_assoc($query);
+			$audio_format = calculateAlbumFormat($album_info);
+			if ($cfg['testing'] == 'on' && $audio_format <> 'CD'  && $audio_format <> 'UNKNOWN') {
+				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
 			}
+			elseif ($cfg['testing'] == 'off'  && $audio_format <> 'UNKNOWN') {
+				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
+			}
+		}
+		elseif ($cfg['show_album_format'] == true && isTidal($album['album_id'])) {
+			$audio_format = calculateAlbumFormat($album);
+			if ($cfg['testing'] == 'on' && $audio_format <> 'CD' && $audio_format <> 'UNKNOWN') {
+				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
+			}
+			elseif ($cfg['testing'] == 'off' && $audio_format <> 'UNKNOWN') {
+				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
+			}
+		}
+		elseif ($cfg['show_album_format'] == true && isHra($album['album_id'])) {
+      if (isset($album['audio_quality_tag']) && $album['audio_quality_tag'] != '') {
+        $res .= '   <div class="tile_format">' . html($album['audio_quality_tag']) . '</div>';
+      }
+      else {
+        $res .= "<script>getHraAudioFormat('" . $album['album_id'] . "');</script>";
+        $res .= '   <div style = "display: none;" class="tile_format" id="tile_format_' . $album['album_id'] . '"></div>';
+      }
+		} */
+
+		$res .= '	<div class="tile_info" style="cursor: initial;">';
+		$res .= '	<div class="tile_title">' . html($album['album']) . '</div>';
+		$res .= '	<div class="tile_band">' . html($album['artist_alphabetic']) . '</div>';
+		if ($cfg['show_quick_play']) {
+			$res .= '<div class="quick-play">';
+			if ($cfg['access_add']) $res .= '<i id="add_' . $album['album_id'] . '" title="Add album to playlist"  onclick="javascript:ajaxRequest(\'play.php?action=updateAddPlay&album_id=' . $album['album_id'] .  '\',updateAddPlay);ajaxRequest(\'play.php?action=addSelect&album_id=' . $album['album_id'] . $md . '\',evaluateAdd);" class="fa fa-plus-circle pointer" style="padding-right: 5px;"></i>';
+			if ($cfg['access_play']) $res .= '<i id="play_' . $album['album_id'] . '" title="Play album" onclick="javascript: playAlbum(\'' . $album['album_id'] . '\',\'' . $multidisc . '\');" class="fa fa-play-circle-o pointer"></i>';
+			$res .= '</div>';
+		}		
+			
+		$res .= '</div>';
+		$res .= '</div>';
+		if ($retType == 'echo') {
+			echo $res;
+		}
+		else {
+			return $res;
+		}
+}
 
 
 //  +---------------------------------------------------------------------------+
