@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright Â© 2015-2021 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright Â© 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -153,9 +153,9 @@ function home() {
 	
 	require_once('include/play.inc.php');
 	$playlists = mpd('listplaylists');
-	sort($playlists, SORT_NATURAL);
 	
-	if (count($playlists) > 0 && $playlists !== 'ACK_ERROR_UNKNOWN') {
+	if ( $playlists !== 'ACK_ERROR_UNKNOWN' && count($playlists) > 0 ) {
+		sort($playlists, SORT_NATURAL);
 ?>
 		<tr class="header">
 			
