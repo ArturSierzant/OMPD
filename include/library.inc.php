@@ -1493,6 +1493,25 @@ function getTidalId($id){
 }
 
 
+
+//  +------------------------------------------------------------------------+
+//  | Get Tidal audio quality                                                |
+//  +------------------------------------------------------------------------+
+
+function getTidalAudioQuality($tidalAudioQuality){
+  global $cfg;
+  switch (strtolower($tidalAudioQuality)){
+    case "high":
+    case "lossless":
+      return "Lossless";
+    case "hi_res":
+      return "Master";
+    default: 
+      return $tidalAudioQuality;
+  }
+}
+
+
 //  +------------------------------------------------------------------------+
 //  | Artists from HRA                                                       |
 //  +------------------------------------------------------------------------+

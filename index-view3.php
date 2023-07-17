@@ -62,6 +62,7 @@ if (isTidal($album_id)) {
 		$album = mysqli_fetch_assoc($query);
 		$image_id = $album_id;
 		$total_time['sum_miliseconds'] = $album['seconds'] * 1000;
+    $audio_quality = getTidalAudioQuality($album['audio_quality']);
 	}
 	else {
 		$getAlbum = json_decode(getAlbumFromTidal(getTidalId($album_id)),true);
@@ -82,6 +83,7 @@ if (isTidal($album_id)) {
 			$album = mysqli_fetch_assoc($query);
 			$image_id = $album_id;
 			$total_time['sum_miliseconds'] = $album['seconds'] * 1000;
+      $audio_quality = getTidalAudioQuality($album['audio_quality']);
 		}
 	}
   //TODO: getting copyright data - move to DB?
@@ -575,9 +577,20 @@ if (isTidal($album_id)) {
 
 <div class="line">
 	<div class="add-info-left">Source:</div>
-	<div class="add-info-right"><a href="<?php echo TIDAL_ALBUM_URL . getTidalId($album_id) ?>" target="new"><i class="ux ico-tidal icon-small fa-fw"></i></a>
-	</div>
+	<div class="add-info-right"><a href="<?php echo TIDAL_ALBUM_URL . getTidalId($album_id); ?>" target="new"><i class="ux ico-tidal icon-small fa-fw"></i></a>
+  </div>
 </div>
+<?php 
+if ($audio_quality) {
+?>
+<div class="line">
+	<div class="add-info-left">Audio quality:</div>
+	<div class="add-info-right"><?php echo $audio_quality; ?>
+  </div>
+</div>
+<?php
+}
+?>
 <?php
 }
 if (isHra($album_id)) {

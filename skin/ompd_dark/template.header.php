@@ -589,7 +589,7 @@ $action 		= get('action');
 <script type="text/javascript">
 	var target = document.getElementById('waitIndicator');
 	var spinner = new Spinner(opts);
-	<?php if ( $action != '' && ($action != 'view3' && $action != 'downloadAlbum' && $action != 'downloadTrack' && $pos === false) ) echo ('showSpinner();'); 
+	<?php if ($action != 'view3' && $action != 'downloadAlbum' && $action != 'downloadTrack' && $pos === false) echo ('showSpinner();'); 
 	?>
 </script>
 
