@@ -27,12 +27,8 @@
 
 
 //  +------------------------------------------------------------------------+
-//  | mysql.inc.php                                                          |
+//  | mysqli.inc.php                                                         |
 //  +------------------------------------------------------------------------+
-
-// for PHP >= 8.1.0
-// https://www.php.net/manual/en/mysqli-driver.report-mode.php
-mysqli_report(MYSQLI_REPORT_OFF);
 
 $db = @mysqli_connect(
 	$cfg['mysqli_host'],

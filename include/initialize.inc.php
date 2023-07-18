@@ -33,6 +33,10 @@
 error_reporting(E_ERROR);
 @ini_set('display_errors', 'Off');
 
+// for PHP >= 8.1.0 - don't throw mysqli_sql_exception for errors
+// https://www.php.net/manual/en/mysqli-driver.report-mode.php
+mysqli_report(MYSQLI_REPORT_OFF);
+
 //prevent buffering for nginx
 header('X-Accel-Buffering: no');
 
