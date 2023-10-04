@@ -46,6 +46,7 @@ setConfigItem('show_miniplayer',$cfg['show_miniplayer'],'true');
 setConfigItem('show_quick_play',$cfg['show_quick_play'],'true');
 setConfigItem('show_album_format',$cfg['show_album_format'],'false');
 setConfigItem('show_album_popularity',$cfg['show_album_popularity'],'false');
+setConfigItem('show_album_disc_number',$cfg['show_album_disc_number'],'false');
 setConfigItem('show_discography_browser',$cfg['show_discography_browser'],'true');
 setConfigItem('show_album_versions',$cfg['show_album_versions'],'true');
 setConfigItem('album_download',$cfg['album_download'],'false');

@@ -163,7 +163,20 @@ class TidalAPI {
     curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "search/" . $type . "?query=" . $query . "&countryCode=" . $this->countryCode . "&limit=" . $limit);
     return $this->request();
   }
-
+  
+ /*  function search($type, $query, $limit = 50) {
+    $query = urlencode($query);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "search/top-hits?query=" . $query . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&types=ARTISTS,ALBUMS,TRACKS,PLAYLISTS");
+    
+    return $this->request()[$type];
+  }
+ */
+/*   function searchAll($query, $limit = 50) {
+    $query = urlencode($query);
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "search/top-hits?query=" . $query . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&types=ARTISTS,ALBUMS,TRACKS,PLAYLISTS");
+    return $this->request();
+  } */
+  
   function searchAll($query, $limit = 50) {
     $query = urlencode($query);
     curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "search?query=" . $query . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&types=ARTISTS,ALBUMS,TRACKS,PLAYLISTS");

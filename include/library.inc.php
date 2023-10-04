@@ -1041,7 +1041,7 @@ function getTrackAlbumFromTidal($track_id) {
 //  +------------------------------------------------------------------------+
 //  | Artist biography from Tidal                                            |
 //  +------------------------------------------------------------------------+
-function showArtistBio($artist_name, $size) {
+function showArtistBio($artist_name, $size, $artistId) {
 	global $cfg, $db, $t;
 	$artist_name = moveTheToBegining($artist_name);
 	$data = array();
@@ -1056,7 +1056,7 @@ function showArtistBio($artist_name, $size) {
 		else {
 			//$data["test"] = $res["totalNumberOfItems"];
 			foreach ($res["items"] as $artist) {
-				if (tidalEscapeChar(strtolower($artist["name"])) == tidalEscapeChar(strtolower($artist_name))) {
+				if (tidalEscapeChar(strtolower($artist["name"])) == tidalEscapeChar(strtolower($artist_name)) || $artist["id"] == $artistId) {
 					$id = $artist["id"];
 					$data = $t->getArtistBio($id);
 					if ($artist["picture"]){

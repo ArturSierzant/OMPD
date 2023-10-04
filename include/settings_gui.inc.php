@@ -102,6 +102,13 @@ global $cfg, $db;
 </tr>
 <tr class="odd">
   <td class="space"></td>
+	<td>Show disc number in album view</td>
+	<td class="textspace"></td>
+	<td><?php setChkBox($cfg['show_album_disc_number'],'show_album_disc_number');?></td>
+  <td class="space"></td>
+</tr>
+<tr class="odd">
+  <td class="space"></td>
 	<td>Show all of the multi-disc albums in album view</td>
 	<td class="textspace"></td>
 	<td><?php setChkBox($cfg['show_multidisc'],'show_multidisc');?></td>

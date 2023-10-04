@@ -58,7 +58,7 @@ if (in_array($cfg['menu'], array('favorite', 'playlist', 'config')) == false)
 
 if (time() - hexdec($timestamp) > 2) {
 	$expired = bbcode($message);
-	$message = '<strong>Message has expired</strong><br><div id="show" style="display: block;"><a href="javascript:showHide(\'show\', \'hide\');"><img src="' . $cfg['img'] . 'small_show.png" alt="" class="small">Message</a></div>';
+	$message = '<strong>Message has expired</strong><br><div id="show" style="display: block;"><a href="javascript:showHide(\'show\', \'hide\');">Message</a></div>';
 	$message .= '<div id="hide" style="display: none;"><a href="javascript:showHide(\'show\', \'hide\');"><img src="' . $cfg['img'] . 'small_hide.png" alt="" class="small">Message</a><br>' . $expired . '</div>';
 }
 else

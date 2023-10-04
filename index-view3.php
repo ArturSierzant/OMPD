@@ -153,8 +153,18 @@ elseif (isHra($album_id)) {
 else {
 	$query = mysqli_query($db, 'SELECT artist_alphabetic, artist, album, album_id, year, month, image_id, album_add_time, album.genre_id, album_dr
 	FROM album
-	WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');	
+	WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '"');
 	$album = mysqli_fetch_assoc($query);
+  $album['disc'] = 0;
+	
+  if ($cfg['show_album_disc_number'] == 'true') { 
+    $queryDisc = mysqli_query($db, 'SELECT disc
+    FROM track
+    WHERE album_id = "' .  mysqli_real_escape_string($db,$album_id) . '" LIMIT 1');
+    $disc = mysqli_fetch_assoc($queryDisc);
+    $album['disc'] = $disc['disc'];
+  }
+  
 	$image_id = $album['image_id'];
 }
 	
@@ -486,7 +496,10 @@ if ($cfg['show_discography_browser'] == true && !in_array($album['artist'],$cfg[
 		echo $artist;
 	}
 	else {
-		echo '<a href="index.php?action=view2&amp;artist=' . rawurlencode($album['artist']) . '&amp;order=year">' . html($album['artist']) . '</a>';
+    if ($album['artist_id']){ //Tidal artist_id
+      $tidalArtistId = "&amp;tidalArtistId=" . $album['artist_id'];
+    };
+		echo '<a href="index.php?action=view2&amp;artist=' . rawurlencode($album['artist']) . '&amp;order=year' . $tidalArtistId . '">' . html($album['artist']) . '</a>';
 	}
 	?></div>
 </div>
@@ -545,6 +558,14 @@ $popularity = round($played['counter'] / $max_played['counter'] * 100);
 <div class="line">
 	<div class="add-info-left">Total time:</div>
 	<div class="add-info-right"><?php echo formattedTime($total_time['sum_miliseconds']);?></div>
+</div>
+<?php }; ?>
+
+<?php if ($album['disc'] > 0 && $cfg['show_album_disc_number'] == 'true') { ?>
+<div class="line">
+	<div class="add-info-left">Disc no.:</div>
+	<div class="add-info-right"><?php echo trim($album['disc']);?>
+  </div>
 </div>
 <?php }; ?>
 

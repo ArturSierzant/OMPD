@@ -1407,6 +1407,7 @@ function editTidal() {
     <option value="HIGH" <?php if ($tidal_audio_quality == 'HIGH') echo 'selected'; ?>>HIGH (320kbps, AAC)</option>
     <option value="LOSSLESS" <?php if ($tidal_audio_quality == 'LOSSLESS') echo 'selected'; ?>>LOSSLESS</option>
     <option value="HI_RES" <?php if ($tidal_audio_quality == 'HI_RES') echo 'selected'; ?>>HI_RES</option>
+    <option value="HI_RES_LOSSLESS" <?php if ($tidal_audio_quality == 'HI_RES_LOSSLESS') echo 'selected'; ?>>HI_RES_LOSSLESS</option>
     </select>
   </td>
   <td class="space"></td>

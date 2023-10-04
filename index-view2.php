@@ -480,10 +480,11 @@ if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
 	var size = <?php echo $size; ?>;
 	console.log ('$tileSize: ' + $tileSize);
 	var artist = "<?php echo str_replace('"','',$artist); ?>";
+  var artistId = "<?php echo $tidalArtistId; ?>";
 	var request = $.ajax({  
 		url: "ajax-tidal-search.php",  
 		type: "POST",  
-		data: { search: "bio", tileSize : size, searchStr : artist, ajax : true, tileSize: size },  
+		data: { search: "bio", tileSize : size, searchStr : artist, tidalArtistId : artistId, ajax : true, tileSize: size },  
 		dataType: "json"
 	}); 
 
@@ -523,7 +524,7 @@ if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
 					if (value["picture"]) {
 						img = '<img src="' + value["picture"] + '">';
 					}
-					related_artists += '<div class="artist_related" onmouseover="return overlib(\'' + value["name"] + '\', CAPTION , \'Go to artist\');" onmouseout="return nd();"><a href="index.php?action=view2&tileSizePHP=' + data["size"] + '&artist=' + encodeURIComponent(value["name"]) + '&order=year"><div class="artist_container_small">' + img + '</div><div>' + value["name"] + '</div></a></div>';
+					related_artists += '<div class="artist_related" onmouseover="return overlib(\'' + value["name"] + '\', CAPTION , \'Go to artist\');" onmouseout="return nd();"><a href="index.php?action=view2&tileSizePHP=' + data["size"] + '&artist=' + encodeURIComponent(value["name"]) + '&order=year&tidalArtistId=' + encodeURIComponent(value["id"]) + '"><div class="artist_container_small">' + img + '</div><div>' + value["name"] + '</div></a></div>';
 				});
 				related_artists +='</div>';
 			}
