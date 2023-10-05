@@ -769,10 +769,18 @@ Other discs in this set:
 </tr> 
 <?php 
 while ($multidisc = mysqli_fetch_assoc($query_md)) {
+  $disc = '';
+  if ($cfg['show_album_disc_number'] == 'true') {
+    $queryDisc = mysqli_query($db, 'SELECT disc
+    FROM track
+    WHERE album_id = "' .  mysqli_real_escape_string($db,$multidisc['album_id']) . '" LIMIT 1');
+    $disc = mysqli_fetch_assoc($queryDisc);
+    $disc = ' (Disc ' . $disc['disc'] . ')';
+  };
 	echo '<tr class="line"><td colspan="4"></td></tr>
 	<tr>
 	<td class="small_cover_md"><a><img src="image.php?image_id=' . rawurlencode($multidisc['image_id']) . '" width="100%"></a></td>
-	<td><a href="index.php?action=view3&amp;album_id=' . rawurlencode($multidisc['album_id']) . '">' . $multidisc['album'] . '</a></td>
+	<td><a href="index.php?action=view3&amp;album_id=' . rawurlencode($multidisc['album_id']) . '">' . $multidisc['album'] . $disc . '</a></td>
 	<td class="icon">
 	<a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;album_id=' . $multidisc['album_id'] . '\',evaluateAdd);"><i id="play_' . $multidisc['album_id'] . '" class="fa fa-fw fa-play-circle-o  icon-small"></i></a>
 	</td>
@@ -813,10 +821,18 @@ while ($multidisc = mysqli_fetch_assoc($query_av)) {
         $multidisc['image_id'] = $sA[1];
       }
     }
+  $disc = '';
+  if ($cfg['show_album_disc_number'] == 'true') {
+    $queryDisc = mysqli_query($db, 'SELECT disc
+    FROM track
+    WHERE album_id = "' .  mysqli_real_escape_string($db,$multidisc['album_id']) . '" LIMIT 1');
+    $disc = mysqli_fetch_assoc($queryDisc);
+    $disc = ' (Disc ' . $disc['disc'] . ')';
+  };
   echo '<tr class="line"><td colspan="4"></td></tr>
   <tr>
   <td class="small_cover_md"><a><img src="image.php?image_id=' . rawurlencode($multidisc['image_id']) . '" width="100%"></a></td>
-  <td><a href="index.php?action=view3&amp;album_id=' . rawurlencode($multidisc['album_id']) . '">' . $multidisc['album'] . '</a></td>
+  <td><a href="index.php?action=view3&amp;album_id=' . rawurlencode($multidisc['album_id']) . '">' . $multidisc['album'] . $disc . '</a></td>
   <td class="icon">
   <a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;album_id=' . $multidisc['album_id'] . '\',evaluateAdd);"><i id="play_' . $multidisc['album_id'] . '" class="fa fa-fw fa-play-circle-o  icon-small"></i></a>
   </td>
