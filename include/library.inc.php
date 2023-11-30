@@ -771,7 +771,7 @@ function showAlbumsFromTidal($artist, $size, $ajax, $tidalArtistId) {
 	
 	$data = array();
 	
-	//prevent diaplaying albums deleted from Tidal
+	//prevent disaplaying albums deleted from Tidal
 	$forceUpdate = false;
 	if (abs($res['min_last_update_time'] - $minDate) > 10) $forceUpdate = true;
 	
@@ -3245,7 +3245,7 @@ function updateGenre() {
 		while ($track = mysqli_fetch_assoc($query)) {
 			$genres = explode('ompd_genre_ompd',$track['genre']);
 			foreach ($genres as $g){
-				$q = mysqli_query($db,'SELECT genre_id FROM genre WHERE genre="' . $g . '"');
+				$q = mysqli_query($db,'SELECT genre_id FROM genre WHERE genre="' . mysqli_real_escape_string($db,$g) . '"');
 				if (mysqli_num_rows($q) == 0) {
 					mysqli_query($db,'INSERT INTO genre (genre_id, genre, updated)
 										VALUES ("' . $i . '",
@@ -3279,7 +3279,7 @@ function updateGenre() {
 			$genres = explode('ompd_genre_ompd',$album['genre']);
 			foreach ($genres as $g){
 				//get genre_id for actual genre from multigenre
-				$q1 = mysqli_query($db,'SELECT genre_id FROM genre WHERE genre = "' . $g . '"');
+				$q1 = mysqli_query($db,'SELECT genre_id FROM genre WHERE genre = "' . mysqli_real_escape_string($db,$g) . '"');
 				$a1 = mysqli_fetch_assoc($q1);
 				
 				//get all genre_ids from album

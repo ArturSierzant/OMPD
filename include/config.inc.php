@@ -91,6 +91,11 @@ $cfg['mysqli_auto_create_db']       = true;
 //  | copy to dir defined in $cfg['stream_covers_dir'] file named:           |
 //  | stream14.shoutcastsolutions.com.png                                    |
 //  |                                                                        |
+//  | In URLs like this:                                                     |
+//  | http://poznan5-3.radio.pionier.net.pl:8000/afera.mp3                   |
+//  | ommit port path:                                                       |
+//  | poznan5-3.radio.pionier.net.pl__afera.mp3.png                          |
+//  |                                                                        |
 //  | For URLs with path replace '/' with double undersoce '__', e.g. for:   |
 //  | http://ice3.somafm.com/seventies-128-aac                               |
 //  | use:                                                                   |

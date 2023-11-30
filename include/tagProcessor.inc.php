@@ -293,8 +293,17 @@ function parseComment($data) {
 }
 
 function parseComposer($data) {
+    $composer = '';
     if (isset($data['comments']['composer'][0])) {
-        return $data['comments']['composer'][0];
+      foreach($data['comments']['composer'] as $c){
+        if ($composer == '') {
+          $composer = $c;
+        }
+        else{
+          $composer = $composer . '; ' . $c;
+        }
+      }
+      return $composer;
     }
     return '';
 }
