@@ -147,7 +147,7 @@ function parseMultiGenreId($genre_id){
 	$genres = explode(';',$genre_id);
 	$where = '';
 	foreach ($genres as $g){
-		$where = ($where == '') ? ' genre_id LIKE "' . $g . '"' : $where . ' OR genre_id LIKE "' . $g . '"';
+		$where = ($where == '') ? ' genre_id LIKE "' . mysqli_real_escape_string($db,$g) . '"' : $where . ' OR genre_id LIKE "' . mysqli_real_escape_string($db,$g) . '"';
 	}
 	$query = mysqli_query($db,'SELECT genre, genre_id FROM genre WHERE ' . $where . ' ORDER BY genre');
 	while ($genre = mysqli_fetch_assoc($query)){
@@ -162,7 +162,7 @@ function parseMultiGenre($genre){
 	$genres = explode('ompd_genre_ompd',$genre);
 	$where = '';
 	foreach ($genres as $g){
-		$where = ($where == '') ? ' genre LIKE "' . $g . '"' : $where . ' OR genre LIKE "' . $g . '"';
+		$where = ($where == '') ? ' genre LIKE "' . mysqli_real_escape_string($db,$g) . '"' : $where . ' OR genre LIKE "' . mysqli_real_escape_string($db,$g) . '"';
 	}
 	$query = mysqli_query($db,'SELECT genre, genre_id FROM genre WHERE ' . $where . ' ORDER BY genre');
 	while ($genre = mysqli_fetch_assoc($query)){

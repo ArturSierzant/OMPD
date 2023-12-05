@@ -59,7 +59,7 @@ class TidalAPI {
   }
 
   function connect() {
-    //return false;
+    //return -1;
     if ($this->expiresAfter > time()) {
       return true;
     }

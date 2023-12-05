@@ -17,6 +17,10 @@
 			$( "#new_tidal" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
 		}
 	});
+  
+  request.fail(function(data) {
+			$( "#new_tidal" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
+	});
 	
 	</script>
 	<div class="full" id="new_tidal">
