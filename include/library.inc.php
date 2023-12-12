@@ -268,14 +268,18 @@ function findCoreTrackTitle($title) {
 	$separator = $cfg['separator'];
 	$count = count($separator);
 	$i=0;
-	
-	for ($i=0; $i<$count; $i++) {
-		$pos = strpos($title,strtolower($separator[$i]),1); //start searching from position 1 to avoid empty results for e.g. "(You Said) You'd Gimme Some More"
-		if ($pos !== false) {
-			$title = trim(substr($title, 0 , $pos));
-			//break;
-		}
-	}  
+  $j=1;
+	if (strlen($title) == 1) {
+    $j=0;
+  }
+  for ($i=0; $i<$count; $i++) {
+    $pos = strpos($title,strtolower($separator[$i]),$j); //start searching from position 1 to avoid empty results for e.g. "(You Said) You'd Gimme Some More"
+    if ($pos !== false) {
+      $title = trim(substr($title, 0 , $pos));
+      //break;
+    }
+  }
+	  
 	
 	return $title;
 
