@@ -2200,7 +2200,7 @@ function playlistTrack() {
 	$track_artist = array();
 	$data['track_mpd_url'] = getTrackMpdUrl($currentsong['file']);
 	
-	if ($track_id !='') {
+	if ($track_id !='' && $track_id !='undefined') {
 		if (isTidal($track_id)) {
 			$track_id = getTidalId($track_id);
 			$query = mysqli_query($db,'SELECT tidal_track.artist, NULL as track_composer, tidal_album.artist AS album_artist, tidal_track.title, NULL as featuring, (tidal_track.seconds * 1000) as miliseconds, NULL as relative_file, tidal_album.album, CONCAT("tidal_", tidal_album.album_id) as image_id, CONCAT("tidal_",tidal_album.album_id) as album_id, tidal_track.genre_id as genre, NULL as audio_bitrate, NULL as audio_dataformat, NULL as audio_bits_per_sample, NULL as audio_sample_rate, tidal_album.genre_id, NULL as audio_profile, tidal_track.artist as track_artist, SUBSTRING(tidal_album.album_date,1,4) as year, tidal_track.number, NULL as comment, CONCAT("tidal_", tidal_track.track_id) as track_id, NULL as trackYear, NULL as dr, NULL as album_dr
