@@ -262,6 +262,7 @@ function multiexplode ($delimiters,$string) {
 
 function findCoreTrackTitle($title) {
 	global $cfg;
+  if ($title == '') return $title;
 	$title = strtolower($title);
 	//$to_replace = array(',',';','.');
 	//$title = str_replace($to_replace,'',$title);
