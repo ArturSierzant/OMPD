@@ -54,6 +54,8 @@ define('NJB_HTTPS', (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !
 define('TIDAL_RESOURCES_URL','https://resources.tidal.com/images/');
 define('TIDAL_ALBUM_URL','https://listen.tidal.com/album/');
 define('TIDAL_ALBUM_URL_2','https://tidal.com/browse/album/');
+define('TIDAL_PLAYLIST_URL','https://listen.tidal.com/playlist/');
+define('TIDAL_MIXLIST_URL','https://listen.tidal.com/mix/');
 define('TIDAL_ARTIST_URL','https://listen.tidal.com/artist/');
 define('TIDAL_TRACK_URL','https://tidal.com/browse/track/');
 define('TIDAL_TRACK_STREAM_URL','audio.tidal.com');

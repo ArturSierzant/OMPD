@@ -60,7 +60,7 @@ if ($conn){
 ?>
 <div class="area">
 <?php
-
+$favIdxCounter = 0;
 foreach($hp['rows'] as $key => $row){
   $mod = $hp['rows'][$key]['modules'][0];
   if ($mod['type'] == 'ALBUM_LIST') {
@@ -85,9 +85,8 @@ foreach($hp['rows'] as $key => $row){
     echo '</div>';
   } //ALBUM_LIST
   
-  //if ($mod['type'] == 'MIX_LIST' || $mod['type'] == 'PLAYLIST_LIST') {
-  /* if ($mod['type'] == 'MIX_LIST') {
-    $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal&type=mix_list&apiPath=' . urlencode($mod['showMore']['apiPath']) . '"> (more...)</a>';
+  if ($mod['type'] == 'MIX_LIST') {
+    $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal&type=mixlist_list&apiPath=' . urlencode($mod['showMore']['apiPath']) . '"> (more...)</a>';
     echo '<h1>&nbsp;' . $headerTitile . '</h1>';
     echo '<div class="full" id="' . $mod['id'] . '">';
     foreach($mod['pagedList']['items'] as $res) {
@@ -96,18 +95,40 @@ foreach($hp['rows'] as $key => $row){
       $albums['album'] = $res['title'];
       $albums['cover'] = $res['images']['SMALL']['url'];
       $albums['artist_alphabetic'] = $res['subTitle'];
-      draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $res['images']['SMALL']['url'] );
+      draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $res['images']['SMALL']['url'], "mixlist");
     }
     echo '</div>';
   } //MIX_LIST
-   */
+    
+   
+  if ($mod['type'] == 'PLAYLIST_LIST') {
+    $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal&type=playlist_list&apiPath=' . urlencode($mod['showMore']['apiPath']) . '"> (more...)</a>';
+    echo '<h1>&nbsp;' . $headerTitile . '</h1>';
+    echo '<div class="full" id="' . $mod['id'] . '">';
+    foreach($mod['pagedList']['items'] as $res) {
+      $albums = array();
+      $albums['album_id'] = 'tidal_' . $res['uuid'];
+      $albums['album'] = $res['title'];
+      $albums['cover'] = $t->albumCoverToURL($res['squareImage'],"lq");
+      $albums['artist_alphabetic'] = getTidalPlaylistCreator($res);
+      draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $t->albumCoverToURL($res['squareImage'],"lq"),"playlist");
+    }
+    echo '</div>';
+  } //PLAYLIST_LIST
+  
   
   if ($mod['type'] == 'TRACK_LIST') {
+    if ($favIdxCounter == 0) {
+      $favIdxCounter = 40000;
+    }
+    else {
+      $favIdxCounter = $favIdxCounter + 10000;
+    }
     $divId = str_replace(' ','_',$mod['title']);
     $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal&type=track_list&apiPath=' . urlencode($mod['showMore']['apiPath']) . '"> (more...)</a>';
     
     $newTracks = $mod['pagedList'];
-    $tracksList = tidalTracksList($newTracks);
+    $tracksList = tidalTracksList($newTracks, $favIdxCounter);
  
     echo '<h1>&nbsp;' . $headerTitile . '</h1>';
     echo '<div id="' . $divId . '">';
@@ -206,14 +227,14 @@ if ($conn === true){
     ?>		
       <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
         
-        <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalPlaylist&amp;favorite_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();"><i id="play_' . $plId . '" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
+        <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();"><i id="play_' . $plId . '" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
         
-        <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=addTidalPlaylist&amp;favorite_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Add to playlist\');" onMouseOut="return nd();"><i id="add_' . $plId . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>'; ?></td>
+        <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=addTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Add to playlist\');" onMouseOut="return nd();"><i id="add_' . $plId . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>'; ?></td>
         
         <td>
         </td>
         
-        <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalPlaylist&amp;favorite_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();">' . html($plName) . '</a>';
+        <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();">' . html($plName) . '</a>';
             else echo html($plName); ?>
         </td>
         

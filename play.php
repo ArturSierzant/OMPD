@@ -51,8 +51,8 @@ elseif	($action == 'beginOfTrack')		beginOfTrack();
 elseif	($action == 'next')				next_();
 elseif	($action == 'playMPDplaylist')	playMPDplaylist();
 elseif	($action == 'addMPDplaylist')	addMPDplaylist();
-elseif	($action == 'playTidalPlaylist')	playTidalPlaylist();
-elseif	($action == 'addTidalPlaylist')	addTidalPlaylist();
+elseif	($action == 'playTidalList')	playTidalList();
+elseif	($action == 'addTidalList')	addTidalList();
 elseif	($action == 'playSelect')		playSelect();
 elseif	($action == 'addSelect')		addSelect();
 elseif	($action == 'addSelectUrl')		addSelectUrl();
@@ -376,11 +376,12 @@ function addMPDplaylist() {
 //  +------------------------------------------------------------------------+
 //  | Play Tidal playlist                                                    |
 //  +------------------------------------------------------------------------+
-function playTidalPlaylist() {
+function playTidalList() {
 	global $cfg, $db;
 	authenticate('access_play');
 	require_once('include/play.inc.php');
-	$favorite_id	= get('favorite_id');
+	$tidal_id	= get('tidal_id');
+	$type	= !empty(get('type')) ? get('type') : 'playlist';
 	$data = array();
 	$playResult = 'play_error';
 	
@@ -389,7 +390,7 @@ function playTidalPlaylist() {
 		mpd('clear');
 	}
 	
-	$playResult = loadTidalPlaylist($favorite_id);
+	$playResult = loadTidalPlaylist($tidal_id, $type);
 	
 	mpd('play');
 	if (strpos((string)$playResult,'ACK') !== false) {
@@ -399,7 +400,7 @@ function playTidalPlaylist() {
 		$playResult = 'play_OK';
 	}
 	$data['playResult'] = $playResult;
-	$data['favorite_id'] = $favorite_id;
+	$data['tidal_id'] = $tidal_id;
 	ob_start();
 	echo safe_json_encode($data);
 	header('Connection: close');
@@ -416,15 +417,16 @@ function playTidalPlaylist() {
 //  | Add Tidal playlist                                                     |
 //  +------------------------------------------------------------------------+
 
-function addTidalPlaylist() {
+function addTidalList() {
 	global $cfg, $db;
 	authenticate('access_play');
 	require_once('include/play.inc.php');
-	$favorite_id	= get('favorite_id');
+	$tidal_id	= get('tidal_id');
+  $type	= !empty(get('type')) ? get('type') : 'playlist';
 	$data = array();
 	$playResult = 'add_error';
 	
-	$playResult = loadTidalPlaylist($favorite_id);
+	$playResult = loadTidalPlaylist($tidal_id, $type);
 	
 	if (strpos((string)$playResult,'ACK') !== false) {
 		$playResult = 'add_error';
@@ -433,7 +435,7 @@ function addTidalPlaylist() {
 		$playResult = 'add_OK';
 	}
 	$data['addResult'] = $playResult;
-	$data['favorite_id'] = $favorite_id;
+	$data['tidal_id'] = $tidal_id;
 	ob_start();
 	echo safe_json_encode($data);
 	header('Connection: close');
@@ -450,47 +452,22 @@ function addTidalPlaylist() {
 //  | Load Tidal playlist                                                    |
 //  +------------------------------------------------------------------------+
 
-function loadTidalPlaylist($favorite_id) {
+function loadTidalPlaylist($tidal_id, $type = 'playlist') {
 	global $cfg, $db, $t;
-	/* $t = new TidalAPI;
-	$t->username = $cfg["tidal_username"];
-	$t->password = $cfg["tidal_password"];
-	$t->token = $cfg["tidal_token"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate(); */
-  //$t = tidal();
+
+  $tidal_id = getTidalId($tidal_id);
 	$conn = $t->connect();
 
 	if ($conn === true){
-		$trackList = $t->getUserPlaylistTracks($favorite_id);
-		
+    if ($type == 'playlist') {
+      $trackList = $t->getPlaylistTracks($tidal_id);
+		}
+    if ($type == 'mixlist') {
+      $trackList = $t->getMixlistTracks($tidal_id);
+		}
 		for ($i = 0; $i < $trackList['totalNumberOfItems']; $i++) {
-				$artist	= $trackList['items'][$i]['artist']['name'];
-				$title	= $trackList['items'][$i]['title'];
-				$id	= $trackList['items'][$i]['id'];
-				$volumeNumber	= $trackList['items'][$i]['volumeNumber'];
-				$duration	= $trackList['items'][$i]['duration'];
-				$trackNumber	= $trackList['items'][$i]['trackNumber'];
-				$album_id	= $trackList['items'][$i]['album']['id'];
-				$album	= $trackList['items'][$i]['album']['title'];
-				$cover	= $trackList['items'][$i]['album']['cover'];
-				$releaseDate	= $trackList['items'][$i]['album']['releaseDate'];
-				
-				$sql = "SELECT album_id FROM tidal_album WHERE album_id = '" . $album_id . "'";
-				$rows = mysqli_num_rows(mysqli_query($db,$sql));
-				if ($rows == 0) {
-					$sql = "INSERT INTO tidal_album 
-					(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time, cover, type)
-					VALUES (
-					'" . $album_id . "', '', '', '0', '" . mysqli_real_escape_string($db,$album) . "', '" . $releaseDate . "', '', '1', '0','" . time() . "','" . $cover . "','playlist')";
-					$query2=mysqli_query($db,$sql);
-				}
-				$sql = "REPLACE INTO tidal_track 
-				(track_id, title, artist, artist_alphabetic, genre_id, disc, seconds, number, album_id)
-				VALUES (
-				'" . $id . "', '" . mysqli_real_escape_string($db,$title) . "', '" . mysqli_real_escape_string($db,$artist) . "', '" . mysqli_real_escape_string($db,$artist) . "', '', '" . $volumeNumber . "', '" . $duration . "', '" . $trackNumber . "', '" . $album_id . "')";
-				
-				mysqli_query($db, $sql);
-				$playResult = mpdAddTidalTrack('tidal_' . $id);
+        $track = getTidalTrack($trackList, $i);
+				$playResult = mpdAddTidalTrack('tidal_' . $track['id']);
 				cliLog("loadTidalPlaylist id: " . $id);
 				cliLog("loadTidalPlaylist: " . $playResult);
 		}

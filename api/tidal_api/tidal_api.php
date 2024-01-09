@@ -389,8 +389,27 @@ class TidalAPI {
   }
 
   function getUserPlaylistTracks($playlist_id, $limit = 1000) {
+    return $this->getPlaylistTracks($playlist_id, $limit = 1000);
+  }
+  
+  function getPlaylist($playlist_id, $limit = 1000) {
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "playlists/" . $playlist_id . "?countryCode=" . $this->countryCode . "&limit=" . $limit);
+    return $this->request();
+  }
+
+  function getPlaylistTracks($playlist_id, $limit = 1000) {
     curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "playlists/" . $playlist_id . "/tracks?countryCode=" . $this->countryCode . "&limit=" . $limit);
     return $this->request();
+  }
+
+  function getMixList($mixlist_id, $limit = 1000) {
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/mix?mixId=" . $mixlist_id . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&deviceType=BROWSER");
+    return $this->request();
+  }
+
+  function getMixlistTracks($mixlist_id, $limit = 1000) {
+    //curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/mix?mixId=" . $mixlist_id . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&deviceType=BROWSER");
+    return $this->getMixList($mixlist_id)["rows"][1]["modules"][0]["pagedList"];
   }
 
   function getHomePage() {

@@ -54,7 +54,7 @@ if (mysqli_num_rows($query) > 0) {
 if (isTidal($album_id)) {
 	$query = mysqli_query($db, 'SELECT *, REPLACE(album_date," 00:00:00","") as year
 	FROM tidal_album
-	WHERE album_id = "' .  mysqli_real_escape_string($db,getTidalId($album_id)) . '" AND artist !=""'); //artist != "" for albums added from tidal playlists
+	WHERE album_id = "' .  mysqli_real_escape_string($db,getTidalId($album_id)) . '" AND seconds != 0'); //seconds != "" for albums added from tidal playlists
 	
 	//$albumType = 'tidal';
 	//album already in OMPD database
@@ -64,7 +64,8 @@ if (isTidal($album_id)) {
 		$total_time['sum_miliseconds'] = $album['seconds'] * 1000;
     $audio_quality = getTidalAudioQuality($album['audio_quality']);
 	}
-	else {
+
+  else {
 		$getAlbum = json_decode(getAlbumFromTidal(getTidalId($album_id)),true);
 		if ($getAlbum['return'] == 1) {
 			$errMessage = '[b]Error in execution Tidal request.[/b][br]Error message:[br]'; 

@@ -40,14 +40,14 @@ require_once('include/library.inc.php');
 $image_id 	= get('image_id');
 $track_id 	= get('track_id');
 $quality	= get('quality') == 'hq' ? 'hq' : 'lq';
-//$quality	= 'hq';
 $image	 	= get('image');
 $image_path	= get('image_path');
 $image_url	= get('image_url');
 $mime	 	= get('mime');
 $source	 	= get('source');
+$type	 	= !empty(get('type')) ? get('type') : 'album';
 
-if		(isset($image_id))		image($image_id, $quality, $track_id, $image_url);
+if		(isset($image_id))		image($image_id, $quality, $track_id, $image_url, $type);
 elseif	(isset($image))			resampleImage($image);
 elseif	(isset($image_path))	streamImage($image_path, $mime);
 elseif	(isset($source))	streamImageFromUrl($image_url);
@@ -60,7 +60,7 @@ exit();
 //  +------------------------------------------------------------------------+
 //  | Image                                                                  |
 //  +------------------------------------------------------------------------+
-function image($image_id, $quality, $track_id, $image_url) {
+function image($image_id, $quality, $track_id, $image_url, $type) {
 	global $cfg, $db, $t;
 	require_once('getid3/getid3/getid3.php');
 	/* $query  = mysqli_query($db,'SELECT image, image_front FROM bitmap WHERE image_id = "' . mysqli_real_escape_string($db,$image_id) . '" LIMIT 1');
@@ -78,8 +78,35 @@ function image($image_id, $quality, $track_id, $image_url) {
 		$rows = mysqli_fetch_assoc($picQuery);
 		$pic = $rows['cover'];
     if (!$pic) {
-      $album = $t->getAlbum($album_id);
-      $pic = $album['cover'];
+      if ($type == "album") {
+        $album = $t->getAlbum($album_id);
+        $pic = $album['cover'];
+      }
+      elseif ($type == "playlist"){
+        $album = $t->getPlaylist($album_id);
+        $pic = $album['squareImage'];
+      }
+      elseif ($type == "mixlist"){
+        $album = $t->getMixList($album_id);
+        $pic = getTidalMixlistPicture($album);
+        if (!isset($pic)) {
+            imageError();
+          }
+          else {
+            $data = file_get_contents($pic);
+            if ($data) {
+              streamData($data, false, false, '"never_expire"');
+            }
+            else {
+              imageError();
+            }
+            exit();
+          }
+      }
+      else {
+        imageError();
+      }
+      
       if (!isset($pic)) {
         imageError();
       }

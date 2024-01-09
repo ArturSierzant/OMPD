@@ -197,7 +197,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 						elseif ($cfg['access_add'])		echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;track_id=' . $track['track_id'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . $track['number'] . '\');" onMouseOut="return nd();">' . html($track['title']) . '</a>';
 						elseif ($cfg['access_stream'])	echo '<a href="stream.php?action=playlist&amp;track_id=' . $track['track_id'] . '&amp;stream_id=' . $cfg['stream_id'] . '" onMouseOver="return overlib(\'Stream track ' . $track['number'] . '\');" onMouseOut="return nd();">' . html($track['title']) . '</a>';
 						else 							echo html($track['title']); ?>
-				<span class="track-list-artist-narrow">by <?php echo html($track['track_artist']); ?></span>		
+				<span class="track-list-artist-narrow"><?php echo html($track['track_artist']); ?></span>		
 				</td>
 				
 				<td class="track-list-artist">

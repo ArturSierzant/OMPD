@@ -66,6 +66,8 @@ elseif	($action == 'viewNewFromHRA')			viewNewFromHRA();
 elseif	($action == 'viewTidal')			viewTidal();
 elseif	($action == 'viewNewFromTidal')			viewNewFromTidal();
 elseif	($action == 'viewMoreFromTidal')			viewMoreFromTidal();
+elseif	($action == 'viewTidalPlaylist')			viewTidalPlaylist();
+elseif	($action == 'viewTidalMixlist')			viewTidalMixlist();
 elseif	($action == 'viewPopular')		viewPopular();
 elseif	($action == 'viewRecentlyPlayed')	viewRecentlyPlayed();
 elseif	($action == 'viewPlayedAtDay')	viewPlayedAtDay();
@@ -2098,11 +2100,147 @@ if ($conn === true){
       }
       $cfg['items_count'] = $results['totalNumberOfItems'];
     }
+    elseif ($type == 'playlist_list'){
+      echo '<div class="albums_container">';
+      foreach($results['rows'][0]['modules'][0]['pagedList']['items'] as $res) {
+        $albums = array();
+        $albums['album_id'] = 'tidal_' . $res['uuid'];
+        $albums['album'] = $res['title'];
+        $albums['cover'] = $t->albumCoverToURL($res['squareImage'],'lq');
+        $albums['artist_alphabetic'] = getTidalPlaylistCreator($res);;
+        draw_Tidal_tile ( $size, $albums, '', 'echo', $albums['cover'],"playlist");
+      }
+      $cfg['items_count'] = $results['totalNumberOfItems'];
+    }
+    elseif ($type == 'mixlist_list'){
+      echo '<div class="albums_container">';
+      foreach($results['rows'][0]['modules'][0]['pagedList']['items'] as $res) {
+        $albums = array();
+        $albums['album_id'] = 'tidal_' . $res['id'];
+        $albums['album'] = $res['title'];
+        $albums['cover'] = getTidalMixlistPicture($res, 'fromMixlist');
+        $albums['artist_alphabetic'] = ($res['subTitle']);
+        draw_Tidal_tile ( $size, $albums, '', 'echo', $albums['cover'],"mixlist");
+      }
+      $cfg['items_count'] = $results['totalNumberOfItems'];
+    }
     elseif ($type == 'track_list') {
       $tracksList = tidalTracksList($results['rows'][0]['modules'][0]['pagedList']);
       echo '<div>';
       echo $tracksList;
     }
+  }
+  else {
+    echo ('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
+  }
+}
+else {
+  echo('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Tidal request.<br>Error message:<br><br>' . $conn["error"] . '</div>');
+}
+?>
+</div>
+
+<table cellspacing="0" cellpadding="0" class="border">
+
+<tr class="<?php echo $class; ?> smallspace"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
+<tr class="line"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
+
+</table>
+
+<?php
+	require_once('include/footer.inc.php');
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | View Tidal playlist                                                    |
+//  +------------------------------------------------------------------------+
+function viewTidalPlaylist() {
+  global $cfg, $db, $t;
+  global $base_size, $spaces, $scroll_bar_correction;
+
+  $type = get('type');
+  $apiPath = get('apiPath');
+  $playlist_id = getTidalId(get('album_id'));
+  
+  authenticate('access_media');
+
+  // formattedNavigator
+  /* $nav			= array();
+  $nav['name'][]	= 'Library';
+  $nav['url'][]	= 'index.php';
+  $nav['name'][]	= 'Tidal';
+  $nav['url'][]	= 'index.php?action=viewTidal'; */
+
+$conn = $t->connect();
+if ($conn === true){
+  
+  $results = $t->getPlaylist($playlist_id);
+  
+  $nav['name'][] = $results['title'] . ':';
+  require_once('include/header.inc.php');
+  //echo ('<h1>' . $results['title'] .'</h1>');
+  if ($tileSizePHP) $size = $tileSizePHP;
+  
+  if ($results['uuid']){
+    tidalPlaylist($playlist_id, $results);
+  }
+  else {
+    echo ('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
+  }
+}
+else {
+  echo('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Tidal request.<br>Error message:<br><br>' . $conn["error"] . '</div>');
+}
+?>
+</div>
+
+<table cellspacing="0" cellpadding="0" class="border">
+
+<tr class="<?php echo $class; ?> smallspace"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
+<tr class="line"><td colspan="<?php echo $colombs + 2; ?>"></td></tr>
+
+</table>
+
+<?php
+	require_once('include/footer.inc.php');
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | View Tidal mix list                                                    |
+//  +------------------------------------------------------------------------+
+function viewTidalMixlist() {
+  global $cfg, $db, $t;
+  global $base_size, $spaces, $scroll_bar_correction;
+
+  $type = get('type');
+  $apiPath = get('apiPath');
+  $mixlist_id = getTidalId(get('album_id'));
+  
+  authenticate('access_media');
+
+  // formattedNavigator
+  /* $nav			= array();
+  $nav['name'][]	= 'Library';
+  $nav['url'][]	= 'index.php';
+  $nav['name'][]	= 'Tidal';
+  $nav['url'][]	= 'index.php?action=viewTidal'; */
+
+$conn = $t->connect();
+if ($conn === true){
+  
+  $results = $t->getMixList($mixlist_id);
+  
+  $nav['name'][] = $results['title'] . ':';
+  require_once('include/header.inc.php');
+
+  if ($tileSizePHP) $size = $tileSizePHP;
+  
+  if ($results['id']){
+    tidalMixList($mixlist_id, $results);
   }
   else {
     echo ('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');

@@ -410,7 +410,7 @@ for ($i=0; $i < $listlength; $i++) {
 <tr class="<?php if ($i == $listpos) echo 'select'; else echo ($i & 1) ? 'even mouseover' : 'odd mouseover'; ?>" id="track<?php echo $i; ?>" style="display:table-row;">
   
   <td class="small_cover">
-  <a id="track<?php echo $i; ?>_image" href="javascript:ajaxRequest('play.php?action=playIndex&amp;index=<?php echo $i ?>&amp;menu=playlist',evaluateListpos);"><img src="<?php echo $src; ?>" alt="" width="100%"></a></td>
+  <a id="track<?php echo $i; ?>_image" href="javascript:ajaxRequest('play.php?action=playIndex&amp;index=<?php echo $i ?>&amp;menu=playlist',evaluateListpos);"><img loading="lazy" decoding="async" src="<?php echo $src; ?>" alt="" width="100%"></a></td>
   
   <td class="play-indicator">
   <div id="track<?php echo $i; ?>_play" style="<?php if ($i == $listpos) echo 'visibility: visible;'; else echo 'visibility: hidden;'; ?>" onclick="javascript:ajaxRequest('play.php?action=playIndex&amp;index=<?php echo $i ?>&amp;menu=playlist',evaluateListpos);">

@@ -164,7 +164,7 @@ function evaluatePlayTo(data) {
 function evaluateAdd(data) {
 	var timeOut = 2000;
 	albumId = data.album_id;
-	if (data.favorite_id) {data.album_id = data.favorite_id};
+	if (data.tidal_id) {data.album_id = data.tidal_id};
 	if (data.file_id) {data.album_id = data.file_id};
 	if (data.random) {data.album_id = 'random'};
 	if (data.disc) {data.album_id = data.album_id + '_' + data.disc};

@@ -244,14 +244,14 @@ function home() {
 				?>		
 					<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 						
-						<td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalPlaylist&amp;favorite_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();"><i id="play_' . $plId . '" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
+						<td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();"><i id="play_' . $plId . '" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
 						
-						<td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=addTidalPlaylist&amp;favorite_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Add to playlist\');" onMouseOut="return nd();"><i id="add_' . $plId . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>'; ?></td>
+						<td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=addTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Add to playlist\');" onMouseOut="return nd();"><i id="add_' . $plId . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>'; ?></td>
 						
 						<td>
 						</td>
 						
-						<td><?php if ($cfg['access_play'])	echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalPlaylist&amp;favorite_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();">' . html($plName) . '</a>';
+						<td><?php if ($cfg['access_play'])	echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();">' . html($plName) . '</a>';
 								else 													echo html($plName); ?>
 						</td>
 						
@@ -604,115 +604,39 @@ function addPlaylistUrl() {
 //  | View Tidal playlist                                                    |
 //  +------------------------------------------------------------------------+
 function viewTidalPlaylist($favorite_id, $favorite_name) {
-	global $cfg, $db;
+	global $cfg, $db, $t;
 	authenticate('access_admin');
 	
 	require_once('include/play.inc.php');
 	
-	// formattedNavigator
+	/* // formattedNavigator
 	$nav			= array();
 	$nav['name'][]	= 'Favorites';
 	$nav['url'][]	= 'favorite.php';
-	$nav['name'][]	= 'View';
+	$nav['name'][]	= 'View'; */
 	require_once('include/header.inc.php');
 	
-?>	
-<form action="favorite.php" method="post" name="favorite" id="favorite">
-	<input type="hidden" name="action" value="saveFavorite">
-	<input type="hidden" name="favorite_id" value="<?php echo $favorite_id; ?>">
-	<input type="hidden" name="sign" value="<?php echo $cfg['sign']; ?>">
-<table cellspacing="0" cellpadding="0" id="favoriteTable">
-<tr class="header">
-	<td colspan="3">&nbsp;Playlist info:</td>
-</tr>
-</tr>
-<tr class="textspace"><td colspan="3"></td></tr>
-<tr>
-<tr>
-	<td id="favoriteTableFirstCol">Name:</td>
-	<td class="textspace">&nbsp;</td>
-	<td class="fullscreen"><?php echo $favorite_name; ?></td>
-</tr>
+  $conn = $t->connect();
+  if ($conn === true){
+    
+    $results = $t->getPlaylist($favorite_id);
+    
+    $nav['name'][] = $results['title'] . ':';
+    require_once('include/header.inc.php');
+    //echo ('<h1>' . $results['title'] .'</h1>');
+    if ($tileSizePHP) $size = $tileSizePHP;
+    
+    if ($results['uuid']){
+      tidalPlaylist($favorite_id, $results);
+    }
+    else {
+      echo ('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
+    }
+  }
+  else {
+    echo('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Tidal request.<br>Error message:<br><br>' . $conn["error"] . '</div>');
+  }
 
-<tr class="space"><td colspan="3"></td></tr>
-<tr>
-	<td></td>
-	<td></td>
-	<td>
-	</td>
-</tr>
-
-<tr class="textspace"><td colspan="3"></td></tr>
-
-<tr class="header">
-	<td colspan="3">&nbsp;Tracks in this playlist:</td>
-</tr>		
-<tr class="line"><td colspan="9"></td></tr>
-<tr>
-	<td colspan="3">
-	<!-- begin indent -->
-<div id="favoriteList">
-<div style="text-align: center; padding: 1em;">
- <i class="fa fa-cog fa-spin icon-small"></i> Loading track list...
-</div>
- </div>
-	<!-- end indent -->
-	</td>
-</tr>
-</table>
-</form>
-
-<script type="text/javascript">
-<!--
-
-$(document).ready(function() {
-	var request = $.ajax({  
-		url: "ajax-favorite-arrange-Tidal.php",  
-		type: "POST",  
-		data: { action : 'display',
-				favorite_id : '<?php echo $favorite_id; ?>'
-			  },  
-		dataType: "html"
-	}); 
-
-	request.done(function( data ) {  
-		$( "#favoriteList" ).html( data );
-		//calcTileSize();
-	}); 
-
-	request.fail(function( jqXHR, textStatus ) {  
-		alert( "Request failed: " + textStatus );	
-	}); 
-});
-
-function importPlaylist() {
-	showSpinner();
-	document.favorite.action.value='importPlaylist'; 
-	$('#favorite').submit();
-}
-
-function addPlaylist() {
-	showSpinner();
-	document.favorite.action.value='addPlaylist'; 
-	$('#favorite').submit();
-}
-
-function importPlaylistUrl() {
-	showSpinner();
-	document.favorite.action.value='importPlaylistUrl'; 
-	$('#favorite').submit();
-}
-
-function addPlaylistUrl() {
-	showSpinner();
-	document.favorite.action.value='addPlaylistUrl'; 
-	$('#favorite').submit();
-}
-
-//-->
-</script>
-
-<?php
 	require_once('include/footer.inc.php');
 }
 
