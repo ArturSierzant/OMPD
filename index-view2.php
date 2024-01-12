@@ -31,7 +31,7 @@
 //  +------------------------------------------------------------------------+
 
 
-global $cfg, $db;
+global $cfg, $db, $t;
 authenticate('access_media');
 $genre_id = get('genre_id');
 if ($genre_id)
@@ -49,6 +49,7 @@ $thumbnail = 1;
 $order = get('order') or $order = ($year || $dr ? 'artist' : (in_array(strtolower($artist), $cfg['no_album_artist']) ? 'album' : 'year'));
 $sort = get('sort') == 'desc' ? 'desc' : 'asc';
 $qsType = (int) get('qsType') or $qsType = false;
+$tileSize = $_GET['tileSizePHP'];
 
 //$artist = moveTheToEnd($artist);
 
@@ -452,125 +453,80 @@ $i			= 0;
 
 $sort_url	= $url;
 $size_url	= $url . '&amp;order=' . $order . '&amp;sort=' . $sort;
+$showBio = false;
+$showRelated = false;
+$playlists = false;
+$links = false;
 
-if ($cfg['use_tidal'] && $artist && !$qsType && !$tag && !in_array($artist,$cfg['VA']) && $filter == 'whole') {
+if ($cfg['use_tidal']) {
+  $artist_name = moveTheToBegining($artistRequested);
+  $res = $t->search("artists",$artist_name);
+  $pic = '';
+  if ($res["totalNumberOfItems"] > 0) {
+    foreach ($res["items"] as $a) {
+      if (tidalEscapeChar(strtolower($a["name"])) == tidalEscapeChar(strtolower($artist_name))) {
+        $tidalArtistId = $a["id"];
+        if ($a["picture"]){
+          $pic = $t->artistPictureToURL($a["picture"]);
+          $img = '<img src="' . $pic . '">';
+        }
+        else {
+          $img = '<div class="artist_bio_pic_not_found"><i class="fa fa-user"></i></div>';
+        }
+        break;
+      }
+    }
+  }
+  /* $bio = $t->getArtistBio($tidalArtistId);
+  if ($bio['text']) {
+    $showBio = true;
+  } */
+  $artistAll = $t->getArtistAll($tidalArtistId);
+  
+  $bio = artistBio($artistAll);
+  if ($bio['text']) {
+    $showBio = true;
+  }
+
+  $related = relatedArtists($artistAll);
+  if ($related[0]) {
+    $showRelated = true;
+  }
+
+  $playlists = artistPlaylists($artistAll);
+  if ($playlists[0]) {
+    $playlists = true;
+  }
+
+  $links = artistLinks($artistAll);
+  if ($links[0]) {
+    $links = true;
+  }
+
+  if ($pic) {
+?>
+<div style="background-image: url(<?php echo $pic;?>); background-position: -10000px -10000px;" class="artist_bio_pic"><?php echo $img;?></div>
+<?php
+  }
+}
+
+
+if ($cfg['use_tidal'] && $artist && !$qsType && !$tag && !in_array($artist,$cfg['VA']) && $filter == 'whole' && $showBio) {
 ?>
 
 
 <div>
 <h1 onclick='toggleSearchResults("TB");' class="pointer" id="tidalBio"><i id="iconSearchResultsTB" class="fa fa-chevron-circle-down icon-anchor"></i> Artist biography</h1>
 <div id="searchResultsTB" class="">
-<span id="bioLoadingIndicator">
-	<i class="fa fa-cog fa-spin icon-small"></i> Loading information...
-</span>
+  <div class="artist_bio_text">
+  <?php
+    echo $bio['text'];
+  ?>
+  </div>
+  <div class="total-time artist_bio_source">Source:<?php echo $bio['source']; ?></div>
 </div>
 </div>
-<script>
 
-$('#tidalBio').click(function() {	
-<?php 
-if ($tileSizePHP) {
-	$size = $tileSizePHP;
-}
-else {
-	$size = '$tileSize';
-}
-?>
-if ($( "#searchResultsTB" ).html().indexOf('Loading information') != -1){
-	var size = <?php echo $size; ?>;
-	console.log ('$tileSize: ' + $tileSize);
-	var artist = "<?php echo str_replace('"','',$artist); ?>";
-  var artistId = "<?php echo $tidalArtistId; ?>";
-	var request = $.ajax({  
-		url: "ajax-tidal-search.php",  
-		type: "POST",  
-		data: { search: "bio", tileSize : size, searchStr : artist, tidalArtistId : artistId, ajax : true, tileSize: size },  
-		dataType: "json"
-	}); 
-
-	request.done(function( data ) {
-		if (data["artist_count"] > 0) { //check if any artist recieved
-			//$("[id='suggested']").show();
-			var bio = data["text"];
-			var source = data["source"];
-			var img = "";
-			var pic = "";
-			var related_artists = "";
-			
-			if (source) {
-				source = '<div class="total-time artist_bio_source">Source: ' + source + '</div>';
-			}
-			else {
-				source = "";
-			}
-			if(data["picture"]) {
-				//pic = '<?php echo TIDAL_RESOURCES_URL; ?>' + data["picture"] + '/480x480.jpg';
-				pic = data["picture"];
-				img = '<img src="' + pic + '">';
-				//img = '<img src="image.php?source=inet&image_url=' + pic + '">';
-			}
-			else {
-				img='<div class="artist_bio_pic_not_found"><i class="fa fa-user"></i></div>';
-			}
-      var artist_bio = '<div style="background-image: url(' + pic + '); background-position: 10000px -50px;" class="artist_bio_pic">' + img + '</div>';
-			if (bio) {
-				artist_bio += '<div class="artist_bio_text">' + bio + '</div>';
-			}
-			artist_bio += source;
-			if (data["related_artists"]) {
-				related_artists = '<div style="text-transform: uppercase;"><h1>Related artists:</h1></div><div class="artist_bio_related">';
-				$.each(data["related_artists"], function(index, value){
-					img = '<i class="fa fa-user" style="font-size: 6em;"></i>';
-					if (value["picture"]) {
-						img = '<img src="' + value["picture"] + '">';
-					}
-					related_artists += '<div class="artist_related" onmouseover="return overlib(\'' + value["name"] + '\', CAPTION , \'Go to artist\');" onmouseout="return nd();"><a href="index.php?action=view2&tileSizePHP=' + data["size"] + '&artist=' + encodeURIComponent(value["name"]) + '&order=year&tidalArtistId=' + encodeURIComponent(value["id"]) + '"><div class="artist_container_small">' + img + '</div><div>' + value["name"] + '</div></a></div>';
-				});
-				related_artists +='</div>';
-			}
-      artist_links = '';
-      if (data["artist_links"]['links_found'] > 0) {
-				artist_links = '<div style="text-transform: uppercase;"><h1>More about artist:</h1></div><div class="artist_bio_text lh3">';
-				$.each(data["artist_links"]["items"], function(index, value){
-					artist_links += '<span class=""><a target="_BLANK" href="' + value["url"] + '">' + (value["siteName"]).replace("_","&nbsp;") + '</a></span>&nbsp;&nbsp;|&nbsp;&nbsp; ';
-				});
-				artist_links +='</div>';
-			}
-			artist_bio = artist_bio + artist_links + related_artists;
-			$( "#searchResultsTB" ).html( artist_bio );
-		}
-		else {
-			if (data["return"] != 0) {
-				$("#bioLoadingIndicator").hide();
-				$("#searchResultsTB").html('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Tidal request.<br>Error message:<br><br>' + data["response"] + '</div>');
-			}
-			else {
-				$("#bioLoadingIndicator").hide();
-				$("#searchResultsTB").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
-			}
-		}
-		
-		//console.log (data.length);
-	}); 
-
-	request.fail(function( jqXHR, textStatus ) {  
-		//alert( "Request failed: " + textStatus );	
-	}); 
-
-	request.always(function() {
-		$('[id^="add_tidal"]').click(function(){
-			$(this).removeClass('fa-plus-circle').addClass('fa-cog fa-spin icon-selected');
-		});
-
-		$('[id^="play_tidal"]').click(function(){
-			$(this).removeClass('fa-play-circle-o').addClass('fa-cog fa-spin icon-selected');
-		});
-		
-	});
-};
-});
-
-</script>
 <?php
 } //if($cfg['use_tidal'])
 
@@ -1001,13 +957,25 @@ if ($filter == 'whole' && !$genre_id && !$year && !$isVA && !$dr) {
 
 
 $filter_queryTA = str_replace('artist ','track.artist ',$filter_query);
-$queryTA = mysqli_query($db, 'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, album.image_id, album.album, album.artist
+
+$search_string = get('artist');
+
+$sqlTA = 'SELECT * FROM
+(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist
 FROM track
 INNER JOIN album ON track.album_id = album.album_id '
-. $filter_queryTA . 
-' AND (track.artist <> album.artist) 
-AND (album.artist NOT LIKE "%' .  mysqli_real_escape_string($db,get('artist')) . '%")
-GROUP BY track.artist');
+. $filter_queryTA .
+' AND track.artist <> album.artist
+AND album.artist NOT LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
+ORDER BY track.artist, album.album, track.title) as a
+LEFT JOIN 
+(SELECT track_id, favorite_id FROM favoriteitem WHERE favorite_id = "' . $cfg['favorite_id'] . '") as b ON b.track_id = a.tid
+LEFT JOIN 
+(SELECT track_id, favorite_id as blacklist_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") as bl ON bl.track_id = a.tid
+ORDER BY a.track_artist
+';
+
+$queryTA = mysqli_query($db,$sqlTA);
 
 $rows = mysqli_num_rows($queryTA);
 
@@ -1020,8 +988,9 @@ if ($rows > 0) {
 		echo $rows . " matches found";
 	}
 	else {
-		$album = mysqli_fetch_assoc($queryTA);
-		echo $rows . " match found: " . $album['track_artist'];
+		/*$track = mysqli_fetch_assoc($queryTA);
+		echo $rows . " match found: " . $album['track_artist']; */
+		echo $rows . " match found";
 	}
 	?>)
 </h1>
@@ -1049,24 +1018,9 @@ if ($rows > 0) {
 <?php
 $i=0;
 $TA_ids = '';
+
+
 $search_string = get('artist');
-
-$queryTA = mysqli_query($db,'SELECT * FROM
-(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist
-FROM track
-INNER JOIN album ON track.album_id = album.album_id '
-. $filter_queryTA .
-' AND track.artist <> album.artist
-AND album.artist NOT LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
-ORDER BY track.artist, album.album, track.title) as a
-LEFT JOIN 
-(SELECT track_id, favorite_id FROM favoriteitem WHERE favorite_id = "' . $cfg['favorite_id'] . '") as b ON b.track_id = a.tid
-LEFT JOIN 
-(SELECT track_id, favorite_id as blacklist_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") as bl ON bl.track_id = a.tid
-ORDER BY a.track_artist
-');
-
-$rowsTA = mysqli_num_rows($queryTA);
 
 while ($track = mysqli_fetch_assoc($queryTA)) {
 		$resultsFound = true;
@@ -1083,7 +1037,8 @@ while ($track = mysqli_fetch_assoc($queryTA)) {
 
 <td class="icon">
 <span>
-<?php if ($cfg['access_add'])  echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;track_id=' . $track['tid'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . $track['number'] . '\');" onMouseOut="return nd();"><i id="add_' . $track['tid'] . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';?>
+<?php 
+if ($cfg['access_add'])  echo '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;track_id=' . $track['tid'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . $track['number'] . '\');" onMouseOut="return nd();"><i id="add_' . $track['tid'] . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';?>
 </span>
 </td>
 <!--	
@@ -1468,7 +1423,9 @@ $tid = $track['tid'];
 if ($group_found != 'none') { 
 ?>
 <script>
-	toggleSearchResults("<?php echo $group_found; ?>");
+  if (<?php echo $rows; ?> < 11) {
+    toggleSearchResults("<?php echo $group_found; ?>");
+  }
 	$("#add_all_FAV").click(function(){
 		
 		$.ajax({
@@ -1509,13 +1466,38 @@ if ($cfg['testing'] == 'on') {
 			OR track.composer LIKE "%, ' . $art . ' & %"';
 	$filter_queryTC = str_replace(')','',$filter_queryTC) . $aux_search_str . ')';
 }
-$queryTC = mysqli_query($db, 'SELECT track.composer as track_composer, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, album.image_id, album.album, album.artist
+/* $queryTC = mysqli_query($db, 'SELECT track.composer as track_composer, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, album.image_id, album.album, album.artist
 FROM track
 INNER JOIN album ON track.album_id = album.album_id '
 . $filter_queryTC . 
 ' AND (track.composer <> album.artist) 
 AND (album.artist NOT LIKE "%' .  mysqli_real_escape_string($db,$art) . '%")
 GROUP BY track.composer');
+
+$queryTCstring = 'SELECT track.composer as track_composer, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, album.image_id, album.album, album.artist
+FROM track
+INNER JOIN album ON track.album_id = album.album_id '
+. $filter_queryTC . 
+' AND (track.composer <> album.artist) 
+AND (album.artist NOT LIKE "%' .  mysqli_real_escape_string($db,$art) . '%")
+GROUP BY track.composer';
+ */
+$search_string = get('artist');
+
+$queryTCstring = 'SELECT * FROM
+(SELECT track.artist as track_artist, track.composer as track_composer, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist
+FROM track
+INNER JOIN album ON track.album_id = album.album_id ' . $filter_queryTC . ' 
+AND album.artist NOT LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
+ORDER BY track.artist, album.album, track.title) as a
+LEFT JOIN 
+(SELECT track_id, favorite_id FROM favoriteitem WHERE favorite_id = "' . $cfg['favorite_id'] . '") as b ON b.track_id = a.tid
+LEFT JOIN 
+(SELECT track_id, favorite_id as blacklist_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") as bl ON bl.track_id = a.tid
+ORDER BY a.track_composer
+';
+$queryTC = mysqli_query($db,$queryTCstring);
+
 
 if ($queryTC) {
   $rows = mysqli_num_rows($queryTC);
@@ -1532,8 +1514,9 @@ if ($rows > 0) {
 		echo $rows . " matches found";
 	}
 	else {
-		$album = mysqli_fetch_assoc($queryTC);
-		echo $rows . " match found: " . $album['track_composer'];
+		/* $album = mysqli_fetch_assoc($queryTC);
+		echo $rows . " match found: " . $album['track_composer']; */
+		echo $rows . " match found";
 	}
 	?>)
 </h1>
@@ -1561,23 +1544,9 @@ if ($rows > 0) {
 <?php
 $i=10000000;
 $TC_ids = '';
-$search_string = get('artist');
 
-$queryTCstring = 'SELECT * FROM
-(SELECT track.artist as track_artist, track.composer as track_composer, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist
-FROM track
-INNER JOIN album ON track.album_id = album.album_id ' . $filter_queryTC . ' 
-AND album.artist NOT LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
-ORDER BY track.artist, album.album, track.title) as a
-LEFT JOIN 
-(SELECT track_id, favorite_id FROM favoriteitem WHERE favorite_id = "' . $cfg['favorite_id'] . '") as b ON b.track_id = a.tid
-LEFT JOIN 
-(SELECT track_id, favorite_id as blacklist_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") as bl ON bl.track_id = a.tid
-ORDER BY a.track_composer
-';
 $queryTC = mysqli_query($db,$queryTCstring);
 
-//$rowsTA = mysqli_num_rows($queryTC);
 $prevComp = '';
 $currComp = '';
 $k = 1;
@@ -1735,7 +1704,9 @@ $tid = $track['tid'];
 if ($group_found != 'none') { 
 ?>
 <script>
-	toggleSearchResults("<?php echo $group_found; ?>");
+	if (<?php echo $rows; ?> < 11) {
+    toggleSearchResults("<?php echo $group_found; ?>");
+  }
 	$("#add_all_TC").click(function(){
 		
 		$.ajax({
@@ -1760,13 +1731,86 @@ if ($group_found != 'none') {
 //End of Track composer	
 
 
+//  +------------------------------------------------------------------------+
+//  | Artist playlists from Tidal                                            |
+//  +------------------------------------------------------------------------+
+
+if ($cfg['use_tidal'] && $filter == 'whole' && $playlists) {
+
+?>
+<h1>&nbsp;<?php echo $playlists['title']; ?> from Tidal</h1>
+<div class="full" id="<?php echo $playlists['id']; ?>">
+<?php
+    foreach($playlists['pagedList']['items'] as $res) {
+      $albums = array();
+      $albums['album_id'] = 'tidal_' . $res['item']['uuid'];
+      $albums['album'] = $res['item']['title'];
+      $albums['cover'] = $t->albumCoverToURL($res['item']['squareImage'],"lq");
+      $albums['artist_alphabetic'] = getTidalPlaylistCreator($res['item']);
+      draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $t->albumCoverToURL($res['item']['squareImage'],"lq"),"playlist");
+    }
+?>
+</div>
+<?php
+}
 
 
-if ($resultsFound == false && $group_found == 'none') echo '<h1>No results found in local DB.</h1>';
+//  +------------------------------------------------------------------------+
+//  | Related artists from Tidal                                             |
+//  +------------------------------------------------------------------------+
+
+if ($cfg['use_tidal'] && $filter == 'whole' && $showRelated) {
+
+?>
+<h1>&nbsp;Fans also like</h1>
+<div class="artist_bio_related">
+<?php
+
+  foreach($related as $ra){
+    if ($ra["picture"]) {
+      $pic = $t->artistPictureToURL($ra["picture"]);
+      $img = '<img src="' . $pic . '">';
+    }
+    else {
+      $img = '<i class="fa fa-user" style="font-size: 6em;"></i>';
+    }
+?>
+<div class="artist_related" onmouseover="return overlib('<?php echo $ra["name"]; ?>', CAPTION ,'Go to artist');" onmouseout="return nd();"><a href="index.php?action=view2&tileSizePHP=<?php echo $tileSizePHP; ?>&artist=<?php echo urlencode($ra["name"]) ?>&order=year&tidalArtistId=<?php echo urlencode($ra["id"])?>"><div class="artist_container_small"><?php echo $img; ?></div><div><?php echo $ra["name"]; ?></div></a></div>
+<?php
+  }
+?>
+</div>
+<?php
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Artist links from Tidal                                                |
+//  +------------------------------------------------------------------------+
+
+if ($cfg['use_tidal'] && $filter == 'whole' && $links) {
+
+?>
+<h1>&nbsp;<?php echo $links['title']; ?></h1>
+<div class="artist_bio_text lh3">
+<?php
+    foreach($links['socialLinks'] as $res) {
+      echo '<span class=""><a target="_BLANK" href="' . $res["url"] . '">' . $res['type'] . '</a></span>&nbsp;&nbsp;|&nbsp;&nbsp;';
+    }
+?>
+</div>
+<?php
+}
+
+
+
+if ($resultsFound == false && $group_found == 'none') echo '<h1>&nbsp;No results found in local DB.</h1>';
 
 } //if ($filter == 'whole')
 
 
+if (false) {
 ?>
 
 <table cellspacing="0" cellpadding="0" class="border">
@@ -1796,6 +1840,8 @@ if ((mysqli_num_rows($query) < 2) && $display_all_tracks) {
 </table>
 
 <?php
+}
+
 }
 require_once('include/footer.inc.php');
 

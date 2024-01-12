@@ -208,49 +208,8 @@ if ($conn === true){
 ?>
 <h1>&nbsp;Your playlists</h1>
 <table cellspacing="0" cellpadding="0" class="border tabFixed break-word">
-<tr class="header">
-
-<td class="icon"></td><!-- optional play -->
-<td class="icon"></td><!-- optional add -->
-<td class="icon"></td><!-- optional stream -->
-<td></td>
-<td></td>
-<td class="icon"></td><!-- optional delete -->
-<td class="icon"></td>
-<td class="space"></td>
-</tr>
 <?php
-    for ($j = 0; $j < $playlists['totalNumberOfItems']; $j++) {
-      $plName = $playlists['items'][$j]['title'];
-      $plId = $playlists['items'][$j]['uuid'];
-      //$plLastMod = $playlists['Last-Modified'][$j];
-    ?>		
-      <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
-        
-        <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();"><i id="play_' . $plId . '" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
-        
-        <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=addTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Add to playlist\');" onMouseOut="return nd();"><i id="add_' . $plId . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>'; ?></td>
-        
-        <td>
-        </td>
-        
-        <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();">' . html($plName) . '</a>';
-            else echo html($plName); ?>
-        </td>
-        
-        <td>
-          <?php echo $playlists['items'][$j]['description']; ?></td>
-        <td>
-        </td>
-        
-        <td>
-          <?php if ($cfg['access_admin']) echo '<a href="favorite.php?action=viewTidalPlaylist&amp;favorite_id=' . $plId . '&plName=' . $plName . '" onMouseOver="return overlib(\'See tracks\');" onMouseOut="return nd();"><i class="fa fa-list fa-fw icon-small"></i></a>'; ?>
-        </td>
-        
-        <td></td>
-      </tr>
-    <?php
-    }
+  tidalUserPlaylists($playlists);
   }
 }
 echo '</table>' . "\n";

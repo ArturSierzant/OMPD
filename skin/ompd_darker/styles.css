@@ -78,7 +78,7 @@ i:active {
     overflow-x: scroll;
     overflow-y: hidden;
     display: inline-block;
-    margin-bottom: 5px;
+    /* margin-bottom: 5px; */
     white-space: nowrap;
     width: 0;
   }
@@ -111,6 +111,7 @@ i:active {
     width: 100%;
     clear: both;
     padding-left: 5px;
+    padding-right: 5px;
     min-height: 164px;
   }
   .pl-track-info {
@@ -195,7 +196,7 @@ i:active {
     overflow-x: scroll;
     overflow-y: hidden;
     display: inline-block;
-    margin-bottom: 5px;
+    /* margin-bottom: 5px; */
     white-space: nowrap;
     width: 0;
   }
@@ -226,6 +227,7 @@ i:active {
     width: 58%;
     float: right;
     padding-left: 5px;
+    padding-right: 5px;
   }
   .pl-track-info {
     width: 100%;
@@ -327,7 +329,7 @@ i:active {
     overflow-x: scroll;
     overflow-y: hidden;
     display: inline-block;
-    margin-bottom: 5px;
+    /* margin-bottom: 5px; */
     white-space: nowrap;
     width: 0;
   }
@@ -2394,10 +2396,11 @@ h1 {
   text-overflow: ellipsis;
 }
 .artist_bio_pic {
-  background-size: 200000% 200000%;
+  background-size: 5000% 5000%;
   height: 270px;
   padding: 10px 0;
   text-align: center;
+  margin-bottom: 1px;
 }
 .artist_bio_pic img {
   display: block;

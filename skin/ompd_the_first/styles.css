@@ -131,7 +131,12 @@ i:active {
   /*#image, #image a, #image_in {min-width: 100px; min-height: 100px;}*/
   #playlist {margin: 0 2px;}
   .pl-track-info-right {width: 100%; clear: both; max-width: 380px; margin: 0 auto;}
-  .album-info-area-right {width: 100%; clear: both; padding-left: 5px;}
+  .album-info-area-right {
+    width: 100%; 
+    clear: both; 
+    padding-left: 5px;
+    padding-right: 5px;
+  }
   .pl-track-info {clear:both; width: 100%;float: none;}
   .sign-ctrl {font-size: 2em;}
   .cb-typcn {font-size: 2.5em; top: 2px;}
@@ -225,6 +230,7 @@ i:active {
     /*min-width:48%;*/
     float:right;
     padding-left: 5px;
+    padding-right: 5px;
   }
   .pl-track-info {width: 100%;}
   .sign-ctrl {font-size: 1.5em;}

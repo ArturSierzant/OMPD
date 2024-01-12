@@ -1015,7 +1015,7 @@ function getTrackAlbumFromTidal($track_id) {
 //  +------------------------------------------------------------------------+
 //  | Artist biography from Tidal                                            |
 //  +------------------------------------------------------------------------+
-function showArtistBio($artist_name, $size, $artistId) {
+function showArtistBioJson($artist_name, $size, $artistId) {
 	global $cfg, $db, $t;
 	$artist_name = moveTheToBegining($artist_name);
 	$data = array();
@@ -1092,6 +1092,71 @@ function showArtistBio($artist_name, $size, $artistId) {
 	}
 	echo safe_json_encode($data);
 }
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Artist biography from Tidal                                            |
+//  +------------------------------------------------------------------------+
+function artistBio($artistAll) {
+  global $cfg, $db, $t;
+  
+  foreach ($artistAll['rows'] as $row) {
+    if ($row['modules'][0]['bio']) {
+      return formatBio($row['modules'][0]['bio']);
+    }
+  }
+  return false;
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Related artists from Tidal                                             |
+//  +------------------------------------------------------------------------+
+function relatedArtists($artistAll) {
+  global $cfg, $db, $t;
+
+  foreach ($artistAll['rows'] as $row) {
+    if (strtolower($row['modules'][0]['title']) == 'fans also like') {
+      return $row['modules'][0]['pagedList']['items'];
+    }
+  }
+  return false;
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Artist playlists from Tidal                                            |
+//  +------------------------------------------------------------------------+
+function artistPlaylists($artistAll) {
+  global $cfg, $db, $t;
+
+  foreach ($artistAll['rows'] as $row) {
+    if (strtolower($row['modules'][0]['title']) == 'playlists') {
+      return $row['modules'][0];
+    }
+  }
+  return false;
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Artist liknks from Tidal                                               |
+//  +------------------------------------------------------------------------+
+function artistLinks($artistAll) {
+  global $cfg, $db, $t;
+
+  foreach ($artistAll['rows'] as $row) {
+    if (strtolower($row['modules'][0]['type']) == 'social') {
+      return $row['modules'][0];
+    }
+  }
+  return false;
+}
+
 
 
 //  +------------------------------------------------------------------------+
@@ -1445,6 +1510,67 @@ function tidalTracksList($tracks, $i = 0, $playlist_type = '') {
 		$tracksList .= '</table>';
 		
 		return $tracksList;
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Draws user playlists from Tidal                                        |
+//  +------------------------------------------------------------------------+
+
+function tidalUserPlaylists($playlists, $header = '') {
+  global $cfg;
+  global $t;
+
+  $conn = $t->connect();
+  if ($conn === true){
+    $playlists = $t->getUserPlaylists();
+    if ($playlists['totalNumberOfItems'] > 0) {
+?>
+		<tr class="header">
+			
+			<td class="icon"></td><!-- optional play -->
+			<td class="icon"></td><!-- optional add -->
+			<td class="icon"></td><!-- optional stream -->
+			<td><?php echo $header; ?></td>
+			<td></td>
+			<td class="icon"></td><!-- optional delete -->
+			<td class="icon"></td>
+			<td class="space"></td>
+		</tr>
+<?php
+  for ($j = 0; $j < $playlists['totalNumberOfItems']; $j++) {
+    $plName = $playlists['items'][$j]['data']['title'];
+    $plId = $playlists['items'][$j]['data']['uuid'];
+  ?>		
+    <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
+      
+      <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();"><i id="play_' . $plId . '" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
+      
+      <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=addTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Add to playlist\');" onMouseOut="return nd();"><i id="add_' . $plId . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>'; ?></td>
+      
+      <td>
+      </td>
+      
+      <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();">' . html($plName) . '</a>';
+          else echo html($plName); ?>
+      </td>
+      
+      <td>
+        <?php echo $playlists['items'][$j]['data']['description']; ?></td>
+      <td>
+      </td>
+      
+      <td>
+        <?php if ($cfg['access_admin']) echo '<a href="favorite.php?action=viewTidalPlaylist&amp;favorite_id=' . $plId . '&plName=' . $plName . '" onMouseOver="return overlib(\'See tracks\');" onMouseOut="return nd();"><i class="fa fa-list fa-fw icon-small"></i></a>'; ?>
+      </td>
+      
+      <td></td>
+    </tr>
+  <?php
+  }
+}
+  }
 }
 
 

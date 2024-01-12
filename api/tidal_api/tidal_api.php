@@ -383,8 +383,15 @@ class TidalAPI {
     return $res;
   }
 
-  function getUserPlaylists($limit = 50) {
+  function getUserPlaylists_old($limit = 50) {
     curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "users/" . $this->userId . "/playlists?countryCode=" . $this->countryCode . "&limit=" . $limit);
+    return $this->request();
+  }
+  
+  function getUserPlaylists() {
+    curl_setopt($this->curl, CURLOPT_URL, self::API_V2_URL . 
+  "my-collection/playlists/folders?folderId=root&includeOnly=&offset=0&limit=50&order=DATE&orderDirection=DESC&countryCode=" . $this->countryCode . "&locale=en-us&deviceType=BROWSER");
+    
     return $this->request();
   }
 

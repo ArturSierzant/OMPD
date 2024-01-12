@@ -77,7 +77,7 @@ i:active {
       overflow-x: scroll;
       overflow-y: hidden;
       display:inline-block; 
-      margin-bottom: 5px;
+      /* margin-bottom: 5px; */
       white-space:nowrap;
       width: 0;
       }
@@ -101,7 +101,13 @@ i:active {
   
   #playlist {margin: 0 0;}
   .pl-track-info-right {width: 100%; clear: both; max-width: 380px; margin: 0 auto;}
-  .album-info-area-right {width: 100%; clear: both; padding-left: 5px; min-height: 164px;}
+  .album-info-area-right {
+    width: 100%; 
+    clear: both; 
+    padding-left: 5px; 
+    padding-right: 5px; 
+    min-height: 164px;
+  }
   .pl-track-info {clear:both; width: 100%;float: none; padding-top: 0px;}
   .sign-ctrl {font-size: 2em;}
   .cb-typcn {font-size: 2.5em; top: 2px;}
@@ -161,7 +167,7 @@ i:active {
       overflow-x: scroll;
       overflow-y: hidden;
       display:inline-block;
-      margin-bottom: 5px;
+      /* margin-bottom: 5px; */
       white-space:nowrap;
       width: 0;
       }
@@ -191,6 +197,7 @@ i:active {
     width: 58%;
     float:right;
     padding-left: 5px;
+    padding-right: 5px;
   }
   .pl-track-info {width: 100%; padding-top: 7px;}
   .sign-ctrl {font-size: 1.5em;}
@@ -265,7 +272,7 @@ i:active {
       overflow-x: scroll;
       overflow-y: hidden;
       display:inline-block;
-      margin-bottom: 5px;
+      /* margin-bottom: 5px; */
       white-space:nowrap;
       width: 0;
       }
@@ -2537,10 +2544,11 @@ h1 {
 }
 
 .artist_bio_pic {
-  background-size: 200000% 200000%;
+  background-size: 5000% 5000%;
   height: 270px;
   padding: 10px 0;
   text-align: center;
+  margin-bottom: 1px;
 }
 
 .artist_bio_pic img {

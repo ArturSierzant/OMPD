@@ -319,8 +319,8 @@ if (isset($db)) {
           refreshTidalAccessToken();
         }
       }
+    }
   }
-}
 }
 //$cfg['use_tidal'] = false;
 
