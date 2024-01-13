@@ -110,8 +110,11 @@ foreach($hp['rows'] as $key => $row){
       $albums['album_id'] = 'tidal_' . $res['uuid'];
       $albums['album'] = $res['title'];
       $albums['cover'] = $t->albumCoverToURL($res['squareImage'],"lq");
+      if (!$albums['cover']) {
+        $albums['cover'] = $t->albumCoverToURL($res['image'],'');
+      }
       $albums['artist_alphabetic'] = getTidalPlaylistCreator($res);
-      draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $t->albumCoverToURL($res['squareImage'],"lq"),"playlist");
+      draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $albums['cover'],"playlist");
     }
     echo '</div>';
   } //PLAYLIST_LIST

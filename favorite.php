@@ -139,7 +139,7 @@ function home() {
 			elseif (!$cfg['access_play'] && $cfg['access_stream'])	echo '<a href="stream.php?action=playlist&amp;favorite_id=' . $favorite['favorite_id'] . ($favorite['stream'] == false ? '&amp;stream_id=' . $cfg['stream_id'] : '') . '" onMouseOver="return overlib(\'Stream\');" onMouseOut="return nd();">' . html($favorite['name']) . '</a>';
 			else 													echo html($favorite['name']); ?></td>
 	
-	<td><?php echo bbcode($favorite['comment']); ?></td>
+	<td><div class="favoritePlaylistDescription"><?php echo bbcode($favorite['comment']); ?></div></td>
 	
 	<td><?php if ($cfg['access_admin']) echo '<a href="favorite.php?action=deleteFavorite&amp;favorite_id=' . $favorite['favorite_id'] . '&amp;sign=' . $cfg['sign'] . '" onClick="return confirm(\'Are you sure you want to delete favorite: ' . addslashes(html($favorite['name'])) . '?\');" onMouseOver="return overlib(\'Delete\');" onMouseOut="return nd();"><i class="fa fa-times-circle fa-fw icon-small"></i></a>'; ?></td>
 	
@@ -552,6 +552,9 @@ function viewTidalPlaylist($favorite_id, $favorite_name) {
 	
 	require_once('include/play.inc.php');
 	
+  $nav			= array();
+	$nav['name'][]	= 'Favorites: Tidal playlist';
+  
 	/* // formattedNavigator
 	$nav			= array();
 	$nav['name'][]	= 'Favorites';

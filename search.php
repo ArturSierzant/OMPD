@@ -94,6 +94,7 @@ function search_all() {
 		echo '<span class="nav_tree">Results from TIDAL:</span>';
 		tidal_artist();
 		tidal_albums();
+    tidal_playlists();
 		tidal_tracks();
 		tidal_scripts();
 	}
@@ -1149,6 +1150,10 @@ $('#tidalAlbums').click(function() {
 	if (!requestDone) tidalSearchAll();
 });
 
+$('#tidalPlaylists').click(function() {
+	if (!requestDone) tidalSearchAll();
+});
+
 $('#tidalTracks').click(function() {
 	if (!requestDone) tidalSearchAll();
 });
@@ -1185,6 +1190,14 @@ function tidalSearchAll(){
 		else {
 			$("#albumsLoadingIndicator").hide();
 			$("#searchResultsTIAl").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
+		}
+		
+		if (data['playlists_results'] > 0) {
+			$( "#searchResultsTIPl" ).html( data['playlists'] );	
+		}
+		else {
+			$("#playlistsLoadingIndicator").hide();
+			$("#searchResultsTIPl").html('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
 		}
 		
 		if (data['tracks_results'] > 0) {
@@ -1263,6 +1276,31 @@ function tidal_albums(){
 <div id="searchResultsTIAl" class="albums_container">
 <span id="albumsLoadingIndicator">
 		<i class="fa fa-cog fa-spin icon-small"></i> Loading albums list...
+</span>
+<?php 
+//if ($tileSizePHP) $size = $tileSizePHP;
+
+?>
+</div>
+</div>
+
+<?php
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Playlists from Tidal                                                   |
+//  +------------------------------------------------------------------------+
+
+function tidal_playlists(){
+	global $cfg, $db, $size, $search_string;
+?>
+<div>
+<h1 onclick='toggleSearchResults("TIPl");' class="pointer" id="tidalPlaylists"><i id="iconSearchResultsTIPl" class="fa fa-chevron-circle-down icon-anchor"></i> Playlists</h1>
+<div id="searchResultsTIPl" class="albums_container">
+<span id="playlistsLoadingIndicator">
+		<i class="fa fa-cog fa-spin icon-small"></i> Loading playlists list...
 </span>
 <?php 
 //if ($tileSizePHP) $size = $tileSizePHP;

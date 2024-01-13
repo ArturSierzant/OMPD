@@ -1261,12 +1261,6 @@ function showAllFromTidal($searchStr, $size) {
 	$albumsList = "";
 	$data = array();
 	
-	/* $t = new TidalAPI;
-	$t->username = $cfg["tidal_username"];
-	$t->password = $cfg["tidal_password"];
-	$t->token = $cfg["tidal_token"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate(); */
-  //$t = tidal();
 	$conn = $t->connect();
 	if ($conn === true){
 		$results = $t->searchAll($value);
@@ -1301,11 +1295,32 @@ function showAllFromTidal($searchStr, $size) {
 			$album['album_id'] = 'tidal_' . $art['id'];
 			$album['artist_alphabetic'] = $art['artists'][0]['name'];
 			$album['album'] = $art['title'];
+			$album['cover'] = $art['cover'];
 			$album['audio_quality'] = $art['audioQuality'];
-			$albumsList .= draw_tile($size, $album, '', 'string',$art['cover']);
+			$albumsList .= draw_tile($size, $album, '', 'string',$album['cover']);
 			}
 		$albumsList .= '</table>';
 		$data['albums'] = $albumsList;
+	}
+  
+	if (count($results['playlists']['items']) == 0) {
+		$data['playlists_results'] = 0;
+	}
+	if ($results['playlists']['items']) {
+		$data['playlists_results'] = count($results['playlists']['items']);
+		$albumsList = '<table class="border" cellspacing="0" cellpadding="0">';
+		foreach ($results['playlists']['items'] as $art) {
+			$album['album_id'] = 'tidal_' . $art['uuid'];
+			$album['artist_alphabetic'] = getTidalPlaylistCreator($art);
+			$album['album'] = $art['title'];
+      $album['cover'] = $t->albumCoverToURL($art['squareImage'],"lq");
+      if (!$album['cover']) {
+        $album['cover'] = $t->albumCoverToURL($art['image'],"");
+      }
+      $albumsList .= draw_Tidal_tile ( $size, $album, '', 'string', $album['cover'],"playlist");
+			}
+		$albumsList .= '</table>';
+		$data['playlists'] = $albumsList;
 	}
 	
 	if (count($results['tracks']['items']) == 0) {
@@ -1557,7 +1572,9 @@ function tidalUserPlaylists($playlists, $header = '') {
       </td>
       
       <td>
-        <?php echo $playlists['items'][$j]['data']['description']; ?></td>
+        <div class="favoritePlaylistDescription">
+        <?php echo $playlists['items'][$j]['data']['description']; ?>
+        </div>
       <td>
       </td>
       

@@ -248,7 +248,7 @@ i:active {
   }
   
   
-  #additional-info {clear: left;}
+  /* #additional-info {clear: left;} */
   #menuSubMiddleMediaGenre, #genreList, #menuSubMiddleMediaQuickSearch {
     column-count: 4;
     -moz-column-count: 4;
@@ -477,9 +477,13 @@ i:active {
   /* margin: 0 2px; */
   overflow: hidden;
   background-color: #f0f0f0;
-
   /* background-color: #EDEDED;
   opacity: 0.5; */
+}
+
+#additional-info {
+  clear: left; 
+  text-align: justify;
 }
 
 #back-ground-wrapper {

@@ -467,8 +467,11 @@ class TidalAPI {
     if ($quality == 'hq') {
       $pic = self::RESOURCES_URL . $pic . '/1280x1280.jpg';
     }
-    else {
+    elseif ($quality == 'lq') {
       $pic = self::RESOURCES_URL . $pic . '/320x320.jpg';
+    }
+    elseif ($quality == '') {
+      $pic = self::RESOURCES_URL . $pic . '/1080x720.jpg';
     }
     return $pic;
   }

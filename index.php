@@ -2107,6 +2107,9 @@ if ($conn === true){
         $albums['album_id'] = 'tidal_' . $res['uuid'];
         $albums['album'] = $res['title'];
         $albums['cover'] = $t->albumCoverToURL($res['squareImage'],'lq');
+        if (!$albums['cover']) {
+          $albums['cover'] = $t->albumCoverToURL($res['image'],'');
+        }
         $albums['artist_alphabetic'] = getTidalPlaylistCreator($res);;
         draw_Tidal_tile ( $size, $albums, '', 'echo', $albums['cover'],"playlist");
       }

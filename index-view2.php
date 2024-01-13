@@ -1466,22 +1466,7 @@ if ($cfg['testing'] == 'on') {
 			OR track.composer LIKE "%, ' . $art . ' & %"';
 	$filter_queryTC = str_replace(')','',$filter_queryTC) . $aux_search_str . ')';
 }
-/* $queryTC = mysqli_query($db, 'SELECT track.composer as track_composer, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, album.image_id, album.album, album.artist
-FROM track
-INNER JOIN album ON track.album_id = album.album_id '
-. $filter_queryTC . 
-' AND (track.composer <> album.artist) 
-AND (album.artist NOT LIKE "%' .  mysqli_real_escape_string($db,$art) . '%")
-GROUP BY track.composer');
 
-$queryTCstring = 'SELECT track.composer as track_composer, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, album.image_id, album.album, album.artist
-FROM track
-INNER JOIN album ON track.album_id = album.album_id '
-. $filter_queryTC . 
-' AND (track.composer <> album.artist) 
-AND (album.artist NOT LIKE "%' .  mysqli_real_escape_string($db,$art) . '%")
-GROUP BY track.composer';
- */
 $search_string = get('artist');
 
 $queryTCstring = 'SELECT * FROM
@@ -1746,8 +1731,11 @@ if ($cfg['use_tidal'] && $filter == 'whole' && $playlists) {
       $albums['album_id'] = 'tidal_' . $res['item']['uuid'];
       $albums['album'] = $res['item']['title'];
       $albums['cover'] = $t->albumCoverToURL($res['item']['squareImage'],"lq");
+      if (!$albums['cover']) {
+        $albums['cover'] = $t->albumCoverToURL($res['item']['image'],"");
+      }
       $albums['artist_alphabetic'] = getTidalPlaylistCreator($res['item']);
-      draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $t->albumCoverToURL($res['item']['squareImage'],"lq"),"playlist");
+      draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $albums['cover'],"playlist");
     }
 ?>
 </div>

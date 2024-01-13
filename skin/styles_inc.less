@@ -212,13 +212,18 @@ i:active {
     position: relative;
   }
   
+/*   #additional-info {
+    clear: left; 
+    padding: 0px 0;
+    text-align: justify;
+  } */
   
-  #additional-info {clear: left; padding: 0px 0;}
   #menuSubMiddleMediaGenre, #genreList, #menuSubMiddleMediaQuickSearch {
     column-count: 4;
     -moz-column-count: 4;
     -webkit-column-count: 4;
   }
+  
   #searchFormAll {
     height: 2.4em;
     display: none;
@@ -421,6 +426,12 @@ i:active {
 #album-info-area {
   overflow: hidden;
   background-color: (@bg-categories);
+}
+
+#additional-info {
+  clear: left; 
+  padding: 0 1px 0 0;
+  text-align: justify;
 }
 
 #back-ground-wrapper {
@@ -1054,6 +1065,13 @@ div.playlist_status_on_border {
   
 #favorites, #favorites1 {
   cursor: pointer;
+}
+
+.favoritePlaylistDescription {
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
 }
 
 .pl-file-info {
