@@ -56,7 +56,6 @@ if (isTidal($album_id)) {
 	FROM tidal_album
 	WHERE album_id = "' .  mysqli_real_escape_string($db,getTidalId($album_id)) . '" AND seconds != 0'); //seconds != "" for albums added from tidal playlists
 	
-	//$albumType = 'tidal';
 	//album already in OMPD database
 	if (mysqli_num_rows($query) > 0) {
 		$album = mysqli_fetch_assoc($query);

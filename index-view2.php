@@ -455,8 +455,11 @@ $sort_url	= $url;
 $size_url	= $url . '&amp;order=' . $order . '&amp;sort=' . $sort;
 $showBio = false;
 $showRelated = false;
-$playlists = false;
-$links = false;
+$showInfluencers = false;
+$showPlaylists = false;
+$showLinks = false;
+$showAppearsOn = false;
+$mixes = false;
 
 if ($cfg['use_tidal']) {
   $artist_name = moveTheToBegining($artistRequested);
@@ -477,31 +480,16 @@ if ($cfg['use_tidal']) {
       }
     }
   }
-  /* $bio = $t->getArtistBio($tidalArtistId);
-  if ($bio['text']) {
-    $showBio = true;
-  } */
+
   $artistAll = $t->getArtistAll($tidalArtistId);
   
   $bio = artistBio($artistAll);
-  if ($bio['text']) {
-    $showBio = true;
-  }
-
   $related = relatedArtists($artistAll);
-  if ($related[0]) {
-    $showRelated = true;
-  }
-
+  $influencers = artistInfluencers($artistAll);
   $playlists = artistPlaylists($artistAll);
-  if ($playlists[0]) {
-    $playlists = true;
-  }
-
+  $mixes = artistMixes($artistAll);
+  $appearsOn = artistAppearsOn($artistAll);
   $links = artistLinks($artistAll);
-  if ($links[0]) {
-    $links = true;
-  }
 
   if ($pic) {
 ?>
@@ -511,7 +499,7 @@ if ($cfg['use_tidal']) {
 }
 
 
-if ($cfg['use_tidal'] && $artist && !$qsType && !$tag && !in_array($artist,$cfg['VA']) && $filter == 'whole' && $showBio) {
+if ($cfg['use_tidal'] && $artist && !$qsType && !$tag && !in_array($artist,$cfg['VA']) && $filter == 'whole' && $bio) {
 ?>
 
 
@@ -523,7 +511,7 @@ if ($cfg['use_tidal'] && $artist && !$qsType && !$tag && !in_array($artist,$cfg[
     echo $bio['text'];
   ?>
   </div>
-  <div class="total-time artist_bio_source">Source:<?php echo $bio['source']; ?></div>
+  <div class="total-time artist_bio_source"><br>Source:<?php echo $bio['source']; ?></div>
 </div>
 </div>
 
@@ -1717,13 +1705,37 @@ if ($group_found != 'none') {
 
 
 //  +------------------------------------------------------------------------+
+//  | Artist mixes from Tidal                                                |
+//  +------------------------------------------------------------------------+
+
+if ($cfg['use_tidal'] && $filter == 'whole' && $mixes) {
+
+?>
+<h1>&nbsp;<?php echo $mixes['title']; ?> from Tidal</h1>
+<div class="full" id="<?php echo $mixes['id']; ?>">
+<?php
+    foreach($mixes['pagedList']['items'] as $res) {
+      $albums = array();
+      $albums['album_id'] = 'tidal_' . $res['id'];
+      $albums['album'] = $res['title'];
+      $albums['cover'] = $res['images']['SMALL']['url'];
+      $albums['artist_alphabetic'] = $res['subTitle'];
+      draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $res['images']['SMALL']['url'], "mixlist");
+    }
+?>
+</div>
+<?php
+}
+
+
+//  +------------------------------------------------------------------------+
 //  | Artist playlists from Tidal                                            |
 //  +------------------------------------------------------------------------+
 
 if ($cfg['use_tidal'] && $filter == 'whole' && $playlists) {
-
+  $headerTitile = $playlists['title'] . ' from Tidal <a href="index.php?action=viewMoreFromTidal&type=mixed_types_list&apiPath=' . urlencode($playlists['showMore']['apiPath']) . '"> (more...)</a>';
 ?>
-<h1>&nbsp;<?php echo $playlists['title']; ?> from Tidal</h1>
+<h1>&nbsp;<?php echo $headerTitile; ?></h1>
 <div class="full" id="<?php echo $playlists['id']; ?>">
 <?php
     foreach($playlists['pagedList']['items'] as $res) {
@@ -1744,10 +1756,37 @@ if ($cfg['use_tidal'] && $filter == 'whole' && $playlists) {
 
 
 //  +------------------------------------------------------------------------+
+//  | Artist appears on from Tidal                                           |
+//  +------------------------------------------------------------------------+
+
+if ($cfg['use_tidal'] && $filter == 'whole' && $appearsOn) {
+  $headerTitile = $appearsOn['title'] . ' albums from Tidal <a href="index.php?action=viewMoreFromTidal&type=album_list&apiPath=' . urlencode($appearsOn['showMore']['apiPath']) . '"> (more...)</a>';
+?>
+<h1>&nbsp;<?php echo $headerTitile; ?> </h1>
+<div class="full" id="<?php echo $appearsOn['id']; ?>">
+<?php
+    foreach($appearsOn['pagedList']['items'] as $res) {
+      $albums = array();
+      $albums['album_id'] = 'tidal_' . $res['id'];
+      $albums['album'] = $res['title'];
+      $albums['cover'] = $t->albumCoverToURL($res['cover'],"lq");
+      if (!$albums['cover']) {
+        $albums['cover'] = $t->albumCoverToURL($res['image'],"");
+      }
+      $albums['artist_alphabetic'] = ($res['artists'][0]['name']);
+      draw_tile ( $tileSize, $albums, '', 'echo', $albums['cover']);
+    }
+?>
+</div>
+<?php
+}
+
+
+//  +------------------------------------------------------------------------+
 //  | Related artists from Tidal                                             |
 //  +------------------------------------------------------------------------+
 
-if ($cfg['use_tidal'] && $filter == 'whole' && $showRelated) {
+if ($cfg['use_tidal'] && $filter == 'whole' && $related) {
 
 ?>
 <h1>&nbsp;Fans also like</h1>
@@ -1755,6 +1794,36 @@ if ($cfg['use_tidal'] && $filter == 'whole' && $showRelated) {
 <?php
 
   foreach($related as $ra){
+    if ($ra["picture"]) {
+      $pic = $t->artistPictureToURL($ra["picture"]);
+      $img = '<img src="' . $pic . '">';
+    }
+    else {
+      $img = '<i class="fa fa-user" style="font-size: 6em;"></i>';
+    }
+?>
+<div class="artist_related" onmouseover="return overlib('<?php echo $ra["name"]; ?>', CAPTION ,'Go to artist');" onmouseout="return nd();"><a href="index.php?action=view2&tileSizePHP=<?php echo $tileSizePHP; ?>&artist=<?php echo urlencode($ra["name"]) ?>&order=year&tidalArtistId=<?php echo urlencode($ra["id"])?>"><div class="artist_container_small"><?php echo $img; ?></div><div><?php echo $ra["name"]; ?></div></a></div>
+<?php
+  }
+?>
+</div>
+<?php
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Influencers from Tidal                                                 |
+//  +------------------------------------------------------------------------+
+
+if ($cfg['use_tidal'] && $filter == 'whole' && $influencers) {
+
+?>
+<h1>&nbsp;Influencers</h1>
+<div class="artist_bio_related">
+<?php
+
+  foreach($influencers as $ra){
     if ($ra["picture"]) {
       $pic = $t->artistPictureToURL($ra["picture"]);
       $img = '<img src="' . $pic . '">';

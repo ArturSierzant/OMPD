@@ -111,7 +111,7 @@ function search_all() {
 	}
 	echo '<script type="text/javascript">';
 	//echo 'hideSpinner();';
-	if ($group_found != 'none') { echo 'toggleSearchResults("' . $group_found . '")';}
+	//if ($group_found != 'none') { echo 'toggleSearchResults("' . $group_found . '")';}
 	echo '</script>';
 	
 	
@@ -203,6 +203,11 @@ function album_artist() {
 	}
 	?>
 	</div>
+    <script>
+    if (<?php echo $rows; ?> > 0) {
+      toggleSearchResults("<?php echo $group_found; ?>");
+    }
+  </script>
 	<?php
 	} 
 }
@@ -216,25 +221,42 @@ function album_artist() {
 function track_artist() {
 	global $cfg, $db, $size, $search_string, $group_found, $match_found;
 
-	$query = mysqli_query($db,'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, track.dr, album.image_id, album.album, album.artist
+/* 	$query = mysqli_query($db,'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, track.dr, album.image_id, album.album, album.artist
 	FROM track
 	INNER JOIN album ON track.album_id = album.album_id
 	WHERE track.artist LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
 	AND track.artist <> album.artist AND album.artist NOT LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%" 
-	GROUP BY track.artist');
+	GROUP BY track.artist'); */
 	
+  $query = mysqli_query($db,'SELECT * FROM
+	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist
+	FROM track
+	INNER JOIN album ON track.album_id = album.album_id
+	WHERE track.artist LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
+	AND track.artist <> album.artist
+	AND album.artist NOT LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
+	ORDER BY track.artist, album.album, track.title) as a
+	LEFT JOIN 
+	(SELECT track_id, favorite_id FROM favoriteitem WHERE favorite_id = "' . $cfg['favorite_id'] . '") as b ON b.track_id = a.tid
+	LEFT JOIN 
+	(SELECT track_id, favorite_id as blacklist_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") as bl ON bl.track_id = a.tid
+	ORDER BY a.track_artist
+	');
+  
 	$rows = mysqli_num_rows($query);
 	
 	if ($rows > 0) {
 		$match_found = true;
-		if ($group_found == 'none') $group_found = 'TA';
+		//if ($group_found == 'none') 
+    $group_found = 'TA';
 	?>
 	<h1 onclick='toggleSearchResults("TA");' class="pointer"><i id="iconSearchResultsTA" class="fa fa-chevron-circle-down icon-anchor"></i> Track artist (<?php if ($rows > 1) {
 				echo $rows . " matches found";
 			}
 			else {
-				$album = mysqli_fetch_assoc($query);
-				echo $rows . " match found: " . $album['track_artist'];
+				/* $album = mysqli_fetch_assoc($query);
+				echo $rows . " match found: " . $album['track_artist']; */
+				echo $rows . " match found";
 			}
 			?>)
 	</h1>
@@ -263,7 +285,7 @@ function track_artist() {
 	$i=0;
 	$TA_ids = '';
 	
-	$query = mysqli_query($db,'SELECT * FROM
+/* 	$query = mysqli_query($db,'SELECT * FROM
 	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist
 	FROM track
 	INNER JOIN album ON track.album_id = album.album_id
@@ -276,7 +298,7 @@ function track_artist() {
 	LEFT JOIN 
 	(SELECT track_id, favorite_id as blacklist_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") as bl ON bl.track_id = a.tid
 	ORDER BY a.track_artist
-	');
+	'); */
 	
 	while ($track = mysqli_fetch_assoc($query)) { 
 		$TA_ids = ($TA_ids == '' ? $track['tid'] : $TA_ids . ';' . $track['tid']);
@@ -405,6 +427,9 @@ function track_artist() {
 	
 	?>
 	<script>
+    if (<?php echo $rows; ?> < 11) {
+      toggleSearchResults("<?php echo $group_found; ?>");
+    }
 		$("#add_all_TA").click(function(){
 			
 			$.ajax({
@@ -443,7 +468,8 @@ function album_title() {
 	$rows = mysqli_num_rows($query);
 	if ($rows > 0) {
 		$match_found = true;
-		if ($group_found == 'none') $group_found = 'AT';
+		//if ($group_found == 'none') 
+    $group_found = 'AT';
 	?>
 	<h1 onclick='toggleSearchResults("AT");' class="pointer"><i id="iconSearchResultsAT" class="fa fa-chevron-circle-down icon-anchor"></i> Album title (<?php if ($rows > 1) {
 			echo $rows . " matches found";
@@ -469,6 +495,11 @@ function album_title() {
 	
 	?>
 	</div>
+  <script>
+    if (<?php echo $rows; ?> > 0) {
+      toggleSearchResults("<?php echo $group_found; ?>");
+    }
+  </script>
 	<?php
 	} 
 }
@@ -482,31 +513,36 @@ function album_title() {
 function track_title() {
 	global $cfg, $db, $size, $search_string, $group_found, $match_found;
 	
-	//$query = mysqli_query($db,'SELECT track.artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, album.image_id, album.album FROM track, album ' . $filter_query . ' ' . $order_query);
+/* 	$query = mysqli_query($db,'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, album.image_id, album.album, album.artist
+	FROM track
+	INNER JOIN album ON track.album_id = album.album_id
+	WHERE track.title LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"'); */
 
-	$query = mysqli_query($db,'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, album.image_id, album.album, album.artist
+	 $query = mysqli_query($db,'SELECT * FROM 
+	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist 
 	FROM track
 	INNER JOIN album ON track.album_id = album.album_id
-	WHERE track.title LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"');
+	WHERE track.title LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%") as a
+	LEFT JOIN 
+	(SELECT track_id, favorite_id FROM favoriteitem WHERE favorite_id = "' . $cfg['favorite_id'] . '") as b ON b.track_id = a.tid
+	LEFT JOIN 
+	(SELECT track_id, favorite_id as blacklist_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") as bl ON bl.track_id = a.tid
 	
-	
-	/* $query = mysqli_query($db,'SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, album.image_id, album.album, album.artist
-	FROM track
-	INNER JOIN album ON track.album_id = album.album_id
-	WHERE track.title LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
-	ORDER BY track.artist, track.title'); */
+	ORDER BY a.title, a.artist, a.album');
 	
 	$rows = mysqli_num_rows($query);
 	if ($rows > 0) {
 		$match_found = true;
-		if ($group_found == 'none')	$group_found = 'TT';
+		//if ($group_found == 'none')	
+    $group_found = 'TT';
 ?>
 <h1 onclick='toggleSearchResults("TT");' class="pointer"><i id="iconSearchResultsTT" class="fa fa-chevron-circle-down icon-anchor"></i> Track title (<?php if ($rows > 1) {
 			echo $rows . " matches found";
 		}
 		else {
-			$album = mysqli_fetch_assoc($query);
-			echo $rows . " match found: " . $album['track_artist'];
+			/* $album = mysqli_fetch_assoc($query);
+			echo $rows . " match found: " . $album['track_artist']; */
+			echo $rows . " match found  ";
 		}
 		?>)
 </h1>
@@ -534,7 +570,7 @@ function track_title() {
 <?php
 	$i=10000;
 	$TT_ids = ''; 
-	 $query = mysqli_query($db,'SELECT * FROM 
+/* 	 $query = mysqli_query($db,'SELECT * FROM 
 	(SELECT track.artist as track_artist, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist 
 	FROM track
 	INNER JOIN album ON track.album_id = album.album_id
@@ -544,7 +580,7 @@ function track_title() {
 	LEFT JOIN 
 	(SELECT track_id, favorite_id as blacklist_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") as bl ON bl.track_id = a.tid
 	
-	ORDER BY a.title, a.artist, a.album');
+	ORDER BY a.title, a.artist, a.album'); */
 	
 	while ($track = mysqli_fetch_assoc($query)) { 
 		$TT_ids = ($TT_ids == '' ? $track['tid'] : $TT_ids . ';' . $track['tid']);
@@ -658,6 +694,10 @@ function track_title() {
 	echo "</div>";
 ?>
 		<script>
+      if (<?php echo $rows; ?> < 11) {
+        toggleSearchResults("<?php echo $group_found; ?>");
+      }
+
 			$("#add_all_TT").click(function(){
 				$.ajax({
 					type: "GET",
@@ -687,25 +727,42 @@ function track_title() {
 function track_composer() {
 	global $cfg, $db, $size, $search_string, $group_found, $match_found;
 
-	$query = mysqli_query($db,'SELECT track.artist as track_artist, track.composer as track_composer, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, track.dr, album.image_id, album.album, album.artist
+/* 	$query = mysqli_query($db,'SELECT track.artist as track_artist, track.composer as track_composer, track.title, track.featuring, track.album_id, track.track_id, track.miliseconds, track.number, track.dr, album.image_id, album.album, album.artist
 	FROM track
 	INNER JOIN album ON track.album_id = album.album_id
 	WHERE track.composer LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
 	AND track.composer <> album.artist AND album.artist NOT LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%" 
-	GROUP BY track.composer');
+	GROUP BY track.composer'); */
 	
+  $query = mysqli_query($db,'SELECT * FROM
+	(SELECT track.artist as track_artist, track.composer as track_composer, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist
+	FROM track
+	INNER JOIN album ON track.album_id = album.album_id
+	WHERE track.composer LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
+	AND track.composer <> album.artist
+	AND album.artist NOT LIKE "%' . mysqli_real_escape_string($db,$search_string) . '%"
+	ORDER BY track.composer, album.album, track.title) as a
+	LEFT JOIN 
+	(SELECT track_id, favorite_id FROM favoriteitem WHERE favorite_id = "' . $cfg['favorite_id'] . '") as b ON b.track_id = a.tid
+	LEFT JOIN 
+	(SELECT track_id, favorite_id as blacklist_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") as bl ON bl.track_id = a.tid
+	ORDER BY a.track_composer
+	');
+  
 	$rows = mysqli_num_rows($query);
 	
 	if ($rows > 0) {
 		$match_found = true;
-		if ($group_found == 'none') $group_found = 'TC';
+		//if ($group_found == 'none') 
+    $group_found = 'TC';
 	?>
 	<h1 onclick='toggleSearchResults("TC");' class="pointer"><i id="iconSearchResultsTC" class="fa fa-chevron-circle-down icon-anchor"></i> Track composer (<?php if ($rows > 1) {
 				echo $rows . " matches found";
 			}
 			else {
-				$album = mysqli_fetch_assoc($query);
-				echo $rows . " match found: " . $album['track_composer'];
+				/* $album = mysqli_fetch_assoc($query);
+				echo $rows . " match found: " . $album['track_composer']; */
+				echo $rows . " match found";
 			}
 			?>)
 	</h1>
@@ -734,7 +791,7 @@ function track_composer() {
 	$i=20000;
 	$TC_ids = '';
 	
-	$query = mysqli_query($db,'SELECT * FROM
+/* 	$query = mysqli_query($db,'SELECT * FROM
 	(SELECT track.artist as track_artist, track.composer as track_composer, track.title, track.featuring, track.album_id, track.track_id as tid, track.miliseconds, track.number, track.relative_file, track.genre, track.dr, album.image_id, album.album, album.artist
 	FROM track
 	INNER JOIN album ON track.album_id = album.album_id
@@ -747,7 +804,7 @@ function track_composer() {
 	LEFT JOIN 
 	(SELECT track_id, favorite_id as blacklist_id FROM favoriteitem WHERE favorite_id = "' . $cfg['blacklist_id'] . '") as bl ON bl.track_id = a.tid
 	ORDER BY a.track_composer
-	');
+	'); */
 	$prevComp = '';
 	$currComp = '';
 	$k = 1;
@@ -901,7 +958,11 @@ function track_composer() {
 	
 	?>
 	<script>
-		$("#add_all_TC").click(function(){
+    if (<?php echo $rows; ?> < 11) {
+      toggleSearchResults("<?php echo $group_found; ?>");
+    }
+
+    $("#add_all_TC").click(function(){
 			$.ajax({
 				type: "GET",
 				url: "play.php",
@@ -937,17 +998,20 @@ function fav4genre($genre) {
 	$rows = mysqli_fetch_assoc($query); */
 	$favorite_id = $cfg['favorite_id'];
 	
-	
-	$query = mysqli_query($db,'SELECT track.track_id
+	$sql = 'SELECT track.track_id
 	FROM track
 	LEFT JOIN favoriteitem on track.track_id = favoriteitem.track_id
-	WHERE favoriteitem.favorite_id=' . mysqli_real_escape_string($db,$favorite_id) . ' AND track.genre = "' . mysqli_real_escape_string($db,$genre) . '"');
+	WHERE favoriteitem.favorite_id=' . mysqli_real_escape_string($db,$favorite_id) . ' AND track.genre = "' . mysqli_real_escape_string($db,$genre) . '"';
+  
+	$query = mysqli_query($db,$sql);
 	
 	$rows = mysqli_num_rows($query);
 	
+  
 	if ($rows > 0) {
 		$match_found = true;
-		if ($group_found == 'none')	$group_found = 'TT';
+		//if ($group_found == 'none')	
+    $group_found = 'TT';
 ?>
 <!--
 <h1 onclick='toggleSearchResults("TT");' class="pointer"><i id="iconSearchResultsTT" class="fa fa-chevron-circle-down icon-anchor"></i> Track title (<?php if ($rows > 1) {
@@ -960,6 +1024,7 @@ function fav4genre($genre) {
 		?>)
 </h1>
 -->
+
 <div id="searchResultsTT">
 <table cellspacing="0" cellpadding="0" class="border">
 <tr class="header">
@@ -998,6 +1063,8 @@ function fav4genre($genre) {
 	
 	ORDER BY a.artist, a.album, a.title');
 	
+  
+  
 	while ($track = mysqli_fetch_assoc($query)) { 
 		$TT_ids = ($TT_ids == '' ? $track['tid'] : $TT_ids . ';' . $track['tid']);
 	?>

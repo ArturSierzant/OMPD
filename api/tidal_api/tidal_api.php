@@ -363,7 +363,13 @@ class TidalAPI {
 
   function getByApiPath($limit, $offset, $apiPath) {
     if ($limit > 50) $limit = 50; //Tidal API limitation
-    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . $apiPath ."?locale=en_US&deviceType=BROWSER&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
+    if (strpos($apiPath,'?') !== false) {
+      $prefix = '&';
+    }
+    else {
+      $prefix = '?';
+    }
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . $apiPath . $prefix . "locale=en_US&deviceType=BROWSER&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
     return $this->request();
   }
 

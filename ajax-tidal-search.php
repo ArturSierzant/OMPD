@@ -43,9 +43,9 @@ elseif ($search == 'artists') {
 elseif ($search == 'all') {
 	showAllFromTidal($searchStr, $size);
 }
-elseif ($search == 'bio') {
+/* elseif ($search == 'bio') {
 	showArtistBioJson($searchStr, $size, $artistId);
-}
+} */
 elseif ($search == 'topTracks') {
 	$searchStr = moveTheToBegining($searchStr);
 	showTopTracksFromTidal($searchStr, $artistId);

@@ -568,7 +568,7 @@ for ($i=0; $i < $listlength; $i++) {
 
 <script type="text/javascript">
 <!--
-
+//window.alert = function () {};
 var previous_hash			= '<?php echo $hash; ?>';
 var previous_listpos		= <?php echo $listpos; ?>;
 var previous_isplaying		= -1; // force update
@@ -999,6 +999,7 @@ function evaluateLyrics(data) {
 
 
 function evaluateTrackVersion(data) {
+  
   $('#title1_wait_indicator').hide();
   $('#title_wait_indicator').hide();
 

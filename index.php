@@ -2081,7 +2081,7 @@ if ($conn === true){
   
   $nav['name'][] = $results['title'] . ':';
   require_once('include/header.inc.php');
-  echo ('<h1>' . $results['title'] .'</h1>');
+  echo ('<h1>&nbsp;' . $results['title'] .'</h1>');
   if ($tileSizePHP) $size = $tileSizePHP;
   
   if ($results['rows']){
@@ -2110,7 +2110,7 @@ if ($conn === true){
         if (!$albums['cover']) {
           $albums['cover'] = $t->albumCoverToURL($res['image'],'');
         }
-        $albums['artist_alphabetic'] = getTidalPlaylistCreator($res);;
+        $albums['artist_alphabetic'] = getTidalPlaylistCreator($res);
         draw_Tidal_tile ( $size, $albums, '', 'echo', $albums['cover'],"playlist");
       }
       $cfg['items_count'] = $results['totalNumberOfItems'];
@@ -2124,6 +2124,21 @@ if ($conn === true){
         $albums['cover'] = getTidalMixlistPicture($res, 'fromMixlist');
         $albums['artist_alphabetic'] = ($res['subTitle']);
         draw_Tidal_tile ( $size, $albums, '', 'echo', $albums['cover'],"mixlist");
+      }
+      $cfg['items_count'] = $results['totalNumberOfItems'];
+    }
+    elseif ($type == 'mixed_types_list'){
+      echo '<div class="albums_container">';
+      foreach($results['rows'][0]['modules'][0]['pagedList']['items'] as $res) {
+        $albums = array();
+        $albums['album_id'] = 'tidal_' . $res['item']['uuid'];
+        $albums['album'] = $res['item']['title'];
+        $albums['cover'] = $t->albumCoverToURL($res['item']['squareImage'],'lq');
+        if (!$albums['cover']) {
+          $albums['cover'] = $t->albumCoverToURL($res['item']['image'],'');
+        }
+        $albums['artist_alphabetic'] = getTidalPlaylistCreator($res['item']);
+        draw_Tidal_tile ( $size, $albums, '', 'echo', $albums['cover'],"playlist");
       }
       $cfg['items_count'] = $results['totalNumberOfItems'];
     }

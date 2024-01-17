@@ -478,6 +478,9 @@ i:active {
   padding: 0 1px 0 0;
   text-align: justify;
 }
+#playedHistory {
+  text-align: left;
+}
 #back-ground-wrapper {
   display: none;
   position: fixed;

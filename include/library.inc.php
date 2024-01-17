@@ -725,6 +725,115 @@ function logoutTidal() {
 //  +------------------------------------------------------------------------+
 function showAlbumsFromTidal($artist, $size, $ajax, $tidalArtistId) {
 	global $cfg, $db, $t;
+  $conn = $t->connect();
+		
+		if ($conn === true){
+			if ($tidalArtistId) {
+				$results = $t->getArtistAlbums($tidalArtistId,999);
+				$resultsEPs = $t->getArtistEPsAndSingles($tidalArtistId,999);
+			}
+			elseif ($artist) {
+				$artist = tidalEscapeChar(strtolower($artist));
+				$results = $t->search("artists",$artist);
+				if (count($results) == 0) {
+					if ($ajax) {
+						$data['results'] = 0;
+						echo safe_json_encode($data);
+						return;
+					}
+					else {
+						echo "No results found on TIDAL.";
+						return;
+					}
+				}
+				else {
+					foreach($results["items"] as $res) {
+						if (tidalEscapeChar(strtolower($res["name"])) == $artist) {
+							$tidalArtistId = $res["id"];
+							break;
+						}
+					}
+					$results = $t->getArtistAlbums($tidalArtistId,999);
+					$resultsEPs = $t->getArtistEPsAndSingles($tidalArtistId,999);
+				}
+			}
+		}
+		else {
+			$data['return'] = $conn["return"];
+			$data['response'] = $conn["error"];
+			echo safe_json_encode($data);
+			return;
+		}
+    
+		if ($results['totalNumberOfItems'] === 0 && $resultsEPs['totalNumberOfItems'] === 0) {
+			if ($ajax) {
+				$data['results'] = 0;
+				echo safe_json_encode($data);
+				return;
+			}
+			else {
+				echo "No results found on TIDAL.";
+				return;
+			}
+		}
+
+		if ($results['items'] || $resultsEPs['items']) {
+
+			for($i=0;$i<2;$i++) {
+				if ($i == 0) {
+					$albums = $results['items'];
+					$albums = array_reverse($albums);
+				}
+				else {
+					if($albums = $resultsEPs['items']){;
+            $albums = array_reverse($albums);
+						echo ('<h1>EPs and Singles</h1>');
+					}
+				}
+				/* usort($albums, function ($a, $b) {
+					return $a['releaseDate'] <=> $b['releaseDate'];
+				}); */
+				foreach ($albums as $album) {
+					
+					$artists = '';
+					foreach ($album["artists"] as $a){
+						if ($artists == ''){
+							$artists = $a["name"];
+						}
+						else {
+							$artists = $artists . " & " . $a["name"];
+						}
+					}
+					if ($artists == '') $artists = $album["artist"]["name"];
+					
+					$tidalAlbum["album_id"] = 'tidal_' . $album["id"];
+					$tidalAlbum["album"] = $album["title"];
+					$tidalAlbum["artist_alphabetic"] = $artists;
+					$tidalAlbum["audio_quality"] = $album["audioQuality"];
+					draw_tile($size, $tidalAlbum);
+				}
+			}
+		}
+		else {
+			if ($ajax) {
+				$data['results'] = 0;
+				echo safe_json_encode($data);
+				return;
+			}
+			else {
+				echo "No results found on TIDAL.";
+				return;
+			}
+		}  
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Albums from Tidal                                                      |
+//  +------------------------------------------------------------------------+
+function showAlbumsFromTidal_old($artist, $size, $ajax, $tidalArtistId) {
+	global $cfg, $db, $t;
 	//echo $artist;
 	//$artist = tidalEscapeChar($artist);
 	//$artist = replaceAnds($artist);
@@ -1015,7 +1124,7 @@ function getTrackAlbumFromTidal($track_id) {
 //  +------------------------------------------------------------------------+
 //  | Artist biography from Tidal                                            |
 //  +------------------------------------------------------------------------+
-function showArtistBioJson($artist_name, $size, $artistId) {
+function showArtistBioJson_DEL($artist_name, $size, $artistId) {
 	global $cfg, $db, $t;
 	$artist_name = moveTheToBegining($artist_name);
 	$data = array();
@@ -1102,7 +1211,7 @@ function artistBio($artistAll) {
   global $cfg, $db, $t;
   
   foreach ($artistAll['rows'] as $row) {
-    if ($row['modules'][0]['bio']) {
+    if ($row['modules'][0]['bio']['text']) {
       return formatBio($row['modules'][0]['bio']);
     }
   }
@@ -1128,6 +1237,22 @@ function relatedArtists($artistAll) {
 
 
 //  +------------------------------------------------------------------------+
+//  | Influencers from Tidal                                                 |
+//  +------------------------------------------------------------------------+
+function artistInfluencers($artistAll) {
+  global $cfg, $db, $t;
+
+  foreach ($artistAll['rows'] as $row) {
+    if (strtolower($row['modules'][0]['title']) == 'influencers') {
+      return $row['modules'][0]['pagedList']['items'];
+    }
+  }
+  return false;
+}
+
+
+
+//  +------------------------------------------------------------------------+
 //  | Artist playlists from Tidal                                            |
 //  +------------------------------------------------------------------------+
 function artistPlaylists($artistAll) {
@@ -1135,6 +1260,38 @@ function artistPlaylists($artistAll) {
 
   foreach ($artistAll['rows'] as $row) {
     if (strtolower($row['modules'][0]['title']) == 'playlists') {
+      return $row['modules'][0];
+    }
+  }
+  return false;
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Artist mixes from Tidal                                                |
+//  +------------------------------------------------------------------------+
+function artistMixes($artistAll) {
+  global $cfg, $db, $t;
+
+  foreach ($artistAll['rows'] as $row) {
+    if (strtolower($row['modules'][0]['title']) == 'contributor mixes') {
+      return $row['modules'][0];
+    }
+  }
+  return false;
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Artist appears on from Tidal                                           |
+//  +------------------------------------------------------------------------+
+function artistAppearsOn($artistAll) {
+  global $cfg, $db, $t;
+
+  foreach ($artistAll['rows'] as $row) {
+    if (strtolower($row['modules'][0]['title']) == 'appears on') {
       return $row['modules'][0];
     }
   }

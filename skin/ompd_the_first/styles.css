@@ -348,6 +348,8 @@ i:active {
 @media all and (min-width: 1281px) {
   td.side-margin {width: 0px;}
 }
+
+
 @media only screen and (min--moz-device-pixel-ratio: 2), only screen and (-o-min-device-pixel-ratio: 2/1), only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2) {
   
 }
@@ -484,6 +486,10 @@ i:active {
 #additional-info {
   clear: left; 
   text-align: justify;
+}
+
+#playedHistory {
+  text-align: left;
 }
 
 #back-ground-wrapper {
