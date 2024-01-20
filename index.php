@@ -2111,7 +2111,8 @@ if ($conn === true){
           $albums['cover'] = $t->albumCoverToURL($res['image'],'');
         }
         $albums['artist_alphabetic'] = getTidalPlaylistCreator($res);
-        draw_Tidal_tile ( $size, $albums, '', 'echo', $albums['cover'],"playlist");
+        //draw_Tidal_tile ( $size, $albums, '', 'echo', $albums['cover'],"playlist");
+        draw_tile ( $size, $albums, '', 'echo', $albums['cover'],"playlist");
       }
       $cfg['items_count'] = $results['totalNumberOfItems'];
     }
@@ -2123,7 +2124,8 @@ if ($conn === true){
         $albums['album'] = $res['title'];
         $albums['cover'] = getTidalMixlistPicture($res, 'fromMixlist');
         $albums['artist_alphabetic'] = ($res['subTitle']);
-        draw_Tidal_tile ( $size, $albums, '', 'echo', $albums['cover'],"mixlist");
+        //draw_Tidal_tile ( $size, $albums, '', 'echo', $albums['cover'],"mixlist");
+        draw_tile ( $size, $albums, '', 'echo', $albums['cover'],"mixlist");
       }
       $cfg['items_count'] = $results['totalNumberOfItems'];
     }
@@ -2138,7 +2140,8 @@ if ($conn === true){
           $albums['cover'] = $t->albumCoverToURL($res['item']['image'],'');
         }
         $albums['artist_alphabetic'] = getTidalPlaylistCreator($res['item']);
-        draw_Tidal_tile ( $size, $albums, '', 'echo', $albums['cover'],"playlist");
+        //draw_Tidal_tile ( $size, $albums, '', 'echo', $albums['cover'],"playlist");
+        draw_tile ( $size, $albums, '', 'echo', $albums['cover'],"playlist");
       }
       $cfg['items_count'] = $results['totalNumberOfItems'];
     }
@@ -2850,6 +2853,7 @@ function viewRecentlyPlayed() {
 	$prevDate = '';
 	$currDate = '';
 	foreach (array_slice($album_multidisc,($page - 1) * $max_item_per_page,$max_item_per_page) as $album_m) {
+    $tidalType = '';
     $a_id = $album_m['album_id'];
     if (isTidal($a_id) && !$cfg['use_tidal']) {
       continue;
@@ -2871,11 +2875,18 @@ function viewRecentlyPlayed() {
 			if (isTidal($a_id)){
 				$query1 = mysqli_query($db, "SELECT album, cover, artist_alphabetic, audio_quality FROM tidal_album 
 				WHERE album_id='" . getTidalId($a_id) . "' LIMIT 1");
-				$a = mysqli_fetch_assoc ( $query1 );
-				$albums['album'] = $a['album'];
-				$tidal_cover = $a['cover'];
-				$albums['artist_alphabetic'] = $a['artist_alphabetic'];
-				$albums['audio_quality'] = $a['audio_quality'];
+        if (mysqli_num_rows($query1)>0){
+          $a = mysqli_fetch_assoc($query1);
+        }
+        else {
+          $a = getTidalPlaylistBasicInfo($a_id);
+          $tidalType = $a['type'];
+          //$a['album']= $a_id;
+        }
+        $albums['album'] = $a['album'];
+        $tidal_cover = $a['cover'];
+        $albums['artist_alphabetic'] = $a['artist_alphabetic'];
+        $albums['audio_quality'] = $a['audio_quality'];
 			}
 			elseif (isHra($a_id)){
 				if (!$hra_session) {
@@ -2922,7 +2933,7 @@ function viewRecentlyPlayed() {
 						'cover' => $albums['cover'],
 						'audio_quality' => $albums['audio_quality']
 						);
-				draw_tile($size,$album_multidisc_1[$a_id],'allDiscs', 'echo', $tidal_cover);
+				draw_tile($size,$album_multidisc_1[$a_id],'allDiscs', 'echo', $tidal_cover, $tidalType);
 			}
 		
 		
@@ -3053,6 +3064,7 @@ function viewPlayedAtDay() {
 	$prevDate = '';
 	$currDate = '';
 	foreach (array_slice($album_multidisc,($page - 1) * $max_item_per_page,$max_item_per_page) as $album_m) {
+    $tidalType = '';
 		$ts = $album_m['played_time'];
 		$currDate = date('Y.m.d', $ts);
 		//$start = mktime(0,0,0,$m,$d,$y);
@@ -3065,10 +3077,16 @@ function viewPlayedAtDay() {
 			$a_id = $album_m['album_id'];
 			$albums['album_id'] = $a_id;
 			$tidal_cover = '';
-			if (isTidal($a_id)){
-				$query1 = mysqli_query($db, "SELECT album, cover, artist_alphabetic FROM tidal_album 
+			if (isTidal($a_id)) {
+				$query1 = mysqli_query($db, "SELECT album, cover, artist_alphabetic, audio_quality FROM tidal_album 
 				WHERE album_id='" . getTidalId($a_id) . "' LIMIT 1");
-				$a = mysqli_fetch_assoc ( $query1 );
+        if (mysqli_num_rows($query1)>0){
+          $a = mysqli_fetch_assoc($query1);
+        }
+        else {
+          $a = getTidalPlaylistBasicInfo($a_id);
+          $tidalType = $a['type'];
+        }
 				$albums['album'] = $a['album'];
 				$tidal_cover = $a['cover'];
 				$albums['artist_alphabetic'] = $a['artist_alphabetic'];
@@ -3114,7 +3132,7 @@ function viewPlayedAtDay() {
 						'artist_alphabetic' => $albums['artist_alphabetic'],
 						'cover' => $albums['cover']
 						);
-				draw_tile($size,$album_multidisc_1[$a_id],'allDiscs', 'echo', $tidal_cover);
+				draw_tile($size,$album_multidisc_1[$a_id],'allDiscs', 'echo', $tidal_cover, $tidalType);
 			}
 		
 		

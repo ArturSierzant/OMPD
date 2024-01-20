@@ -95,7 +95,8 @@ foreach($hp['rows'] as $key => $row){
       $albums['album'] = $res['title'];
       $albums['cover'] = $res['images']['SMALL']['url'];
       $albums['artist_alphabetic'] = $res['subTitle'];
-      draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $res['images']['SMALL']['url'], "mixlist");
+      //draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $res['images']['SMALL']['url'], "mixlist");
+      draw_tile ( $tileSize, $albums, '', 'echo', $res['images']['SMALL']['url'], "mixlist");
     }
     echo '</div>';
   } //MIX_LIST
@@ -114,7 +115,8 @@ foreach($hp['rows'] as $key => $row){
         $albums['cover'] = $t->albumCoverToURL($res['image'],'');
       }
       $albums['artist_alphabetic'] = getTidalPlaylistCreator($res);
-      draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $albums['cover'],"playlist");
+      //draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $albums['cover'],"playlist");
+      draw_tile ( $tileSize, $albums, '', 'echo', $albums['cover'],"playlist");
     }
     echo '</div>';
   } //PLAYLIST_LIST

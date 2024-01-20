@@ -182,7 +182,8 @@ function prev_() {
 	mpd('previous'); */
   if ($status['song'] > 0) {
     mpd('stop');
-    mpd('play ' . $status['song'] - 1);
+    //mpd('play ' . $status['song'] - 1);
+    mpd('previous');
   }
 	if (get('menu') == 'playlist') {
 		$status = mpd('status');
@@ -231,7 +232,8 @@ function next_() {
   
   if ($status['song'] < $status['playlistlength'] - 1) {
     mpd('stop');
-    mpd('play ' . $status['song'] + 1);
+    //mpd('play ' . $status['song'] + 1);
+    mpd('next');
   }
   
 	if (get('menu') == 'playlist') {
@@ -401,6 +403,13 @@ function playTidalList() {
 	}
 	$data['playResult'] = $playResult;
 	$data['tidal_id'] = $tidal_id;
+	//$data['album_id'] = 'tidal_' . $tidal_id;
+  if (strpos($tidal_id,'tidal_') !== false){
+    $data['album_id'] = $tidal_id;
+  } 
+  else {
+    $data['album_id'] = 'tidal_' . $tidal_id;
+  }
 	ob_start();
 	echo safe_json_encode($data);
 	header('Connection: close');
@@ -436,7 +445,13 @@ function addTidalList() {
 	}
 	$data['addResult'] = $playResult;
 	$data['tidal_id'] = $tidal_id;
-	ob_start();
+	if (strpos($tidal_id,'tidal_') !== false){
+    $data['album_id'] = $tidal_id;
+  } 
+  else {
+    $data['album_id'] = 'tidal_' . $tidal_id;
+  }
+  ob_start();
 	echo safe_json_encode($data);
 	header('Connection: close');
 	header('Content-Length: ' . ob_get_length());
@@ -471,6 +486,10 @@ function loadTidalPlaylist($tidal_id, $type = 'playlist') {
 				cliLog("loadTidalPlaylist id: " . $id);
 				cliLog("loadTidalPlaylist: " . $playResult);
 		}
+	}
+  
+  if (strpos((string)$playResult,'ACK') === false) {
+    updateCounter('tidal_' . $type . '_' . $tidal_id, NJB_COUNTER_PLAY);
 	}
 	return $playResult;
 }
@@ -771,7 +790,6 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	//only whole albums, not single tracks from e.g. search results
 	elseif ($album_id && !isTidal($track_id) && !isHra($track_id)) {
 		if (isTidal($album_id)) {
-			//$tidal_album_id = str_replace("tidal_","",$album_id);
 			$tidal_album_id = getTidalId($album_id);
 			if ($insertType == 'album' && $insPos > 0) {
 				$tidal_tracks = getTracksFromTidalAlbum($tidal_album_id, 'DESC');
@@ -2490,7 +2508,13 @@ function updateAddPlay() {
 	$album_id = get('album_id');
 	$data = array();
   
-  $query = mysqli_query($db,'SELECT COUNT(album_id) as counter, max(time) as time FROM counter WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '"');
+  $where = 'WHERE album_id = "' . mysqli_real_escape_string($db,$album_id) . '"';
+  
+  if (isTidal($album_id)) {
+    $where = 'WHERE album_id LIKE "tidal_%' . mysqli_real_escape_string($db,getTidalId($album_id)) . '"';
+  }
+  
+  $query = mysqli_query($db,'SELECT COUNT(album_id) as counter, max(time) as time FROM counter ' . $where);
 	$played = mysqli_fetch_assoc($query);
 	
 	$query = mysqli_query($db,'SELECT artist, artist_alphabetic, album, image_id, album.album_id, COUNT(*) AS counter

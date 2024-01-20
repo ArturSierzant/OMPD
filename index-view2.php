@@ -1720,7 +1720,8 @@ if ($cfg['use_tidal'] && $filter == 'whole' && $mixes) {
       $albums['album'] = $res['title'];
       $albums['cover'] = $res['images']['SMALL']['url'];
       $albums['artist_alphabetic'] = $res['subTitle'];
-      draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $res['images']['SMALL']['url'], "mixlist");
+      //draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $res['images']['SMALL']['url'], "mixlist");
+      draw_tile ( $tileSize, $albums, '', 'echo', $res['images']['SMALL']['url'], "mixlist");
     }
 ?>
 </div>
@@ -1747,7 +1748,8 @@ if ($cfg['use_tidal'] && $filter == 'whole' && $playlists) {
         $albums['cover'] = $t->albumCoverToURL($res['item']['image'],"");
       }
       $albums['artist_alphabetic'] = getTidalPlaylistCreator($res['item']);
-      draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $albums['cover'],"playlist");
+      //draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $albums['cover'],"playlist");
+      draw_tile ( $tileSize, $albums, '', 'echo', $albums['cover'],"playlist");
     }
 ?>
 </div>
@@ -1853,7 +1855,7 @@ if ($cfg['use_tidal'] && $filter == 'whole' && $links) {
 <div class="artist_bio_text lh3">
 <?php
     foreach($links['socialLinks'] as $res) {
-      echo '<span class=""><a target="_BLANK" href="' . $res["url"] . '">' . $res['type'] . '</a></span>&nbsp;&nbsp;|&nbsp;&nbsp;';
+      echo '<span class=""><a target="_BLANK" href="' . $res["url"] . '">' . $res['type'] . '</a></span>&nbsp;&nbsp; | &nbsp;&nbsp;';
     }
 ?>
 </div>

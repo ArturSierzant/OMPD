@@ -29,10 +29,14 @@ $user_id = $_POST["user_id"];
 authenticate('access_media');
 
 
+if (!$cfg['use_tidal']) { //in case one stopped Tidal subscription
+  $noTidal = " AND album_id NOT LIKE 'tidal_%' ";
+}
+
 $query_string = "
   SELECT * FROM
   (SELECT album_id, time FROM counter
-  WHERE user_id = $user_id
+  WHERE user_id = $user_id $noTidal
   ORDER BY time DESC
   LIMIT 20) c
   GROUP BY c.album_id
@@ -50,18 +54,23 @@ while ( $album = mysqli_fetch_assoc ($query)) {
 	$a_id = $album['album_id'];
 	$albums['album_id'] = $a_id;
 	$tidal_cover = '';
+  $tidalType = '';
+  
 	if (isTidal($a_id)){
-    if (!$cfg['use_tidal']) { //in case one stopped Tidal subscription
-      $albums = null;
-      continue;
-    }
 		$query1 = mysqli_query($db, "SELECT album, cover, artist_alphabetic, audio_quality FROM tidal_album 
 		WHERE album_id='" . getTidalId($a_id) . "' LIMIT 1");
-		$a = mysqli_fetch_assoc ( $query1 );
-		$albums['album'] = $a['album'];
-		$tidal_cover = $a['cover'];
-		$albums['artist_alphabetic'] = $a['artist_alphabetic'];
-		$albums['audio_quality'] = $a['audio_quality'];
+    $rows = mysqli_num_rows($query1);
+    if ($rows > 0) {
+      $a = mysqli_fetch_assoc ( $query1 );
+    }
+    else {
+      $a = getTidalPlaylistBasicInfo($a_id);
+      $tidalType = $a['type'];
+    }
+    $albums['album'] = $a['album'];
+    $tidal_cover = $a['cover'];
+    $albums['artist_alphabetic'] = $a['artist_alphabetic'];
+    $albums['audio_quality'] = $a['audio_quality'];
 	}
 	elseif (isHra($a_id)){
 		if (!$hra_session) {
@@ -100,7 +109,7 @@ while ( $album = mysqli_fetch_assoc ($query)) {
 		$albums['artist_alphabetic'] = $a['artist_alphabetic'];
 	}
 	if ($albums) {
-    draw_tile ( $size, $albums, '', 'echo', $tidal_cover );
+    draw_tile ($size, $albums, '', 'echo', $tidal_cover, $tidalType);
   }
 }
 if ($c == 0) {

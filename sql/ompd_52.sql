@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS `cache` (
 
 CREATE TABLE IF NOT EXISTS `counter` (
   `sid` varchar(40) NOT NULL DEFAULT '',
-  `album_id` varchar(50) NOT NULL DEFAULT '',
+  `album_id` varchar(100) NOT NULL DEFAULT '',
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
   `flag` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `time` int(10) unsigned NOT NULL DEFAULT '0',
