@@ -262,6 +262,7 @@ $cfg['use_hra'] = false;
 if ($cfg['hra_username'] && $cfg['hra_password']) {
   $cfg['use_hra'] = true;
 }
+//$cfg['use_hra'] = true;
 
 
 //  +------------------------------------------------------------------------+

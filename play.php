@@ -181,9 +181,11 @@ function prev_() {
 	}
 	mpd('previous'); */
   if ($status['song'] > 0) {
-    mpd('stop');
-    //mpd('play ' . $status['song'] - 1);
+    if ($status['state'] == 'stop') {
+      mpd('play');
+    }
     mpd('previous');
+    //mpd('play ' . $status['song'] - 1);
   }
 	if (get('menu') == 'playlist') {
 		$status = mpd('status');
@@ -231,9 +233,11 @@ function next_() {
 	mpd('next'); */
   
   if ($status['song'] < $status['playlistlength'] - 1) {
-    mpd('stop');
-    //mpd('play ' . $status['song'] + 1);
+    if ($status['state'] == 'stop') {
+      mpd('play');
+    }
     mpd('next');
+    //mpd('play ' . $status['song'] + 1);
   }
   
 	if (get('menu') == 'playlist') {
@@ -764,6 +768,9 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 			}
 			//track not added to DB yet (e.g. result of search)
 			if (mysqli_num_rows($query) == 0) {
+        if (!isset($album_id)) {
+          $album_id = getTrackAlbumFromTidal(getTidalId($track_id));
+        }
 				$tidal_tracks_tmp = getTracksFromTidalAlbum(getTidalId($album_id));
 				if ($cfg['tidal_direct']) {
 					$query = mysqli_query($db,'SELECT CONCAT("' . mysqli_real_escape_string($db,NJB_HOME_URL) . 'stream.php?action=streamTidal&track_id=", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');

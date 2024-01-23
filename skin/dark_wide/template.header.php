@@ -614,7 +614,7 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id, player_h
 <div>
 <table cellspacing="0" cellpadding="0" class="menu_top">
 <tr>
-	<td class="menu_top_left"><div class="mpd_title pointer" onclick="javascript: window.location.href='http://ompd.pl'"><span id="logo1">O!</span><span id="logo2">MPD</span></div></td>
+	<td class="menu_top_left"><div class="mpd_title pointer" onclick="javascript: window.open('https://ompd.pl','_blank').focus();"><span id="logo1">O!</span><span id="logo2">MPD</span></div></td>
 	<td class="menu_top<?php echo ($cfg['menu'] == 'Library') ? ' menu_top_selected' : ''; ?>" onclick="javascript: window.location.href='index.php';"><p>&nbsp;library</p></td>
 	<td class="menu_top<?php echo ($cfg['menu'] == 'playlist') ? ' menu_top_selected' : ''; ?>" onclick="javascript: window.location.href='playlist.php';">&nbsp;now playing</td>
 	<td class="menu_top<?php echo ($cfg['menu'] == 'favorite') ? ' menu_top_selected' : ''; ?>" onclick="javascript: window.location.href='favorite.php';">&nbsp;favorites</td>
@@ -734,7 +734,24 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id, player_h
 
 
 
-<span id="menuMiddleMedia">
+<div id="menuMiddleMedia">
+
+<?php 
+if ($cfg['use_tidal']) { 
+?>
+  <a href="index.php?action=viewTidal">Tidal</a>
+<?php
+  echo $header['seperation'];
+}
+
+if ($cfg['use_hra']) { 
+?>
+  <a href="index.php?action=viewHRA">HRA</a>
+<?php
+  echo $header['seperation'];
+}
+?>
+
 <span id="list" onclick='toggleSubMiddle("Alpha");'>artist <i id="iconmenuSubMiddleMediaAlpha" class="fa fa-chevron-circle-down"></i></span>
 
 <?php echo $header['seperation']; ?>
@@ -759,7 +776,7 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id, player_h
 	echo $header['menu'];
 ?>
 
-</span>
+</div>
 
 
 
@@ -836,7 +853,7 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id, player_h
 	}
 	else if ($cfg['menu'] == 'playlist') {
 	?>
-	<span id="menuMiddleMedia">
+	<div id="menuMiddleMedia">
 	<a id="deletePlayed" class="pointer noselect">delete played</a>
 	<!-- <a id="deletePlayed" href="javascript:ajaxRequest('play.php?action=deletePlayed&amp;menu=playlist');">delete played</a> --> 
 <?php
@@ -860,7 +877,7 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id, player_h
 	<span id="addUrl" onclick='toggleSubMiddle("AddUrl");'>add <i id="iconmenuSubMiddleMediaAddUrl" class="fa fa-chevron-circle-down"></i></span>
 	<?php echo $header['seperation']; ?>
 	<span id="savePlaylist" onclick='toggleSubMiddle("SavePlaylist");'>save <i id="iconmenuSubMiddleMediaSavePlaylist" class="fa fa-chevron-circle-down"></i></span>
-	</span>
+	</div>
 	
 	<div id="menuSubMiddleMediaAddUrl">
 		<div>

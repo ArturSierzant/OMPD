@@ -1113,13 +1113,7 @@ function getTrackAlbumFromTidal($track_id) {
 	global $cfg, $db, $t;
 
 	$data = array();
-	
-  //$t = tidal();
-	/* $t = new TidalAPI;
-	$t->username = $cfg["tidal_username"];
-	$t->password = $cfg["tidal_password"];
-	$t->token = $cfg["tidal_token"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate(); */
+
 	$conn = $t->connect();
 	if ($conn === true){
 		$results = $t->getTrack($track_id);

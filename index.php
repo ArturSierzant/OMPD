@@ -2880,8 +2880,12 @@ function viewRecentlyPlayed() {
         }
         else {
           $a = getTidalPlaylistBasicInfo($a_id);
-          $tidalType = $a['type'];
-          //$a['album']= $a_id;
+          if ($a) {
+            $tidalType = $a['type'];
+          }
+          else { //ommit not existing play/mixlist
+            continue;
+          }
         }
         $albums['album'] = $a['album'];
         $tidal_cover = $a['cover'];
@@ -3085,7 +3089,12 @@ function viewPlayedAtDay() {
         }
         else {
           $a = getTidalPlaylistBasicInfo($a_id);
-          $tidalType = $a['type'];
+          if ($a) {
+            $tidalType = $a['type'];
+          }
+          else { //ommit not existing play/mixlist
+            continue;
+          }
         }
 				$albums['album'] = $a['album'];
 				$tidal_cover = $a['cover'];

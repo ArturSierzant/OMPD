@@ -1,5 +1,5 @@
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2020 Artur Sierzant                            |
+//  | O!MPD, Copyright Â© 2015-2020 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -384,16 +384,22 @@ function resizeSuggested($tileSize,$containerWidth) {
     $('.full').css('height', function() { return ($tileSize + 1); });
 	}
   $('.full').css('width', function() { 
-	return ($tileCount * $tileSize + (($tileCount - 1) * 1) + 'px'); 
+    return ($tileCount * $tileSize + (($tileCount - 1) * 1) + 'px'); 
+	}); 
+  
+  $('#menuMiddleMedia').css('width', function() { 
+    return ($tileCount * $tileSize + (($tileCount - 1) * 1) - 8 + 'px'); 
 	});
+  
   $("#suggested_artists_for_you").css("height","auto");
 }
 
 function resizeUsersTab($tileSize,$containerWidth) {
 	$('#usersTab').css('width', function() { 
-	return ($tileCount * $tileSize + (($tileCount - 1) * 2) + 'px'); 
+    return ($tileCount * $tileSize + (($tileCount - 1) * 2) + 'px'); 
 	});
 }
+
 
 function resizeFormSettings(containerWidth, myCodeMirror) {
 		if (containerWidth > 1280) {containerWidth = 1280};
@@ -420,7 +426,7 @@ function resizeImgContainer() {
 		$("#file-info-mini").css("max-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));
 		$("#media_control_mini").css("display","table-cell");
 	}
-	
+  
 	//prevent resizing when virtual keybord is visible on mobile devices 
 	//if ($("#savePlaylistAsName").is(":focus") || $("#savePlaylistComment").is(":focus") || $("#addUrlAddress").is(":focus")) 
 	if ($("input").is(":focus")) 

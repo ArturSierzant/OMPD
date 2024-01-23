@@ -38,7 +38,7 @@ if (isset($cfg['footer']) && $cfg['footer'] == 'close') {
 }
 
 $footer = ($cfg['username'] != '') ? '| <a href="index.php?authenticate=logout">Logout: ' . html($cfg['username']) . '</a> ' : '';
-$footer .= '| <a href="about.php">O!MPD ' . html(NJB_VERSION) . '</a> ';
+$footer .= '| <a href="about.php">About O!MPD ' . html(NJB_VERSION) . '</a> ';
 $footer .= '| Script execution time: <span id="execution_time">' . executionTime() . '</span> |';
 require_once(NJB_HOME_DIR . 'skin/' . $cfg['skin'] . '/template.footer.php');
 

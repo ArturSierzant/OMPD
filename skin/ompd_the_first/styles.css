@@ -789,12 +789,20 @@ td.menu_bottom_right			{width: 0.769em;}
   font-size: 1em;
 }
 
-
 #menuMiddleMedia {
   position: relative;
-  overflow: visible;
-  display: inline-block;
-  width: 100%;
+  width: 0px;
+  padding: 0.4em 0;
+  overflow-x: scroll;
+  white-space: nowrap;
+  /* Hide scrollbar for IE, Edge and Firefox */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+#menuMiddleMedia::-webkit-scrollbar {
+  display: none;
 }
 
 #menuMiddleMedia  > span {
@@ -1138,6 +1146,13 @@ div.playlist_status_on_border	{border: solid 1px rgb(77, 144, 254);}
 .pl-tdr {
   font-size: 1em;
   text-align: center;
+}
+
+.favoritePlaylistDescription {
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
 }
 
 .pl-file-info {

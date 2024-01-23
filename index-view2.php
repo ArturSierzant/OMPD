@@ -638,7 +638,7 @@ if ($cfg['use_tidal'] && $artist && $artist != 'All albums' && !in_array($artist
 
 <script>
 
-$('#tidalAlbums').click(function() {	
+//$('#tidalAlbums').click(function() {	
 <?php 
 //$artist = replaceAnds($artist);
 if ($tileSizePHP) {
@@ -700,7 +700,8 @@ request.always(function() {
 	
 });
 
-});
+//});
+
 <?php
 	$artist1 = replaceAnds($artist);
 	if (hasThe($artist1)){
@@ -718,11 +719,11 @@ request.always(function() {
 	}
 	$query = mysqli_query($db, $sql);
 	$res = mysqli_fetch_assoc($query);
-	if ($res['last_update_time'] > (time() - TIDAL_MAX_CACHE_TIME)) {
+/* 	if ($res['last_update_time'] > (time() - TIDAL_MAX_CACHE_TIME)) {
 ?>
 		$('#tidalAlbums').click();
 <?php
-	}
+	} */
 ?>
 
 $('#tidalTopTracks').click(function() {	

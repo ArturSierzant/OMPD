@@ -165,6 +165,8 @@ function about() {
 	<td>
 	<ul style="padding-left: 1em;">
 	<li> most of settings from config.inc.php moved to Config -> Settings</li>
+	<li> added support for more Tidal items (playlists, mixlists, podcasts)</li>
+	<li> added more items in artist view (when using Tidal)</li>
 	<li> fixed bugs</li>
 	</ul>
 	<br>
