@@ -34,9 +34,9 @@
 global $cfg, $db, $t;
 authenticate('access_media');
 $genre_id = get('genre_id');
-if ($genre_id)
+if ($genre_id) {
   genreNavigator($genre_id);
-
+}
 
 $title = get('title');
 $artist = $artistRequested = get('artist');
@@ -497,11 +497,12 @@ if ($cfg['use_tidal']) {
 <?php
   }
 }
-
+?>
+<!-- <div class="area"> -->
+<?php
 
 if ($cfg['use_tidal'] && $artist && !$qsType && !$tag && !in_array($artist,$cfg['VA']) && $filter == 'whole' && $bio) {
 ?>
-
 
 <div>
 <h1 onclick='toggleSearchResults("TB");' class="pointer" id="tidalBio"><i id="iconSearchResultsTB" class="fa fa-chevron-circle-down icon-anchor"></i> Artist biography</h1>
@@ -639,6 +640,7 @@ if ($cfg['use_tidal'] && $artist && $artist != 'All albums' && !in_array($artist
 <script>
 
 //$('#tidalAlbums').click(function() {	
+function getTidalAlbums() {
 <?php 
 //$artist = replaceAnds($artist);
 if ($tileSizePHP) {
@@ -699,7 +701,7 @@ request.always(function() {
 	});
 	
 });
-
+};
 //});
 
 <?php
@@ -1704,6 +1706,9 @@ if ($group_found != 'none') {
 }
 //End of Track composer	
 
+?>
+<div class="area">
+<?php
 
 //  +------------------------------------------------------------------------+
 //  | Artist mixes from Tidal                                                |
@@ -1903,6 +1908,17 @@ if ((mysqli_num_rows($query) < 2) && $display_all_tracks) {
 }
 
 }
+?>
+</div> <!--  class="area" -->
+<script>
+
+$(document).ready(function() {
+  getTidalAlbums();
+});
+
+</script>
+<?php
 require_once('include/footer.inc.php');
 
 ?>
+

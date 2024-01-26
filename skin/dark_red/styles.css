@@ -1776,13 +1776,17 @@ div.in-static {
   top: 5px;
   left: 5px;
 }
-.albums_container {
-  width: 100%;
-  margin: 5px auto;
-  line-height: 1px;
-}
+.albums_container,
 .full {
+  width: 100%;
+  /* margin: 5px auto; */
+  padding: 2px 0;
   line-height: 1px;
+  background-color: #353638;
+}
+.full_DEL {
+  line-height: 1px;
+  background-color: #353638;
 }
 div.tile {
   overflow: hidden;
@@ -2345,7 +2349,7 @@ h1 {
   white-space: nowrap;
   text-align: left;
   display: none;
-  padding-bottom: 5px;
+  /* padding-bottom: 5px; */
   overflow-x: auto;
 }
 .imgThumb {
@@ -2443,11 +2447,13 @@ h1 {
   color: #ffffff;
 }
 .artist_bio_text {
-  margin-top: 5px;
+  padding-top: 5px;
   text-align: justify;
+  background-color: #2b2b2c;
 }
 .artist_bio_source {
-  margin-bottom: 5px;
+  padding-bottom: 5px;
+  background-color: #2b2b2c;
 }
 .artist_bio_related {
   overflow: hidden;
@@ -2456,6 +2462,8 @@ h1 {
   white-space: nowrap;
   overflow-x: scroll;
   padding-top: 1em;
+  background-color: #2b2b2c;
+  /* background-color: (@bg-track); */
 }
 .artist_bio_related img {
   width: 6em;
@@ -2466,7 +2474,7 @@ h1 {
 }
 .artist_related {
   display: inline-block;
-  margin: 0 1em;
+  margin: 0 1.5em 0 1px;
   width: 6em;
 }
 .artist_related div {
@@ -2478,7 +2486,9 @@ h1 {
 }
 .artist_related .artist_container_small {
   border-radius: 10px;
-  background-color: #585858;
+  /* background-color: @button-playlist; */
+  /* background-color: screen(@button, @button-playlist); */
+  background-color: #5c5c5c;
   color: #ffffff;
 }
 #suggested_artists_for_you {

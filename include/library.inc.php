@@ -65,6 +65,9 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
       $sqlCount = "SELECT count(album_id) AS c FROM counter WHERE album_id LIKE 'tidal_%" . getTidalId($album['album_id']) . "'";
       if ($type) {
         $pic = $tidal_cover;
+        if (!$tidal_cover) {
+          $tidal_cover = 'image/no_image.jpg';
+        }
         $res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=viewTidal' . ucfirst($type) . '&amp;album_id=' . $album['album_id'] . '"\' src="' . $tidal_cover . '" alt="" width="100%" height="100%">';
         $urlTidalType = '&amp;type=' . $type;
       }
@@ -1348,26 +1351,32 @@ function formatBio($bio) {
 //  +------------------------------------------------------------------------+
 //  | Tracks from Tidal album                                                |
 //  +------------------------------------------------------------------------+
-function getTracksFromTidalAlbum($album_id, $order = '') {
+function getTracksFromTidalAlbum($album_id, $order = '', $type  = "album") {
 	global $cfg, $db, $t;
 	$field = 'albumTracks';
 	$value = $album_id;
-	
-	$sql = "SELECT album_id FROM tidal_album WHERE album_id = " . $album_id;
-	$query = mysqli_query($db,$sql);
-	if (mysqli_num_rows($query) == 0) {
-		getAlbumFromTidal($album_id);
+     
+  if ($type == 'album') {
+    $sql = "SELECT album_id FROM tidal_album WHERE album_id = " . $album_id;
+    $query = mysqli_query($db,$sql);
+    if (mysqli_num_rows($query) == 0) {
+      getAlbumFromTidal($album_id);
+    }
 	}
-	 
-   //$t = tidal();
-	/* $t = new TidalAPI;
-	$t->username = $cfg["tidal_username"];
-	$t->password = $cfg["tidal_password"];
-	$t->token = $cfg["tidal_token"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate(); */
+  
 	$conn = $t->connect();
 	if ($conn === true){
-		$results = $t->getAlbumTracks($album_id);
+    switch ($type) {
+      case 'album':
+        $results = $t->getAlbumTracks($album_id);
+        break;
+      case 'mixlist_list':
+        $results = $t->getMixlistTracks($album_id);
+        break;
+      case 'playlist_list':
+        $results = $t->getPlaylistTracks($album_id);
+        break;
+    }
 	}
 	else {
 		$data['return'] = $conn["return"];
@@ -1383,16 +1392,23 @@ function getTracksFromTidalAlbum($album_id, $order = '') {
 	 
 	$tracks = $results["items"];
 	if (count($tracks) > 0) {
-		if ($order == 'DESC') {
-			usort($tracks, function ($a, $b) {
-				return $b['volumeNumber'] <=> $a['volumeNumber'] ?: $b['trackNumber'] <=> $a['trackNumber'];
-			});
-		}
-		else {
-			usort($tracks, function ($a, $b) {
-				return $a['volumeNumber'] <=> $b['volumeNumber'] ?: $a['trackNumber'] <=> $b['trackNumber'];
-			});
-		}
+    if ($type == 'album') {
+      if ($order == 'DESC') {
+        usort($tracks, function ($a, $b) {
+          return $b['volumeNumber'] <=> $a['volumeNumber'] ?: $b['trackNumber'] <=> $a['trackNumber'];
+        });
+      }
+      else {
+        usort($tracks, function ($a, $b) {
+          return $a['volumeNumber'] <=> $b['volumeNumber'] ?: $a['trackNumber'] <=> $b['trackNumber'];
+        });
+      }
+    }
+    else { //for playlists and mixlists
+      if ($order == 'DESC') {
+        $tracks = array_reverse($tracks);
+      }
+    }
 		foreach ($tracks as $track){
 			$artists = '';
 			foreach ($track["artists"] as $a){
@@ -1732,14 +1748,14 @@ function tidalUserPlaylists($playlists, $header = '') {
   ?>		
     <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
       
-      <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();"><i id="play_' . $plId . '" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
+      <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=tidal_' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();"><i id="play_tidal_' . $plId . '" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
       
-      <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=addTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Add to playlist\');" onMouseOut="return nd();"><i id="add_' . $plId . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>'; ?></td>
+      <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=addTidalList&amp;tidal_id=tidal_' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Add to playlist\');" onMouseOut="return nd();"><i id="add_tidal_' . $plId . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>'; ?></td>
       
       <td>
       </td>
       
-      <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();">' . html($plName) . '</a>';
+      <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=tidal_' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();">' . html($plName) . '</a>';
           else echo html($plName); ?>
       </td>
       
@@ -1776,10 +1792,14 @@ function tidalPlaylist($playlist_id, $results) {
   $search = array();
 
   if ($cfg['access_play']){
-    $basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=' . $playlist_id . '\',evaluateAdd);"><i id="play_' . $playlist_id . '" class="fa fa-fw fa-play-circle-o  icon-small"></i>Play</a>';
+    $basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=tidal_' . $playlist_id . '\',evaluateAdd);"><i id="play_tidal_' . $playlist_id . '" class="fa fa-fw fa-play-circle-o  icon-small"></i>Play</a>';
   }
   if ($cfg['access_add']){
-    $basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=addTidalList&tidal_id=' . $playlist_id . '\',evaluateAdd);"><i id="add_' . $playlist_id . '" class="fa fa-fw  fa-plus-circle  icon-small"></i>Add to playlist</a>';
+    $basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=addTidalList&tidal_id=tidal_' . $playlist_id . '\',evaluateAdd);"><i id="add_tidal_' . $playlist_id . '" class="fa fa-fw  fa-plus-circle  icon-small"></i>Add to playlist</a>';
+    $basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;album_id=tidal_' . $playlist_id . '&amp;insertType=playlist_list\',evaluateAdd);"><i id="insert_tidal_' . $playlist_id . '" class="fa fa-fw fa-indent icon-small"></i>Insert into playlist</a>';
+  }
+  if ($cfg['access_add'] && $cfg['access_play']) {
+    $basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;album_id=tidal_' . $playlist_id . '&amp;insertType=playlist_list\',evaluateAdd);"><i id="insertPlay_tidal_' . $playlist_id . '" class="fa fa-fw  fa-play-circle icon-small"></i>Insert and play</a>';
   }
 
 ?>
@@ -2043,10 +2063,14 @@ function tidalMixList($playlist_id, $results) {
   $search = array();
 
   if ($cfg['access_play']){
-    $basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=' . $playlist_id . '&amp;type=mixlist\',evaluateAdd);"><i id="play_' . $playlist_id . '" class="fa fa-fw fa-play-circle-o  icon-small"></i>Play</a>';
+    $basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=tidal_' . $playlist_id . '&amp;type=mixlist\',evaluateAdd);"><i id="play_tidal_' . $playlist_id . '" class="fa fa-fw fa-play-circle-o  icon-small"></i>Play</a>';
   }
   if ($cfg['access_add']){
-    $basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=addTidalList&tidal_id=' . $playlist_id . '&amp;type=mixlist\',evaluateAdd);"><i id="add_' . $playlist_id . '" class="fa fa-fw  fa-plus-circle  icon-small"></i>Add to playlist</a>';
+    $basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=addTidalList&tidal_id=tidal_' . $playlist_id . '&amp;type=mixlist\',evaluateAdd);"><i id="add_tidal_' . $playlist_id . '" class="fa fa-fw  fa-plus-circle  icon-small"></i>Add to playlist</a>';
+    $basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;album_id=tidal_' . $playlist_id . '&amp;insertType=mixlist_list\',evaluateAdd);"><i id="insert_tidal_' . $playlist_id . '" class="fa fa-fw fa-indent icon-small"></i>Insert into playlist</a>';
+  }
+  if ($cfg['access_add'] && $cfg['access_play']) {
+    $basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;album_id=tidal_' . $playlist_id . '&amp;insertType=mixlist_list\',evaluateAdd);"><i id="insertPlay_tidal_' . $playlist_id . '" class="fa fa-fw  fa-play-circle icon-small"></i>Insert and play</a>';
   }
 
 ?>

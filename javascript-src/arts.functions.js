@@ -162,14 +162,16 @@ function evaluatePlayTo(data) {
 }
 
 function evaluateAdd(data) {
+  
 	var timeOut = 2000;
 	albumId = data.album_id;
-	if (data.tidal_id) {data.album_id = data.tidal_id};
+	//if (data.tidal_id) {data.album_id = data.tidal_id};
 	if (data.file_id) {data.album_id = data.file_id};
+	if (data.favorite_id) {data.album_id = data.favorite_id};
 	if (data.random) {data.album_id = 'random'};
 	if (data.disc) {data.album_id = data.album_id + '_' + data.disc};
 	if (data.addType) {data.album_id = data.addType};
-	if (data.album_id && !data.track_id) { 
+	if (data.album_id && !data.track_id) {
 		if (data.addResult == 'add_OK') {
 			$('[id="add_' + data.album_id +'"]').removeClass('fa-cog fa-spin icon-selected').addClass('fa-check-square icon-ok');
 			offMenuSub('');
@@ -384,7 +386,8 @@ function resizeSuggested($tileSize,$containerWidth) {
     $('.full').css('height', function() { return ($tileSize + 1); });
 	}
   $('.full').css('width', function() { 
-    return ($tileCount * $tileSize + (($tileCount - 1) * 1) + 'px'); 
+    //return ($tileCount * $tileSize + (($tileCount - 1) * 1) + 'px'); 
+    return '100%';
 	}); 
   
   $('#menuMiddleMedia').css('width', function() { 

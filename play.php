@@ -386,7 +386,7 @@ function playTidalList() {
 	global $cfg, $db;
 	authenticate('access_play');
 	require_once('include/play.inc.php');
-	$tidal_id	= get('tidal_id');
+	$tidal_id	= getTidalId(get('tidal_id'));
 	$type	= !empty(get('type')) ? get('type') : 'playlist';
 	$data = array();
 	$playResult = 'play_error';
@@ -406,14 +406,14 @@ function playTidalList() {
 		$playResult = 'play_OK';
 	}
 	$data['playResult'] = $playResult;
-	$data['tidal_id'] = $tidal_id;
-	//$data['album_id'] = 'tidal_' . $tidal_id;
-  if (strpos($tidal_id,'tidal_') !== false){
+	//$data['tidal_id'] = $tidal_id;
+  $data['album_id'] = 'tidal_' . $tidal_id;
+  /* if (strpos($tidal_id,'tidal_') !== false){
     $data['album_id'] = $tidal_id;
   } 
   else {
     $data['album_id'] = 'tidal_' . $tidal_id;
-  }
+  } */
 	ob_start();
 	echo safe_json_encode($data);
 	header('Connection: close');
@@ -434,7 +434,7 @@ function addTidalList() {
 	global $cfg, $db;
 	authenticate('access_play');
 	require_once('include/play.inc.php');
-	$tidal_id	= get('tidal_id');
+	$tidal_id	= getTidalId(get('tidal_id'));
   $type	= !empty(get('type')) ? get('type') : 'playlist';
 	$data = array();
 	$playResult = 'add_error';
@@ -448,13 +448,14 @@ function addTidalList() {
 		$playResult = 'add_OK';
 	}
 	$data['addResult'] = $playResult;
-	$data['tidal_id'] = $tidal_id;
-	if (strpos($tidal_id,'tidal_') !== false){
+	//$data['tidal_id'] = $tidal_id;
+  $data['album_id'] = 'tidal_' . $tidal_id;
+	/* if (strpos($tidal_id,'tidal_') !== false){
     $data['album_id'] = $tidal_id;
   } 
   else {
     $data['album_id'] = 'tidal_' . $tidal_id;
-  }
+  } */
   ob_start();
 	echo safe_json_encode($data);
 	header('Connection: close');
@@ -798,12 +799,34 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	elseif ($album_id && !isTidal($track_id) && !isHra($track_id)) {
 		if (isTidal($album_id)) {
 			$tidal_album_id = getTidalId($album_id);
-			if ($insertType == 'album' && $insPos > 0) {
-				$tidal_tracks = getTracksFromTidalAlbum($tidal_album_id, 'DESC');
-			}
-			else {
-				$tidal_tracks = getTracksFromTidalAlbum($tidal_album_id);
-			}
+      switch ($insertType) {
+        case 'mixlist_list':
+          if ($insertType == 'mixlist_list' && $insPos > 0) {
+            $tidal_tracks = getTracksFromTidalAlbum($tidal_album_id, 'DESC', 'mixlist_list');
+          }
+          else {
+            $tidal_tracks = getTracksFromTidalAlbum($tidal_album_id,'','mixlist_list');
+          }
+          $album_id = 'tidal_mixlist_' . $tidal_album_id;
+          break;
+        case 'playlist_list':
+          if ($insertType == 'playlist_list' && $insPos > 0) {
+            $tidal_tracks = getTracksFromTidalAlbum($tidal_album_id, 'DESC','playlist_list');
+          }
+          else {
+            $tidal_tracks = getTracksFromTidalAlbum($tidal_album_id, '','playlist_list');
+          }
+          $album_id = 'tidal_playlist_' . $tidal_album_id;
+          break;
+        default:
+          if ($insertType == 'album' && $insPos > 0) {
+            $tidal_tracks = getTracksFromTidalAlbum($tidal_album_id, 'DESC');
+          }
+          else {
+            $tidal_tracks = getTracksFromTidalAlbum($tidal_album_id);
+          }
+          break;
+      }
 			$mds_updateCounter = array();
 			$mds_updateCounter[] = $album_id;
 		}
