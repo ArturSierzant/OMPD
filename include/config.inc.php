@@ -193,6 +193,7 @@ $cfg['album_versions_indicator'][] = " (";
 $cfg['album_versions_indicator'][] = " [";
 $cfg['album_versions_indicator'][] = ", ";
 $cfg['album_versions_indicator'][] = ": ";
+$cfg['album_versions_indicator'][] = " - ";
 
 
 

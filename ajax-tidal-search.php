@@ -51,5 +51,3 @@ elseif ($search == 'topTracks') {
 	showTopTracksFromTidal($searchStr, $artistId);
 }
 ?>
-
-	

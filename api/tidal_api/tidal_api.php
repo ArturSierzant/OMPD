@@ -252,8 +252,8 @@ class TidalAPI {
     curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/show_more_featured_albums?countryCode=" . $this->countryCode . "&limit=" . $limit . "&deviceType=BROWSER");
     $res = $this->request();
     return $res;
-    $s = array_search("featured-new",array_column($res["rows"][0]["modules"][0]["tabs"],"key"));
-    return $res["rows"][0]["modules"][0]["tabs"][$s]["pagedList"]["items"];
+    /* $s = array_search("featured-new",array_column($res["rows"][0]["modules"][0]["tabs"],"key"));
+    return $res["rows"][0]["modules"][0]["tabs"][$s]["pagedList"]["items"]; */
   }
 
   function getFeatured($limit = 100, $offset = 0) {
@@ -400,6 +400,59 @@ class TidalAPI {
     
     return $this->request();
   }
+  
+  function getUserMixlists() {
+    curl_setopt($this->curl, CURLOPT_URL, self::API_V2_URL . 
+  "favorites/mixes?offset=0&limit=50&order=DATE&orderDirection=DESC&countryCode=" . $this->countryCode . "&locale=en-us&deviceType=BROWSER");
+    
+    return $this->request();
+  }
+
+ /*  function getUserMixlists() {
+    curl_setopt($this->curl, CURLOPT_URL, self::API_V2_URL . 
+  "favorites/mixes/ids?limit=500&cursor=&countryCode=" . $this->countryCode . "&locale=en-us&deviceType=BROWSER");
+    
+    return $this->request();
+  } */
+
+  function addToMyCollection($id, $type='playlist') {
+    if ($type == 'playlist') {
+      curl_setopt($this->curl, CURLOPT_URL, self::API_V2_URL . 
+      "my-collection/playlists/folders/add-favorites?folderId=root&uuids=". $id . "&countryCode=" . $this->countryCode . "&locale=en-us&deviceType=BROWSER");
+    }
+    if ($type == 'mixlist') {
+      curl_setopt($this->curl, CURLOPT_URL, self::API_V2_URL . 
+      "favorites/mixes/add?countryCode=" . $this->countryCode . "&locale=en-us&deviceType=BROWSER");
+      $postfields = array('mixIds' => $id, 'onArtifactNotFound' => 'FAIL');
+      curl_setopt($this->curl, CURLOPT_POSTFIELDS, $postfields);
+    }
+    $res = $this->request('put');
+    if (count($res['addedItems']) > 0 ) {
+      return $res;
+    }
+    return false;
+  }
+
+  function removeFromMyCollection($id, $type='playlist') {
+    if ($type == 'playlist') {
+      curl_setopt($this->curl, CURLOPT_URL, self::API_V2_URL . 
+      "my-collection/playlists/folders/remove?trns=trn:playlist:" . $id . "&countryCode=" . $this->countryCode . "&locale=en-us&deviceType=BROWSER");
+    }
+    if ($type == 'mixlist') {
+      curl_setopt($this->curl, CURLOPT_URL, self::API_V2_URL . 
+      "favorites/mixes/remove?mixIds=" . $id . "&countryCode=" . $this->countryCode . "&locale=en-us&deviceType=BROWSER");
+    }
+    $res = $this->request('put');
+    //mixlists
+    if (isset($res['deletedItems']) && count($res['deletedItems']) > 0 ) {
+      return $res;
+    }
+    //playlists
+    if (!$res) {
+      return true;
+    }
+    return false;
+  }
 
   function getUserPlaylistTracks($playlist_id, $limit = 1000) {
     return $this->getPlaylistTracks($playlist_id, $limit = 1000);
@@ -482,8 +535,13 @@ class TidalAPI {
     return $pic;
   }
 
-  function request() {
-    curl_setopt($this->curl, CURLOPT_POST, 0);
+  function request($type = 'post') {
+    if ($type == 'post') {
+      curl_setopt($this->curl, CURLOPT_POST, 0);
+    }
+    if ($type == 'put') {
+      curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, "PUT");
+    }
     curl_setopt($this->curl, CURLOPT_HTTPHEADER, array('authorization: Bearer ' . $this->token));
     for ($i=0; $i<3; $i++) {
       $server_output = curl_exec($this->curl);
@@ -500,5 +558,3 @@ class TidalAPI {
   }
 
 }
-
-?>

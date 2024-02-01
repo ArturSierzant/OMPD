@@ -211,13 +211,29 @@ if ($conn === true){
   $playlists = $t->getUserPlaylists();
   if ($playlists['totalNumberOfItems'] > 0) {
 ?>
-<h1>&nbsp;Your playlists</h1>
-<table cellspacing="0" cellpadding="0" class="border tabFixed break-word">
-<?php
-  tidalUserPlaylists($playlists);
+    <h1>&nbsp;Your playlists</h1>
+    <table cellspacing="0" cellpadding="0" class="border tabFixed break-word">
+    <?php
+      tidalUserPlaylists($playlists);
   }
+?>
+    </table>
+<?php
 }
-echo '</table>' . "\n";
+
+if ($conn === true){
+  $mixlists = $t->getUserMixlists();
+  if (count($mixlists['items']) > 0) {
+?>
+    <h1>&nbsp;Your Mixlists & Radios</h1>
+    <table cellspacing="0" cellpadding="0" class="border tabFixed break-word">
+    <?php
+      tidalUserMixlists($mixlists);
+  }
+?>
+    </table>
+<?php
+}
 
 $query = mysqli_query($db,"SELECT * FROM album WHERE album_id IN (SELECT album_id FROM album_id WHERE path LIKE 'tidal_%') ORDER BY album_add_time DESC LIMIT 14");
 if (mysqli_num_rows($query) > 0) {

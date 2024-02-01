@@ -1,0 +1,34 @@
+{
+    "name": "adinan-cenci/radio-browser",
+    "description": "A library to fetch radio stations from the radio-browser.info catalog.", 
+    "type": "library", 
+    "keywords": ["radio", "music"], 
+    "license": "MIT",
+    "version": "2.1.0", 
+    "authors": [
+        {
+            "name": "Adinan Cenci",
+            "email": "adinancenci@protonmail.com", 
+            "role": "developer"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/adinan-cenci/radio-browser"
+        }, 
+        {
+            "type": "vcs",
+            "url": "https://github.com/adinan-cenci/simple-request"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "guzzlehttp/guzzle": "^7.4" 
+    }, 
+    "autoload": {
+        "psr-4": {
+            "AdinanCenci\\RadioBrowser\\": "src/"
+        }
+    }
+}

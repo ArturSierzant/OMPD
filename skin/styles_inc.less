@@ -1013,7 +1013,7 @@ div.playlist_status_on_border {
 }
 
 .pl-track-info-right {
-  /* overflow: auto */;
+  /* overflow: auto ;*/
 }
 
 .pl-track-info {
@@ -2578,11 +2578,22 @@ h1 {
 }
 
 .artist_bio_pic {
-  background-size: 5000% 5000%;
+  /* background-size: 5000% 5000%; */
+  /* background-size: 1300px; */
+  background-size: cover;
+  background-repeat: no-repeat;
   height: 270px;
-  padding: 10px 0;
+  /* padding: 10px 0; */
   text-align: center;
   margin-bottom: 1px;
+  /* background-position-y: -400px; */
+  background-position: center;
+}
+
+.artist_bio_pic div {
+  backdrop-filter: blur(15px);
+  background-color: rgba(0, 0, 0, 0.55);
+  padding: 10px 0;
 }
 
 .artist_bio_pic img {
@@ -2594,7 +2605,7 @@ h1 {
   border-radius: 10%;
 }
 
-.artist_bio_pic_not_found{
+.artist_bio_pic_not_found {
   font-size: 210px;
   width: 260px;
   border-radius: 10px;

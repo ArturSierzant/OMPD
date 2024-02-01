@@ -123,7 +123,4 @@ elseif ($action == "remove") {
   }
 }
 
-echo safe_json_encode($data);	
-
-?>
-	
+echo safe_json_encode($data);

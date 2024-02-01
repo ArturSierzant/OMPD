@@ -1,0 +1,5 @@
+{
+    "require": {
+        "adinan-cenci/radio-browser": "^2.1"
+    }
+}

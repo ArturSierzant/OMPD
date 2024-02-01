@@ -493,7 +493,7 @@ if ($cfg['use_tidal']) {
 
   if ($pic) {
 ?>
-<div style="background-image: url(<?php echo $pic;?>); background-position: -10000px -10000px;" class="artist_bio_pic"><?php echo $img;?></div>
+<div style="background-image: url(<?php echo $pic;?>);" class="artist_bio_pic"><div><?php echo $img;?></div></div>
 <?php
   }
 }

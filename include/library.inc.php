@@ -276,7 +276,7 @@ function findCoreTrackTitle($title) {
 }
 
 //  +---------------------------------------------------------------------------+
-//  | Draws sub menu for add/remove to/from favorite                            |
+//  | Display sub menu for add/remove to/from favorite                          |
 //  +---------------------------------------------------------------------------+
 
 function starSubMenu($i, $isFavorite, $isBlacklist, $track_id, $type = 'echo') {
@@ -332,7 +332,7 @@ function starSubMenu($i, $isFavorite, $isBlacklist, $track_id, $type = 'echo') {
 
 	
 //  +---------------------------------------------------------------------------+
-//  | Draws sub menu for track                                                  |
+//  | Display sub menu for track                                                |
 //  +---------------------------------------------------------------------------+
 
 function trackSubMenu($i, $track, $album_id = '', $type = 'echo') {
@@ -396,7 +396,7 @@ function trackSubMenu($i, $track, $album_id = '', $type = 'echo') {
 
 	
 //  +---------------------------------------------------------------------------+
-//  | Draws sub menu for file                                                   |
+//  | Display sub menu for file                                                 |
 //  +---------------------------------------------------------------------------+
 
 function fileSubMenu($i, $filepath, $mime) {
@@ -433,7 +433,7 @@ function fileSubMenu($i, $filepath, $mime) {
 
 
 //  +---------------------------------------------------------------------------+
-//  | Draws sub menu for directory                                              |
+//  | Display sub menu for directory                                            |
 //  +---------------------------------------------------------------------------+
 
 function dirSubMenu($i, $dir) {
@@ -481,7 +481,7 @@ function dirSubMenu($i, $dir) {
 
 
 //  +---------------------------------------------------------------------------+
-//  | Draws sub menu for track moving/deleting                                  |
+//  | Display sub menu for track moving/deleting                                |
 //  +---------------------------------------------------------------------------+
 
 function moveSubMenu($i, $bottom) {
@@ -591,7 +591,7 @@ function listOfFavorites($file = true, $stream = true, $track_id = "", $track_mp
 //  +------------------------------------------------------------------------+
 
 function tidal() {
-  global $cfg, $db;
+  global $cfg, $db, $t;
   $t = new TidalAPI($cfg['tidal_client_id'], $cfg['tidal_client_secret']);
   $t->userId = $cfg['tidal_userid'];
   $t->countryCode = $cfg['tidal_countryCode'];
@@ -1524,16 +1524,10 @@ function showAllFromTidal($searchStr, $size) {
 //  +------------------------------------------------------------------------+
 function showTopTracksFromTidal($artist, $tidalArtistId = "") {
 	global $cfg, $db, $t;
-	$value = $searchStr;
+	//$value = $searchStr;
 	$data = array();
 	$data['tracks_results'] = 0;
 	
-	/* $t = new TidalAPI;
-	$t->username = $cfg["tidal_username"];
-	$t->password = $cfg["tidal_password"];
-	$t->token = $cfg["tidal_token"];
-	if (NJB_WINDOWS) $t->fixSSLcertificate(); */
-  //$t = tidal();
 	$conn = $t->connect();
 	if ($conn === true){
 		if ($tidalArtistId) {
@@ -1580,7 +1574,7 @@ function showTopTracksFromTidal($artist, $tidalArtistId = "") {
 
 
 //  +------------------------------------------------------------------------+
-//  | Draws list of tracks from Tidal                                        |
+//  | Display list of tracks from Tidal                                      |
 //  +------------------------------------------------------------------------+
 
 function tidalTracksList($tracks, $i = 0, $playlist_type = '') {
@@ -1718,70 +1712,71 @@ function tidalTracksList($tracks, $i = 0, $playlist_type = '') {
 
 
 //  +------------------------------------------------------------------------+
-//  | Draws user playlists from Tidal                                        |
+//  | Display user playlists from Tidal                                      |
 //  +------------------------------------------------------------------------+
 
 function tidalUserPlaylists($playlists, $header = '') {
   global $cfg;
   global $t;
 
-  $conn = $t->connect();
-  if ($conn === true){
-    $playlists = $t->getUserPlaylists();
-    if ($playlists['totalNumberOfItems'] > 0) {
+  if ($playlists['totalNumberOfItems'] > 0) {
 ?>
-		<tr class="header">
-			
-			<td class="icon"></td><!-- optional play -->
-			<td class="icon"></td><!-- optional add -->
-			<td class="icon"></td><!-- optional stream -->
-			<td><?php echo $header; ?></td>
-			<td></td>
-			<td class="icon"></td><!-- optional delete -->
-			<td class="icon"></td>
-			<td class="space"></td>
-		</tr>
-<?php
-  for ($j = 0; $j < $playlists['totalNumberOfItems']; $j++) {
-    $plName = $playlists['items'][$j]['data']['title'];
-    $plId = $playlists['items'][$j]['data']['uuid'];
-  ?>		
-    <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
-      
-      <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=tidal_' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();"><i id="play_tidal_' . $plId . '" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
-      
-      <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=addTidalList&amp;tidal_id=tidal_' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Add to playlist\');" onMouseOut="return nd();"><i id="add_tidal_' . $plId . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>'; ?></td>
-      
-      <td>
-      </td>
-      
-      <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=tidal_' . $plId . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();">' . html($plName) . '</a>';
-          else echo html($plName); ?>
-      </td>
-      
-      <td>
-        <div class="favoritePlaylistDescription">
-        <?php echo $playlists['items'][$j]['data']['description']; ?>
-        </div>
-      <td>
-      </td>
-      
-      <td>
-        <?php if ($cfg['access_admin']) echo '<a href="favorite.php?action=viewTidalPlaylist&amp;favorite_id=' . $plId . '&plName=' . $plName . '" onMouseOver="return overlib(\'See tracks\');" onMouseOut="return nd();"><i class="fa fa-list fa-fw icon-small"></i></a>'; ?>
-      </td>
-      
+    <tr class="header">
+      <td class="icon"></td><!-- optional play -->
+      <td class="icon"></td><!-- optional add -->
+      <td class="icon"></td><!-- optional stream -->
+      <td><?php echo $header; ?></td>
       <td></td>
+      <td class="icon"></td><!-- optional delete -->
+      <td class="icon"></td>
+      <td class="space"></td>
     </tr>
-  <?php
+<?php
+    for ($j = 0; $j < $playlists['totalNumberOfItems']; $j++) {
+      $plName = $playlists['items'][$j]['data']['title'];
+      $plId = $playlists['items'][$j]['data']['uuid'];
+      $description = $playlists['items'][$j]['data']['description'];
+      tidalUserPlaylistItem($plId, $plName, $description);
+    }
   }
 }
+
+
+//  +------------------------------------------------------------------------+
+//  | Display user mixlists and radios from Tidal                            |
+//  +------------------------------------------------------------------------+
+
+function tidalUserMixlists($mixlists, $header = '') {
+  global $cfg;
+  global $t;
+
+  $c = count($mixlists['items']);
+  if ($c > 0) {
+?>
+    <tr class="header">
+      <td class="icon"></td><!-- optional play -->
+      <td class="icon"></td><!-- optional add -->
+      <td class="icon"></td><!-- optional stream -->
+      <td><?php echo $header; ?></td>
+      <td></td>
+      <td class="icon"></td><!-- optional delete -->
+      <td class="icon"></td>
+      <td class="space"></td>
+    </tr>
+<?php
+    for ($j = 0; $j < $c; $j++) {
+      $plName = $mixlists['items'][$j]['title'];
+      $plId = $mixlists['items'][$j]['id'];
+      $description = $mixlists['items'][$j]['subTitleTextInfo']['text'];
+      tidalUserPlaylistItem($plId, $plName, $description, 'mixlist');
+    }
   }
 }
 
 
 
 //  +------------------------------------------------------------------------+
-//  | Draws playlist from Tidal                                              |
+//  | Display playlist from Tidal                                            |
 //  +------------------------------------------------------------------------+
 
 function tidalPlaylist($playlist_id, $results) {
@@ -1801,7 +1796,19 @@ function tidalPlaylist($playlist_id, $results) {
   if ($cfg['access_add'] && $cfg['access_play']) {
     $basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;album_id=tidal_' . $playlist_id . '&amp;insertType=playlist_list\',evaluateAdd);"><i id="insertPlay_tidal_' . $playlist_id . '" class="fa fa-fw  fa-play-circle icon-small"></i>Insert and play</a>';
   }
-
+	if ($cfg['access_admin']) {
+		$isInMyCollection = isInTdalMyCollection($playlist_id);
+    if ($isInMyCollection !== 'noAddRemove') {
+      $favAction = 'Add to My Collection';
+      $classes = 'fa fa-fw fa-heart-o icon-small';
+      if ($isInMyCollection) {
+        $favAction = 'Remove from My Collection';
+        $classes = 'fa fa-fw fa-heart icon-small';
+      }
+      $basic[] = '<a id="add2lib" href="javascript: favAction();"><i class="' . $classes . '"></i><span>' . $favAction . '</span></a>';
+	
+    }
+  }
 ?>
 
 
@@ -1940,7 +1947,7 @@ else
 <br>	
 <table cellspacing="0" cellpadding="0" id="basic" class="fullscreen">
 <?php
-for ($i = 0; $i < 4; $i=$i+2) { ?>
+for ($i = 0; $i < 6; $i=$i+2) { ?>
 <tr class="<?php echo ($i & 1) ? 'even_info' : 'odd_info'; ?> nowrap">
 <td class="halfscreen"><?php echo (isset($basic[$i])) ? $basic[$i] : '&nbsp;'; ?></td>
 <td class="halfscreen"><?php echo (isset($basic[$i+1])) ? $basic[$i+1] : '&nbsp;'; ?></td>
@@ -2044,6 +2051,54 @@ $('#bar_popularity').css('width',function() { return (<?php echo floor($populari
 return(true);
 };
 
+function favAction(){
+  var action = "remove";
+  var classes = $("#add2lib i").attr('class');
+  var actionTxt = $("#add2lib span").html();
+  var timeOut = 2000;
+  if ($("#add2lib span").html() == "Add to My Collection") {
+    action = "add";
+  }
+  $("#add2lib i").removeClass("fa-heart-o").removeClass("fa-heart").addClass("fa-cog fa-spin");
+  
+  var request = $.ajax({  
+    url: "ajax-tidal-my-collection.php",  
+    type: "POST",  
+    data: { 
+      id : '<?php echo $playlist_id; ?>',
+      action : action,
+      type: 'playlist'
+    },  
+    dataType: "json"
+  }); 
+
+  request.done(function(data) {  
+    if (data["result"] == "add_ok") {
+      $("#add2lib i").removeClass("fa-cog fa-spin").addClass("fa-heart");
+      $("#add2lib span").html("Remove from My Collection");
+    }
+    if (data["result"] == "remove_ok") {
+      $("#add2lib i").removeClass("fa-cog fa-spin").addClass("fa-heart-o");
+      $("#add2lib span").html("Add to My Collection");
+    }
+    if (data["result"] == "error") {
+      $("#add2lib i").removeClass("fa-cog fa-spin").addClass("fa-exclamation-triangle icon-nok");
+      
+      setTimeout(function(){
+        $("#add2lib i").removeClass('fa-exclamation-triangle icon-nok').addClass(classes);
+      }, timeOut);
+    }
+  }); 
+
+  request.fail(function( jqXHR, textStatus ) {  
+  $("#add2lib i").removeClass("fa-cog fa-spin").addClass("fa-exclamation-triangle icon-nok");
+  $("#add2lib span").html("Error in ajax execution: " + textStatus);
+  setTimeout(function(){
+    $("#add2lib i").removeClass('fa-exclamation-triangle icon-nok').addClass(classes);
+    $("#add2lib span").html(actionTxt);
+		}, timeOut);
+  }); 
+}
 //-->
 </script>
 <?php
@@ -2052,7 +2107,7 @@ return(true);
 
 
 //  +------------------------------------------------------------------------+
-//  | Draws mix list from Tidal                                              |
+//  | Display mix list from Tidal                                            |
 //  +------------------------------------------------------------------------+
 
 function tidalMixList($playlist_id, $results) {
@@ -2072,6 +2127,16 @@ function tidalMixList($playlist_id, $results) {
   if ($cfg['access_add'] && $cfg['access_play']) {
     $basic[] = '<a href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;album_id=tidal_' . $playlist_id . '&amp;insertType=mixlist_list\',evaluateAdd);"><i id="insertPlay_tidal_' . $playlist_id . '" class="fa fa-fw  fa-play-circle icon-small"></i>Insert and play</a>';
   }
+  if ($cfg['access_admin']) {
+		$isInMyCollection = isInTdalMyCollection($playlist_id, 'mixlist');
+		$favAction = 'Add to My Collection';
+		$classes = 'fa fa-fw fa-heart-o icon-small';
+		if ($isInMyCollection) {
+			$favAction = 'Remove from My Collection';
+			$classes = 'fa fa-fw fa-heart icon-small';
+		}
+		$basic[] = '<a id="add2lib" href="javascript: favAction();"><i class="' . $classes . '"></i><span>' . $favAction . '</span></a>';
+	}
 
 ?>
 
@@ -2205,7 +2270,7 @@ else
 <br>	
 <table cellspacing="0" cellpadding="0" id="basic" class="fullscreen">
 <?php
-for ($i = 0; $i < 4; $i=$i+2) { ?>
+for ($i = 0; $i < 6; $i=$i+2) { ?>
 <tr class="<?php echo ($i & 1) ? 'even_info' : 'odd_info'; ?> nowrap">
 <td class="halfscreen"><?php echo (isset($basic[$i])) ? $basic[$i] : '&nbsp;'; ?></td>
 <td class="halfscreen"><?php echo (isset($basic[$i+1])) ? $basic[$i+1] : '&nbsp;'; ?></td>
@@ -2278,7 +2343,6 @@ function evaluatePlay() {
   redirToNowPlaying();
 }
 
-
 function importPlaylist() {
 	showSpinner();
 	document.favorite.action.value='importPlaylist'; 
@@ -2308,6 +2372,54 @@ $('#bar_popularity').css('width',function() { return (<?php echo floor($populari
 return(true);
 };
 
+function favAction(){
+  var action = "remove";
+  var classes = $("#add2lib i").attr('class');
+  var actionTxt = $("#add2lib span").html();
+  var timeOut = 2000;
+  if ($("#add2lib span").html() == "Add to My Collection") {
+    action = "add";
+  }
+  $("#add2lib i").removeClass("fa-heart-o").removeClass("fa-heart").addClass("fa-cog fa-spin");
+  
+  var request = $.ajax({  
+    url: "ajax-tidal-my-collection.php",  
+    type: "POST",  
+    data: { 
+      id : '<?php echo $playlist_id; ?>',
+      action : action,
+      type: 'mixlist'
+    },  
+    dataType: "json"
+  }); 
+
+  request.done(function(data) {  
+    if (data["result"] == "add_ok") {
+      $("#add2lib i").removeClass("fa-cog fa-spin").addClass("fa-heart");
+      $("#add2lib span").html("Remove from My Collection");
+    }
+    if (data["result"] == "remove_ok") {
+      $("#add2lib i").removeClass("fa-cog fa-spin").addClass("fa-heart-o");
+      $("#add2lib span").html("Add to My Collection");
+    }
+    if (data["result"] == "error") {
+      $("#add2lib i").removeClass("fa-cog fa-spin").addClass("fa-exclamation-triangle icon-nok");
+      
+      setTimeout(function(){
+        $("#add2lib i").removeClass('fa-exclamation-triangle icon-nok').addClass(classes);
+      }, timeOut);
+    }
+  }); 
+
+  request.fail(function( jqXHR, textStatus ) {  
+  $("#add2lib i").removeClass("fa-cog fa-spin").addClass("fa-exclamation-triangle icon-nok");
+  $("#add2lib span").html("Error in ajax execution: " + textStatus);
+  setTimeout(function(){
+    $("#add2lib i").removeClass('fa-exclamation-triangle icon-nok').addClass(classes);
+    $("#add2lib span").html(actionTxt);
+		}, timeOut);
+  }); 
+}
 //-->
 </script>
 <?php
@@ -2521,6 +2633,36 @@ function isTidal($id) {
 
 
 //  +------------------------------------------------------------------------+
+//  | Check if play/mixlists is in user playlists on Tidal                   |
+//  +------------------------------------------------------------------------+
+
+function isInTdalMyCollection($id, $type = 'playlist') {
+	global $cfg, $t;
+  if ($type == 'playlist') {
+    $userPlaylists = $t->getUserPlaylists();
+      foreach ($userPlaylists['items'] as $userPlaylist){
+        if (strpos($userPlaylist['trn'], getTidalId($id)) !== false) {
+          if ($userPlaylist['data']['creator']['type'] == 'USER') {
+            return 'noAddRemove';
+          }
+          return true;
+        }
+      }
+  }
+
+  if ($type == 'mixlist') {
+    $userMixlists = $t->getUserMixlists();
+      foreach ($userMixlists['items'] as $userMixlist){
+        if (strpos($userMixlist['id'], getTidalId($id)) !== false) {
+          return true;
+        }
+      }
+  }
+	return false;
+}
+
+
+//  +------------------------------------------------------------------------+
 //  | Get pure Tidal id of item                                              |
 //  +------------------------------------------------------------------------+
 
@@ -2566,6 +2708,49 @@ function getTidalAudioQuality($tidalAudioQuality){
   }
 }
 
+
+
+//  +------------------------------------------------------------------------+
+//  | Display Tidal playlist item                                            |
+//  +------------------------------------------------------------------------+
+
+function tidalUserPlaylistItem($plId, $plName, $description, $type = 'playlist'){
+  global $db, $cfg;
+  $n = 'Play';
+  if ($type == 'mixlist') {
+    $n = 'Mix';
+  }
+  ?>
+  <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
+    <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=tidal_' . $plId . '&amp;menu=favorite&amp;type=' . $type . '\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();"><i id="play_tidal_' . $plId . '" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
+    
+    <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=addTidalList&amp;tidal_id=tidal_' . $plId . '&amp;menu=favorite&amp;type=' . $type . '\',evaluateAdd);" onMouseOver="return overlib(\'Add to playlist\');" onMouseOut="return nd();"><i id="add_tidal_' . $plId . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>'; ?></td>
+    
+    <td>
+    </td>
+    
+    <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=tidal_' . $plId . '&amp;menu=favorite&amp;type=' . $type . '\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();">' . html($plName) . '</a>';
+        else echo html($plName); ?>
+    </td>
+    
+    <td>
+      <div class="favoritePlaylistDescription">
+      <?php echo $description; ?>
+      </div>
+    <td>
+    </td>
+    
+    <td>
+      <?php 
+      // if ($cfg['access_admin']) echo '<a href="favorite.php?action=viewTidal' . $n . 'list&amp;favorite_id=' . $plId . '&plName=' . $plName . '" onMouseOver="return overlib(\'See tracks\');" onMouseOut="return nd();"><i class="fa fa-list fa-fw icon-small"></i></a>'; 
+      ?>
+      <?php if ($cfg['access_admin']) echo '<a href="index.php?action=viewTidal' . $n . 'list&amp;album_id=' . $plId . '" onMouseOver="return overlib(\'See tracks\');" onMouseOut="return nd();"><i class="fa fa-list fa-fw icon-small"></i></a>'; ?>
+    </td>
+    
+    <td></td>
+  </tr>
+  <?php
+}
 
 //  +------------------------------------------------------------------------+
 //  | Artists from HRA                                                       |

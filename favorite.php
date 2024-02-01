@@ -40,7 +40,6 @@ $favorite_name	= getpost('plName');
 if		($action == '')							home();
 elseif	($action == 'editFavorite')				editFavorite($favorite_id);
 elseif	($action == 'editFavoriteMPD')		editFavoriteMPD($favorite_id);
-elseif	($action == 'viewTidalPlaylist')		viewTidalPlaylist($favorite_id, $favorite_name);
 elseif	($action == 'addFavorite')	 			addFavorite();
 elseif	($action == 'saveFavorite') 			saveFavorite($favorite_id);
 elseif	($action == 'importPlaylist')			importFavorite($favorite_id, 'import');
@@ -213,10 +212,19 @@ function home() {
 	
 	
 	if ($cfg['use_tidal']) {
-    $header = "Playlists from Tidal";
-    tidalUserPlaylists($playlists, $header);
-	}
-
+    $conn = $t->connect();
+    if ($conn === true){    
+      
+      $playlists = $t->getUserPlaylists();
+      $header = "Playlists from Tidal";
+      tidalUserPlaylists($playlists, $header);
+      
+      $mixlists = $t->getUserMixlists();
+      $header = "Mixlists & Radios from Tidal";
+      tidalUserMixlists($mixlists, $header);
+	
+    }
+  }
 	echo '</table>' . "\n";
 	require_once('include/footer.inc.php');
 }
@@ -537,52 +545,6 @@ function addPlaylistUrl() {
 </script>
 
 <?php
-	require_once('include/footer.inc.php');
-}
-
-
-
-
-//  +------------------------------------------------------------------------+
-//  | View Tidal playlist                                                    |
-//  +------------------------------------------------------------------------+
-function viewTidalPlaylist($favorite_id, $favorite_name) {
-	global $cfg, $db, $t;
-	authenticate('access_admin');
-	
-	require_once('include/play.inc.php');
-	
-  $nav			= array();
-	$nav['name'][]	= 'Favorites: Tidal playlist';
-  
-	/* // formattedNavigator
-	$nav			= array();
-	$nav['name'][]	= 'Favorites';
-	$nav['url'][]	= 'favorite.php';
-	$nav['name'][]	= 'View'; */
-	require_once('include/header.inc.php');
-	
-  $conn = $t->connect();
-  if ($conn === true){
-    
-    $results = $t->getPlaylist($favorite_id);
-    
-    $nav['name'][] = $results['title'] . ':';
-    require_once('include/header.inc.php');
-    //echo ('<h1>' . $results['title'] .'</h1>');
-    if ($tileSizePHP) $size = $tileSizePHP;
-    
-    if ($results['uuid']){
-      tidalPlaylist($favorite_id, $results);
-    }
-    else {
-      echo ('<span><i class="fa fa-exclamation-circle icon-small"></i> No results found on TIDAL.</span>');
-    }
-  }
-  else {
-    echo('<div style="line-height: initial;"><i class="fa fa-exclamation-circle icon-small"></i> Error in execution Tidal request.<br>Error message:<br><br>' . $conn["error"] . '</div>');
-  }
-
 	require_once('include/footer.inc.php');
 }
 
