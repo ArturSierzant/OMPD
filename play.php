@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright ï¿½ 2015-2021 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright ï¿½ 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -1181,20 +1181,7 @@ function addUrl($mode = 'play') {
 	else {
 		$file[] = $url;
 	}
-//moved to addSelectUrl()
-/* 	if (count($file) == 1) {
-		//$yt = striposa($url, $cfg['youtube_indicator']);
-		//if ($yt !== false) {
-		if (isYoutube($url)) {
-			if ($ytUrl = getYouTubeMPDUrl($url)) {
-				$file[0] = $ytUrl;
-			}
-			else {
-				$addURLresult = 'add_error';
-				return $addURLresult;
-			}
-		}
-	} */
+
 	if ($cfg['play_queue'] == false)
 		$index = 0;
 	elseif ($cfg['player_type'] == NJB_MPD) {
@@ -1289,19 +1276,21 @@ function playStreamDirect() {
 	
 	$favorite_id 	= get('favorite_id');
 	$position 		= get('position');
+	$url 		= get('url');
 	
 	$data			= array();
 	
 	$status = mpd('status');
 	$insPos = $status['song'] + 1;
-	
-	$query = mysqli_query($db,'SELECT stream_url FROM favoriteitem WHERE favorite_id = ' . (int) $favorite_id . ' AND position = ' . (int) $position . ' LIMIT 1');
-	
-	$favoriteitem = mysqli_fetch_assoc($query);
-	//mpd('add ' . $favoriteitem['stream_url']);
-	mpd('addid "' . mpdEscapeChar($favoriteitem['stream_url']) . '" ' . $insPos);
+  
+	if (!isset($url)) {
+    $query = mysqli_query($db,'SELECT stream_url FROM favoriteitem WHERE favorite_id = ' . (int) $favorite_id . ' AND position = ' . (int) $position . ' LIMIT 1');    
+    $favoriteitem = mysqli_fetch_assoc($query);
+    $url = $favoriteitem['stream_url'];
+  }
+
+  mpd('addid "' . mpdEscapeChar($url) . '" ' . $insPos);
 	mpd('play ' . $insPos);
-	
 	$data['album_id'] = $position;
 	$data['playResult'] = 'play_OK'; 
 	$data['addResult'] = 'add_OK'; 

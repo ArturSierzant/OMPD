@@ -100,6 +100,11 @@ $cfg['mysqli_auto_create_db']       = true;
 //  | http://ice3.somafm.com/seventies-128-aac                               |
 //  | use:                                                                   |
 //  | ice3.somafm.com__seventies-128-aac.jpg                                 |
+//  |                                                                        |
+//  | O!MPD tries to download and use favicons for internet radio stations   |
+//  | searched in Library -> Radio Browser. To use this feature you need     |
+//  | to add write rights to this directory for your web server.             |
+//  |                                                                        |
 //  +------------------------------------------------------------------------+
 
 $cfg['stream_covers_dir'] = 'covers/';

@@ -749,10 +749,13 @@ if ($cfg['use_tidal']) {
 if ($cfg['use_hra']) { 
 ?>
   <a href="index.php?action=viewHRA">HRA</a>
-<?php
+  <?php
   echo $header['seperation'];
 }
 ?>
+
+<a href="index.php?action=viewRadio">Radio</a>
+<?php echo $header['seperation']; ?>
 
 <span id="list" onclick='toggleSubMiddle("Alpha");'>artist <i id="iconmenuSubMiddleMediaAlpha" class="fa fa-chevron-circle-down"></i></span>
 

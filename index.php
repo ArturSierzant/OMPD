@@ -60,6 +60,7 @@ elseif	($action == 'viewYear')			viewYear();
 elseif	($action == 'viewGenre')		viewGenre();
 elseif	($action == 'viewDR')			viewDR();
 elseif	($action == 'viewComposer')		viewComposer();
+elseif	($action == 'viewRadio')			viewRadio();
 elseif	($action == 'viewNew')			viewNew();
 elseif	($action == 'viewHRA')			viewHRA();
 elseif	($action == 'viewNewFromHRA')			viewNewFromHRA();
@@ -1801,6 +1802,15 @@ Your database is empty. Please <a href="config.php">update it.</a><br><br>
 	require_once('include/footer.inc.php');
 }
 
+
+
+//  +------------------------------------------------------------------------+
+//  | Tidal                                                                  |
+//  +------------------------------------------------------------------------+
+
+function viewRadio() {
+	require_once("index-radio.php");
+}
 
 
 

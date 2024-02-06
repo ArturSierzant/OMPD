@@ -487,6 +487,15 @@ function about() {
 	<td><a href="https://github.com/Smile4ever/LyricsCore" target="_blank">https://github.com/Smile4ever/LyricsCore</a></td>
 	<td></td>
 </tr>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
+	<td>Radio Browser</td>
+	<td></td>
+	<td><a href="https://github.com/adinan-cenci/radio-browser" target="_blank">https://github.com/adinan-cenci/radio-browser</a></br>
+  Radio Browser is a library to fetch data from the <a href="https:// radio-browser.info" target="_blank">radio-browser.info</a> catalog of Internet radio stations.
+</td>
+	<td></td>
+</tr>
 
 
 

@@ -752,6 +752,9 @@ if ($cfg['use_hra']) {
 }
 ?>
 
+<a href="index.php?action=viewRadio">Radio</a>
+<?php echo $header['seperation']; ?>
+
 <span id="list" onclick='toggleSubMiddle("Alpha");'>artist <i id="iconmenuSubMiddleMediaAlpha" class="fa fa-chevron-circle-down"></i></span>
 
 <?php echo $header['seperation']; ?>
