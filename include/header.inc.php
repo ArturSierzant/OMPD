@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright ï¿½ 2015-2021 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright ï¿½ 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -130,14 +130,18 @@ elseif ($cfg['menu'] == 'favorite')	{
 }
 
 elseif ($cfg['menu'] == 'config') {
-	$header['menu'] = "\t" . '<div id="menuMiddleMedia"><span id="menu_middle_items">';
+	$header['menu'] = "\t" . '
+  <div id="gradientLeft" class="menuGradient left">&nbsp;</div>
+  <div id="gradientRight" class="menuGradient right">&nbsp;</div>
+  <div id="menuMiddleMedia">
+  ';
 	$header['menu'] .= "\t" . '<a href="config.php?action=playerProfile">player profile</a>' . $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="config.php?action=streamProfile">stream profile</a>' . $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="config.php?action=downloadProfile">download profile</a>' . $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="config.php?action=skinProfile">skin profile</a>' . $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="users.php">users</a>' . $header['seperation'];
 	$header['menu'] .= "\t" . '<a href="update.php?action=update&amp;sign=' . $cfg['sign'] . '">update all</a>' . "\n";
-	$header['menu'] .= "\t" . '</span></div>' . "\n";
+	$header['menu'] .= "\t" . '</div>' . "\n";
 }
 
 elseif ($cfg['menu'] == 'about') {

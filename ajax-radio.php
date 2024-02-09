@@ -118,7 +118,6 @@ foreach ($stations as $track) {
     <td class="time"><?php 
     
     if ($cfg['access_play']) 		echo '<span id="a_play_track'. $position_id .'" class="pointer" streamUrl="' . ($url) . '" picUrl="' . $picUrl . '" position_id="' . $position_id . '"><div class="playlist_title break-word">' . html($track['name']) . '</div><div class="playlist_title_album break-all favoritePlaylistDescription">' . html($track['url']) . '</div></span>';
-    // if ($cfg['access_play']) 		echo '<a id="a_play_track'. $position_id .'" href="javascript:ajaxRequest(\'play.php?action=playStreamDirect&amp;playAfterInsert=yes&amp;url=' . urlencode($url) . '&amp;position_id=' . $position_id . '\',evaluateAdd);" onMouseOver="return overlib(\'Play stream ' . $track['number'] . '\');" onMouseOut="return nd();"><div class="playlist_title break-word">' . html($track['name']) . '</div><div class="playlist_title_album break-all favoritePlaylistDescription">' . html($track['url']) . '</div></a>';
     
     else echo html($track['name']);
     
@@ -198,7 +197,7 @@ foreach ($stations as $track) {
 <script>
   <?php
   $s = '';
-  if ($stationsCount > 1) $s="s";
+  if ($stationsCount > 1) $s = "s";
   if ($stationsCount > 999) {
   ?>
     $("#stationsCount").html(" - over 1000 stations found:");
@@ -214,6 +213,7 @@ foreach ($stations as $track) {
   $("span[id^='tagId']").on('click', (function() {
     $("#stationsCount").html('');
     $("#name").val('');
+    // $("#country").val('0');
     $("#tag").val($(this).html());
     searchRadio();
   }));
@@ -282,6 +282,9 @@ foreach ($stations as $track) {
       },
     });
   }
+
+  // addFavSubmenuActions();
+
 </script>
 <?php 
 

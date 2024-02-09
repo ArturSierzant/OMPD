@@ -33,7 +33,7 @@ if ($cfg['player_type'] == NJB_MPD) {
     if ($ping != 'OK'){
       $state = 'NOK';
     };
-    $data[]=array("player_id" => $player['player_id'],"state" => $state);
+    $data[]=array("player_id" => $player['player_id'],"player_name" => $player['player_name'],"state" => $state);
   }
   
   echo safe_json_encode($data);	

@@ -16,3 +16,6 @@ ajax-hra-download.php
 ajax-tidal-pages.php
 /api/Tidal-Media-Downloader
 ompd.code-workspace
+*_old
+*_OLD
+*_DEL

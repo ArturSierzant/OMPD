@@ -752,6 +752,11 @@ td.menu_bottom_right {
 #menuMiddleMedia > span {
   cursor: pointer;
 }
+.menuGradient {
+  width: 20px;
+  position: absolute;
+  display: none;
+}
 [id^=menuSubMiddle] {
   position: relative;
   display: none;

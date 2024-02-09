@@ -514,11 +514,11 @@ table.border {
 }
 
 
-tr.line, td.line {
+tr.line, td.line, tr.line td {
   height: 1px;
-  background-color: (@bg-categories);
+  background-color: (@bg-track);
   border-bottom: 1px (@bg-categories) solid;
-  transform: scaleY(0.5);
+  /* transform: scaleY(0.5); */
 
 }
 
@@ -732,6 +732,27 @@ td.menu_bottom_right			{width: 0.769em;}
 
 #menuMiddleMedia  > span {
   cursor: pointer;
+}
+
+.menuGradient {
+  width: 20px;
+  position: absolute;
+  display: none;
+}
+
+.menuGradient.left {
+  left: 0;
+  background: linear-gradient(270deg, rgba(78,104,25,0) 0%, (@bg-sub-banner) 100%);
+}
+
+.menuGradient.right {
+  right: 0;
+  background: linear-gradient(90deg, rgba(78,104,25,0) 0%, (@bg-sub-banner) 100%);
+}
+
+.menuGradient.visible {
+  display: block;
+  z-index: 1;
 }
 
 [id^=menuSubMiddle] {
@@ -1585,7 +1606,8 @@ input, select {
   font-size: 16px;
   border-radius: 3px;
   border: solid 1px #bbb;
-  line-height: 1.7em;
+  height: 2.2em;
+  /* line-height: 1.7em; */
   padding: 4px;
   background-color: @bg-forms;
   /* margin-bottom: 3px; */

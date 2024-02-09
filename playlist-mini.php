@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright ï¿½ 2015-2021 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright ï¿½ 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -176,8 +176,8 @@ function evaluateListpos(listpos) {
 }
 
 function evaluateIsplaying(isplaying, idx, duration) {
-    console.log("duration: " + duration);
-    console.log("isplaying: " + isplaying);
+    // console.log("duration: " + duration);
+    // console.log("isplaying: " + isplaying);
   if (!duration) {
     switch(isplaying){
       case 1:

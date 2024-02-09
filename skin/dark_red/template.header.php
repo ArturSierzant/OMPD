@@ -490,6 +490,35 @@ $(function () {
 			ajaxRequest('play.php?action=deletePlayed&menu=playlist');
 	});	
 	
+  var el = $('#menuMiddleMedia');
+  hasOverflow = (el.innerWidth() < el[0].scrollWidth);
+  if (hasOverflow) {
+    $("#gradientRight").addClass("visible");
+  }
+  
+  $("#menuMiddleMedia").on("scroll", function(){
+    // console.log($("#menuMiddleMedia").scrollRight());
+    if ($("#menuMiddleMedia").scrollLeft() == 0) {
+      $("#gradientLeft").removeClass("visible");
+    }
+    else {
+      $("#gradientLeft").addClass("visible");
+    }
+
+    if ($("#menuMiddleMedia").scrollRight() < 2) {
+      $("#gradientRight").removeClass("visible");
+    }
+    else {
+      $("#gradientRight").addClass("visible");
+    }
+
+  })
+  $.fn.extend({
+    scrollRight: function(property) {
+      return this[0].scrollWidth - (this[0].scrollLeft + this[0].clientWidth);
+    }
+  });
+
 });
 
 
@@ -735,9 +764,10 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id, player_h
 ?>
 
 
+<div id="gradientLeft" class="menuGradient left">&nbsp;</div>
+<div id="gradientRight" class="menuGradient right">&nbsp;</div>
 
 <div id="menuMiddleMedia">
-
 <?php 
 if ($cfg['use_tidal']) { 
 ?>
@@ -754,7 +784,7 @@ if ($cfg['use_hra']) {
 }
 ?>
 
-<a href="index.php?action=viewRadio">Radio</a>
+<a href="index.php?action=viewRadio">radio</a>
 <?php echo $header['seperation']; ?>
 
 <span id="list" onclick='toggleSubMiddle("Alpha");'>artist <i id="iconmenuSubMiddleMediaAlpha" class="fa fa-chevron-circle-down"></i></span>
@@ -780,7 +810,6 @@ if ($cfg['use_hra']) {
 	$header['menu'] .= '<a href="index.php?action=viewDR">DR</a>';
 	echo $header['menu'];
 ?>
-
 </div>
 
 

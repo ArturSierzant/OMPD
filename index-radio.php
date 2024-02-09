@@ -108,7 +108,7 @@ $languages = $browser->getLanguages();
   }
   ?>
 
-  $('input').keypress(function (e) {
+  $('#searchRadio :input').keypress(function (e) {
     var key = e.which;
     if(key == 13)  // the enter key code
       {
@@ -142,6 +142,7 @@ $languages = $browser->getLanguages();
       alert( "Request failed: " + textStatus );	
     }); 
   }
+
 </script>
 
 <?php

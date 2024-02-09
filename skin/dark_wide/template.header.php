@@ -563,6 +563,45 @@ var request = $.ajax({
 		}
 	});
 
+  function checkMpdsStatus () {
+    var request = $.ajax({  
+      url: "ajax-check-status.php",  
+      type: "POST",
+      dataType: "json"
+      }); 
+
+    request.done(function(data) {
+      if (data) {
+        $.each(data, function(index, value){
+            // console.log ("data: " + data[index]["player_id"] + data[index]["state"] );
+          
+          if (data[index]["state"] == "NOK") {
+            $("#selectSource option[value='" + data[index]["player_id"] + "']").remove();
+            $("#selectDest option[value='" + data[index]["player_id"] + "']").remove();
+            $("#player" + data[index]["player_id"]).css("opacity","0.4");
+          }
+          else {
+            $("#player" + data[index]["player_id"]).css("opacity","1");
+            var hasOption = $('#selectSource option[value="' + data[index]["player_id"] + '"]');
+            if (hasOption.length == 0){
+              $("#selectSource").append($('<option>', { 
+                value: data[index]["player_id"],
+                text : data[index]["player_name"] 
+              }));
+            }
+            var hasOption = $('#selectDest option[value="' + data[index]["player_id"] + '"]');
+            if (hasOption.length == 0){
+              $("#selectDest").append($('<option>', { 
+                value: data[index]["player_id"],
+                text : data[index]["player_name"] 
+              }));
+            }
+          }
+        });
+      }
+    });
+  };
+
 </script>
 
 

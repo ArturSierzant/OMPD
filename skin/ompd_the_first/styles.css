@@ -587,7 +587,6 @@ table.border {
 tr.line, td.line {
   height: 1px;
   background-color: #E0E0E0;
-  
   border-bottom: 1px #E0E0E0 solid;
   transform: scaleY(0.5);
 
@@ -807,6 +806,12 @@ td.menu_bottom_right			{width: 0.769em;}
 
 #menuMiddleMedia  > span {
   cursor: pointer;
+}
+
+.menuGradient {
+  width: 20px;
+  position: absolute;
+  display: none;
 }
 
 [id^=menuSubMiddle] {
@@ -2113,7 +2118,7 @@ div.trackNumber {
 div.footer_line {
     width: 100%; 
     border-top: 0.2em solid #FE5C00;
-    //margin-top: 0.7em;
+    /* margin-top: 0.7em; */
     }
 
 td.icon {
@@ -2402,15 +2407,16 @@ iframe.full {
       padding: 0 5px 0 0;
       /* border: 1px solid #dedede; */
       border: 1px solid #dedede;
-
       border-top: 0px;
       text-align: right;
       /* border-top: 0px; */
     }	
 
-    
-    
-.menuSubStarSave {
+  #playlist td[colspan] {
+    width: 100%;
+  }
+
+  .menuSubStarSave {
   /* background-color: #f5f5f5; */
   padding: 0.2em;
   border-top: solid 1px #eee;

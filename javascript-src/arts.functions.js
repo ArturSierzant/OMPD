@@ -796,7 +796,8 @@ function goSearch () {
 };
 
 function toggleChangePlayer() {
-	ajaxRequest('ajax-evaluate-status.php', evaluateVolume);
+  checkMpdsStatus();
+  ajaxRequest('ajax-evaluate-status.php', evaluateVolume);
 	$('#iconSearchToggler').removeClass("icon-selected-main-menu");
 	$('#iconVolumeToggler').removeClass("icon-selected-main-menu");
 	$('#searchFormAll').slideUp( "slow", function() {});
