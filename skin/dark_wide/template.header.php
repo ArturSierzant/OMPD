@@ -18,7 +18,7 @@ require_once('include/play.inc.php');
 <link rel="icon" type="image/png" sizes="196x196" href="image/favicon.png?v=2">
 
 
-<script type="text/javascript" src="jquery/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="jquery/jquery-3.7.1.min.js"></script>
 <script type="text/javascript" src="javascript-src/spin.min.js"></script>
 <script type="text/javascript" src="javascript-src/arts.functions.js?<?php echo filemtime('javascript-src/arts.functions.js') ?>"></script>
 <script type="text/javascript" src="javascript-src/jquery.longpress.js"></script>
@@ -565,7 +565,8 @@ var request = $.ajax({
 
   function checkMpdsStatus () {
     var request = $.ajax({  
-      url: "ajax-check-status.php",  
+      url: "ajax-check-status.php",
+      data: {'playerId': playerId},
       type: "POST",
       dataType: "json"
       }); 

@@ -407,7 +407,7 @@ for ($i=0; $i < $listlength; $i++) {
     }
   }
 ?>
-<tr class="<?php if ($i == $listpos) echo 'select'; else echo ($i & 1) ? 'even mouseover' : 'odd mouseover'; ?>" id="track<?php echo $i; ?>" style="display:table-row;">
+<tr class="line <?php if ($i == $listpos) echo 'select'; else echo ($i & 1) ? 'even mouseover' : 'odd mouseover'; ?>" id="track<?php echo $i; ?>" style="display:table-row;">
   
   <td class="small_cover">
   <a id="track<?php echo $i; ?>_image" href="javascript:ajaxRequest('play.php?action=playIndex&amp;index=<?php echo $i ?>&amp;menu=playlist',evaluateListpos);"><img loading="lazy" decoding="async" src="<?php echo $src; ?>" alt="" width="100%"></a></td>
@@ -531,7 +531,7 @@ for ($i=0; $i < $listlength; $i++) {
   </td>
 </tr>
 
-<tr id="track-line<?php echo $i; ?>" class="line"><td colspan="12"></td></tr>
+<!-- <tr id="track-line<?php echo $i; ?>"><td colspan="12"></td></tr> -->
 <?php
   moveSubMenu($i, $bottom);
   }
@@ -692,7 +692,7 @@ function evaluateStatus(data) {
         query_title = title.toString().replace(/'/g,"");
       }
       document.getElementById('lyrics').innerHTML = '<a href="javascript: ajaxRequest(\'ajax-lyrics.php?artist=' + query_artist + '&title=' + query_title + '\',evaluateLyrics);"><i id="lyrics_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>'; 
-      document.getElementById('lyrics1').innerHTML = '<a href="javascript: ajaxRequest(\'ajax-lyrics.php?artist=' + query_artist + '&title=' + query_title + '\',evaluateLyrics);"><i id="lyrics1_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>&nbsp;&bull;'; 
+      document.getElementById('lyrics1').innerHTML = '<a href="javascript: ajaxRequest(\'ajax-lyrics.php?artist=' + query_artist + '&title=' + query_title + '\',evaluateLyrics);"><i id="lyrics1_search_icon" class="fa fa-search"></i>&nbsp;Lyrics</a>&nbsp;&bull;';
     }
     
     data.max = data.Time;

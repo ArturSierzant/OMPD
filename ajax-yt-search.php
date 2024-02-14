@@ -167,7 +167,7 @@ if ($i > 0) {
 		$even_odd = ($i++ & 1) ? 'even' : 'odd';
 		$tracksList .= '
 		
-		<tr class="' . $even_odd . ' mouseover">
+		<tr class="line ' . $even_odd . ' mouseover">
 			<td class="icon">
 			<span id="menu-track'. $i .'">
 			<div onclick="toggleMenuSub(' . $i . ');">

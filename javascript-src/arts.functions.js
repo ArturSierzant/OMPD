@@ -795,16 +795,18 @@ function goSearch () {
 	$('#searchFormAll').submit();
 };
 
+
 function toggleChangePlayer() {
-  checkMpdsStatus();
+  // checkMpdsStatus();
   ajaxRequest('ajax-evaluate-status.php', evaluateVolume);
 	$('#iconSearchToggler').removeClass("icon-selected-main-menu");
 	$('#iconVolumeToggler').removeClass("icon-selected-main-menu");
 	$('#searchFormAll').slideUp( "slow", function() {});
 	$('#volumeArea').slideUp( "slow", function() { });
 	if ($('#playerList').css("display")=="none"){
-		$('#playerList').slideDown( "slow", function() {});
+    $('#playerList').slideDown( "slow", function() {});
 		$('#iconPlayerToggler').addClass("icon-selected-main-menu");
+    checkMpdsStatus();
 	}
 	else {
 		$('#playerList').slideUp( "slow", function() { });

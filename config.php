@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright ï¿½ 2015-2021 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright ï¿½ 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -1381,7 +1381,18 @@ function editTidal() {
 </tr>
 <tr class="even">
 <td></td>
-<td colspan="4"><b>client_id</b> and <b>client_secret</b> are required to login to Tidal. You can try to find them in the Internet or get your own from FireTV stick (or other limited input devices). Instructions can be found <a href="https://ompd.pl/getting-tidal-login-data" target="_blank">here</a>.</td>
+<td colspan="4"><b>client_id</b> and <b>client_secret</b> are required to login to Tidal. You can get them from FireTV stick (or other limited input devices). Instructions can be found <a href="https://ompd.pl/getting-tidal-login-data" target="_blank">here</a>.<br/>
+There is also possibility to get them from Internet - for example from <a href="https://github.com/yaronzz/Tidal-Media-Downloader" target="_blank">Tidal-Media-Downloader</a> project: <div class="buttons" style="display:inline;"><span id="getKeys">&nbsp;try now</span></div>
+</td>
+</tr>
+<tr>
+  <td colspan="5">
+    <div id="tidalKeys" style="display:none;">
+    <span id="albumsLoadingIndicator">
+      <i class="fa fa-cog fa-spin icon-small"></i> Trying to get keys...
+    </span>
+    </div>
+  </td>
 </tr>
 <tr class="even">
   <td></td>
@@ -1490,6 +1501,23 @@ function saveTidalSettings(){
     }
   });
 };
+
+$("#getKeys").on("click",function(){
+  $("#tidalKeys").slideDown();
+  $.ajax({
+    url: "ajax-tidal-keys.php",  
+    type: "POST",
+    dataType: "html",
+    success: function(data) {
+      $("#tidalKeys").html(data);
+    },
+    error: function(data) {
+      $("#tidalKeys").html("Error getting data");
+    }
+    
+  })
+});
+
 </script>
 
 

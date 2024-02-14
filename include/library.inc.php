@@ -741,6 +741,24 @@ function logoutTidal() {
 
 
 //  +------------------------------------------------------------------------+
+//  | Get Tidal API keys                                                     |
+//  +------------------------------------------------------------------------+
+function getTidalAPIkeys() {
+  // $keysUrl = "https://api.github.com/gists/48d01f5a24b4b7b37f19443977c22cd6";
+  $keysUrl = "https://gist.githubusercontent.com/yaronzz/48d01f5a24b4b7b37f19443977c22cd6/raw/5ffe4b3af4779827c7a051dfdfbfa84078d43049/tidal-api-key.json";
+  $data = @file_get_contents($keysUrl);
+  if ($data === false) {
+    $error = error_get_last();
+    return "HTTP request failed. Error was: " . $error['message'];
+  } else {
+    // $keys = json_decode(file_get_contents($keysUrl),true);
+    $keys = json_decode($data,true);
+    return $keys;
+  }
+  
+}
+
+//  +------------------------------------------------------------------------+
 //  | Albums from Tidal                                                      |
 //  +------------------------------------------------------------------------+
 function showAlbumsFromTidal($artist, $size, $ajax, $tidalArtistId) {
@@ -1612,7 +1630,7 @@ function tidalTracksList($tracks, $i = 0, $playlist_type = '') {
 			$even_odd = ($i++ & 1) ? 'even' : 'odd';
 			$tracksList .= '
 			
-			<tr class="' . $even_odd . ' mouseover">
+			<tr class="line ' . $even_odd . ' mouseover">
 				<td class="icon">
 				<span id="menu-track'. $i .'">
 				<div onclick="toggleMenuSub(' . $i . ');">
@@ -2721,7 +2739,7 @@ function tidalUserPlaylistItem($plId, $plName, $description, $type = 'playlist')
     $n = 'Mix';
   }
   ?>
-  <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
+  <tr class="line <?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
     <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=tidal_' . $plId . '&amp;menu=favorite&amp;type=' . $type . '\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();"><i id="play_tidal_' . $plId . '" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
     
     <td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=addTidalList&amp;tidal_id=tidal_' . $plId . '&amp;menu=favorite&amp;type=' . $type . '\',evaluateAdd);" onMouseOver="return overlib(\'Add to playlist\');" onMouseOut="return nd();"><i id="add_tidal_' . $plId . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>'; ?></td>

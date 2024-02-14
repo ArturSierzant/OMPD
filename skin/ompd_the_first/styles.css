@@ -225,7 +225,7 @@ i:active {
     right: 0;
   }
   .album-info-area-right {
-    overflow: auto; 
+    /* overflow: auto;  */
     width: 58%;
     /*min-width:48%;*/
     float:right;
@@ -567,6 +567,7 @@ table {
   font-size: 1em;
   /*font-weight: normal;*/	
   width: 100%;
+  border-collapse: collapse;
   }
 
 
@@ -585,11 +586,10 @@ table.border {
 
 
 tr.line, td.line {
-  height: 1px;
-  background-color: #E0E0E0;
+  /* height: 1px; */
+  /* background-color: #F0F0F0; */
   border-bottom: 1px #E0E0E0 solid;
-  transform: scaleY(0.5);
-
+  /* transform: scaleY(0.5); */
 }
 
 td.fullscreen {
@@ -1146,6 +1146,7 @@ div.playlist_status_on_border	{border: solid 1px rgb(77, 144, 254);}
   cursor: pointer;
   font-size: 1.4em;
   max-width: 1.5em;
+  width: 1.5em;
   }
 
 .pl-tdr {
@@ -2198,12 +2199,16 @@ td.time {
   padding-left: 0.4em;
   }
 
-
+  td.time_w
+  {
+    width: 3em;
+    max-width: 3em;
+  }
 
   
 td.small_cover, td.small_cover_md {
-  width: 4.3em;
-  height: 4.3em;
+  width: 4em;
+  height: 4em;
   /*padding: 2px 0px 2px 0px;*/
   line-height: 0;
   }
@@ -2412,9 +2417,9 @@ iframe.full {
       /* border-top: 0px; */
     }	
 
-  #playlist td[colspan] {
+ /*  #playlist td[colspan] {
     width: 100%;
-  }
+  } */
 
   .menuSubStarSave {
   /* background-color: #f5f5f5; */

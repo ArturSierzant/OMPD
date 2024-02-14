@@ -193,7 +193,7 @@ i:active {
     right: 0;
   }
   .album-info-area-right {
-    overflow: auto; 
+    /* overflow: auto; */ 
     width: 58%;
     float:right;
     padding-left: 5px;
@@ -496,6 +496,7 @@ table {
   border: 0px;
   font-size: 1em;
   width: 100%;
+  border-collapse: collapse;
   }
 
 
@@ -515,8 +516,8 @@ table.border {
 
 
 tr.line, td.line, tr.line td {
-  height: 1px;
-  background-color: (@bg-track);
+  /* height: 1px; */
+  /* background-color: (@bg-track); */
   border-bottom: 1px (@bg-categories) solid;
   /* transform: scaleY(0.5); */
 
@@ -1640,7 +1641,9 @@ input.login {
 
 
 input.edit {
-  width: 13.4615em;
+  /* width: 13.4615em; */
+  width: 100%;
+  max-width: 26em;
 }
 
 
@@ -2385,6 +2388,10 @@ h1 {
 
 .paginator-nav span {
   margin: 0.6em 0; 
+}
+
+.paginator-nav select{
+  height: auto;
 }
 
 .buttons {

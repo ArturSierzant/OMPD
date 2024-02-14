@@ -221,7 +221,7 @@ i:active {
     right: 0;
   }
   .album-info-area-right {
-    overflow: auto;
+    /* overflow: auto; */
     width: 58%;
     float: right;
     padding-left: 5px;
@@ -519,6 +519,7 @@ table {
   border: 0px;
   font-size: 1em;
   width: 100%;
+  border-collapse: collapse;
 }
 table.fullscreen {
   width: 100%;
@@ -532,10 +533,10 @@ table.border {
 }
 tr.line,
 td.line {
-  height: 1px;
-  background-color: #ececec;
+  /* height: 1px; */
+  /* background-color: #ececec; */
   border-bottom: 1px #ececec solid;
-  transform: scaleY(0.5);
+  /* transform: scaleY(0.5); */
 }
 td.fullscreen {
   width: 100%;
@@ -1018,7 +1019,7 @@ div.playlist_indicator {
   color: #ffffff;
 }
 div.playlist_status_off {
-  text-shadow: -1px 0 #bdbdbd, 0 1px #bdbdbd, 1px 0 #bdbdbd, 0 -1px #bdbdbd;
+  /* text-shadow: -1px 0 #bdbdbd, 0 1px #bdbdbd, 1px 0 #bdbdbd, 0 -1px #bdbdbd; */
 }
 div.playlist_status_on {
   color: #ffa500;

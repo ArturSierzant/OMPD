@@ -761,7 +761,7 @@ if ($cfg['show_multidisc'] == true && $multidisc_count > 0) {
 ?>
 <div id="multidisc">
 <table>
-<tr class="line"><td colspan="4"></td></tr>
+<!-- <tr class="line"><td colspan="4"></td></tr> -->
 <tr class="header">
 <td colspan="4">
 Other discs in this set:
@@ -777,8 +777,9 @@ while ($multidisc = mysqli_fetch_assoc($query_md)) {
     $disc = mysqli_fetch_assoc($queryDisc);
     $disc = ' (Disc ' . $disc['disc'] . ')';
   };
-	echo '<tr class="line"><td colspan="4"></td></tr>
-	<tr>
+	// echo '<tr class="line"><td colspan="4"></td></tr>';
+	echo '
+  <tr>
 	<td class="small_cover_md"><a><img src="image.php?image_id=' . rawurlencode($multidisc['image_id']) . '" width="100%"></a></td>
 	<td><a href="index.php?action=view3&amp;album_id=' . rawurlencode($multidisc['album_id']) . '">' . $multidisc['album'] . $disc . '</a></td>
 	<td class="icon">
@@ -790,7 +791,7 @@ while ($multidisc = mysqli_fetch_assoc($query_md)) {
 	</tr>'; 
 }
 if ($album_versions_count == 0) {
-echo '<tr class="line"><td colspan="4"></td></tr>';
+// echo '<tr class="line"><td colspan="4"></td></tr>';
 }
 ?>
 
@@ -805,7 +806,7 @@ if ($cfg['show_album_versions'] == true && $album_versions_count > 0) {
 ?>
 <div id="album_versions">
 <table>
-<tr class="line"><td colspan="4"></td></tr>
+<!-- <tr class="line"><td colspan="4"></td></tr> -->
 <tr class="header">
 <td colspan="4">
 Other versions of this album:
@@ -829,8 +830,8 @@ while ($multidisc = mysqli_fetch_assoc($query_av)) {
     $disc = mysqli_fetch_assoc($queryDisc);
     $disc = ' (Disc ' . $disc['disc'] . ')';
   };
-  echo '<tr class="line"><td colspan="4"></td></tr>
-  <tr>
+  // echo '<tr class="line"><td colspan="4"></td></tr>';
+  echo '<tr>
   <td class="small_cover_md"><a><img src="image.php?image_id=' . rawurlencode($multidisc['image_id']) . '" width="100%"></a></td>
   <td><a href="index.php?action=view3&amp;album_id=' . rawurlencode($multidisc['album_id']) . '">' . $multidisc['album'] . $disc . '</a></td>
   <td class="icon">
@@ -842,7 +843,7 @@ while ($multidisc = mysqli_fetch_assoc($query_av)) {
   </tr>'; 
 }
 ?>
-<tr class="line"><td colspan="4"></td></tr>
+<!-- <tr class="line"><td colspan="4"></td></tr> -->
 </table>
 </div>
 

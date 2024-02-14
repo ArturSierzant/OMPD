@@ -137,7 +137,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 					<td class="small_cover_md">Disc #<?php echo $disc;?></td>
 					<td></td>
 				</tr>
-				<tr class="line"><td colspan="5"></td></tr>
+				<!-- <tr class="line"><td colspan="5"></td></tr> -->
 			</table>
 		</div>
 		<?php } ?>
@@ -173,7 +173,7 @@ for ($disc; $disc <= $max_disc; $disc++) {
 		//while ($track = mysqli_fetch_assoc($query)) { 
 		foreach ($tracks as $track) { 
 		?>
-			<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
+			<tr class="line <?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 				<?php 
 				$position_id = $i + $disc * 100;
 				?>
@@ -275,9 +275,8 @@ for ($disc; $disc <= $max_disc; $disc++) {
 				<td align="right"><?php echo formattedTime($track['miliseconds']); ?></td>
 				<td></td>
 			</tr>
-			<tr class="line">
-				<td></td>
-				<td colspan="16"></td>
+			<tr>
+				<!-- <td class="line" colspan="16"></td> -->
 			</tr>
 
 			<tr>

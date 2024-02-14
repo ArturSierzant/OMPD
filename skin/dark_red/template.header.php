@@ -18,7 +18,7 @@ require_once('include/play.inc.php');
 <link rel="icon" type="image/png" sizes="196x196" href="image/favicon.png?v=2">
 
 
-<script type="text/javascript" src="jquery/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="jquery/jquery-3.7.1.min.js"></script>
 <script type="text/javascript" src="javascript-src/spin.min.js"></script>
 <script type="text/javascript" src="javascript-src/arts.functions.js?<?php echo filemtime('javascript-src/arts.functions.js') ?>"></script>
 <script type="text/javascript" src="javascript-src/jquery.longpress.js"></script>
@@ -214,7 +214,7 @@ $(function () {
 	?>
 	
 	ajaxRequest('ajax-evaluate-status.php', evaluateVolume);
-	
+	checkMpdsStatus();
 	<?php 
 	}; 
 	?>
@@ -575,25 +575,52 @@ function setMiniplayer(){
 		$(".wrapper, .bottom, .back-to-top, div.playlist_button").toggleClass("miniplayer");
 }
 
-var request = $.ajax({  
-		url: "ajax-check-status.php",  
-		type: "POST",
-		dataType: "json"
-		}); 
-
-	request.done(function(data) {
-		if (data) {
-      $.each(data, function(index, value){
-          //console.log ("data: " + data[index]["player_id"] + data[index]["state"] );
-        if (data[index]["state"] == "NOK") {
-          $("#player" + data[index]["player_id"]).css("opacity","0.4");
-          $("#selectSource option[value='" + data[index]["player_id"] + "']").remove();
-          $("#selectDest option[value='" + data[index]["player_id"] + "']").remove();
-        }
-      });
-		}
-	});
+function checkMpdsStatus () {
+  $.each($('#selectPlayer [id^="player"]'), function(){
+    var playerId = ($(this).attr("id").replace("player",""));
   
+    var request = $.ajax({  
+      url: "ajax-check-status.php",
+      data: {'playerId': playerId},
+      type: "POST",
+      dataType: "json"
+      }); 
+
+    request.done(function(data) {
+      if (data) {
+        $.each(data, function(index, value){
+            // console.log ("data: " + data[index]["player_id"] + data[index]["state"] );
+          
+          if (data[index]["state"] == "NOK") {
+            $("#selectSource option[value='" + data[index]["player_id"] + "']").remove();
+            $("#selectDest option[value='" + data[index]["player_id"] + "']").remove();
+            $("#player" + data[index]["player_id"]).css("opacity","0.4");
+          }
+          else {
+            $("#player" + data[index]["player_id"]).css("opacity","1");
+            var hasOption = $('#selectSource option[value="' + data[index]["player_id"] + '"]');
+            if (hasOption.length == 0){
+              $("#selectSource").append($('<option>', { 
+                value: data[index]["player_id"],
+                text : data[index]["player_name"] 
+              }));
+            }
+            var hasOption = $('#selectDest option[value="' + data[index]["player_id"] + '"]');
+            if (hasOption.length == 0){
+              $("#selectDest").append($('<option>', { 
+                value: data[index]["player_id"],
+                text : data[index]["player_name"] 
+              }));
+            }
+          }
+        });
+      }
+    });
+  });
+};
+
+
+
 </script>
 
 

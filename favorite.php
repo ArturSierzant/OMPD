@@ -89,7 +89,7 @@ function home() {
 	<td class="icon"></td>
 	<td class="space"></td>
 </tr>
-<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
+<tr class="line <?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 	
 	<td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;random=new\',evaluateAdd);" onMouseOver="return overlib(\'Play random tracks\');" onMouseOut="return nd();"><i id="play_random" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
 	
@@ -126,7 +126,7 @@ function home() {
 			</tr>' . "\n";
 			//echo '<tr class="line"><td colspan="11"></td></tr>' . "\n";
 		} ?>
-<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
+<tr class="line <?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
 	
 	<td><?php if ($cfg['access_play']) echo '<a href="javascript:ajaxRequest(\'play.php?action=playSelect&amp;favorite_id=' . $favorite['favorite_id'] . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play\');" onMouseOut="return nd();"><i id="play_' . $favorite['favorite_id'] . '" class="fa fa-play-circle-o fa-fw icon-small"></i></a>'; ?></td>
 	

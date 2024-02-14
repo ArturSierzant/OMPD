@@ -22,10 +22,12 @@ global $cfg, $db;
 require_once('include/initialize.inc.php');
 require_once('include/play.inc.php');
 
+$playerId = $_POST['playerId'];
+
 if ($cfg['player_type'] == NJB_MPD) {
   $data = array();
 
-  $query = mysqli_query($db,'SELECT player_name, player_type, player_id, player_host, player_port FROM player ORDER BY player_name');
+  $query = mysqli_query($db,'SELECT player_name, player_type, player_id, player_host, player_port FROM player WHERE player_id = ' . $playerId . ' ORDER BY player_name');
   
   while ($player = mysqli_fetch_assoc($query)) {
     $ping = mpdSilent('ping',$player['player_host'],$player['player_port']);
