@@ -565,9 +565,11 @@ tr.select td:nth-child(1) {
   /* background-color: (@active-nav); */
 }
 tr.select #trackNumber,
-tr.select .trackNumber {
+tr.select .trackNumber,
+tr.select .trackNumber div {
   color: #fdf6e3;
   background-color: #ffa500;
+  transition: all 300ms linear;
 }
 tr.even td,
 tr.odd td,
@@ -594,7 +596,7 @@ td.menu_top {
   color: #bbbbbb;
   text-align: center;
   font-size: 0.9em;
-  border-top: 0.3em solid #6b6f73;
+  border-top: 0.3em solid #0a0b0b;
   width: 9em;
   vertical-align: middle;
   cursor: pointer;
@@ -663,13 +665,14 @@ td.menu_bottom_right {
 #activePlayer,
 #currentVolume {
   font-size: 0.5em;
-  padding-top: 3px;
+  /* padding-top: 3px; */
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
   position: absolute;
   text-transform: uppercase;
   white-space: nowrap;
+  bottom: 4px;
 }
 #volumeValue {
   display: inline-block;
@@ -1007,7 +1010,7 @@ div.playlist_button {
 div.playlist_button.miniplayer {
   background-color: #6b6f73;
   border: solid 1px #6b6f73;
-  color: #6b6f73;
+  /* color: #6b6f73; */
 }
 div.playlist_button_play {
   width: 6.1538em;
@@ -1538,6 +1541,7 @@ select {
   line-height: 1.7em;
   padding: 4px;
   background-color: #fefefe;
+  height: 2.2em;
 }
 #updateDir,
 #randomDir {
@@ -2212,6 +2216,9 @@ h1 {
   text-align: center;
   vertical-align: middle;
 }
+.paginator-nav select {
+  height: auto;
+}
 .paginator-nav span {
   margin: 0.6em 0;
 }
@@ -2421,12 +2428,26 @@ h1 {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .artist_bio_pic {
-  background-size: 200000% 200000%;
+  /* background-size: 5000% 5000%; */
+  /* background-size: 1300px; */
+  background-size: cover;
+  background-repeat: no-repeat;
   height: 270px;
-  padding: 10px 0;
+  /* padding: 10px 0; */
   text-align: center;
+  margin-bottom: 1px;
+  /* background-position-y: -400px; */
+  background-position: center;
 }
+
+.artist_bio_pic div {
+  backdrop-filter: blur(15px);
+  background-color: rgba(0, 0, 0, 0.55);
+  padding: 10px 0;
+}
+
 .artist_bio_pic img {
   display: block;
   margin-left: auto;
@@ -2435,6 +2456,7 @@ h1 {
   max-width: 250px;
   border-radius: 10%;
 }
+
 .artist_bio_pic_not_found {
   font-size: 210px;
   width: 260px;

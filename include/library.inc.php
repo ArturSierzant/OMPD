@@ -1245,6 +1245,7 @@ function artistBio($artistAll) {
   foreach ($artistAll['rows'] as $row) {
     if ($row['modules'][0]['bio']['text']) {
       return formatBio($row['modules'][0]['bio']);
+      //return ($row['modules'][0]['bio']);
     }
   }
   return false;
@@ -1353,14 +1354,17 @@ function artistLinks($artistAll) {
 //  +------------------------------------------------------------------------+
 function formatBio($bio) {
 	global $cfg, $db;
+
+	$albumURL="index.php?action=view3&album_id=tidal_";
+  $artistURL = "index.php?action=view2&order=year&tidalArtistId=";
 	
-	$bio = str_replace("<br/><br/>","<br/>",$bio);
+  $bio = str_replace("<br/><br/>","<br/>",$bio);
 	$bio = str_replace("<br/>","<br/><br/>",$bio);
 	$bio = str_replace("[/wimpLink]","</a>",$bio);
-	$bio = str_replace('[wimpLink artistId="','<a target="_blank" href="' . TIDAL_ARTIST_URL,$bio);
-	$bio = str_replace('[wimpLink albumId="','<a target="_blank" href="' . TIDAL_ALBUM_URL,$bio);
+	$bio = str_replace('[wimpLink artistId="','<a href="' . $artistURL,$bio);
+	$bio = str_replace('[wimpLink albumId="','<a href="' . $albumURL,$bio);
 	$bio = str_replace('"]','">',$bio);
-	//$bio = $bio . "<br/><br/>";
+
 	return $bio;
 	
 }

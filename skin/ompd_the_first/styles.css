@@ -77,17 +77,17 @@ i:active {
 }
 
 @media all and (max-width: 320px) {
-  html {font-size: 11px; font-weight: 300;}
+  html {font-size: 11px; font-weight: normal;}
 }
 
 
 @media all and (min-width: 321px) and (max-width: 529px) {
-  html {font-size: 12px; font-weight: 300;}
+  html {font-size: 12px; font-weight: normal;}
 }
 
 @media all and (max-width: 539px) {
 
-  body {font-size: 12px; font-weight: 300;}
+  /* body {font-size: 12px; font-weight: normal;} */
   td.side-margin {width: 0px;}
   td.menu_top_left {display:none;}
   .full 	{
@@ -147,10 +147,9 @@ i:active {
   /*div.playlist_title_album {margin-top: 3px;}*/
   #track-progress {width: 80%;}
   #info_area {
-    //background-image: url(img/info_area_background.png);
+    /* background-image: url(img/info_area_background.png); */
     background-repeat: repeat;
     /* margin: 0 2px; */
-
     position: relative;
   }
     
@@ -229,8 +228,9 @@ i:active {
     width: 58%;
     /*min-width:48%;*/
     float:right;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 0 5px 5px 5px;
+    /* padding-left: 5px;
+    padding-right: 5px; */
   }
   .pl-track-info {width: 100%;}
   .sign-ctrl {font-size: 1.5em;}
@@ -620,10 +620,11 @@ tr.select td:nth-child(1) {
   background-color: #fe5c00;
 }
 
-tr.select #trackNumber, tr.select .trackNumber {
+tr.select #trackNumber, tr.select .trackNumber, tr.select .trackNumber div {
     /* line-height: 3.29em; */
     color: #f5f5f5;
     background-color: #fe5c00;
+    transition: all 300ms linear;
 }
 
 tr.even td, tr.odd td, tr.select td {
@@ -720,7 +721,7 @@ td.menu_bottom_right			{width: 0.769em;}
 
 #activePlayer, #currentVolume {
   font-size: 0.5em;
-  padding-top: 3px;
+  /* padding-top: 3px; */
   overflow: hidden;
   text-overflow: ellipsis;
   /* max-width: 5em; */
@@ -728,6 +729,7 @@ td.menu_bottom_right			{width: 0.769em;}
   position: absolute;
   text-transform: uppercase;
   white-space: nowrap;
+  bottom: 4px;
 }
 
 #volumeValue {
@@ -1066,14 +1068,9 @@ div.playlist_button.miniplayer{
 }
 
 
-div.playlist_button.miniplayer{
-  background-color: (@bg-banner);
-  border: solid 1px (@bg-banner);
-  color: @bg-banner;
+div.playlist_button_play { 
+  width: 6.1538em;
 }
-
-div.playlist_button_play		{ width: 6.1538em;
-              }
 
 div.playlist_indicator { 
   /* padding: 0.1538em 0; */
@@ -1299,11 +1296,10 @@ table.tab_border {
 table.ok a:link					{color: #529600; text-decoration: underline;}
 table.ok a:visited				{color: #529600; text-decoration: underline;}
 table.ok {
-
   border: 1px solid #529600;
   background-color: #EFFFD6;
-
 }
+
 table.ok tr.line {
   height: 1px;
   background-color: #529600;
@@ -1689,6 +1685,7 @@ input, select {
   border: solid 1px #bbb;
   line-height: 1.7em;
   padding: 4px;
+  height: 2.2em;
 }
 
 #updateDir, #randomDir {
@@ -2496,38 +2493,36 @@ h1 {
   opacity: 0.7;
 }
 
-}
-    
- .search_artist {
+.search_artist {
   line-height: 1px;
   padding: 3px 0px;
   background-color: #fff;
- }
+}
  
  
- .search_artist p {
+.search_artist p {
   padding-left: 4px;
   line-height: 2em;
- }
+}
  
- [id^=searchResults] {
+[id^=searchResults] {
   display: none;
- }
+}
  
- .back-to-top {
-    position: fixed;
-    bottom: 3.3em;
-    right: 10px;
+.back-to-top {
+  position: fixed;
+  bottom: 3.3em;
+  right: 10px;
   height: 3.2em;
   width: 3.2em;
-    text-decoration: none;
-    color: #6695E5;
-    background-color: rgba(246, 246, 246, 0.80);
-    font-size: 1em;
-    /*padding: 0.55em 1em;*/
+  text-decoration: none;
+  color: #6695E5;
+  background-color: rgba(246, 246, 246, 0.80);
+  font-size: 1em;
+  /*padding: 0.55em 1em;*/
   padding-left: 0.74em;
   padding-top: 0.68em;
-    display: none;
+  display: none;
   cursor: pointer;
   -moz-border-radius: 50%;
   border-radius: 50%;
@@ -2560,6 +2555,9 @@ h1 {
   vertical-align: middle;
 }
 
+.paginator-nav select {
+  height: auto;
+}
 .paginator-nav span {
   margin-top: 0.6em;
 }
@@ -2795,13 +2793,7 @@ h1 {
   background-color: rgba(0, 0, 0, 0.55);
   padding: 10px 0;
 }
-/* .artist_bio_pic {
-  background-size: 2000% 2000%;
-  height: 270px;
-  margin-bottom: 5px;
-  padding: 10px 0;
-  text-align: center;
-} */
+
 .artist_bio_pic img {
   display: block;
   margin-left: auto;

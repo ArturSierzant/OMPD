@@ -309,7 +309,7 @@ global $cfg, $db;
   <td class="icon"></td>
 </tr>
 <?php 
-$query = mysqli_query($db, "SELECT * FROM config WHERE name='quick_search'");
+$query = mysqli_query($db, "SELECT * FROM config WHERE name='quick_search' ORDER BY `index`");
 while ($quick_search = mysqli_fetch_assoc($query)) {
   $idx = $quick_search['index'];
   $value = json_decode($quick_search['value']);

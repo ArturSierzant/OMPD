@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright ï¿½ 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -59,7 +59,7 @@ if (in_array($cfg['menu'], array('favorite', 'playlist', 'config')) == false)
 if (time() - hexdec($timestamp) > 2) {
 	$expired = bbcode($message);
 	$message = '<strong>Message has expired</strong><br><div id="show" style="display: block;"><a href="javascript:showHide(\'show\', \'hide\');">Message</a></div>';
-	$message .= '<div id="hide" style="display: none;"><a href="javascript:showHide(\'show\', \'hide\');"><img src="' . $cfg['img'] . 'small_hide.png" alt="" class="small">Message</a><br>' . $expired . '</div>';
+	$message .= '<div id="hide" style="display: none;"><a href="javascript:showHide(\'show\', \'hide\');">Message</a><br>' . $expired . '</div>';
 }
 else
 	$message = bbcode($message);

@@ -51,6 +51,11 @@ $sort = get('sort') == 'desc' ? 'desc' : 'asc';
 $qsType = (int) get('qsType') or $qsType = false;
 $tileSize = $_GET['tileSizePHP'];
 
+if ($tidalArtistId && !$artist && $cfg['use_tidal']){
+  $res = $t->getArtistAll($tidalArtistId);
+  $artist = $artistRequested = $res['title'];
+}
+
 //$artist = moveTheToEnd($artist);
 
 $sort_artist			= 'asc';

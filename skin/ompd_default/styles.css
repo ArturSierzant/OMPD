@@ -56,13 +56,13 @@ i:active {
 @media all and (max-width: 320px) {
   html {
     font-size: 11px;
-    font-weight: 300;
+    font-weight: normal;
   }
 }
 @media all and (min-width: 321px) and (max-width: 529px) {
   html {
     font-size: 12px;
-    font-weight: 300;
+    font-weight: normal;
   }
 }
 @media all and (max-width: 529px) {
@@ -110,8 +110,9 @@ i:active {
   .album-info-area-right {
     width: 100%;
     clear: both;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 0 5px 5px 5px;
+    /* padding-left: 5px; 
+    padding-right: 5px;  */
     min-height: 164px;
   }
   .pl-track-info {
@@ -213,10 +214,12 @@ i:active {
   #image_container {
     float: left;
     width: 39%;
+    /* width:37.7%; */
     min-width: 220px;
   }
   .pl-track-info-right {
     width: 59%;
+    /* width: 61%; */
     position: absolute;
     top: 0;
     bottom: 0;
@@ -225,9 +228,11 @@ i:active {
   .album-info-area-right {
     /* overflow: auto; */
     width: 58%;
+    /* width: 61%; */
     float: right;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 0 5px 5px 5px;
+    /* padding-left: 5px;
+    padding-right: 5px; */
   }
   .pl-track-info {
     width: 100%;
@@ -578,9 +583,11 @@ tr.select td:nth-child(1) {
   /* background-color: (@active-nav); */
 }
 tr.select #trackNumber,
-tr.select .trackNumber {
+tr.select .trackNumber,
+tr.select .trackNumber div {
   color: #fdf6e3;
   background-color: #e74c3c;
+  transition: all 300ms linear;
 }
 tr.even td,
 tr.odd td,
@@ -622,6 +629,9 @@ td.menu_top_config {
   text-align: center;
   font-size: 1.1em;
 }
+/* td.menu_top_config > div:first-of-type {
+  margin-bottom: 4px;
+} */
 td.menu_top_selected {
   color: #ffffff;
   border-top: 4px solid #e74c3c;
@@ -676,13 +686,14 @@ td.menu_bottom_right {
 #activePlayer,
 #currentVolume {
   font-size: 0.5em;
-  padding-top: 3px;
+  /* padding-top: 3px */
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
   position: absolute;
   text-transform: uppercase;
   white-space: nowrap;
+  bottom: 4px;
 }
 #volumeValue {
   display: inline-block;
@@ -1305,6 +1316,9 @@ table.error {
 table.error tr.line {
   height: 1px;
   background-color: Red;
+}
+table.error td {
+  padding: 10px;
 }
 /*  +------------------------------------------------------------------------+
     | Table bar                                                              |
@@ -1985,6 +1999,7 @@ td.play-indicator {
   text-align: center;
   font-size: 3em;
   width: 45px !important;
+  transition: all 300ms linear;
 }
 .blackstar {
   border: solid 1px;

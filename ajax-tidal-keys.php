@@ -28,9 +28,9 @@ $ret = getTidalAPIkeys();
 if (is_array($ret)){
   $keys = $ret['keys'];
   $count = count($keys);
-  $s = "";
-  if ($count > 1) $s = "s";
   if ($count > 0) {
+    $s = "";
+    if ($count > 1) $s = "s";
   ?>
   <h1>Found <?= array_count_values(array_column($keys, 'valid'))['True']; ?> key<?= $s ?> marked as VALID:</h1>
   <table id="tidalApiKeys" class="border">

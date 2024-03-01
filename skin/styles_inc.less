@@ -60,12 +60,12 @@ i:active {
 }
 
 @media all and (max-width: 320px) {
-  html {font-size: 11px; font-weight: 300;}
+  html {font-size: 11px; font-weight: normal;}
 }
 
 
 @media all and (min-width: 321px) and (max-width: 529px) {
-  html {font-size: 12px; font-weight: 300;}
+  html {font-size: 12px; font-weight: normal;}
 }
 
 @media all and (max-width: 529px) {
@@ -100,14 +100,18 @@ i:active {
   }
   
   #playlist {margin: 0 0;}
+
   .pl-track-info-right {width: 100%; clear: both; max-width: 380px; margin: 0 auto;}
+
   .album-info-area-right {
     width: 100%; 
-    clear: both; 
-    padding-left: 5px; 
-    padding-right: 5px; 
+    clear: both;
+    padding: 0 5px 5px 5px;
+    /* padding-left: 5px; 
+    padding-right: 5px;  */
     min-height: 164px;
   }
+
   .pl-track-info {clear:both; width: 100%;float: none; padding-top: 0px;}
   .sign-ctrl {font-size: 2em;}
   .cb-typcn {font-size: 2.5em; top: 2px;}
@@ -183,10 +187,12 @@ i:active {
   #image_container {
     float:left;
     width:39%;
+    /* width:37.7%; */
     min-width:220px;
   }
   .pl-track-info-right {
     width: 59%; 
+    /* width: 61%; */ 
     position: absolute;
     top: 0;
     bottom: 0;
@@ -195,9 +201,11 @@ i:active {
   .album-info-area-right {
     /* overflow: auto; */ 
     width: 58%;
+    /* width: 61%; */
     float:right;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 0 5px 5px 5px;
+    /* padding-left: 5px;
+    padding-right: 5px; */
   }
   .pl-track-info {width: 100%; padding-top: 7px;}
   .sign-ctrl {font-size: 1.5em;}
@@ -551,9 +559,10 @@ tr.select td:nth-child(1) {
   /* background-color: (@active-nav); */
 }
 
-tr.select #trackNumber, tr.select .trackNumber {
+tr.select #trackNumber, tr.select .trackNumber, tr.select .trackNumber div {
     color: (@font-track-playing-active);
     background-color: (@bg-track-playing-active);
+    transition: all 300ms linear;
 }
 
 tr.even td, tr.odd td, tr.select td {
@@ -570,38 +579,40 @@ tr.even td, tr.odd td, tr.select td {
 table.menu_top 			{width: 100%; background-color: (@bg-banner); height: 3.846em;}
 
 td.menu_top_left {
-              width: 10em; 
-              vertical-align: middle; 
-              padding-left: 0px; 
-  }
+  width: 10em; 
+  vertical-align: middle; 
+  padding-left: 0px; 
+}
 
 td.menu_top	{
-            color: (@button-banner);
-            text-align: center;
-            font-size: 0.9em;
-            border-top: 0.3em solid (@bg-banner);
-            width: 9em; 
-            vertical-align: middle;
-            cursor: pointer;
-            transition: all 100ms linear;
-            position: relative;
-            text-transform: uppercase;
-            font-weight: normal;
-            }
+  color: (@button-banner);
+  text-align: center;
+  font-size: 0.9em;
+  border-top: 0.3em solid (@bg-banner);
+  width: 9em; 
+  vertical-align: middle;
+  cursor: pointer;
+  transition: all 100ms linear;
+  position: relative;
+  text-transform: uppercase;
+  font-weight: normal;
+}
 
 
-td.menu_top_config 		{
-            max-width: 3em !important;
-            width: 3em;
-            text-align: center;
-            font-size: 1.1em;
-            }
-            
-            
+td.menu_top_config {
+  max-width: 3em !important;
+  width: 3em;
+  text-align: center;
+  font-size: 1.1em;
+}
+
+/* td.menu_top_config > div:first-of-type {
+  margin-bottom: 4px;
+} */
+
 td.menu_top_selected		{
-            color: (@button-banner-active);
-            border-top: 4px solid (@active-banner);}
-    
+  color: (@button-banner-active);
+  border-top: 4px solid (@active-banner);}
 
 table.menu_middle a:link		{color: (@font-sub-banner); text-decoration: none;}
 table.menu_middle a:visited		{color: (@font-sub-banner); text-decoration: none;}
@@ -637,13 +648,14 @@ td.menu_bottom_right			{width: 0.769em;}
 
 #activePlayer, #currentVolume {
   font-size: 0.5em;
-  padding-top: 3px;
+  /* padding-top: 3px */;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
   position: absolute;
   text-transform: uppercase;
   white-space: nowrap;
+  bottom: 4px;
 }
 
 #volumeValue {
@@ -1283,6 +1295,9 @@ table.error {
 table.error tr.line {
   height: 1px;
   background-color: Red;
+}
+table.error td {
+  padding: 10px;
 }
 
 
@@ -2100,6 +2115,7 @@ td.play-indicator {
   text-align: center;
   font-size: 3em;
   width: 45px !important;
+  transition: all 300ms linear;
   }
 
   
