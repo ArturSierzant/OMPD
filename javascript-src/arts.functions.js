@@ -380,7 +380,7 @@ function getScrollbarWidth() {
 
 function resizeSuggested($tileSize,$containerWidth) {
   if (getScrollbarWidth() > 0) {
-    $('.full').css('height', function() { return ($tileSize + 8); });
+    $('.full').css('height', function() { return ($tileSize + 10); });
   }
   else {
     $('.full').css('height', function() { return ($tileSize + 1); });
@@ -1309,3 +1309,38 @@ function getHraAudioFormat (albumId) {
 	request.fail(function( jqXHR, textStatus ) {
 	}); 
 }
+
+//taken from https://stackoverflow.com/a/52479018
+//handle ctrl+shift+F key combination
+var ctrlPressed = false;
+var shiftPressed = false;
+
+$(document).keydown(function(e) {
+  if (e.which == 17) { //ctrl
+    ctrlPressed = true;
+  }
+  if (e.which == 16) { //shift
+    shiftPressed = true;
+  }
+}).keyup(function(e) {
+  if (e.which == 17) {
+    ctrlPressed = false;
+  }
+  if (e.which == 16) {
+    shiftPressed = false;
+  }
+});
+
+$(document).keydown(function(e) {
+  if (e.which == 70) { //code for F char
+    if(ctrlPressed == true && shiftPressed == true){
+      shiftPressed = false;
+      ctrlPressed = false; //Important! Set ctrlPressed variable to false. Otherwise the code will work everytime you press the space button again
+      toggleSearch();
+    }
+  }
+})
+
+$(function(){
+  $('#searchToggler').prop('title','Shortcut: Shift+Ctrl+F');
+})

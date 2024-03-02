@@ -1316,6 +1316,21 @@ function artistMixes($artistAll) {
 }
 
 
+//  +------------------------------------------------------------------------+
+//  | Artist radio from Tidal                                                |
+//  +------------------------------------------------------------------------+
+function artistRadio($artistAll) {
+  global $cfg, $db, $t;
+
+  foreach ($artistAll['rows'] as $row) {
+    if (strtolower($row['modules'][0]['artistMix']['id'])) {
+      return $row['modules'][0]['artistMix']['id'];
+    }
+  }
+  return false;
+}
+
+
 
 //  +------------------------------------------------------------------------+
 //  | Artist appears on from Tidal                                           |
@@ -3635,7 +3650,7 @@ function formattedMonth($number) {
 //  | HTML                                                                   |
 //  +------------------------------------------------------------------------+
 function html($string) {
-	return htmlspecialchars($string, ENT_SUBSTITUTE, NJB_DEFAULT_CHARSET);
+	return htmlspecialchars($string, ENT_SUBSTITUTE | ENT_QUOTES, NJB_DEFAULT_CHARSET);
 }
 
 

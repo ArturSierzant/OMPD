@@ -465,6 +465,7 @@ $showPlaylists = false;
 $showLinks = false;
 $showAppearsOn = false;
 $mixes = false;
+$radio = false;
 
 if ($cfg['use_tidal']) {
   $artist_name = moveTheToBegining($artistRequested);
@@ -493,6 +494,7 @@ if ($cfg['use_tidal']) {
   $influencers = artistInfluencers($artistAll);
   $playlists = artistPlaylists($artistAll);
   $mixes = artistMixes($artistAll);
+  $radio = artistRadio($artistAll);
   $appearsOn = artistAppearsOn($artistAll);
   $links = artistLinks($artistAll);
 
@@ -1714,6 +1716,32 @@ if ($group_found != 'none') {
 ?>
 <div class="area">
 <?php
+
+//  +------------------------------------------------------------------------+
+//  | Artist radio from Tidal                                                |
+//  +------------------------------------------------------------------------+
+
+if ($cfg['use_tidal'] && $filter == 'whole' && $radio) {
+  $mix = $t->getMixList($radio);
+  $res = $mix['rows'][0]['modules'][0]['mix'];
+  ?>
+  <h1>&nbsp;Artist radio from Tidal</h1>
+  <div class="full" id="<?php echo $radio; ?>">
+  <?php
+      //foreach($mixes['pagedList']['items'] as $res) {
+        $albums = array();
+        $albums['album_id'] = 'tidal_' . $res['id'];
+        $albums['album'] = $res['title'];
+        $albums['cover'] = $res['images']['SMALL']['url'];
+        $albums['artist_alphabetic'] = $res['subTitle'];
+        //draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $res['images']['SMALL']['url'], "mixlist");
+        draw_tile ( $tileSize, $albums, '', 'echo', $res['images']['SMALL']['url'], "mixlist");
+      //}
+  ?>
+  </div>
+  <?php
+  }
+  
 
 //  +------------------------------------------------------------------------+
 //  | Artist mixes from Tidal                                                |
