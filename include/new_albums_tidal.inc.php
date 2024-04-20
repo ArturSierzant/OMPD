@@ -1,4 +1,4 @@
-<h1>&nbsp;Suggested new albums from <a href="index.php?action=viewTidal">Tidal</a> <a href="index.php?action=viewNewFromTidal&type=suggested_new">(more...)</a></h1>
+<h1>&nbsp;<span id="suggestedNewTidal">Suggested new albums from</span> <a href="index.php?action=viewTidal">Tidal</a> <a id="suggestedNewLink" href="index.php?action=viewNewFromTidal&type=suggested_new">(more...)</a></h1>
 	<script>
 		calcTileSize();
 		var size = $tileSize;
@@ -22,6 +22,11 @@
 			$( "#new_tidal" ).html('<div style="line-height: initial;">Error loading albums from Tidal.</div>');
 	});
 	
+  function changeSuggested(dataApiPath){
+    $("#suggestedNewTidal").html("Suggested new albums for you from ");
+    $("#suggestedNewLink").attr('href','index.php?action=viewMoreFromTidal&type=album_list&apiPath=' + encodeURIComponent(dataApiPath));
+  }
+
 	</script>
 	<div class="full" id="new_tidal">
 		<div style="display: grid; height: 100%;">

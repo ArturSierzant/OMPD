@@ -68,8 +68,10 @@ if ($cfg['musixmatch_api_key']) {
       $maxTry = $tracks;
     }
     $data['musixmatch_tracks'] = $tracks;
+    
     for ($i=0; $i<$maxTry; $i++) {
       $data['musixmatch_iterations'] = $i;
+      
       if ($data['response']['message']['body']['track_list'][$i]) {
         $data['response']['source'] = "Musixmatch";
         $data['response']['url'] = $data['response']['message']['body']['track_list'][$i]['track']['track_share_url'];
@@ -80,6 +82,7 @@ if ($cfg['musixmatch_api_key']) {
           $data['result'] = 'ok';
           break;
         }
+        
         if ($data['response']['url']) {
           require_once('PHPsimpleHTMLDomParser/simple_html_dom.php');
           $html = new simple_html_dom();
@@ -88,9 +91,16 @@ if ($cfg['musixmatch_api_key']) {
           $data['response']['lyrics'] = "";
           $html -> load_file($urlSearch);
           if ($html->root) {
-            foreach($html->find('p[class=mxm-lyrics__content]') as $lyrics){
-              $data['response']['lyrics'] .= nl2br($lyrics);
+            foreach($html->find ('script#__NEXT_DATA__') as $r){
+              if($r->innertext){
+                $jArr = array();
+                $jArr = json_decode($r->innertext, true);
+                $lyrics = $jArr['props']['pageProps']['data']['trackInfo']['data']['lyrics']['body'];
+                break;
+              };
             }
+            $data['response']['lyrics'] .= nl2br($lyrics);
+            
             if ($data['response']['lyrics'] !== "") {
               $data['result'] = 'ok';
               break;
@@ -101,6 +111,7 @@ if ($cfg['musixmatch_api_key']) {
     }
   }
 }
+
 
 if ($data['result'] == 'error') {
   $url = NJB_HOME_URL . "api/LyricsCore/index.php?artist=$artistUrl&title=$titleUrl&format=json";

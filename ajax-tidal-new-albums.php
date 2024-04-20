@@ -44,6 +44,10 @@ if ($conn === true){
   switch ($type){
     case "suggested_new":
       $results = $t->getSuggestedNew();
+      if (!$results['items']) {
+        $results = $t->getSuggestedNewForYou($limit, $offset);
+        echo "<script> changeSuggested('" . $results['apiPath'] . "');</script>";
+      }
       break;
     case "featured_new":
       $results = $t->getFeatured($limit, $offset);

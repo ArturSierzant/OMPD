@@ -1,18 +1,15 @@
 <?php
-// example of how to modify HTML contents
-include('../simple_html_dom.php');
+// This example illustrates how to modify HTML contents
+include_once '../HtmlWeb.php';
+use simplehtmldom\HtmlWeb;
 
-// get DOM from URL or file
-$html = file_get_html('http://www.google.com/');
+// Load the document
+$doc = new HtmlWeb();
+$html = $doc->load('https://www.google.com/');
 
-// remove all image
-foreach($html->find('img') as $e)
-    $e->outertext = '';
+// Remove all images and inputs from the DOM
+foreach($html->find('img, input') as $element) {
+	$element->remove();
+}
 
-// replace all input
-foreach($html->find('input') as $e)
-    $e->outertext = '[INPUT]';
-
-// dump contents
 echo $html;
-?>

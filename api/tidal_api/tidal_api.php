@@ -303,7 +303,30 @@ class TidalAPI {
           return $more;
         }
         else {
-          return ($res['rows'][$key]['modules'][0]['pagedList']);
+          $ret = array();
+          $ret = $res['rows'][$key]['modules'][0]['pagedList'];
+          $ret['apiPath'] = $res['rows'][$key]['modules'][0]['showMore']['apiPath'];
+          return ($ret);
+        }
+      }
+    }
+    return false;
+  }
+
+  function getSuggestedNewForYou($limit = 50, $offset = 0, $getMore = false) {
+    $res = $this->getHomePage();
+    foreach($res['rows'] as $key => $row){
+      if (strtolower($row['modules'][0]['title']) == 'suggested new albums for you') {
+        if ($getMore) {
+          $apiPath = $res['rows'][$key]['modules'][0]['pagedList']['dataApiPath'];
+          $more = $this->getByApiPath($limit, $offset, $apiPath);
+          return $more;
+        }
+        else {
+          $ret = array();
+          $ret = $res['rows'][$key]['modules'][0]['pagedList'];
+          $ret['apiPath'] = $res['rows'][$key]['modules'][0]['showMore']['apiPath'];
+          return ($ret);
         }
       }
     }

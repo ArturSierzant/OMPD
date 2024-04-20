@@ -3,9 +3,113 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.9.1] - 2019-10-20
+
+## [Unreleased]
+### Changed
+- Comments that start with `>` or `->` are now considered malformed in accordance with [section 12.1.6](https://html.spec.whatwg.org/multipage/syntax.html#comments) of the [HTML specification](https://html.spec.whatwg.org/multipage/). Comments may still contain the strings `<!--` or `--!>` and they may still end with `<!-` contrary to the specification.
+
+## [2.0-RC2] - 2019-11-09
+
+**Important**: This is a release **candidate**, which means some features might not yet be stable or emit unexpected behavior. Please don't hesitate to report broken or unstable features.
+
+### Added
+- Added a `README` file.
+- Added a `composer` file.
+- Added `.travis.yml` for automated unit tests with `Travis-CI`.
+- Added the magic method `__debugInfo` to `HtmlDocument` and `HtmlNode` in order to reduce the memory footprint and to prevent recursion errors when using `print_r` and `var_dump`.
+- Added the magic method `__call` to `HtmlDocument` and `HtmlNode` as a wrapper for deprecated methods using the lowercase calling convention (see below).
+- Added unit tests `attribute_test.php`, `callback_test.php`, `debug_info_test.php`, `doctype_test.php`, `script_test.php`, `server_side_script_test.php`, `style_test.php` and `dom_manipulation_test.php`.
+- Added and extended unit tests for `cdata_test.php` and `comment_test.php`.
+- Added a new `Debug` class to inform users about deprecated functions, malformed documents and parsing issues.
+- Added full support for `script` element parsing.
+### Changed
+- Renamed unit test `simple_html_dom_test.php` to `htmldocument_test.php`.
+- Renamed unit test `simple_html_dom_node_test.php` to `htmlnode_test.php`.
+- Changed the implementation of destructors for better garbage collection.
+- Changed how literal elements (`script`, `style`, `cdata`, "comment" and `code`) are handled by `HtmlDocument`.
+### Deprecated
+- `HtmlDocument::clear()` has been deprecated and will be removed in the next major version of simplehtmldom. Use `unset()` instead.
+- `HtmlDocument::load_file()` has been deprecated and will be removed in the next major version of simplehtmldom. Use `HtmlDocument::loadFile()` instead.
+- `HtmlNode::children()` has been deprecated and will be removed in the next major version of simplehtmldom. Use `HtmlNode::childNodes()` instead.
+- `HtmlNode::first_child()` has been deprecated and will be removed in the next major version of simplehtmldom. Use `HtmlNode::firstChild()` instead.
+- `HtmlNode::has_child()` has been deprecated and will be removed in the next major version of simplehtmldom. Use `HtmlNode::hasChild()` instead.
+- `HtmlNode::last_child()` has been deprecated and will be removed in the next major version of simplehtmldom. Use `HtmlNode::lastChild()` instead.
+- `HtmlNode::next_sibling()` has been deprecated and will be removed in the next major version of simplehtmldom. Use `HtmlNode::nextSibling()` instead.
+- `HtmlNode::prev_sibling()` has been deprecated and will be removed in the next major version of simplehtmldom. Use `HtmlNode::previousSibling()` instead.
+- Support for Smarty scripts has been deprecated and will be removed in the next major version of simplehtmldom.
+- Support for server-side scripts has been deprecated and will be removed in the next major version of simplehtmldom.
+### Removed
+- Removed the `testcase/` folder as all tests are covered by unit tests inside `tests/`.
 ### Fixed
-- Fixed broken "text" selectors [#175](https://sourceforge.net/p/simplehtmldom/bugs/175/)
+- Fixed a bug with boolean attributes that were incorrectly represented with a value of "1" when saving the DOM.
+- Fixed a bug with comment and CDATA parsing that could cause an infinite loop if any of these elements contained `script`, `style`, `code`, server-side php or Smarty tags.
+- Fixed a bug with comment and CDATA parsing that resulted in whitespace and newlines being removed when loading a document with `$stripRN = true` (default setting).
+- Fixed a bug with attribute values that resulted in incorrectly encoded content when using `outertext()`, `innertext()` or `save()`.
+- Fixed a bug with charset encoding that resulted in partially encoded documents depending on the use of `outertext()` and `innertext()` [#178](https://sourceforge.net/p/simplehtmldom/bugs/178/)
+- Fixed multiple bugs related to DOM manipulation when using `HtmlDocument::createElement()`, `HtmlDocument::createTextNode()` and `HtmlNode::appendChild()`.
+
+## [2.0-RC1] - 2019-10-20
+
+**Important**: This is a release **candidate**, which means some features might not yet be stable or emit unexpected behavior. Please don't hesitate to report broken or unstable features.
+
+### Added
+- Added unit tests
+  - Added tests for whitespace handling.
+  - Added tests for entity decoding.
+  - Added tests for node functions after calling remove().
+  - Added tests for `maxLen` in `file_get_html`.
+  - Added tests for `simple_html_dom_node`.
+  - Added tests for `HtmlWeb`.
+  - Added test for bug [#172](https://sourceforge.net/p/simplehtmldom/bugs/172/)
+- Added optional argument `$trim = true` to `$node->text()`
+- Added attribute value normalization
+  - https://www.w3.org/TR/html/syntax.html#attribute-values
+  - https://www.w3.org/TR/xml/#AVNormalize
+- Added automatic HTML entity decoding when loading documents [feature:#52]
+- Added [the negation pseudo-class](https://www.w3.org/TR/selectors-3/#negation)
+- Added `simple_html_dom::expect()`.
+- Added `simple_html_dom_node::expect()`.
+- Added the ability to parse CDATA sections.
+- Added `HtmlWeb` to directly load webpages via cURL or fopen as DOM.
+- Added `HtmlDocument`, `HtmlNode`, `HtmlWeb` and `constants` to namespace `simplehtmldom`.
+- Added a new element type `HDOM_TYPE_CDATA` for CDATA sections.
+- Added full support for parsing comments and CDATA sections.
+### Changed
+- `simple_html_dom::doc` is now unset after loading the DOM.
+- `simple_html_dom::restore_noise()` now clears restored elements.
+- `simple_html_dom_node::_[HDOM_INFO_ENDSPACE]` now only exists if needed.
+- `simple_html_dom_node::_[HDOM_INFO_SPACE]`
+  - Now stores elements by attribute names.
+  - Now only exists if needed (defaults to `array(' ', '', '')`).
+- `simple_html_dom_node::_[HDOM_INFO_QUOTE]`
+  - Now stores elements by attribute names.
+  - Now only exists if needed (defaults to `HDOM_QUOTE_DOUBLE`).
+- `simple_html_dom_node::text()` now supports all block and inline level elements.
+- `simple_html_dom_node::text()` now skips empty block elements.
+- `simple_html_dom_node::text()` now properly handles `&nbsp` characters.
+- `simple_html_dom_node::removeChild()` now removes all types of children.
+- Increased `MAX_FILE_SIZE` from 0.6 MB (600000 Bytes) to 2.5 MiB (2621440 Bytes)
+- `HDOM_INFO_INNER` (innertext) is now stored as part of the owning element.
+- Moved and renamed `simple_html_dom` to `HtmlDocument`.
+- Moved and renamed `simple_html_dom_node` to `HtmlNode`.
+- Moved constants to `constants.php`
+- Moved `HDOM_TYPE_*`, `HDOM_INFO_*` and `HDOM_QUOTE_*` constants into `HtmlNode`.
+### Removed
+- Removed `/example/scraping/example_scraping_general.php`.
+- Removed `/example/simple_html_dom_utility.php`.
+- Removed `/app`.
+- Removed `/testcase/reader`.
+- Removed `simple_html_dom_node::tag_start`.
+### Fixed
+- Fixed fatal error when removing nodes from the DOM (#172)
+- Fixed `simple_html_dom::parse()` to work after removing elements from the DOM.
+- Fixed `simple_html_dom_node::text()` to properly handle UTF-8 characters.
+- Fixed all scripts in the example folder.
+- Fixed `file_get_html` to return false if the file size is larger than `maxLen`.
+- Fixed a bug that caused the parser to convert UTF-8 to UTF-8 on mistake.
+- Fixed `simple_html_dom::loadFile` to properly forward arguments to `simple_html_dom::load_file`.
+- Fixed handling of optional closing tags to end on the last element.
+- Fixed broken support for `text` nodes when using `find` (#175).
 
 ## [1.9] - 2019-05-30
 ### Added
@@ -60,7 +164,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Added support for Next Sibling Combinator (`+`)
   - Added support for Subsequent Sibling Combinator (`~`)
 - Added support for multiclass selectors (`.class.class.class`)
-- Added support for multiattribute selectors (`[attr1][attr2][attribute3]`)
+- Added support for multi-attribute selectors (`[attr1][attr2][attribute3]`)
 - Added support for attribute selectors
   - Added support for pipe selectors (`|=`)
   - Added support for tilde selectors (`~=`)
@@ -110,7 +214,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Added 'track'
   - Added 'wbr'
 - Updated list of `simple_html_dom::$optional_closing_tags`
-  - Removed "nobr" (obsolete)
+  - Removed `nobr` (obsolete)
   - Added 'th' as closable element to 'td'
   - Added 'td' as closable element to 'th'
   - Added 'optgroup' with 'optgroup' and 'option' as closable elements
@@ -134,7 +238,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed typo (#147)
 - Fixed handling of incorrectly escaped text (#160)
 - Restore functionality of `$maxLen` in `file_get_html()`
-- Fixed load_file breaks if an error ocurred in another script
+- Fixed load_file breaks if an error occurred in another script
 
 ## [1.6] - 2014-05-28
 ### Added
@@ -182,7 +286,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - New method "getAllAttributes" of "simple_html_dom_node"
 - Supports full javascript string in selector: `$e->find("a[onclick=alert('hello')]")`
 ### Changed
-- Changed selector "*=" to case-insentive
+- Changed selector "*=" to case-insensitive
 ### Fixed
 - Fixed the bug of selector in some critical conditions
 - Fixed the bug of striping php tags
@@ -215,7 +319,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed the bug of $dom->clear()
 - Fixed the bug of text nodes' innertext
 - Fixed the bug of comment nodes' innertext
-- Fixed the bug of decendent selector with optional tags
+- Fixed the bug of descendant selector with optional tags
 
 ## [0.97] - 2008-05-09
 ### Added
@@ -261,5 +365,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Add FAQ section in manual
 ### Fixed
 - Fixed infinity loop while the source content is BAD HTML
-- Fixed the bug of adding new attributes to self closing tags
+- Fixed the bug of adding new attributes to self-closing tags
 - Fixed the bug of customize parser without $dom->remove_noise()

@@ -399,8 +399,9 @@ function resizeSuggested($tileSize,$containerWidth) {
 
 function resizeUsersTab($tileSize,$containerWidth) {
 	$('#usersTab').css('width', function() { 
-    return ($tileCount * $tileSize + (($tileCount - 1) * 2) + 'px'); 
-	});
+    //return ($tileCount * $tileSize + (($tileCount - 1) * 2) + 'px'); 
+    return ($tileCount * $tileSize + (($tileCount - 1) + 2) + 'px'); 
+  });
 }
 
 
@@ -569,7 +570,7 @@ function resizeImgContainer() {
 	$("#media_control_mini").css("display","table-cell"); */
 	
 	if ($(window).width() > 1280) {
-		$(".back-to-top").css("right",($(window).width() - 1280)/2);
+		$(".back-to-top").css("right",($(window).width() - 1275)/2);
 	}
 	else {
 		$(".back-to-top").css("right",10)

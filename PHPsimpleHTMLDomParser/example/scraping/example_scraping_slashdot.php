@@ -1,35 +1,35 @@
 <?php
-include_once('../../simple_html_dom.php');
+/**
+ * This example loads a page from Slashdot and displays articles in a custom
+ * format.
+ */
+include_once '../../HtmlWeb.php';
+use simplehtmldom\HtmlWeb;
 
-function scraping_slashdot() {
-    // create HTML DOM
-    $html = file_get_html('http://slashdot.org/');
+// Load the page into memory
+$doc = new HtmlWeb();
+$html = $doc->load('https://slashdot.org/');
 
-    // get article block
-    foreach($html->find('div[id^=firehose-]') as $article) {
-        // get title
-        $item['title'] = trim($article->find('a.datitle', 0)->plaintext);
-        // get body
-        $item['body'] = trim($article->find('div.body', 0)->plaintext);
+$data = array();
 
-        $ret[] = $item;
-    }
-    
-    // clean up memory
-    $html->clear();
-    unset($html);
+// Find and extract all articles
+foreach($html->find('#firehoselist > [id^="firehose-"]') as $article) {
+	$item['title'] = trim($article->find('[id^="title-"]', 0)->plaintext);
+	$item['body'] = trim($article->find('[id^="text-"]', 0)->plaintext);
 
-    return $ret;
+	$data[] = $item;
 }
 
-// -----------------------------------------------------------------------------
-// test it!
-$ret = scraping_slashdot();
+// clean up memory
+$html->clear();
+unset($html);
 
-foreach($ret as $v) {
-    echo $v['title'].'<br>';
-    echo '<ul>';
-    echo '<li>'.$v['body'].'</li>';
-    echo '</ul>';
+// Return custom page
+foreach($data as $item) {
+	echo <<<EOD
+
+<h2>{$item['title']}</h2>
+<p>{$item['body']}</p>
+
+EOD;
 }
-?>

@@ -1179,7 +1179,7 @@ if ($fav_rows > 0) {
 	
   $filter_queryFAV = str_replace('artist ','track.artist ',$filter_query);
   
-  $q = 'SELECT track.artist as track_artist, track.title, track.album_id, track.track_id as tid, track.relative_file, track.miliseconds, track.number, track.genre, track.dr, favoriteitem.favorite_id, album.album
+  $q = 'SELECT track.artist as track_artist, track.title, track.album_id, track.track_id as tid, track.relative_file, track.miliseconds, track.number, track.genre, track.dr, favoriteitem.favorite_id, album.album, album.image_id
 	FROM track
 	INNER JOIN favoriteitem ON track.track_id = favoriteitem.track_id 
 	LEFT JOIN album ON track.album_id = album.album_id '
@@ -1267,7 +1267,7 @@ if ($rows > 0) {
 		$group_found = 'FAV';
 	$tracksFav = mysqli_fetch_assoc($queryFav);
 ?>
-<h1 onclick='toggleSearchResults("FAV");' class="pointer"><i id="iconSearchResultsFAV" class="fa fa-chevron-circle-down icon-anchor"></i> Favorites tracks by <?php 
+<h1 onclick='toggleSearchResults("FAV");' class="pointer"><i id="iconSearchResultsFAV" class="fa fa-chevron-circle-down icon-anchor"></i> Favorite tracks by <?php 
 	//echo ($tracksFav['track_artist']);
 	echo ($artistRequested);
 	?>
@@ -1343,6 +1343,7 @@ else {
 		else 							echo html($track['title']); ?>
 <span class="track-list-artist-narrow">by <?php echo html($track['track_artist']); ?></span> 
 </td>
+
 <td>
 <?php if($track['album_id'] == 'youtube') { ?>
 <a href="<?php echo $track['album']; ?>" <?php echo onmouseoverImage($track['image_id']); ?> target="_blank"><i class="fa fa-youtube-play fa-fw icon-small"></i></a>
