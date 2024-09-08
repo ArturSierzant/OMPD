@@ -88,7 +88,18 @@ else	message(__FILE__, __LINE__, 'error', '[b]Unsupported input value for[/b][br
 exit();
 
 
+//  +------------------------------------------------------------------------+
+//  | CLI Update wrapper                                                     |
+//  +------------------------------------------------------------------------+
+function cliUpdate() {
+	global $cfg, $db, $lastGenre_id, $getID3, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $last_update, $file;
 
+	$cfg['cli_update'] = true;
+
+	cliLog( "CLI update of " . $cfg['media_dir'] );
+
+	update_impl( $cfg['media_dir'] );
+}
 
 
 //  +------------------------------------------------------------------------+
@@ -98,12 +109,16 @@ function update($dir_to_update = '') {
 
 	global $cfg, $db, $lastGenre_id, $getID3, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $last_update, $file;
 	authenticate('access_admin', false, true);
+
+	$cfg['cli_update'] = false;
+
+	update_impl( $dir_to_update );
+}
 	
-	
+function update_impl($dir_to_update = '') {
 	require_once('getid3/getid3/getid3.php');
 	require_once('include/play.inc.php'); // Needed for mpdUpdate()
 	
-	$cfg['cli_update'] = false;
 	$startTime = new DateTime();
 	
 	cliLog("Update start time: " . date("Ymd H:i:s"));
@@ -251,6 +266,8 @@ function update($dir_to_update = '') {
 		$update_status=$row["update_status"];
 	}
 	
+	cliLog( "Update status ".$update_status );
+
 	if ($update_status == 0) {
 		mysqli_query($db,"update update_progress set 
 			update_status = 1,
@@ -846,6 +863,25 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 				$album = basename($dir);
 		}
 		
+        // misc_tracks_misc_artists_folder might also be a CSV - https://github.com/ArturSierzant/OMPD/issues/147
+        $miscs = explode( ',',$cfg['misc_tracks_misc_artists_folder'] );
+
+        if( count($miscs) > 1 ){ 
+                $is_misc = false;
+                foreach($miscs as $misc){
+                        if( basename($dir) == $misc ){
+                                $is_misc = true;
+
+                                $artist = 'Various Artists';
+                                $artist_alphabetic      = $artist;
+                                $aGenre = '';
+                                $year = NULL;
+                                $album = basename($dir);
+                        }
+                }
+
+        }
+
 		/* $result = mysqli_query($db,'SELECT genre_id FROM genre WHERE genre="' . $db->real_escape_string($aGenre) . '"');
 		$row=mysqli_fetch_assoc($result);
 		$aGenre_id=$row["genre_id"];
