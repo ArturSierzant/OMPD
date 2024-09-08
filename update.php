@@ -116,6 +116,8 @@ function update($dir_to_update = '') {
 }
 	
 function update_impl($dir_to_update = '') {
+	global $cfg, $db, $lastGenre_id, $getID3, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $last_update, $file;
+
 	require_once('getid3/getid3/getid3.php');
 	require_once('include/play.inc.php'); // Needed for mpdUpdate()
 	
