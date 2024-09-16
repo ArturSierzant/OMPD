@@ -98,6 +98,9 @@ function cliUpdate() {
 
 	cliLog( "CLI update of " . $cfg['media_dir'] );
 
+  echo ("Update started\n");
+  echo ("Update in progress...\n");
+  
 	update_impl( $cfg['media_dir'] );
 }
 
@@ -153,103 +156,105 @@ function update_impl($dir_to_update = '') {
 	//$lastGenre_id = 1;
 	
 	// formattedNavigator
-	$nav			= array();
-	$nav['name'][]	= 'Configuration';
-	$nav['url'][]	= 'config.php';
-	$nav['name'][]	= 'Update';
-	require_once('include/header.inc.php');
-?>
-<table width="100%" cellspacing="0" cellpadding="0" class="border">
-<tr class="header">
-	<td class="space"></td>
-	<td class="update_text">Update</td>
-	<td>Progress</td>
-	<td class="space"></td>
-</tr>
-<tr class="line"><td colspan="4"></td></tr>
-<tr class="odd">
-	<td></td>
-	<td>Structure &amp; image:</td>
-	<td><span id="structure"></span></td>
-	<td></td>
-</tr>
-<tr class="even">
-	<td></td>
-	<td>File info:</td>
-	<td><span id="fileinfo"></span></td>
-	<td></td>
-</tr>
-<tr class="odd">
-	<td></td>
-	<td>Cleanup:</td>
-	<td><span id="cleanup"></span></td>
-	<td></td>
-</tr>
-<tr class="even">
-	<td></td>
-	<td>Update time:</td>
-	<td><span id="updateTime"></span></td>
-	<td></td>
-</tr>
-</table>
-<script>
-	hideSpinner();
-	var intervalId = window.setInterval(function() {
-		show_update_progress();
-	}, 500);
-	
-	function show_update_progress() {
-		$.ajax({
-			type: "POST",
-			url: "ajax-update-progress.php",
-			dataType : 'json',
-			success : function(json) {
-				var s = json['structure_image'];
-				if (s.indexOf("fa-spin") > -1) {
-					if (!$("#structure").hasClass("fa-spin"))
-						$("#structure").html(json['structure_image']);
-				}
-				else
-					$("#structure").html(json['structure_image']);
-				
-				s = json['file_info'];
-				if (s.indexOf("fa-spin") > -1) {
-					if (!$("#fileinfo").hasClass("fa-spin"))
-						$("#fileinfo").html(json['file_info']);
-				}	
-				else
-					$("#fileinfo").html(json['file_info']);
-				
-				s = json['cleanup'];
-				if (s.indexOf("fa-spin") > -1) {
-					if (!$("#cleanup").hasClass("fa-spin"))
-						$("#cleanup").html(json['cleanup']);
-				}
-				else
-					$("#cleanup").html(json['cleanup']);
-				
-				s = json['update_time'];
-				if (s.indexOf("Update error") > -1) {
-					$("#updateTime").html(json['update_time']);
-					clearInterval(intervalId);
-				}
-				else
-					$("#updateTime").html(json['update_time']);
-				
-			}
-		});
-	}
-	
-	</script>
-	
-	<?php
-	
-	@ob_flush();
-	flush();
-	
-	$cfg['footer'] = 'dynamic';
-	require('include/footer.inc.php');
-	
+  if ($cfg['cli_update'] == false) {
+    $nav			= array();
+    $nav['name'][]	= 'Configuration';
+    $nav['url'][]	= 'config.php';
+    $nav['name'][]	= 'Update';
+    require_once('include/header.inc.php');
+  ?>
+  <table width="100%" cellspacing="0" cellpadding="0" class="border">
+  <tr class="header">
+    <td class="space"></td>
+    <td class="update_text">Update</td>
+    <td>Progress</td>
+    <td class="space"></td>
+  </tr>
+  <tr class="line"><td colspan="4"></td></tr>
+  <tr class="odd">
+    <td></td>
+    <td>Structure &amp; image:</td>
+    <td><span id="structure"></span></td>
+    <td></td>
+  </tr>
+  <tr class="even">
+    <td></td>
+    <td>File info:</td>
+    <td><span id="fileinfo"></span></td>
+    <td></td>
+  </tr>
+  <tr class="odd">
+    <td></td>
+    <td>Cleanup:</td>
+    <td><span id="cleanup"></span></td>
+    <td></td>
+  </tr>
+  <tr class="even">
+    <td></td>
+    <td>Update time:</td>
+    <td><span id="updateTime"></span></td>
+    <td></td>
+  </tr>
+  </table>
+  <script>
+    hideSpinner();
+    var intervalId = window.setInterval(function() {
+      show_update_progress();
+    }, 500);
+    
+    function show_update_progress() {
+      $.ajax({
+        type: "POST",
+        url: "ajax-update-progress.php",
+        dataType : 'json',
+        success : function(json) {
+          var s = json['structure_image'];
+          if (s.indexOf("fa-spin") > -1) {
+            if (!$("#structure").hasClass("fa-spin"))
+              $("#structure").html(json['structure_image']);
+          }
+          else
+            $("#structure").html(json['structure_image']);
+          
+          s = json['file_info'];
+          if (s.indexOf("fa-spin") > -1) {
+            if (!$("#fileinfo").hasClass("fa-spin"))
+              $("#fileinfo").html(json['file_info']);
+          }	
+          else
+            $("#fileinfo").html(json['file_info']);
+          
+          s = json['cleanup'];
+          if (s.indexOf("fa-spin") > -1) {
+            if (!$("#cleanup").hasClass("fa-spin"))
+              $("#cleanup").html(json['cleanup']);
+          }
+          else
+            $("#cleanup").html(json['cleanup']);
+          
+          s = json['update_time'];
+          if (s.indexOf("Update error") > -1) {
+            $("#updateTime").html(json['update_time']);
+            clearInterval(intervalId);
+          }
+          else
+            $("#updateTime").html(json['update_time']);
+          
+        }
+      });
+    }
+    
+    </script>
+    
+    <?php
+    
+    @ob_flush();
+    flush();
+    
+    $cfg['footer'] = 'dynamic';
+    require('include/footer.inc.php');
+    
+  } //$cfg['cli_update']
 	
 	/* $getID3 = new getID3;
 	//initial settings for getID3:
@@ -280,11 +285,13 @@ function update_impl($dir_to_update = '') {
 			last_update = 'Update in progress..'");
 		sleep(1);
 		//redirect back to update.php to use ajax status update 
-		$cfg['footer'] = 'close';	
-		echo ('<script>window.location.href="update.php?action=update&sign=' . $cfg['sign'] . '"</script>');
-		
-		@ob_flush();
-		flush();
+		$cfg['footer'] = 'close';
+    if ($cfg['cli_update'] == false) {
+      echo ('<script>window.location.href="update.php?action=update&sign=' . $cfg['sign'] . '"</script>');
+      
+      @ob_flush();
+      flush();
+    }
 		
 		mysqli_query($db,"update update_progress set 
 			structure_image = 'Requesting MPD update...'");
@@ -485,8 +492,13 @@ function update_impl($dir_to_update = '') {
 		$update_time=$row["update_time"];
 		echo '<script type="text/javascript"> document.getElementById(\'updateTime\').innerHTML=" ' . $update_time . '";</script>' . "\n";
 	}
-	$cfg['footer'] = 'close';
-	require('include/footer.inc.php');
+  if ($cfg['cli_update'] == false){
+    $cfg['footer'] = 'close';
+    require('include/footer.inc.php');
+  }
+  else {
+    echo("Update done\n");
+  }
 }
 
 
@@ -773,7 +785,7 @@ Function fileStructure($dir, $file, $filename, $album_id, $album_add_time) {
 	if ($cfg['name_source'] == 'tags') {
 	
 	++$curDirsCounter; 	
-	if ($cfg['cli_update'] == false && ((microtime(true) - $cfg['timer']) * 1000) > $cfg['update_refresh_time'] && ($curDirsCounter/$dirsCounter > ($prevDirsCounter/$dirsCounter + 0.005))) {
+	if (((microtime(true) - $cfg['timer']) * 1000) > $cfg['update_refresh_time'] && ($curDirsCounter/$dirsCounter > ($prevDirsCounter/$dirsCounter + 0.005))) {
 		
 		$prevDirsCounter = $curDirsCounter;
 		
@@ -1295,7 +1307,7 @@ function fileInfo($track, $getID3 = NULL) {
 		return;
 	}
 
-    if ($cfg['cli_update'] == false && ((microtime(true) - $cfg['timer']) * 1000) > $cfg['update_refresh_time'] && ($curFilesCounter/$filesCounter > ($prevFilesCounter/$filesCounter + 0.005))) {
+    if (((microtime(true) - $cfg['timer']) * 1000) > $cfg['update_refresh_time'] && ($curFilesCounter/$filesCounter > ($prevFilesCounter/$filesCounter + 0.005))) {
         // write import/update progress to database
         $prevFilesCounter = $curFilesCounter;
         // TODO: add some decimals to displayed percent value for avouiding visually "freezes" on huge collections
