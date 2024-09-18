@@ -78,7 +78,7 @@ else {
 $flag	= (int) getpost('flag');
 
 
-if		(PHP_SAPI == 'cli')					cliUpdate();
+if		(PHP_SAPI == 'cli')					cliUpdate($argv);
 elseif	($action == 'update')				update($dir_to_update);
 elseif	($action == 'imageUpdate')			imageUpdate($flag);
 elseif	($action == 'saveImage')			saveImage($flag);
@@ -91,17 +91,17 @@ exit();
 //  +------------------------------------------------------------------------+
 //  | CLI Update wrapper                                                     |
 //  +------------------------------------------------------------------------+
-function cliUpdate() {
+function cliUpdate($argv_) {
 	global $cfg, $db, $lastGenre_id, $getID3, $dirsCounter, $filesCounter, $curFilesCounter, $curDirsCounter, $last_update, $file;
 
 	$cfg['cli_update'] = true;
 
 	cliLog( "CLI update of " . $cfg['media_dir'] );
 
-  echo ("Update started\n");
-  echo ("Update in progress...\n");
+	echo ("Update started\n");
+	echo ("Update in progress...\n");
   
-	update_impl( $cfg['media_dir'] );
+	update_impl( $argv_[0] );
 }
 
 
