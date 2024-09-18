@@ -96,12 +96,16 @@ function cliUpdate($argv_) {
 
 	$cfg['cli_update'] = true;
 
-	cliLog( "CLI update of " . $cfg['media_dir'] );
+	cliLog( "CLI update of " . $argv_[1] );
 
 	echo ("Update started\n");
 	echo ("Update in progress...\n");
-  
-	update_impl( $argv_[0] );
+
+	try {
+		update_impl( $argv_[1] );
+	} catch (Exception $e) {
+		echo ("Update error")
+	}
 }
 
 
