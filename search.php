@@ -1,6 +1,6 @@
  <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright ï¿½ 2015-2021 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  | This program is free software: you can redistribute it and/or modify   |
@@ -40,7 +40,7 @@ $size = floor($aval_width / $colombs);
 
 $cfg['menu']		= 'Library';
 $action 			= get('action');
-$search_string	 	= get('search_string');
+$search_string	 	= trim(get('search_string'));
 $genre_id	 	= get('genre_id');
 $group_found		= 'none';
 $match_found		= false;
