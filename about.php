@@ -165,6 +165,7 @@ function about() {
 	<td>
 	<ul style="padding-left: 1em;">
 	<li> most of settings from config.inc.php moved to Config -> Settings</li>
+	<li> added Radio Browser (based on <a href="https://radio-browser.info" target="_blank">radio-browser.info</a>)</li>
 	<li> added support for more Tidal items (playlists, mixlists, podcasts)</li>
 	<li> added more items in artist view (when using Tidal)</li>
 	<li> fixed bugs</li>
@@ -492,7 +493,7 @@ function about() {
 	<td>Radio Browser</td>
 	<td></td>
 	<td><a href="https://github.com/adinan-cenci/radio-browser" target="_blank">https://github.com/adinan-cenci/radio-browser</a></br>
-  Radio Browser is a library to fetch data from the <a href="https:// radio-browser.info" target="_blank">radio-browser.info</a> catalog of Internet radio stations.
+  Radio Browser is a library to fetch data from the <a href="https://radio-browser.info" target="_blank">radio-browser.info</a> catalog of Internet radio stations.
 </td>
 	<td></td>
 </tr>

@@ -121,6 +121,7 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 		}
 		elseif ($cfg['show_album_format'] == true && isTidal($album['album_id'])) {
 			$audio_format = calculateAlbumFormat($album);
+			//$audio_format = $album['audio_quality'];
 			if ($cfg['testing'] == 'on' && $audio_format <> 'CD' && $audio_format <> 'UNKNOWN') {
 				$res .= '   <div class="tile_format">' . html($audio_format) . '</div>';
 			}
@@ -847,7 +848,8 @@ function showAlbumsFromTidal($artist, $size, $ajax, $tidalArtistId) {
 					$tidalAlbum["album_id"] = 'tidal_' . $album["id"];
 					$tidalAlbum["album"] = $album["title"];
 					$tidalAlbum["artist_alphabetic"] = $artists;
-					$tidalAlbum["audio_quality"] = $album["audioQuality"];
+					//$tidalAlbum["audio_quality"] = $album["audioQuality"];
+					$tidalAlbum["audio_quality"] = getTidalAudioQualityMediaMetadata($album);
 					draw_tile($size, $tidalAlbum);
 				}
 			}
@@ -1116,10 +1118,20 @@ function getAlbumFromTidal($album_id) {
 	}
 	if ($artists == '') $artists = $results["artist"]["name"];
 	
+/*   if (count($results["mediaMetadata"]["tags"]) > 1) {
+    $lk = array_key_last($results["mediaMetadata"]["tags"]);
+    $aq = $results["mediaMetadata"]["tags"][$lk];
+  }
+  else {
+    $aq = $results['audioQuality'];
+  } */
+
+  $aq = getTidalAudioQualityMediaMetadata($results);
+
 	$sql = "REPLACE INTO tidal_album 
 	(album_id, artist, artist_alphabetic, artist_id, album, album_date, genre_id, discs, seconds, last_update_time, cover, type, audio_quality)
 	VALUES (
-	'" . $results["id"] . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . $results["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$results["title"]) . "', '" . $results["releaseDate"] . "', '', 1, '" . $results["duration"] . "','0','" . $results["cover"] . "','" . $results['type'] . "','" . $results['audioQuality'] . "')";
+	'" . $results["id"] . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . mysqli_real_escape_string($db,$artists) . "', '" . $results["artist"]["id"] . "', '" . mysqli_real_escape_string($db,$results["title"]) . "', '" . $results["releaseDate"] . "', '', 1, '" . $results["duration"] . "','0','" . $results["cover"] . "','" . $results['type'] . "','" . $aq . "')";
 	
 	mysqli_query($db, $sql);
 	$data['results'] = 1;
@@ -1517,7 +1529,8 @@ function showAllFromTidal($searchStr, $size) {
 			$album['artist_alphabetic'] = $art['artists'][0]['name'];
 			$album['album'] = $art['title'];
 			$album['cover'] = $art['cover'];
-			$album['audio_quality'] = $art['audioQuality'];
+			//$album['audio_quality'] = $art['audioQuality'];
+			$album['audio_quality'] = getTidalAudioQualityMediaMetadata($art);
 			$albumsList .= draw_tile($size, $album, '', 'string',$album['cover']);
 			}
 		$albumsList .= '</table>';
@@ -1738,6 +1751,140 @@ function tidalTracksList($tracks, $i = 0, $playlist_type = '') {
 				<tr>
 				<td colspan="20">
 				' . trackSubMenu($i, $track, 'tidal_' . $track['album']['id'], 'string') . '
+				</td>
+				</tr>';
+			}
+		$tracksList .= '</table>';
+		
+		return $tracksList;
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Display list of tracks from Tidal (API v2)                             |
+//  +------------------------------------------------------------------------+
+
+function tidalTracksList_v2($tracks, $i = 0, $playlist_type = '') {
+	global $cfg;
+	$tracksList = '<table class="border" cellspacing="0" cellpadding="0">';
+		$tracksList .= '
+		<tr class="header">
+			<td class="icon"></td><!-- track menu -->
+			<td class="icon">';
+		if ($cfg["access_add"] && false) {  
+			$tracksList .= '<span onMouseOver="return overlib(\'Add all tracks\');" onMouseOut="return nd();"><i id="add_all_TOPT" class="fa fa-plus-circle fa-fw icon-small pointer"></i></span>';
+		}
+		$tracksList .= '</td><!-- add track -->';
+    
+		$tracksList .= '
+      <td>Title&nbsp;</td>';
+    if ($playlist_type != "PODCAST") {
+			$tracksList .= '<td class="track-list-artist">Artist&nbsp;</td>
+			<td>Album&nbsp;</td>';
+    }
+		$tracksList .= '
+			<td></td>
+			<td></td>
+			<td align="right" class="time time_w">Time</td>
+			<td class="space right"></td>
+		</tr>';
+		if ($i == 0){
+      $i=40000;
+    }
+		$TOPT_ids = ''; 
+		foreach ($tracks as $track) {
+			$track['track_id'] = 'tidal_' . $track['data']['id'];
+			$isFavorite = isInFavorite($track['track_id'], $cfg['favorite_id']);
+			$isBlacklist = isInFavorite($track['track_id'], $cfg['blacklist_id']);
+			$even_odd = ($i++ & 1) ? 'even' : 'odd';
+			$tracksList .= '
+			
+			<tr class="line ' . $even_odd . ' mouseover">
+				<td class="icon">
+				<span id="menu-track'. $i .'">
+				<div onclick="toggleMenuSub(' . $i . ');">
+					<i id="menu-icon' . $i .'" class="fa fa-bars icon-small"></i>
+				</div>
+				</span>
+				</td>
+				
+				<td class="icon">
+				<span>';
+			if ($cfg['access_add']) {
+				$tracksList .= '<a href="javascript:ajaxRequest(\'play.php?action=addSelect&amp;track_id=' . $track['track_id'] . '\',evaluateAdd);" onMouseOver="return overlib(\'Add track ' . addslashes($track['data']['title']) . '\');" onMouseOut="return nd();"><i id="add_tidal_' . $track['data']['id'] . '" class="fa fa-plus-circle fa-fw icon-small"></i></a>';
+			}
+			$tracksList .= '
+				</span>
+				</td>';
+
+      $tracksList .='
+				<td style="word-break: break-word;"><a id="a_play_track' . $i . '" href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id=' . $track['track_id'] . '&amp;position_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'Play track ' . $track['data']['trackNumber'] . '\');" onMouseOut="return nd();">' . $track['data']['title'] . '</a>';
+        if ($playlist_type != "PODCAST") {
+          $tracksList .= '
+          <span class="track-list-artist-narrow">' . html($track['data']['artists'][0]['name']);
+          if (count($track['data']['artists']) > 1) {
+					foreach ($track['data']['artists'] as $key => $TOPT_art)
+            if ($key > 0) {
+              $tracksList .= ' & ' . html($TOPT_art['name']);
+            }
+          }
+          $tracksList .= '</span>';
+        }
+				/* if (count($track['artists']) > 1) {
+					foreach ($track['artists'] as $key => $TOPT_art)
+					if ($key > 0) {
+						$tracksList .= ' & ' . html($TOPT_art['name']);
+					}
+				} */
+				
+				$tracksList .= '
+				</td>';
+        if ($playlist_type != "PODCAST") {
+        $tracksList .= '
+				<td class="track-list-artist">
+				<a href="index.php?action=view2&amp;artist=' . rawurlencode($track['data']['artists'][0]['name']) . '&amp;order=year">' . html($track['data']['artists'][0]['name']) . '</a>';
+				if (count($track['data']['artists']) > 1) {
+					foreach ($track['data']['artists'] as $key => $TOPT_art)
+					if ($key > 0) {
+						$tracksList .= ' & <a href="index.php?action=view2&amp;artist=' . rawurlencode($TOPT_art['name']) . '&amp;order=year">' . html($TOPT_art['name']) . '</a>';
+					}
+				}
+				$tracksList .= '</td>
+        <td style="word-break: break-word;"><a id="a_album' . $i . '" href="index.php?action=view3&amp;album_id=tidal_' . $track['data']['album']['id'] . '">' . $track['data']['album']['title'] . '</a>
+				</td>';
+        }
+        $o = "";
+				if (!$isFavorite) {
+					$o = "-o";
+				}
+				$starClass = "";
+				if ($isBlacklist) {
+					$starClass = " blackstar blackstar-selected";
+				}
+        $tracksList .= '
+				<td onclick="toggleStarSub(' . $i . ',\'' . $track['track_id'] . '\');" class="pl-favorites">
+				<span id="blacklist-star-bg' . $track['track_id'] . '" class="' . $starClass . '">
+				<i class="fa fa-star' . $o . ' fa-fw" id="favorite_star-' . $track['track_id'] . '"></i>
+				</span>
+				</td>
+				
+				<td></td>
+				<td align="right">' . formattedTime($track['data']['duration'] * 1000) . '</td>
+				<td></td>
+				</tr>
+			
+			';
+			$tracksList .= '
+				<tr>
+					<td colspan="20">
+					' . starSubMenu($i, $isFavorite, $isBlacklist, $track['track_id'], 'string') . '
+					</td>
+				</tr>';
+			
+			$tracksList .= '
+				<tr>
+				<td colspan="20">
+				' . trackSubMenu($i, $track, 'tidal_' . $track['data']['album']['id'], 'string') . '
 				</td>
 				</tr>';
 			}
@@ -2681,6 +2828,7 @@ function isInTdalMyCollection($id, $type = 'playlist') {
         if (strpos($userPlaylist['trn'], getTidalId($id)) !== false) {
           if ($userPlaylist['data']['creator']['type'] == 'USER') {
             return 'noAddRemove';
+            //return true;
           }
           return true;
         }
@@ -2729,6 +2877,25 @@ function getTidalId($id){
 
 
 //  +------------------------------------------------------------------------+
+//  | Get Tidal audio quality from mediaMetadata                             |
+//  +------------------------------------------------------------------------+
+
+function getTidalAudioQualityMediaMetadata($d){
+  global $cfg;
+  if ($d["mediaMetadata"]["tags"]) { 
+    if (count($d["mediaMetadata"]["tags"]) > 1) {
+      $lk = array_key_last($d["mediaMetadata"]["tags"]);
+      $aq = $d["mediaMetadata"]["tags"][$lk];
+    }
+    else {
+      $aq = $d['audioQuality'];
+    }
+    return $aq;
+  }
+}
+
+
+//  +------------------------------------------------------------------------+
 //  | Get Tidal audio quality                                                |
 //  +------------------------------------------------------------------------+
 
@@ -2739,7 +2906,8 @@ function getTidalAudioQuality($tidalAudioQuality){
     case "lossless":
       return "Lossless";
     case "hi_res":
-      return "Master";
+    case "hires_lossless":
+        return "Hires Lossless";
     default: 
       return $tidalAudioQuality;
   }
@@ -3295,10 +3463,11 @@ function getYouTubeStreamUrl($url){
 	global $cfg;
 	$cmd = trim($cfg['python_path'] . ' ' . $cfg['youtube-dl_path'] . ' ' . $cfg['youtube-dl_options'] . ' ' . ($url));
 	exec($cmd, $output, $ret);
+  cliLog('YouTube cmd: ' . $cmd);
 	if ($ret == 0) {
 		$js = json_decode($output[0],true);
 		$f = $cfg['youtube_audio_format_name'];
-		preg_match_all('!\d+!', $f, $matches_f);
+		preg_match('!\d+!', $f, $matches_f);
 		$format = array_search($matches_f[0], array_column($js['formats'], 'format_id'));
 		if (isset($js['formats'][$format]['fragment_base_url'])){
 			$yt_url = $js['formats'][$format]['fragment_base_url'];
@@ -4880,8 +5049,9 @@ function calculateAlbumFormat($album_information, $hra_tag = "") {
 			case "high":
 			case "lossless":
 				return "CD";
+			case "hires_lossless":
 			case "hi_res":
-				return "Master";
+				return "Hires";
 			default: 
 				return $album_information['audio_quality'];
 			}

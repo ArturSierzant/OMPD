@@ -758,32 +758,35 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 	
 	if ($track_id) {
 		if (isTidal($track_id)) {
-			if ($cfg['tidal_direct']) {
-				$query = mysqli_query($db,'SELECT CONCAT("' . mysqli_real_escape_string($db,NJB_HOME_URL) . 'stream.php?action=streamTidal&track_id=", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
-			}
-			elseif ($cfg['upmpdcli_tidal']) {
-				$query = mysqli_query($db,'SELECT CONCAT("' . mysqli_real_escape_string($db,$cfg['upmpdcli_tidal']) . '", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
-			}
-			else {
-				$query = mysqli_query($db,'SELECT CONCAT("' . MPD_TIDAL_URL . '", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
-			}
-			//track not added to DB yet (e.g. result of search)
-			if (mysqli_num_rows($query) == 0) {
+      //check if track and album are in DB
+      $query = mysqli_query($db,'SELECT track_id, album_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
+      if (mysqli_num_rows($query) > 0) {
+        //track is in DB, check if album is too
+        $a = mysqli_fetch_assoc($query);
+        $album_id = $a['album_id'];
+				$query1 = mysqli_query($db,'SELECT album_id FROM tidal_album WHERE  album_id = "' . mysqli_real_escape_string($db, $album_id) . '"');
+        if (mysqli_num_rows($query1) == 0) {
+          //if not then add album to DB
+          $tidal_tracks_tmp = getTracksFromTidalAlbum(getTidalId($album_id));
+        }
+      }
+      else {
+        //track from album not added to DB yet (e.g. result of search)
         if (!isset($album_id)) {
           $album_id = getTrackAlbumFromTidal(getTidalId($track_id));
         }
 				$tidal_tracks_tmp = getTracksFromTidalAlbum(getTidalId($album_id));
-				if ($cfg['tidal_direct']) {
-					$query = mysqli_query($db,'SELECT CONCAT("' . mysqli_real_escape_string($db,NJB_HOME_URL) . 'stream.php?action=streamTidal&track_id=", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
-				}
-				elseif ($cfg['upmpdcli_tidal']) {
-					$query = mysqli_query($db,'SELECT CONCAT("' . mysqli_real_escape_string($db,$cfg['upmpdcli_tidal']) . '", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
-				}
-				else {
-					$query = mysqli_query($db,'SELECT CONCAT("' . MPD_TIDAL_URL . '", track_id) as relative_file, track_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
-				}
-			}
+      }
 
+			if ($cfg['tidal_direct']) {
+				$query = mysqli_query($db,'SELECT CONCAT("' . mysqli_real_escape_string($db,NJB_HOME_URL) . 'stream.php?action=streamTidal&track_id=", track_id) as relative_file, track_id, album_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
+			}
+			elseif ($cfg['upmpdcli_tidal']) {
+				$query = mysqli_query($db,'SELECT CONCAT("' . mysqli_real_escape_string($db,$cfg['upmpdcli_tidal']) . '", track_id) as relative_file, track_id, album_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
+			}
+			else {
+				$query = mysqli_query($db,'SELECT CONCAT("' . MPD_TIDAL_URL . '", track_id) as relative_file, track_id, album_id FROM tidal_track WHERE 	track_id = "' . mysqli_real_escape_string($db,getTidalId($track_id)) . '"');
+			}
 		}
 		elseif (isHra($track_id)){
 			$isHRA = true;

@@ -396,6 +396,18 @@ class TidalAPI {
     return $this->request();
   }
 
+  function getByApiPath_v2($limit, $offset, $apiPath) {
+    if ($limit > 50) $limit = 50; //Tidal API limitation
+    if (strpos($apiPath,'?') !== false) {
+      $prefix = '&';
+    }
+    else {
+      $prefix = '?';
+    }
+    curl_setopt($this->curl, CURLOPT_URL, self::API_V2_URL . $apiPath . $prefix . "locale=en_US&deviceType=BROWSER&platform=WEB&countryCode=" . $this->countryCode . "&limit=" . $limit . "&offset=" . $offset);
+    return $this->request();
+  }
+
   function getStreamURL_old($track_id) {
     curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "tracks/" . $track_id . "/streamUrl?soundQuality=" . $this->audioQuality . "&countryCode=" . $this->countryCode);
     return $this->request();
@@ -403,6 +415,17 @@ class TidalAPI {
 
   function getStreamURL($track_id) {
     curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "tracks/" . $track_id . "/playbackinfopostpaywall?audioquality=" . $this->audioQuality . "&countryCode=" . $this->countryCode . "&playbackmode=STREAM&assetpresentation=FULL");
+    $res = $this->request();
+    if (strpos($res['manifestMimeType'],"vnd.tidal.bt") !== false) {
+      $manifest = json_decode(base64_decode($res['manifest']),true);
+      $res['manifest_b64_decoded'] = $manifest;
+      $res['url'] = $manifest['urls'][0];
+    }
+    return $res;
+  }
+
+  function getStreamURL_manifest($track_id) {
+    curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "tracks/" . $track_id . "/playbackinfo?audioquality=" . $this->audioQuality . "&countryCode=" . $this->countryCode . "&playbackmode=STREAM&assetpresentation=FULL");
     $res = $this->request();
     if (strpos($res['manifestMimeType'],"vnd.tidal.bt") !== false) {
       $manifest = json_decode(base64_decode($res['manifest']),true);
@@ -486,6 +509,11 @@ class TidalAPI {
     return $this->request();
   }
 
+  function getPlaylist_v2($playlist_id, $limit = 1000) {
+    curl_setopt($this->curl, CURLOPT_URL, self::API_V2_URL . "user-playlists/" . $playlist_id . "?countryCode=" . $this->countryCode . "&limit=" . $limit);
+    return $this->request();
+  }
+
   function getPlaylistTracks($playlist_id, $limit = 1000) {
     curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "playlists/" . $playlist_id . "/tracks?countryCode=" . $this->countryCode . "&limit=" . $limit);
     return $this->request();
@@ -499,6 +527,14 @@ class TidalAPI {
   function getMixlistTracks($mixlist_id, $limit = 1000) {
     //curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "pages/mix?mixId=" . $mixlist_id . "&countryCode=" . $this->countryCode . "&limit=" . $limit . "&deviceType=BROWSER");
     return $this->getMixList($mixlist_id)["rows"][1]["modules"][0]["pagedList"];
+  }
+
+  function getHomePage_v2($cursor = '') {
+    if ($cursor){
+      $cursor = '&cursor=' . $cursor;
+    }
+    curl_setopt($this->curl, CURLOPT_URL, self::API_V2_URL . "home/feed/static?locale=en_US&deviceType=BROWSER&platform=WEB&countryCode=" . $this->countryCode . $cursor);
+    return $this->request();
   }
 
   function getHomePage() {
@@ -565,7 +601,7 @@ class TidalAPI {
     if ($type == 'put') {
       curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, "PUT");
     }
-    curl_setopt($this->curl, CURLOPT_HTTPHEADER, array('authorization: Bearer ' . $this->token));
+    curl_setopt($this->curl, CURLOPT_HTTPHEADER, array('authorization: Bearer ' . $this->token,'x-tidal-client-version: 2030'));
     for ($i=0; $i<3; $i++) {
       $server_output = curl_exec($this->curl);
       if (curl_errno($this->curl) == 0 ) {

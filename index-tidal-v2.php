@@ -50,72 +50,80 @@ $countryCode = '';
 if ($conn){
   $sessionId = $t->sessionId;
   $countryCode = $t->countryCode;
-  $hp = $t->getHomePage();
-  if (strtolower($hp['title']) != 'home') {
+  $hp = $t->getHomePage_v2();
+  if (count($hp['items']) < 1) {
     echo ("Error getting Home Page from Tidal");
     require_once('include/footer.inc.php');
     exit();
+  }
+  if (strlen($hp['page']['cursor']) > 1){
+    $hp2 = $t->getHomePage_v2($hp['page']['cursor']);
+    if (count($hp2['items']) > 0) {
+      foreach($hp2['items'] as $key1 => $row1){
+        $hp['items'][]=$hp2['items'][$key1];
+      }
+    }
   }
 }
 ?>
 <div class="area">
 <?php
 $favIdxCounter = 0;
-foreach($hp['rows'] as $key => $row){
-  $mod = $hp['rows'][$key]['modules'][0];
-  if ($mod['type'] == 'ALBUM_LIST') {
-    $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal&type=album_list&apiPath=' . urlencode($mod['showMore']['apiPath']) . '"> (more...)</a>';
+foreach($hp['items'] as $key => $row){
+  $mod = $hp['items'][$key];
+  //echo count($hp['items']);
+  if ($mod['type'] == 'HORIZONTAL_LIST' && strtolower($mod['items'][0]['type']) == 'album') {
+    $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal_v2&type=album_list&apiPath=' . urlencode($mod['viewAll']) . '&moduleName=' . urldecode($mod['title']) . '"> (more...)</a>';
     if (strtolower($mod['preTitle']) == 'because you listened to') {
       $cover = $t->albumCoverToURL($mod['header']['item']['cover'],'lq');
       $headerTitile = '<img class="pointer" style="width: 3em; float: left; margin: 0 7px 5px 0;" src="' . $cover . '" onclick=\'location.href="index.php?action=view3&album_id=tidal_' . $mod['header']['item']['id'] .'"\'><div style="line-height: 1.5em">Because you listened to <br><a href="index.php?&action=view3&album_id=tidal_' . $mod['header']['item']['id'] . '"> `' . urldecode($mod['title']) . '`</a> by <a href="index.php?action=view2&artist=' . $mod['header']['item']['artists'][0]['name'] .'">' . urldecode($mod['header']['item']['artists'][0]['name']) . '</a>';
     }
     echo '<h1>' . $headerTitile . '</h1>';
-    echo '<div class="full" id="' . $mod['id'] . '">';
-    foreach($mod['pagedList']['items'] as $res) {
+    echo '<div class="full" id="' . $mod['moduleId'] . '">';
+    foreach($mod['items'] as $res) {
       $albums = array();
-      $albums['album_id'] = 'tidal_' . $res['id'];
-      $albums['album'] = $res['title'];
-      $albums['cover'] = $t->albumCoverToURL($res['cover'],'lq');
-      $albums['artist_alphabetic'] = $res['artists'][0]['name'];
+      $albums['album_id'] = 'tidal_' . $res['data']['id'];
+      $albums['album'] = $res['data']['title'];
+      $albums['cover'] = $t->albumCoverToURL($res['data']['cover'],'lq');
+      $albums['artist_alphabetic'] = $res['data']['artists'][0]['name'];
       if ($cfg['show_album_format']) {
-        //$albums['audio_quality'] = $res['audioQuality'];
-        $albums['audio_quality'] = getTidalAudioQualityMediaMetadata($res);
+        //$albums['audio_quality'] = $res['data']['audioQuality'];
+        $albums['audio_quality'] = getTidalAudioQualityMediaMetadata($res['data']);
       }
-      draw_tile ( $tileSize, $albums, '', 'echo', $res['cover'] );
+      draw_tile ( $tileSize, $albums, '', 'echo', $res['data']['cover'] );
     }
     echo '</div>';
   } //ALBUM_LIST
   
-  if ($mod['type'] == 'MIX_LIST') {
-    $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal&type=mixlist_list&apiPath=' . urlencode($mod['showMore']['apiPath']) . '"> (more...)</a>';
+  if ($mod['type'] == 'HORIZONTAL_LIST' && strtolower($mod['items'][0]['type']) == 'mix') {
+    $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal_v2&type=mixlist_list&apiPath=' . urlencode($mod['viewAll']) . '&moduleName=' . urldecode($mod['title']) . '"> (more...)</a>';
     echo '<h1>&nbsp;' . $headerTitile . '</h1>';
-    echo '<div class="full" id="' . $mod['id'] . '">';
-    foreach($mod['pagedList']['items'] as $res) {
+    echo '<div class="full" id="' . $mod['moduleId'] . '">';
+    foreach($mod['items'] as $res) {
       $albums = array();
-      $albums['album_id'] = 'tidal_' . $res['id'];
-      $albums['album'] = $res['title'];
-      $albums['cover'] = $res['images']['SMALL']['url'];
-      $albums['artist_alphabetic'] = $res['subTitle'];
+      $albums['album_id'] = 'tidal_' . $res['data']['id'];
+      $albums['album'] = $res['data']['titleTextInfo']['text'];
+      $albums['cover'] = $res['data']['mixImages'][0]['url'];
+      $albums['artist_alphabetic'] = $res['data']['subtitleTextInfo']['text'];
       //draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $res['images']['SMALL']['url'], "mixlist");
-      draw_tile ( $tileSize, $albums, '', 'echo', $res['images']['SMALL']['url'], "mixlist");
+      draw_tile ( $tileSize, $albums, '', 'echo', $res['data']['mixImages'][0]['url'], "mixlist");
     }
     echo '</div>';
   } //MIX_LIST
-    
-   
-  if ($mod['type'] == 'PLAYLIST_LIST') {
-    $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal&type=playlist_list&apiPath=' . urlencode($mod['showMore']['apiPath']) . '"> (more...)</a>';
+       
+  if ($mod['type'] == 'HORIZONTAL_LIST' && strtolower($mod['items'][0]['type']) == 'playlist') {
+    $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal_v2&type=playlist_list&apiPath=' . urlencode($mod['viewAll']) . '&moduleName=' . urldecode($mod['title']) . '"> (more...)</a>';
     echo '<h1>&nbsp;' . $headerTitile . '</h1>';
-    echo '<div class="full" id="' . $mod['id'] . '">';
-    foreach($mod['pagedList']['items'] as $res) {
+    echo '<div class="full" id="' . $mod['moduleId'] . '">';
+    foreach($mod['items'] as $res) {
       $albums = array();
-      $albums['album_id'] = 'tidal_' . $res['uuid'];
-      $albums['album'] = $res['title'];
-      $albums['cover'] = $t->albumCoverToURL($res['squareImage'],"lq");
+      $albums['album_id'] = 'tidal_' . $res['data']['uuid'];
+      $albums['album'] = $res['data']['title'];
+      $albums['cover'] = $t->albumCoverToURL($res['data']['squareImage'],"lq");
       if (!$albums['cover']) {
-        $albums['cover'] = $t->albumCoverToURL($res['image'],'');
+        $albums['cover'] = $t->albumCoverToURL($res['data']['image'],'');
       }
-      $albums['artist_alphabetic'] = getTidalPlaylistCreator($res);
+      $albums['artist_alphabetic'] = getTidalPlaylistCreator($res['data']);
       //draw_Tidal_tile ( $tileSize, $albums, '', 'echo', $albums['cover'],"playlist");
       draw_tile ( $tileSize, $albums, '', 'echo', $albums['cover'],"playlist");
     }
@@ -131,10 +139,10 @@ foreach($hp['rows'] as $key => $row){
       $favIdxCounter = $favIdxCounter + 10000;
     }
     $divId = str_replace(' ','_',$mod['title']);
-    $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal&type=track_list&apiPath=' . urlencode($mod['showMore']['apiPath']) . '"> (more...)</a>';
+    $headerTitile = $mod['title'] . '<a href="index.php?action=viewMoreFromTidal_v2&type=track_list&apiPath=' . urlencode($mod['viewAll']) . '&moduleName=' . urldecode($mod['title']) . '"> (more...)</a>';
     
-    $newTracks = $mod['pagedList'];
-    $tracksList = tidalTracksList($newTracks, $favIdxCounter);
+    $newTracks = $mod['items'];
+    $tracksList = tidalTracksList_v2($newTracks, $favIdxCounter);
  
     echo '<h1>&nbsp;' . $headerTitile . '</h1>';
     echo '<div id="' . $divId . '">';

@@ -489,7 +489,7 @@ function recursiveScan($dir) {
         $entries = @scandir($dir);
     }
     else {
-        $entries = @scandir($dir) or message(__FILE__, __LINE__, 'error', '[b]Update error![/b] [br][br][b]Failed to open directory:[/b][br]' . $dir . '[list][*]Check media_dir value in Settings -> Config[*]Check file permission[/list]');
+        $entries = @scandir($dir) or message(__FILE__, __LINE__, 'error', '[b]Update error![/b] [br][br][b]Failed to open directory:[/b][br]' . $dir . '[list][*]Check Media directory value in Settings -> Media update options[*]Check file permission[/list]');
     }
 	
 	//$dir = iconv(NJB_DEFAULT_FILESYSTEM_CHARSET, 'UTF-8', $dir);
@@ -649,7 +649,7 @@ function countDirectories($base_dir) {
 		$entries = @scandir($base_dir);
 	}
 	else {
-		$entries = @scandir($base_dir) or message(__FILE__, __LINE__, 'error', '[b]Update error![/b] [br][br][b]Failed to open directory:[/b][br]' . $base_dir . '[list][*]Check media_dir value in Settings -> Config[*]Check file permission[/list]');
+		$entries = @scandir($base_dir) or message(__FILE__, __LINE__, 'error', '[b]Update error![/b] [br][br][b]Failed to open directory:[/b][br]' . $base_dir . '[list][*]Check Media directory value in Settings -> Media update options[*]Check file permission[/list]');
 
 	}
 	$directories = array();

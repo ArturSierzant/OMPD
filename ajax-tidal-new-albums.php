@@ -76,7 +76,8 @@ if ($conn === true){
       $albums['cover'] = $t->albumCoverToURL($res['cover'],'lq');
       $albums['artist_alphabetic'] = $res['artists'][0]['name'];
       if ($cfg['show_album_format']) {
-        $albums['audio_quality'] = $res['audioQuality'];
+        //$albums['audio_quality'] = $res['audioQuality'];
+        $albums['audio_quality'] = getTidalAudioQualityMediaMetadata($res);
       }
       draw_tile ( $size, $albums, '', 'echo', $res['cover'] );
     }
