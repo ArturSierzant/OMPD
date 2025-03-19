@@ -466,28 +466,32 @@ $showLinks = false;
 $showAppearsOn = false;
 $mixes = false;
 $radio = false;
+$pic = '';
 
 if ($cfg['use_tidal']) {
-  $artist_name = moveTheToBegining($artistRequested);
-  $res = $t->search("artists",$artist_name);
-  $pic = '';
-  if ($res["totalNumberOfItems"] > 0) {
-    foreach ($res["items"] as $a) {
-      if (tidalEscapeChar(strtolower($a["name"])) == tidalEscapeChar(strtolower($artist_name))) {
-        $tidalArtistId = $a["id"];
-        if ($a["picture"]){
-          $pic = $t->artistPictureToURL($a["picture"]);
-          $img = '<img src="' . $pic . '">';
+  if (!$tidalArtistId){
+    $artist_name = moveTheToBegining($artistRequested);
+    $res = $t->search("artists",$artist_name);
+    if ($res["totalNumberOfItems"] > 0) {
+      foreach ($res["items"] as $a) {
+        if (tidalEscapeChar(strtolower($a["name"])) == tidalEscapeChar(strtolower($artist_name))) {
+          $tidalArtistId = $a["id"];
+          break;
         }
-        else {
-          $img = '<div class="artist_bio_pic_not_found"><i class="fa fa-user"></i></div>';
-        }
-        break;
       }
     }
   }
 
   $artistAll = $t->getArtistAll($tidalArtistId);
+  
+  if ($artistAll["rows"][0]["modules"][0]["artist"]["picture"]){
+    $pic = $t->artistPictureToURL($artistAll["rows"][0]["modules"][0]["artist"]["picture"]);
+    $img = '<img src="' . $pic . '">';
+  }
+  else {
+    $img = '<div class="artist_bio_pic_not_found"><i class="fa fa-user"></i></div>';
+  }
+  
   
   $bio = artistBio($artistAll);
   $related = relatedArtists($artistAll);
@@ -1844,7 +1848,7 @@ if ($cfg['use_tidal'] && $filter == 'whole' && $related) {
       $img = '<i class="fa fa-user" style="font-size: 6em;"></i>';
     }
 ?>
-<div class="artist_related" onmouseover="return overlib('<?php echo $ra["name"]; ?>', CAPTION ,'Go to artist');" onmouseout="return nd();"><a href="index.php?action=view2&tileSizePHP=<?php echo $tileSizePHP; ?>&artist=<?php echo urlencode($ra["name"]) ?>&order=year&tidalArtistId=<?php echo urlencode($ra["id"])?>"><div class="artist_container_small"><?php echo $img; ?></div><div><?php echo $ra["name"]; ?></div></a></div>
+<div class="artist_related" title="Go to artist <?php echo $ra["name"]; ?>"><a href="index.php?action=view2&tileSizePHP=<?php echo $tileSizePHP; ?>&artist=<?php echo urlencode($ra["name"]) ?>&order=year&tidalArtistId=<?php echo urlencode($ra["id"])?>"><div class="artist_container_small"><?php echo $img; ?></div><div><?php echo $ra["name"]; ?></div></a></div>
 <?php
   }
 ?>
@@ -1874,7 +1878,7 @@ if ($cfg['use_tidal'] && $filter == 'whole' && $influencers) {
       $img = '<i class="fa fa-user" style="font-size: 6em;"></i>';
     }
 ?>
-<div class="artist_related" onmouseover="return overlib('<?php echo $ra["name"]; ?>', CAPTION ,'Go to artist');" onmouseout="return nd();"><a href="index.php?action=view2&tileSizePHP=<?php echo $tileSizePHP; ?>&artist=<?php echo urlencode($ra["name"]) ?>&order=year&tidalArtistId=<?php echo urlencode($ra["id"])?>"><div class="artist_container_small"><?php echo $img; ?></div><div><?php echo $ra["name"]; ?></div></a></div>
+<div class="artist_related" title="Go to artist <?php echo $ra["name"]; ?>"><a href="index.php?action=view2&tileSizePHP=<?php echo $tileSizePHP; ?>&artist=<?php echo urlencode($ra["name"]) ?>&order=year&tidalArtistId=<?php echo urlencode($ra["id"])?>"><div class="artist_container_small"><?php echo $img; ?></div><div><?php echo $ra["name"]; ?></div></a></div>
 <?php
   }
 ?>

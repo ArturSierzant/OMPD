@@ -346,8 +346,11 @@ function redirToNowPlaying(){
 }
 
 function resizeTile($tileSize,$containerWidth) {
-	$('.tile').css('width', function() { return $tileSize; });
-	$('.tile').css('height', function() { return $tileSize; });
+	$('.tile_env').css('width', function() { return $tileSize; });
+	$('.tile_env').css('height', function() { return $tileSize; });
+	$('.tile_artist').css('width', function() { return $tileSize; });
+	$('.tile_artist_info').css('width', function() { return $tileSize * 0.95; });
+	$('.tile_artist_info').css('height', function() { return $tileSize * 0.95; });
 	resizeSuggested($tileSize,$containerWidth);
 	resizeUsersTab($tileSize,$containerWidth);
 	
@@ -497,6 +500,8 @@ function resizeImgContainer() {
     //calc only if #image_container exists (only on NowPlaying and Album view) - in other case error appeared
     if ($('#image_container').css('height')) {
       diff = $('#image_container').css('height').replace('px','') - $('#image_in').css('height').replace('px','');
+      //console.log('cont=' + $('#image_container').css('height') + ' image=' + $('#image_in').css('height') + ' top=' + top);
+
       $('#pl-track-info-narrow').css('position','relative');
       //$('#pl-track-info-narrow').css('lineHeight', diff/3 + 'px');
       $('#pl-track-info-narrow').css('top','-' + diff/2 + 'px');
@@ -573,7 +578,7 @@ function resizeImgContainer() {
 		$(".back-to-top").css("right",($(window).width() - 1275)/2);
 	}
 	else {
-		$(".back-to-top").css("right",10)
+		$(".back-to-top").css("right","2px");
 	}
 	
 	

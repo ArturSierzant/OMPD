@@ -37,8 +37,10 @@ $saveTrackId = $_GET['saveTrackId'];
 $saveTrackMpdUrl = getTrackMpdUrl($_GET['track_mpd_url']);
 //add to/save as from track submenu for streams (Tidal/YT)
 if (!$saveTrackMpdUrl){
-	$saveTrackMpdUrl = createStreamUrlMpd($saveTrackId);
+  $saveTrackMpdUrl = createStreamUrlMpd($saveTrackId);
 }
+//$saveTrackMpdUrl = str_replace(NJB_HOME_URL, '_NJB_HOME_URL_',$saveTrackMpdUrl);
+//$data['saveTrackMpdUrl'] = $saveTrackMpdUrl;
 $saveTrack = $_GET['saveTrack'];
 
 //avoid adding empty record when mpd is in unknown state
@@ -122,7 +124,9 @@ function importTrack($favorite_id, $track_id, $track_mpd_url) {
 			}
 		}
 	}
-	
+
+  $track_mpd_url = str_replace(NJB_HOME_URL, '_NJB_HOME_URL_',$track_mpd_url);
+
 	$query = mysqli_query($db,"SELECT MAX(position) as maxPosition FROM favoriteitem WHERE favorite_id = '" .$favorite_id . "'");
 	$favoriteitem = mysqli_fetch_assoc($query);
 	$maxPosition = (int) $favoriteitem['maxPosition'];

@@ -52,13 +52,13 @@ $searchTag = $_GET['searchTag'];
 
 $browser = new RadioBrowser();
 $countries = $browser->getCountries();
-$languages = $browser->getLanguages();
+//$languages = $browser->getLanguages();
 
 ?>
 <h1>Search radio stations</h1>
 <table cellspacing="0" cellpadding="0" id="searchRadio" class="border">
 
-<tr class="textspace"><td colspan="3"></td></tr>
+<tr class="textspace"><td colspan="2"></td></tr>
 <tr>
 	<td>Name:</td>
 	<td><input type="text" id="name" value=""  style="width: 100%; max-width: 400px; margin-bottom: 4px"></td>
@@ -83,17 +83,19 @@ $languages = $browser->getLanguages();
 
 <tr class="space"><td colspan="2"></td></tr>
 <tr>
-	<td>
+	<td colspan="2">
   <div class="buttons">
 		<span id="btnSearch" onClick="searchRadio()">Search</span>
-		</div>
+    <span id="btnSaved" onClick="showSavedRadios()">Show saved</span>
+    <span id="btnClear" onClick="clearForm()">Clear</span>
+	</div>
   </td>
 	<td></td>
 </tr>
 </table>
 
 <div id="searchResults">
-<h1>Search results<span id="stationsCount"></span></h1>
+<h1><span id="searchType"></span> <span id="stationsCount"></span></h1>
   <div id="stationContainer"></div>
   <div style="text-align: center; padding: 1em;" id="loadingIndicator">
     <i class="fa fa-cog fa-spin icon-small"></i> Loading stations list...
@@ -107,6 +109,12 @@ $languages = $browser->getLanguages();
     //echo 'searchRadio();';
   }
   ?>
+  if ($("#tag").val() != '' || $("#name").val() != ''){
+    searchRadio();
+  }
+  else {
+    showSavedRadios();
+  }
 
   $('#searchRadio :input').keypress(function (e) {
     var key = e.which;
@@ -116,7 +124,7 @@ $languages = $browser->getLanguages();
        return false;  
       }
   });
-
+  
   function searchRadio(){
     $("#stationsCount").html('');
     $("#searchResults").show();
@@ -126,16 +134,57 @@ $languages = $browser->getLanguages();
       url: "ajax-radio.php",
       type: "POST",
       data: {
-        name : $("#name").val(),
-        tag : $("#tag").val().toLowerCase(),
+        action : "searchRadios",
+        name : $("#name").val().trim(),
+        tag : $("#tag").val().toLowerCase().trim(),
         countrycode : $("#country").val()
         },  
       dataType: "html"
     }); 
     
-    request.done(function( data ) {  
+    request.done(function(data) {  
+      $("#searchType").html('Search results');
+      $("#stationContainer").html(data);
       $("#loadingIndicator").hide();
-      $("#stationContainer").html( data );
+    }); 
+    
+    request.fail(function( jqXHR, textStatus ) {  
+      alert( "Request failed: " + textStatus );	
+    }); 
+  }
+
+  function clearForm(){
+    $("#name").val('');
+    $("#tag").val('');
+    $("#country").val('0');
+    $("#searchResults").hide();
+    //showSavedRadios();
+  }
+
+  function showSavedRadios(){
+    $("#loadingIndicator").show();
+
+    var request = $.ajax({
+      url: "ajax-radio.php",
+      type: "POST",
+      data: {
+        action : "showSavedRadios"
+        },  
+      dataType: "html"
+    }); 
+    
+    request.done(function(data) {
+      if (data){
+        $("#searchType").html('Saved radio stations');
+        $("#stationsCount").html('');
+        $("#searchResults").show();
+        $("#stationContainer").html('');
+        $("#stationContainer").html(data);
+      }
+      else {
+        $("#stationContainer").hide();
+      }
+      $("#loadingIndicator").hide();
     }); 
     
     request.fail(function( jqXHR, textStatus ) {  

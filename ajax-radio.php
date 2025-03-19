@@ -18,20 +18,20 @@
 //  | along with this program.  If not, see <http://www.gnu.org/licenses/>.  |
 //  +------------------------------------------------------------------------+
 
-global $cfg;
+global $cfg,$db;
 
 use AdinanCenci\RadioBrowser\RadioBrowser;
 
-require_once 'vendor/autoload.php';
 require_once('include/initialize.inc.php');
 require_once('include/library.inc.php');
+require_once('vendor/autoload.php');
 
 $name = $_POST['name'];
 $tag = $_POST['tag'];
 $countrycode = $_POST['countrycode'];
-$action = $_GET['action'];
-$picUrl = $_GET['picUrl'];
-$streamUrl = $_GET['streamUrl'];
+$action = $_POST['action'];
+$picUrl = $_POST['picUrl'];
+$streamUrl = $_POST['streamUrl'];
 $orderBy = 'votes';
 $reverse = true;
 if ($name) {
@@ -45,26 +45,45 @@ authenticate('access_media');
 if ($action == 'savePic') {
   echo savePic($picUrl, $streamUrl);
   return;
-}
+} 
 
 $browser = new RadioBrowser();
 
-if ($countrycode == '0') $countrycode = null;
+if ($action == 'searchRadios') {
+  if ($countrycode == '0') $countrycode = null;
+  $searchTerms = array('tag'=>$tag,'name'=>$name,'countrycode'=>$countrycode, 'limit'=>$limit,'order'=>$orderBy,'reverse'=>$reverse);
 
-$searchTerms = array('tag'=>$tag,'name'=>$name,'countrycode'=>$countrycode, 'limit'=>$limit,'order'=>$orderBy,'reverse'=>$reverse);
+  $stations = $browser->searchStation($searchTerms);
 
-$stations = $browser->searchStation($searchTerms);
+  $stationsCount = count($stations);
 
-$stationsCount = count($stations);
+  if ($stationsCount == 0){
+    ?>
+    <script>
+      $("#stationsCount").html('');
+    </script>
+    <br>No matching stations found.
+    <?php
+    return;
+  }
+}
 
-if ($stationsCount == 0){
-  ?>
-  <script>
-     $("#stationsCount").html('');
-  </script>
-  <br>No matching stations found.
-  <?php
-  return;
+elseif ($action == 'showSavedRadios') {
+  $query = mysqli_query($db, "SELECT DISTINCT SUBSTRING_INDEX(stream_url,'ompd_stationuuid=',-1) AS 'stationuuid' FROM favoriteitem WHERE stream_url LIKE '%ompd_stationuuid=%'");
+  $stationsCount = mysqli_num_rows($query);
+  if ($stationsCount == 0){
+    return;
+  }
+  else {
+    $stations = array();
+    while ($row = mysqli_fetch_assoc($query)) {
+      $stationuuid = $row['stationuuid'];
+      $station = $browser->getStationsByUuid($stationuuid);
+      if ($station) {
+        $stations[] = $station[0];
+      }
+    }
+  }
 }
 
 $disc = 1;
@@ -80,117 +99,15 @@ $disc = 1;
     <td>Quality</td>
     <td class="pl-genre">Votes</td>
     <td></td>
+    <td></td>
   </tr>
   <?php
 
 $i = 0;
-$tagId = 0;
 
-foreach ($stations as $track) { 
-?>
-  <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?> mouseover">
-    <?php 
-    $position_id = $i + $disc * 100;
-    $url = $track['url'];
-    if ($track['url_resolved']) {
-      $url = $track['url_resolved'];
-    }
-    $picUrl = $track['favicon'];
-    ?>
-    <td class="small_cover_md">
-      <?php 
-      if ($track['favicon']) {
-      ?>
-      <img loading="lazy" decoding="async"
-        src="image.php?source=radio&amp;image_url=<?= urlencode($track['favicon']); ?>" alt="" width="100%">
-      <?php
-      }
-      ?>
-    </td>
-
-    <td class="icon">
-      <?php 
-    if ($cfg['access_add'])  echo '<span id="add_' . $position_id . '" streamUrl="' . $url . '" picUrl="' . $picUrl . '" class="pointer" onMouseOver="return overlib(\'Add stream\');" onMouseOut="return nd();"><i class="fa fa-plus-circle fa-fw icon-small"></i></span>'; 
-    ?>
-
-    </td>
-
-    <td class="time"><?php 
-    
-    if ($cfg['access_play']) 		echo '<span id="a_play_track'. $position_id .'" class="pointer" streamUrl="' . ($url) . '" picUrl="' . $picUrl . '" position_id="' . $position_id . '"><div class="playlist_title break-word">' . html($track['name']) . '</div><div class="playlist_title_album break-all favoritePlaylistDescription">' . html($track['url']) . '</div></span>';
-    
-    else echo html($track['name']);
-    
-    ?>
-
-    </td>
-    <td class="track-list-artist">
-      <div>
-        <?php 
-      $sp = explode(",",$track['tags']);
-      foreach($sp as $s){
-        if ($s){
-          echo '<span id="tagId' . $tagId . '" class="artist_all pointer" style="white-space: break-spaces; margin-bottom: 4px;">' . $s .'</a></span>';
-          $tagId ++;
-        }
-      } 
-      ?>
-      </div>
-    </td>
-    <td class="time pl-genre">
-      <?php if($track['homepage'] !== '') { ?>
-      <a href="<?= $track['homepage'] ?>" target="_NEW"><i class="fa fa-globe icon-small" aria-hidden="true"></i>
-      </a>
-      <?php }; ?>
-    </td>
-    <td>
-      <?php if ($track['codec'] != "UNKNOWN") $codec = $track['codec']; 
-      else $codec = "---";
-      if ($track['bitrate'] != "0") $bitrate = "@" . $track['bitrate']; 
-      else $bitrate = "";
-      echo $codec . $bitrate;
-      ?>
-    </td>
-
-    <td class="pl-genre">
-      <?php echo $track['votes']; ?>
-    </td>
-
-    <?php
-    
-    $isFavorite = false;
-    $isBlacklist = false;
-    $tid = $track['changeuuid'];
-  
-    if ($track['favorite_pos']) $isFavorite = true;
-    if ($track['blacklist_pos']) $isBlacklist = true;
-    ?>
-    <td></td>
-<!--     <td onclick="toggleStarSub(<?php echo $i + $disc * 100 ?>,'<?php echo $tid ?>');" class="pl-favorites">
-      <span id="blacklist-star-bg<?php echo $tid ?>"
-        class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
-        <i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
-      </span>
-    </td> -->
-
-  </tr>
-  <tr class="line">
-    <td></td>
-    <td colspan="16"></td>
-  </tr>
-
-  <tr>
-    <td colspan="10">
-      <?php starSubMenu($i + $disc * 100, $isFavorite, $isBlacklist, $tid);?>
-    </td>
-  </tr>
-
-  <tr>
-    <td colspan="10">
-      <?php trackSubMenu($i + $disc * 100, $track, $album_id);?>
-    </td>
-  </tr>
-  <?php
+foreach ($stations as $track) {
+  radioListItem($track, $i, $disc);
+  $i++;
 }
 ?>
 </table>
@@ -204,9 +121,16 @@ foreach ($stations as $track) {
   <?php
   }
   else {
-  ?>
-    $("#stationsCount").html(" - <?= $stationsCount; ?> station<?= $s; ?> found:");
-  <?php
+    if ($action == 'showSavedRadios') {
+      ?>
+      $("#stationsCount").html(" - <?= $stationsCount; ?> station<?= $s; ?> found in Favorites:");
+      <?php
+    }
+    else {
+      ?>
+        $("#stationsCount").html(" - <?= $stationsCount; ?> station<?= $s; ?> found:");
+      <?php
+    }
   }
   ?>
 
@@ -273,7 +197,7 @@ foreach ($stations as $track) {
 
   function savePic(picUrl, streamUrl) {
     $.ajax({
-      type: "GET",
+      type: "POST",
       url: "ajax-radio.php",
       data: {
         'action': 'savePic',
@@ -283,7 +207,7 @@ foreach ($stations as $track) {
     });
   }
 
-  // addFavSubmenuActions();
+ addFavSubmenuActions();
 
 </script>
 <?php 

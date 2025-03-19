@@ -42,6 +42,8 @@ $addYouTubePrefix = false;
 $addHraPrefix = false;
 $track_id = $track_id ? $track_id :  '';
 $track_mpd_url = $track_mpd_url ? $track_mpd_url :  '';
+$radio_id = getTrackIdFromUrl($track_mpd_url,'radio');
+
 if ($track_id) {
 	//from Tidal album view or search results
 	if (isTidal($track_id)){
@@ -76,6 +78,12 @@ if ($track_id) {
 		$track_id = '';
 		$addYouTubePrefix = true;
 	}
+  elseif (isRadio($track_id)){
+    $radio_id = getRadioId($track_id);
+    $track_mpd_url = createStreamUrlMpd($track_id);
+    $track_id = '';
+    $addRadioPrefix = true;
+  }
 	else {
 		//check if track_id is from local files indexed by DB
 		$query = mysqli_query($db,"SELECT track_id FROM track WHERE track_id = '" .$track_id . "'");
@@ -95,11 +103,12 @@ if ($action == 'add') {
 		track_id='" . mysqli_real_escape_string($db, $track_id) . "'
 		AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['favorite_id']) . "'");
 	}
-	if ($track_mpd_url){
-/*  $query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE 
-    stream_url='" . mysqli_real_escape_string($db, $track_mpd_url) . "'
-    AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['favorite_id']) . "'");
- */    
+  if ($radio_id){
+    $query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE 
+    stream_url LIKE '%ompd_stationuuid=" . mysqli_real_escape_string($db, $radio_id) . "%' AND favorite_id = '" . mysqli_real_escape_string($db, $cfg['favorite_id']) . "'");
+  }
+  elseif ($track_mpd_url){
+    $track_mpd_url=str_replace(NJB_HOME_URL, '_NJB_HOME_URL_',$track_mpd_url);
     $track_id_url = getTrackIdFromUrl($track_mpd_url);
 		if ($track_id_url) {
       $query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE 
@@ -142,6 +151,7 @@ if (!$track_id) {
 	if ($addTidalPrefix) $track_id = "tidal_" . $track_id;
 	if ($addHraPrefix) $track_id = "hra_" . $track_id;
 	if ($addYouTubePrefix) $track_id = "youtube_" . $track_id;
+  if ($addRadioPrefix) $track_id = "radio_" . $radio_id;
 }
 $data['track_id'] = $track_id;
 

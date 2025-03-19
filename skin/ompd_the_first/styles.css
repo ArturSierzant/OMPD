@@ -2022,14 +2022,24 @@ div.tile:active {
     transform: scale(0.98) rotate(0deg) translateX(0px) translateY(0px) skewX(0deg) skewY(0deg); */
     }
 
-.tile 	{
-    width: 150px; 
-    height: 150px;
-    display: inline-block; 
+.tile_env {
+    width: 110px;
+    height: 110px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: left ;
+    margin: 0 0 1px 1px;
+  }
+
+.tile {
+    width: 96%;
+    height: 96%;
+    display: inline-block;
     margin: 0 0 1px 1px;
     overflow: hidden;
     text-overflow: ellipsis;
-    }		
+    border-radius: 5%;
+  }
     
 .tile1 {
     background-color: white;
@@ -2048,6 +2058,32 @@ div.tile:active {
     border-radius: 0.3077em;
     overflow: hidden;
     }
+
+.tile_artist 	{
+    display: inline-block; 
+    margin: 0 0 1px 1px;
+    line-height: initial;
+    color: #ffffff;
+    }
+
+.tile_artist_pic 	{
+    border-radius: 10%;
+    overflow: hidden;
+    background-color: #5c5c5c;
+    height: 100%;
+    justify-content: center;
+    align-items: center; display: flex;
+   }
+
+.tile_artist_name {
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 5px 0 15px 0;
+    color: #4D90FE;
+    }
+
 .tile_format {
     padding: 0.6em;
     font-size: 0.8em;
@@ -2604,7 +2640,7 @@ h1 {
 }
 
 .break-all {
-  word-break: break-all;
+  word-wrap: anywhere;
   -ms-word-break: break-all;
 }
 

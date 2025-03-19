@@ -497,6 +497,14 @@ function about() {
 </td>
 	<td></td>
 </tr>
+<tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
+	<td></td>
+	<td>CD Icon</td>
+	<td></td>
+	<td><a href="https://www.svgrepo.com/svg/387093/cd" target="_blank">https://www.svgrepo.com/svg/387093/cd</a>
+</td>
+	<td></td>
+</tr>
 
 
 

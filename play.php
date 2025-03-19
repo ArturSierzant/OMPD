@@ -698,7 +698,12 @@ function insertSelect() {
 	}
 	elseif ($cfg['player_type'] == NJB_MPD) {
 		$status = mpd('status');
-		$insPos = $status['song'] + 1;
+    if ($status['state'] == 'stop') {
+      $insPos = $status['playlistlength'];
+    }
+    else {
+      $insPos = $status['song'] + 1;
+    }
 		$playAfterInsert= get('playAfterInsert');
 		if ($status['playlistlength'] == 0)	
 			$addResult = addTracks('play');
@@ -1101,7 +1106,8 @@ function addTracks($mode = 'play', $insPos = '', $playAfterInsert = '', $track_i
 				$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
 			}
 			elseif ($file = $track['stream_url']){
-				$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
+				//$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
+				$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', str_replace('_NJB_HOME_URL_', NJB_HOME_URL, $file));
 			}
 			$mpdCommand = mpd('addid "' . mpdEscapeChar($file) . '" ' . $insPos);
 			if ($mpdCommand == 'ACK_ERROR_NO_EXIST') {
@@ -1230,45 +1236,6 @@ function addUrl($mode = 'play') {
 
 
 
-
-//  +------------------------------------------------------------------------+
-//  | Play Stream                                                            |
-//  +------------------------------------------------------------------------+
-function DEL_playStream($favorite_id) {
-	global $db, $cfg;
-
-	$first = true;
-	
-	$query = mysqli_query($db,'SELECT stream_url FROM favoriteitem WHERE favorite_id = ' . (int) $favorite_id . ' AND stream_url != "" ORDER BY position');
-	//return 'here1';
-	while ($favoriteitem = mysqli_fetch_assoc($query)) {
-		if ($cfg['player_type'] == NJB_HTTPQ) {
-			httpq('playfile', 'file=' . rawurlencode($favoriteitem['stream_url']));
-			if ($first)
-				httpq('play');
-		}
-		elseif ($cfg['player_type'] == NJB_VLC) {
-			$file = addslashes($file);
-			$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
-			vlc('in_enqueue&input=' . rawurlencode($favoriteitem['stream_url']));
-			if ($first)
-				vlc('pl_play');
-		}
-		elseif ($cfg['player_type'] == NJB_MPD) {
-			
-			$file = iconv(NJB_DEFAULT_CHARSET, 'UTF-8', $file);
-			mpd('add ' . mpdEscapeChar($favoriteitem['stream_url']));
-			if ($first)
-				mpd('play');
-		}
-		$first = false;
-	}
-	//exit();
-}
-
-
-
-
 //  +------------------------------------------------------------------------+
 //  | Play Stream direct                                                     |
 //  +------------------------------------------------------------------------+
@@ -1284,14 +1251,19 @@ function playStreamDirect() {
 	$data			= array();
 	
 	$status = mpd('status');
-	$insPos = $status['song'] + 1;
+  if ($status['state'] == 'stop') {
+    $insPos = $status['playlistlength'];
+  }
+  else {
+	  $insPos = $status['song'] + 1;
+  }
   
 	if (!isset($url)) {
     $query = mysqli_query($db,'SELECT stream_url FROM favoriteitem WHERE favorite_id = ' . (int) $favorite_id . ' AND position = ' . (int) $position . ' LIMIT 1');    
     $favoriteitem = mysqli_fetch_assoc($query);
     $url = $favoriteitem['stream_url'];
   }
-
+  $url = str_replace('_NJB_HOME_URL_',NJB_HOME_URL,$url);
   mpd('addid "' . mpdEscapeChar($url) . '" ' . $insPos);
 	mpd('play ' . $insPos);
 	$data['album_id'] = $position;
@@ -1320,11 +1292,14 @@ function addStreamDirect() {
 	$query = mysqli_query($db,'SELECT stream_url FROM favoriteitem WHERE favorite_id = ' . (int) $favorite_id . ' AND position = ' . (int) $position . ' LIMIT 1');
 	
 	$favoriteitem = mysqli_fetch_assoc($query);
-	mpd('add ' . mpdEscapeChar($favoriteitem['stream_url']));
+  $url = $favoriteitem['stream_url'];
+  $url = str_replace('_NJB_HOME_URL_',NJB_HOME_URL,$url);
+
+	mpd('add ' . mpdEscapeChar($url));
 	
 	$data['album_id'] = $position;
 	$data['addResult'] = 'add_OK'; 
-	//$data['insPos'] = $insPos; 
+	//$data['url'] = $url; 
 	
 	echo safe_json_encode($data);
 }
@@ -2220,10 +2195,19 @@ function playlistTrack() {
 	if ($track_id !='') {
 		if (isTidal($track_id)) {
 			$track_id = getTidalId($track_id);
-			$query = mysqli_query($db,'SELECT tidal_track.artist, NULL as track_composer, tidal_album.artist AS album_artist, tidal_track.title, NULL as featuring, (tidal_track.seconds * 1000) as miliseconds, NULL as relative_file, tidal_album.album, CONCAT("tidal_", tidal_album.album_id) as image_id, CONCAT("tidal_",tidal_album.album_id) as album_id, tidal_track.genre_id as genre, NULL as audio_bitrate, NULL as audio_dataformat, NULL as audio_bits_per_sample, NULL as audio_sample_rate, tidal_album.genre_id, NULL as audio_profile, tidal_track.artist as track_artist, SUBSTRING(tidal_album.album_date,1,4) as year, tidal_track.number, NULL as comment, CONCAT("tidal_", tidal_track.track_id) as track_id, NULL as trackYear, NULL as dr, NULL as album_dr
+      $sql='SELECT tidal_track.artist, NULL as track_composer, tidal_album.artist AS album_artist, tidal_track.title, NULL as featuring, (tidal_track.seconds * 1000) as miliseconds, NULL as relative_file, tidal_album.album, CONCAT("tidal_", tidal_album.album_id) as image_id, CONCAT("tidal_",tidal_album.album_id) as album_id, tidal_track.genre_id as genre, NULL as audio_bitrate, NULL as audio_dataformat, NULL as audio_bits_per_sample, NULL as audio_sample_rate, tidal_album.genre_id, NULL as audio_profile, tidal_track.artist as track_artist, SUBSTRING(tidal_album.album_date,1,4) as year, tidal_track.number, NULL as comment, CONCAT("tidal_", tidal_track.track_id) as track_id, NULL as trackYear, NULL as dr, NULL as album_dr
 				FROM tidal_track, tidal_album 
 				WHERE tidal_track.album_id = tidal_album.album_id
-				AND tidal_track.track_id = "' . mysqli_real_escape_string($db,$track_id) . '"');
+				AND tidal_track.track_id = "' . mysqli_real_escape_string($db,$track_id) . '"';
+			$query = mysqli_query($db,$sql);
+      $rows = mysqli_num_rows($query);
+      if ($rows == 0) {
+        $tidal_album_id =getTrackAlbumFromTidal($track_id);
+        if ($tidal_album_id) {
+          getAlbumFromTidal($tidal_album_id);
+        }
+			$query = mysqli_query($db,$sql);
+      }
 			$track = mysqli_fetch_assoc($query);
 			
 			/* $query = mysqli_query($db,'SELECT image_front FROM bitmap WHERE image_id="' . mysqli_real_escape_string($db,$track['image_id']) . '"');

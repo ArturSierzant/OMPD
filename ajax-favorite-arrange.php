@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright ï¿½ 2015-2021 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -130,7 +130,7 @@ elseif ($action == 'removeItem') {
 <tr class="header">
 	
 	<td class="icon"></td><!-- optional play -->
-	<td<?php if ($cfg['access_play'] && $favorite['stream'] == false) echo' class="space"'; ?>></td>
+	<td <?php if ($cfg['access_play'] && $favorite['stream'] == false) echo' class="space"'; ?>></td>
 	<td><?php echo $favorite['stream'] ? 'Stream/title' : 'Title' ?></td>
 	<td<?php if ($favorite['stream'] == false) echo ' class="textspace"'; ?>></td>
 	<td class="_delArtist"><?php echo $favorite['stream'] ? 'Artist' : 'Artist' ?></td>
@@ -237,7 +237,7 @@ elseif ($action == 'removeItem') {
 	<?php 
 	$title_array = explode(" ", $title);
 	$lengths = array_map('strlen', $title_array);
-	if (max($lengths) > 30) {
+	if (max($lengths) > 9) {
 		$break_method = 'break-all';
 	} 
 	else {
@@ -249,7 +249,12 @@ elseif ($action == 'removeItem') {
 		echo '<a id="fav_play_track' . $favoriteitem['track_id'] . '" href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id=' . $favoriteitem['track_id'] . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'play track\');" onMouseOut="return nd();">' . html($title) . '</a>';
 	}
 	elseif ($cfg['access_play'] && $favoriteitem['stream_url']) {
-		echo '<a id="fav_play_track' . $favoriteitem['position'] . '" href="javascript:ajaxRequest(\'play.php?action=playStreamDirect&amp;playAfterInsert=yes&amp;position=' . $favoriteitem['position'] . '&amp;favorite_id=' . $favorite_id . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play stream\');" onMouseOut="return nd();">' . html($title) . '</a>';
+    if (isRadio($favoriteitem['stream_url'])){
+      $uuid = getRadioId($favoriteitem['stream_url']);
+      $radio = getRadioById($uuid);
+      $title = $radio['name'] . '<br><span style="font-size: smaller;">' . $radio['url'] . '</span>';
+    }
+		echo '<a id="fav_play_track' . $favoriteitem['position'] . '" href="javascript:ajaxRequest(\'play.php?action=playStreamDirect&amp;playAfterInsert=yes&amp;position=' . $favoriteitem['position'] . '&amp;favorite_id=' . $favorite_id . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play stream\');" onMouseOut="return nd();">' . ($title) . '</a>';
 	}
 	else echo html($title); ?>
 	</td>
@@ -257,7 +262,7 @@ elseif ($action == 'removeItem') {
 	<?php 
 	$artist_array = explode(" ", $artist);
 	$lengths = array_map('strlen', $artist_array);
-	if (max($lengths) > 30) {
+	if (max($lengths) > 9) {
 		$break_method = 'break-all';
 	} 
 	else {
@@ -282,7 +287,17 @@ elseif ($action == 'removeItem') {
 	}
 	?>
 	</td>
-	<td class="_delFrom">
+  <?php
+  	$album_array = explode(" ", $album);
+    $lengths = array_map('strlen', $album_array);
+    if (max($lengths) > 9) {
+      $break_method = 'break-all';
+    } 
+    else {
+      $break_method = 'break-word';
+    }
+  ?>
+	<td class="<?php echo $break_method;?> _delFrom">
 	<?php
   if ($extUrl && $a == 'streamYouTube') {
     echo '';

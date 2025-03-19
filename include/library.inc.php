@@ -60,13 +60,13 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 		if ($multidisc != '') {
 			$md = '&md=' . $multidisc;
 		}
-		$res = '<div title="Go to album \'' . html($album['album']) .  '\'" class="tile pointer" style="width: ' . $size . 'px; height: ' . $size . 'px;">';
+		$res = '<div class="tile_env"  style="width: ' . $size . 'px; height: ' . $size . 'px;"><div title="Go to \'' . html($album['album']) .  '\'" class="tile pointer">';
 		if (isTidal($album['album_id']) && $cfg['use_tidal']) {
       $sqlCount = "SELECT count(album_id) AS c FROM counter WHERE album_id LIKE 'tidal_%" . getTidalId($album['album_id']) . "'";
       if ($type) {
         $pic = $tidal_cover;
         if (!$tidal_cover) {
-          $tidal_cover = 'image/no_image.jpg';
+          $tidal_cover = 'image/no_image.png';
         }
         $res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=viewTidal' . ucfirst($type) . '&amp;album_id=' . $album['album_id'] . '"\' src="' . $tidal_cover . '" alt="" width="100%" height="100%">';
         $urlTidalType = '&amp;type=' . $type;
@@ -94,7 +94,7 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
         
         $cover = $t->albumCoverToURL($pic,'lq');
         if (!$cover) {
-          $cover = 'image/no_image.jpg';
+          $cover = 'image/no_image.png';
         }
         //$res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="' . $cover . '" alt="" width="100%" height="100%">';
         $res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=view3&amp;album_id=' . $album['album_id'] . '"\' src="image.php?image_id=' . $album['album_id'] . '" alt="" width="100%" height="100%">';
@@ -166,11 +166,14 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
       $played = $rows['c'];
       $pop = 0;
       if ($maxPlayed > 0 && $size > 0) {
+        if ($played > 0 && $played < 2) { //for rounded tile to be visible
+          $played = 2;
+        }
         $pop = $played/$maxPlayed * $size;
       }
 			$res .= '<div class="in tile_popularity" style="width: ' . $pop . 'px;"></div>';
 		}
-		$res .= '</div>';
+		$res .= '</div></div>';
 		if ($retType == 'echo') {
 			echo $res;
 		}
@@ -181,37 +184,30 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 
 
 //  +------------------------------------------------------------------------+
-//  | Tile for Tidal playlist and mixlist                                    |
+//  | Tile for artist                                                        |
 //  +------------------------------------------------------------------------+
-function draw_Tidal_tile_DEL($size,$album,$multidisc = '', $retType = "echo",$tidal_cover = '', $type) {
-		global $db,$cfg, $t;
-		$res = "";
-		$md = "";
+function draw_tile_artist($size,$album, $retType = "echo") {
+    global $db,$cfg, $t;
+    $res = "";
+    $md = "";
     
-		$res = '<div title="Go to album \'' . html($album['album']) .  '\'" class="tile pointer" style="width: ' . $size . 'px; height: ' . $size . 'px;">';
-		$pic = $tidal_cover;
-		
-			$res .= '<img loading="lazy" decoding="async" onclick=\'location.href="index.php?action=viewTidal' . ucfirst($type) . '&amp;album_id=' . $album['album_id'] . '"\' src="' . $tidal_cover . '" alt="" width="100%" height="100%">';
+    $res = '<div class="tile_artist pointer" style="width: ' . $size . 'px;" title="Go to artist ' . html($album['artist']) .  '" onclick=\'location.href="index.php?action=view2&amp;tileSizePHP=' . $size . '&amp;artist=' . $album['artist'] . '&amp;order=year&amp;tidalArtistId=' . $album['tidalArtistId'] . '"\'>
+    <div class="tile_artist_info" style="width: ' . $size * 0.95 . 'px; height: ' . $size * 0.95 . 'px;">
+     <div class="tile_artist_pic">
+      ' . $album["cover"]  . '
+      </div>
+      </div>
+      <div class="tile_artist_name" style="width: ' . $size * 0.95 . 'px">'. $album['artist'] .'</div>
+    </div>';
 
-		$res .= '	<div class="tile_info" style="cursor: initial;">';
-		$res .= '	<div class="tile_title">' . html($album['album']) . '</div>';
-		$res .= '	<div class="tile_band">' . html($album['artist_alphabetic']) . '</div>';
-		if ($cfg['show_quick_play']) {
-			$res .= '<div class="quick-play">';
-			if ($cfg['access_add']) $res .= '<i id="add_' . $album['album_id'] . '" title="Add to playlist"  onclick="javascript:ajaxRequest(\'play.php?action=addTidalList&tidal_id=' . $album['album_id'] . $md . '&amp;type=' . $type . '\',evaluateAdd);" class="fa fa-plus-circle pointer" style="padding-right: 5px;"></i>';
-			if ($cfg['access_play']) $res .= '<i id="play_' . $album['album_id'] . '" title="Play" onclick="javascript:ajaxRequest(\'play.php?action=playTidalList&amp;tidal_id=' . $album['album_id'] . '&amp;type=' . $type . '\',evaluateAdd);" class="fa fa-play-circle-o pointer"></i>';
-			$res .= '</div>';
-		}		
-			
-		$res .= '</div>';
-		$res .= '</div>';
-		if ($retType == 'echo') {
-			echo $res;
-		}
-		else {
-			return $res;
-		}
+    if ($retType == 'echo') {
+      echo $res;
+    }
+    else {
+      return $res;
+    }
 }
+
 
 
 
@@ -535,7 +531,13 @@ function listOfFavorites($file = true, $stream = true, $track_id = "", $track_mp
 					$track_id = "tidal_" . $output['track_id'];
 					break;
 			}
-		}
+      if (!$track_id) {
+        $track_id = getTrackIdFromUrl($track_mpd_url,'radio');
+        if ($track_id) {
+          $track_id = "radio_" . $track_id;
+        }
+      }
+    }
 	}
 	$favIds = array();
 	$inPlaylistIndicator = '[&#9673;] ';
@@ -549,6 +551,9 @@ function listOfFavorites($file = true, $stream = true, $track_id = "", $track_mp
 		elseif (isYoutube($track_id)) {
 			$query = mysqli_query($db,"SELECT favorite_id FROM favoriteitem WHERE favorite_id NOT IN (SELECT favorite_id FROM favorite WHERE name = '" . $cfg['favorite_name'] . "' OR name = '" . $cfg['blacklist_name'] . "') AND (stream_url LIKE '%action=streamYouTube%' AND stream_url LIKE '%" . getYouTubeId($track_id) ."%')");
 		}
+    elseif (isRadio($track_id)) {
+      $query = mysqli_query($db,"SELECT favorite_id FROM favoriteitem WHERE favorite_id NOT IN (SELECT favorite_id FROM favorite WHERE name = '" . $cfg['favorite_name'] . "' OR name = '" . $cfg['blacklist_name'] . "') AND (stream_url LIKE '%ompd_stationuuid%' AND stream_url LIKE '%" . getRadioId($track_id) ."%')");
+    }
 		else {
 			$query = mysqli_query($db,"SELECT favorite_id FROM favoriteitem WHERE favorite_id NOT IN (SELECT favorite_id FROM favorite WHERE name = '" . $cfg['favorite_name'] . "' OR name = '" . $cfg['blacklist_name'] . "') AND (track_id ='" . $track_id ."' OR stream_url LIKE '%" . $track_id ."%')");
 		}
@@ -587,6 +592,146 @@ function listOfFavorites($file = true, $stream = true, $track_id = "", $track_mp
 
 
 	
+//  +------------------------------------------------------------------------+
+//  | Radio list item                                                        |
+//  +------------------------------------------------------------------------+
+
+function radioListItem($track, $i, $disc) {
+
+  global $cfg, $db;
+  $tagId = 0;
+
+  $tid = 'radio_' . $track['stationuuid'];
+  ?>
+  <tr class="<?php echo ($i & 1) ? 'even' : 'odd'; ?> mouseover">
+    <?php 
+    $position_id = $i + $disc * 100;
+    $url = $track['url'];
+    if ($track['url_resolved']) {
+      $url = $track['url_resolved'];
+    }
+    if (strpos($url, '?') !== false) {
+      $url .= '&ompd_stationuuid=' . $track['stationuuid'];
+    }
+    else {
+      $url .= '?ompd_stationuuid=' . $track['stationuuid'];
+    }
+
+    if ($url_path = parse_url($url, PHP_URL_PATH)) {
+      $url_path = str_replace('/','__',$url_path);
+    }
+
+    $picUrl = $track['favicon'];
+    $imageFile = $cfg['stream_covers_dir'] . parse_url($url, PHP_URL_HOST) . $url_path;
+    if (file_exists($imageFile . '.jpg')) {
+      $picUrl = $imageFile . '.jpg';
+    }
+    elseif (file_exists($imageFile . '.png')) {
+      $picUrl = $imageFile . '.png';
+    }
+
+    ?>
+    <td class="small_cover_md">
+      <?php 
+      if ($picUrl) {
+      ?>
+      <img loading="lazy" decoding="async"
+        src="<?= $picUrl; ?>" alt="" width="100%">
+      <?php
+      }
+      else {
+        ?>
+        <img loading="lazy" decoding="async"
+        src="image.php?source=radio" alt="" width="100%">
+        <?php
+      } 
+      ?>
+    </td>
+
+    <td class="icon">
+      <?php 
+    if ($cfg['access_add'])  echo '<span id="add_' . $position_id . '" streamUrl="' . $url . '" picUrl="' . $picUrl . '" class="pointer" onMouseOver="return overlib(\'Add stream\');" onMouseOut="return nd();"><i class="fa fa-plus-circle fa-fw icon-small"></i></span>'; 
+    ?>
+
+    </td>
+
+    <td class="time"><?php 
+    
+    if ($cfg['access_play']) 		echo '<span id="a_play_track'. $position_id .'" class="pointer" streamUrl="' . ($url) . '" picUrl="' . $picUrl . '" position_id="' . $position_id . '"><div class="playlist_title break-word">' . html($track['name']) . '</div><div class="playlist_title_album break-all favoritePlaylistDescription">' . html($track['url']) . '</div></span>';
+    
+    else echo html($track['name']);
+    
+    ?>
+
+    </td>
+    <td class="track-list-artist">
+      <div>
+        <?php 
+      $sp = explode(",",$track['tags']);
+      foreach($sp as $s){
+        if ($s){
+          echo '<span id="tagId' . $tagId . '" class="artist_all pointer" style="white-space: break-spaces; margin-bottom: 4px;">' . $s .'</a></span>';
+          $tagId ++;
+        }
+      } 
+      ?>
+      </div>
+    </td>
+    <td class="time pl-genre">
+      <?php if($track['homepage'] !== '') { ?>
+      <a href="<?= $track['homepage'] ?>" target="_NEW"><i class="fa fa-globe icon-small" aria-hidden="true"></i>
+      </a>
+      <?php }; ?>
+    </td>
+    <td>
+      <?php if ($track['codec'] != "UNKNOWN") $codec = $track['codec']; 
+      else $codec = "---";
+      if ($track['bitrate'] != "0") $bitrate = "@" . $track['bitrate']; 
+      else $bitrate = "";
+      echo $codec . $bitrate;
+      ?>
+    </td>
+
+    <td class="pl-genre">
+      <?php echo $track['votes']; ?>
+    </td>
+
+    <?php
+    
+    $isFavorite = false;
+    $isBlacklist = false;
+    if (isInFavorite($tid,$cfg['favorite_id'])) $isFavorite = true;
+    if (isInFavorite($tid,$cfg['blacklist_id'])) $isBlacklist = true;
+    ?>
+    <td></td>
+     <td onclick="toggleStarSub(<?php echo $i + $disc * 100 ?>,'<?php echo $tid ?>');" class="pl-favorites">
+      <span id="blacklist-star-bg<?php echo $tid ?>"
+        class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
+        <i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
+      </span>
+    </td>
+      
+  </tr>
+  <tr class="line">
+    <td></td>
+    <td colspan="16"></td>
+  </tr>
+
+  <tr>
+    <td colspan="10">
+      <?php starSubMenu($i + $disc * 100, $isFavorite, $isBlacklist, $tid);?>
+    </td>
+  </tr>
+
+  <tr>
+    <td colspan="10">
+      <?php trackSubMenu($i + $disc * 100, $track, $album_id);?>
+    </td>
+  </tr>
+  <?php
+}
+
+
 //  +------------------------------------------------------------------------+
 //  | Init Tidal object                                                      |
 //  +------------------------------------------------------------------------+
@@ -3316,6 +3461,7 @@ function createHRAMPDUrl($tracks){
 	return $hraStreamUrl;
 }
 
+
 //  +------------------------------------------------------------------------+
 //  | Check if album/track is from Youtube                                   |
 //  +------------------------------------------------------------------------+
@@ -3354,8 +3500,6 @@ function getYouTubeId($id){
 	}
 	return false;
 }
-
-
 
 
 //  +------------------------------------------------------------------------+
@@ -3454,7 +3598,6 @@ function getYouTubeMPDUrl($url, $title = ''){
 }
 
 
-
 //  +------------------------------------------------------------------------+
 //  | Get Youtube stream URL                                                 |
 //  +------------------------------------------------------------------------+
@@ -3487,7 +3630,70 @@ function getYouTubeStreamUrl($url){
 }
 
 
+//  +------------------------------------------------------------------------+
+//  | Check if track is from Radio                                           |
+//  +------------------------------------------------------------------------+
 
+function isRadio($id) {
+	if (strpos($id,"radio_") !== false || strpos($id,'ompd_stationuuid') !== false) {
+		return true;
+	}
+	return false;
+}
+
+//  +------------------------------------------------------------------------+
+//  | Get radio stream URL                                                   |
+//  +------------------------------------------------------------------------+
+
+function getRadioMPDUrl($track_id) {
+  require_once 'vendor/autoload.php';
+  $browser = new AdinanCenci\RadioBrowser\RadioBrowser();
+  $stations = $browser->getStationsByUuid($track_id);
+  $url = $stations[0]['url'];
+  if ($stations[0]['url_resolved']) {
+    $url = $stations[0]['url_resolved'];
+  }
+  if (strpos($url, '?') !== false) {
+    $url .= '&ompd_stationuuid=' . $track_id;
+  }
+  else {
+    $url .= '?ompd_stationuuid=' . $track_id;
+  }
+  return $url;
+}
+
+//  +------------------------------------------------------------------------+
+//  | Get radio UUID                                                         |
+//  +------------------------------------------------------------------------+
+
+function getRadioId($id){
+	if (strpos($id,"radio_") !== false ) { 
+    return str_replace('radio_','',$id);
+  }
+  if (strpos($id,'ompd_stationuuid') !== false) {
+    return end(explode('ompd_stationuuid=',$id));
+  }
+}
+
+//  +------------------------------------------------------------------------+
+//  | Get radio by UUID                                                      |
+//  +------------------------------------------------------------------------+
+
+function getRadioById($id){
+   require_once 'vendor/autoload.php';
+   $browser = new AdinanCenci\RadioBrowser\RadioBrowser();
+   $radio = array();
+   $stations = $browser->getStationsByUuid($id);
+   $name = $stations[0]['name'];
+   $url = $stations[0]['url'];
+   if ($stations[0]['url_resolved']) {
+    $url = $stations[0]['url_resolved'];
+  }
+   $radio['name'] = $name;
+   $radio['url'] = $url;
+   return $radio;
+
+}
 
 //  +------------------------------------------------------------------------+
 //  | onMouseOver download album                                             |
@@ -3552,8 +3758,6 @@ function onmouseoverDownloadAlbum($album_id) {
 }
 
 
-
-
 //  +------------------------------------------------------------------------+
 //  | strpos for arrays                                                      |
 //  | source: http://stackoverflow.com/questions/6284553                     |
@@ -3565,7 +3769,6 @@ function striposa($haystack, $needle, $offset=0) {
     }
     return false;
 }
-
 
 
 //  +------------------------------------------------------------------------+
@@ -3646,8 +3849,6 @@ function onmouseoverDownloadTrack($track_id) {
 }
 
 
-
-
 //  +------------------------------------------------------------------------+
 //  | onMouseOver view cover                                                 |
 //  +------------------------------------------------------------------------+
@@ -3662,7 +3863,6 @@ function onmouseoverViewCover($album_id) {
 	
 	return 'onMouseOver="return overlib(\'' . addslashes(html($list)) . '\', CAPTION, \'View pdf cover:&nbsp;\');" onMouseOut="return nd();"';
 }
-
 
 
 //  +------------------------------------------------------------------------+
@@ -4936,10 +5136,16 @@ function getTrackMpdUrl($track_mpd_url) {
 //  | Get track_id from url                                                  |
 //  +------------------------------------------------------------------------+
 
-function getTrackIdFromUrl($track_mpd_url) {
+function getTrackIdFromUrl($track_mpd_url, $type='') {
 	$parts = parse_url($track_mpd_url);
 	parse_str(isset($parts['query']) ? $parts['query'] : '', $query);
-	$track_id = urldecode(isset($query['track_id']) ? $query['track_id'] : '');
+	if ($type == 'radio') {
+    $track_id = urldecode(isset($query['ompd_stationuuid']) ? $query['ompd_stationuuid'] : '');
+  }
+  else {
+    $track_id = urldecode(isset($query['track_id']) ? $query['track_id'] : '');
+  }
+
 	if ($track_id) {
 		return $track_id;
 	}
@@ -4956,6 +5162,7 @@ function createStreamUrlMpd($track_id) {
 	if (isTidal($track_id)){
 		if ($cfg['tidal_direct']) {
 			$stream_url_mpd = NJB_HOME_URL . 'stream.php?action=streamTidal&track_id=' . getTidalId($track_id);
+			//$stream_url_mpd = '_NJB_HOME_URL_stream.php?action=streamTidal&track_id=' . getTidalId($track_id);
 		}
 		elseif ($cfg['upmpdcli_tidal']) {
 			$stream_url_mpd = $cfg['upmpdcli_tidal'] .  getTidalId($track_id);
@@ -4971,6 +5178,10 @@ function createStreamUrlMpd($track_id) {
 		$stream_url_mpd = getYouTubeMPDUrl(getYouTubeId($track_id));
 		$stream_url_mpd = getTrackMpdUrl($stream_url_mpd);
 	}
+  elseif (isRadio($track_id)) {
+    $stream_url_mpd = getRadioMPDUrl(getRadioId($track_id));
+    //$stream_url_mpd = 'http://wp.pl/';
+  }
 	
 	return $stream_url_mpd;
 }
@@ -4996,6 +5207,11 @@ function isInFavorite($track_id, $favorite_id) {
 	elseif (isYoutube($track_id)){
 		$track_id = getYouTubeId($track_id);
 		$query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE favorite_id = '" . $favorite_id . "' AND stream_url LIKE '%action=streamYouTube&track_id=" . $track_id . "%'");
+		if (mysqli_num_rows($query) > 0) $inFavorite = true;
+	}
+	elseif (isRadio($track_id)){
+		$track_id = getRadioId($track_id);
+		$query = mysqli_query($db,"SELECT position FROM favoriteitem WHERE favorite_id = '" . $favorite_id . "' AND stream_url LIKE '%ompd_stationuuid=" . $track_id . "%'");
 		if (mysqli_num_rows($query) > 0) $inFavorite = true;
 	}
 	else{

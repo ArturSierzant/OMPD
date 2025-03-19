@@ -177,7 +177,7 @@ if ($conn === true){
       else {
         $img = '<i class="fa fa-user" style="font-size: 6em;"></i>';
       }
-      $artistList .= '<div class="artist_related" onmouseover="return overlib(\'' . $artist["name"] . '\', CAPTION , \'Go to artist\');" onmouseout="return nd();"><a href="index.php?tileSizePHP=' . $tileSize . '&action=view2&artist=' . urlencode($artist["name"]) . '&order=year"><div class="artist_container_small">' . $img . '</div><div>' . $artist["name"] . '</div></a></div>';
+      $artistList .= '<div class="artist_related" title="Go to artist ' . $artist["name"] . '"><a href="index.php?tileSizePHP=' . $tileSize . '&action=view2&artist=' . urlencode($artist["name"]) . '&order=year"><div class="artist_container_small">' . $img . '</div><div>' . $artist["name"] . '</div></a></div>';
     }
     $artistList .= '</div>';
 ?>

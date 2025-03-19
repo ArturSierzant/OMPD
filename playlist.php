@@ -109,7 +109,7 @@ if (count($file) == 0) {
   <div id="lyrics_container"></div>
   
   <div id="image">
-    <a href="index.php"><img id="image_in" src="image/transparent.gif" alt=""></a>
+    <a href="#"><img id="image_in" src="image/transparent.gif" alt=""></a>
   </div>
     <div id="waitIndicatorImg"></div>
 </div>
@@ -1302,6 +1302,7 @@ function evaluateTrack(data) {
   });
   
   //console.log ('data.album_id = ' + data.album_id);
+  $("#image a").attr("href","#");
   if (data.album_id) {
     if (data.thumbnail){
       //temporary solution for HRA streams
@@ -1324,7 +1325,9 @@ function evaluateTrack(data) {
     $("#image_in").attr("src",data.imageFile);
   }
   else {
-    document.getElementById('image').innerHTML = '<a href="#"><img id="image_in" src="<?php echo 'image/'; ?>large_file_not_found.png" alt=""></a>';
+    //console.log('large_file_not_found.png');
+    //document.getElementById('image').innerHTML = '<a href="#"><img id="image_in" src="<?php echo 'image/'; ?>large_file_not_found.png" alt=""></a>';
+    $("#image_in").attr("src","image/large_file_not_found.png");
     $("#waitIndicatorImg").hide();
   }
   //$("#cover-spinner").hide();
@@ -1430,6 +1433,7 @@ $(function () {
     $(window).scrollTop(scrollTo);
   <?php
   } ?>
+  
 });
 
 

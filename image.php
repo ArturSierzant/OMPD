@@ -50,8 +50,9 @@ $type	 	= !empty(get('type')) ? get('type') : 'album';
 if		(isset($image_id))		image($image_id, $quality, $track_id, $image_url, $type);
 elseif	(isset($image))			resampleImage($image);
 elseif	(isset($image_path))	streamImage($image_path, $mime);
-elseif	(isset($source))	streamImageFromUrl($image_url);
+elseif	(isset($source))	streamImageFromUrl($image_url, $source);
 elseif	($cfg['image_share'])	shareImage();
+else  imageError();
 exit();
 
 
@@ -212,7 +213,8 @@ function image($image_id, $quality, $track_id, $image_url, $type) {
 				
 			}
 			elseif (strpos($bitmap['image_id'],"no_image") !== false) {
-				$image = imagecreatefromjpeg(NJB_HOME_DIR . 'image/no_image.jpg');
+				//$image = imagecreatefromjpeg(NJB_HOME_DIR . 'image/no_image.jpg');
+				$image = imagecreatefrompng(NJB_HOME_DIR . 'image/no_image.png');
 				header("Content-type: image/jpeg");
 				imagejpeg($image);
 				imagedestroy($image);
@@ -257,8 +259,11 @@ function image($image_id, $quality, $track_id, $image_url, $type) {
 //  +------------------------------------------------------------------------+
 //  | Stream image from url                                                  |
 //  +------------------------------------------------------------------------+
-function streamImageFromUrl($image_url) {
+function streamImageFromUrl($image_url, $source = '') {
 	global $cfg, $db;
+  if (!$image_url){
+    imageError($source);
+  }
 	$data = file_get_contents($image_url);
   if ($data) {
     header('Cache-Control: max-age=31536000');
@@ -366,10 +371,17 @@ function shareImage() {
 //  +------------------------------------------------------------------------+
 //  | Image error                                                            |
 //  +------------------------------------------------------------------------+
-function imageError() {
-	$etag = '"image_error_' . dechex(filemtime('image/image_error.png')) . '"';
+function imageError($source = '') {
+  if (!$source) {
+    $img = 'image/image_error.png';
+  }
+  elseif ($source == 'radio') {
+    $img = 'image/icons8-radio-speaker-100.png';
+  }
+  $img = 'image/image_error.png';
+	$etag = '"image_error_' . dechex(filemtime($img)) . '"';
 	//$etag = "never_expire";
-	streamData(file_get_contents('image/image_error.png'), 'image/png', false, false, $etag);
+	streamData(file_get_contents($img), 'image/png', false, false, $etag);
 	exit();
 }
 ?>
