@@ -168,6 +168,7 @@ function about() {
 	<li> added Radio Browser (based on <a href="https://radio-browser.info" target="_blank">radio-browser.info</a>)</li>
 	<li> added support for more Tidal items (playlists, mixlists, podcasts)</li>
 	<li> added more items in artist view (when using Tidal)</li>
+	<li> added [experimental] update DB from command line (<code>php update.php "/path/to/updated/directory"</code>) - thanks to <a href="https://github.com/tomchiverton" target="_blank">tomchiverton</a></li>
 	<li> fixed bugs</li>
 	</ul>
 	<br>

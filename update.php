@@ -104,7 +104,7 @@ function cliUpdate($argv_) {
 	try {
 		update_impl( $argv_[1] );
 	} catch (Exception $e) {
-		echo ("Update error")
+		echo ("Update error");
 	}
 }
 
