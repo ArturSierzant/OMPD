@@ -23,6 +23,7 @@
 //  | along with this program.  If not, see <http://www.gnu.org/licenses/>.  |
 //  +------------------------------------------------------------------------+
 
+use AdinanCenci\RadioBrowser\RadioBrowser;
 
 //  +------------------------------------------------------------------------+
 //  | Tile for album cover and info                                          |
@@ -186,7 +187,7 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 //  +------------------------------------------------------------------------+
 //  | Tile for artist                                                        |
 //  +------------------------------------------------------------------------+
-function draw_tile_artist($size,$album, $retType = "echo") {
+function draw_tile_artist_($size,$album, $retType = "echo") {
     global $db,$cfg, $t;
     $res = "";
     $md = "";
@@ -206,6 +207,32 @@ function draw_tile_artist($size,$album, $retType = "echo") {
     else {
       return $res;
     }
+}
+
+
+
+//  +------------------------------------------------------------------------+
+//  | Tile for artist                                                        |
+//  +------------------------------------------------------------------------+
+function draw_tile_artist($size,$album, $retType = "echo", $scale=1) {
+  global $db,$cfg, $t;
+  $res = "";
+  $md = "";
+  $res= '<div class="tile_artist pointer" style="width: ' . $size . 'px; display: inline-flex; flex-direction: column; vertical-align: top; margin-top: 2px; align-items: center;" title="Go to artist ' . html($album['artist']) .  '" onclick=\'location.href="index.php?action=view2&amp;tileSizePHP=' . $size . '&amp;artist=' . $album['artist'] . '&amp;order=year&amp;tidalArtistId=' . $album['tidalArtistId'] . '"\'>
+  <div class="tile_artist_info" style="width: ' . $size * $scale . 'px; height: ' . $size * $scale . 'px;">
+    <div class="tile_artist_pic">
+    ' . $album["cover"]  . '
+    </div>
+  </div>
+  <div class="tile_artist_name">'. $album['artist'] .'</div>
+  </div>';
+
+  if ($retType == 'echo') {
+    echo $res;
+  }
+  else {
+    return $res;
+  }
 }
 
 
@@ -3646,8 +3673,8 @@ function isRadio($id) {
 //  +------------------------------------------------------------------------+
 
 function getRadioMPDUrl($track_id) {
-  require_once 'vendor/autoload.php';
-  $browser = new AdinanCenci\RadioBrowser\RadioBrowser();
+  $server = RadioBrowser::pickAServer();
+  $browser = new AdinanCenci\RadioBrowser\RadioBrowser($server);
   $stations = $browser->getStationsByUuid($track_id);
   $url = $stations[0]['url'];
   if ($stations[0]['url_resolved']) {
@@ -3680,8 +3707,8 @@ function getRadioId($id){
 //  +------------------------------------------------------------------------+
 
 function getRadioById($id){
-   require_once 'vendor/autoload.php';
-   $browser = new AdinanCenci\RadioBrowser\RadioBrowser();
+   $server = RadioBrowser::pickAServer();
+   $browser = new AdinanCenci\RadioBrowser\RadioBrowser($server);
    $radio = array();
    $stations = $browser->getStationsByUuid($id);
    $name = $stations[0]['name'];

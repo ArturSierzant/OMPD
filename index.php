@@ -2263,13 +2263,13 @@ if ($conn === true){
           $pic = '<img src="' . $pic . '" style="width: 100%; height: 100%;">';
         }
         else {
-          $pic = '<i class="fa fa-user" style="font-size: 9em;"></i>';
+          $pic = '<i class="fa fa-user" style="font-size: 8em;"></i>';
         }
         $albums = array();
         $albums['artist'] = $res['data']['name'];
         $albums['cover'] = $pic;
         $albums['tidalArtistId'] = $res['data']['id'];
-        draw_tile_artist ( $size, $albums, 'echo');
+        draw_tile_artist ( $size, $albums, 'echo', 0.95);
       }
     }
 

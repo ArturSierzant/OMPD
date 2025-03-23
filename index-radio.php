@@ -50,10 +50,10 @@ require 'vendor/autoload.php';
 $tileSize = $_GET['tileSizePHP'];
 $searchTag = $_GET['searchTag'];
 
-$browser = new RadioBrowser();
-$countries = $browser->getCountries();
 //$languages = $browser->getLanguages();
-
+$server = RadioBrowser::pickAServer();
+$browser = new RadioBrowser($server);
+$countries = $browser->getCountries();
 ?>
 <h1>Search radio stations</h1>
 <table cellspacing="0" cellpadding="0" id="searchRadio" class="border">

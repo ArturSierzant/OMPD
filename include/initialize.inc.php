@@ -238,6 +238,8 @@ require_once(NJB_HOME_DIR . 'include/library.inc.php');
 require_once(NJB_HOME_DIR . 'include/globalize.inc.php');
 require_once(NJB_HOME_DIR . 'include/tagProcessor.inc.php');
 require_once(NJB_HOME_DIR . 'ping/ping.php');
+require_once(NJB_HOME_DIR . 'vendor/autoload.php');
+
 
 // To prevent mysql error snowball effect, and to speed up the message.php and cache.php script.
 if (NJB_SCRIPT != 'message.php' && NJB_SCRIPT != 'cache.php')

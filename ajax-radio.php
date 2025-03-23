@@ -23,8 +23,6 @@ global $cfg,$db;
 use AdinanCenci\RadioBrowser\RadioBrowser;
 
 require_once('include/initialize.inc.php');
-require_once('include/library.inc.php');
-require_once('vendor/autoload.php');
 
 $name = $_POST['name'];
 $tag = $_POST['tag'];
@@ -46,9 +44,8 @@ if ($action == 'savePic') {
   echo savePic($picUrl, $streamUrl);
   return;
 } 
-
-$browser = new RadioBrowser();
-
+$server = RadioBrowser::pickAServer();
+$browser = new RadioBrowser($server);
 if ($action == 'searchRadios') {
   if ($countrycode == '0') $countrycode = null;
   $searchTerms = array('tag'=>$tag,'name'=>$name,'countrycode'=>$countrycode, 'limit'=>$limit,'order'=>$orderBy,'reverse'=>$reverse);

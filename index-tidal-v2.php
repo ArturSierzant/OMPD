@@ -110,6 +110,20 @@ foreach($hp['items'] as $key => $row){
         $albums['artist_alphabetic'] = getTidalPlaylistCreator($res['data']);
         draw_tile ( $tileSize, $albums, '', 'echo', $albums['cover'],"playlist");
       }
+      if (strtolower($res['type']) == 'artist'){
+
+        if (isset($res['data']['picture'])) {
+          $pic = $t->artistPictureToURL($res['data']['picture']);
+          $pic = '<img src="' . $pic . '" style="width: 100%; height: 100%;">';
+        }
+        else {
+          $pic = '<i class="fa fa-user" style="font-size: 8em;"></i>';
+        }
+        $albums['artist'] =  $res['data']['name'];
+        $albums['cover'] = $pic;
+        $albums['tidalArtistId'] = $res['data']['id'];
+        draw_tile_artist ( $tileSize, $albums, 'echo',0.8);
+      }
     }
     echo '</div>';
   }
