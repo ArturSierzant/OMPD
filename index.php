@@ -2219,39 +2219,11 @@ if ($conn === true){
   if ($tileSizePHP) $size = $tileSizePHP;
   
   if ($results['items']){
-    if ($type == 'general_list'){
-      echo '<div class="albums_container">';
+    if ($type == 'general_list' || $type == 'mix_list'){
+      echo '<div class="albums_container ' . $type .'">';
       foreach($results['items'] as $res) {
-        $albums = array();
-        if (strtolower($res['type']) == 'album'){
-          $albums['album_id'] = 'tidal_' . $res['data']['id'];
-          $albums['album'] = $res['data']['title'];
-          $albums['cover'] = $t->albumCoverToURL($res['data']['cover'],'lq');
-          $albums['artist_alphabetic'] = $res['data']['artists'][0]['name'];
-          if ($cfg['show_album_format']) {
-            //$albums['audio_quality'] = $res['data']['audioQuality'];
-            $albums['audio_quality'] = getTidalAudioQualityMediaMetadata($res['data']);
-          }
-          draw_tile ( $size, $albums, '', 'echo', $res['data']['cover'] );
-        }
-        if (strtolower($res['type']) == 'mix'){
-          $albums['album_id'] = 'tidal_' . $res['data']['id'];
-          $albums['album'] = $res['data']['titleTextInfo']['text'];
-          $albums['cover'] = $res['data']['mixImages'][0]['url'];
-          $albums['artist_alphabetic'] = $res['data']['subtitleTextInfo']['text'];
-          draw_tile ( $size, $albums, '', 'echo', $res['data']['mixImages'][0]['url'], "mixlist");
-        }
-        if (strtolower($res['type']) == 'playlist'){
-          $albums['album_id'] = 'tidal_' . $res['data']['uuid'];
-          $albums['album'] = $res['data']['title'];
-          $albums['cover'] = $t->albumCoverToURL($res['data']['squareImage'],"lq");
-          if (!$albums['cover']) {
-            $albums['cover'] = $t->albumCoverToURL($res['data']['image'],'');
-          }
-          $albums['artist_alphabetic'] = getTidalPlaylistCreator($res['data']);
-          draw_tile ( $size, $albums, '', 'echo', $albums['cover'],"playlist");
-        }
-      $cfg['items_count'] = $results['totalNumberOfItems'];
+        drawTidalTileItems($res, $size);
+        $cfg['items_count'] = $results['totalNumberOfItems'];
       }
     }
 
@@ -2269,7 +2241,7 @@ if ($conn === true){
         $albums['artist'] = $res['data']['name'];
         $albums['cover'] = $pic;
         $albums['tidalArtistId'] = $res['data']['id'];
-        draw_tile_artist ( $size, $albums, 'echo', 0.95);
+        draw_tile_artist ( $size, $albums, 'echo', 'grid');
       }
     }
 

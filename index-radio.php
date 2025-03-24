@@ -126,6 +126,7 @@ $countries = $browser->getCountries();
   });
   
   function searchRadio(){
+    $("#searchType").html('Search results');
     $("#stationsCount").html('');
     $("#searchResults").show();
     $("#stationContainer").html('');
@@ -143,7 +144,6 @@ $countries = $browser->getCountries();
     }); 
     
     request.done(function(data) {  
-      $("#searchType").html('Search results');
       $("#stationContainer").html(data);
       $("#loadingIndicator").hide();
     }); 
@@ -162,6 +162,10 @@ $countries = $browser->getCountries();
   }
 
   function showSavedRadios(){
+    $("#searchType").html('Saved radio stations');
+    $("#stationsCount").html('');
+    $("#searchResults").show();
+    $("#stationContainer").html('');
     $("#loadingIndicator").show();
 
     var request = $.ajax({
@@ -175,10 +179,11 @@ $countries = $browser->getCountries();
     
     request.done(function(data) {
       if (data){
-        $("#searchType").html('Saved radio stations');
+        /*$("#searchType").html('Saved radio stations');
         $("#stationsCount").html('');
         $("#searchResults").show();
         $("#stationContainer").html('');
+        */
         $("#stationContainer").html(data);
       }
       else {

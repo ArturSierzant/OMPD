@@ -349,9 +349,17 @@ function resizeTile($tileSize,$containerWidth) {
 	$('.tile_env').css('width', function() { return $tileSize; });
 	$('.tile_env').css('height', function() { return $tileSize; });
 	$('.tile_artist').css('width', function() { return $tileSize; });
-	$('.tile_artist_info').css('width', function() { return $tileSize * 0.95; });
-	$('.tile_artist_info').css('height', function() { return $tileSize * 0.95; });
-	resizeSuggested($tileSize,$containerWidth);
+  
+  if ($('.tile_artist_info').parent().parent().hasClass('mix_list') || $('.tile_artist_info').parent().parent().hasClass('full')) {
+    $('.tile_artist_info').css('width', function() { return $tileSize * 0.8; });
+    $('.tile_artist_info').css('height', function() { return $tileSize * 0.8; });
+  }
+  else if ($('.tile_artist_info').parent().parent().hasClass('albums_container')) {
+    $('.tile_artist_info').css('width', function() { return $tileSize * 0.95; });
+    $('.tile_artist_info').css('height', function() { return $tileSize * 0.95; });
+  }
+  
+  resizeSuggested($tileSize,$containerWidth);
 	resizeUsersTab($tileSize,$containerWidth);
 	
 }

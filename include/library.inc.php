@@ -143,7 +143,6 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 				$res .= '   <div class="tile_format" style="left: 0; right: auto; top: 0; "><i class="fa fa-fw fa-bookmark-o"></i></div>';
 
     } */
-		//$res .= '	<div id="tile_title" class="tile_info">';
 		$res .= '	<div class="tile_info" style="cursor: initial;">';
 		$res .= '	<div class="tile_title">' . html($album['album']) . '</div>';
 		$res .= '	<div class="tile_band">' . html($album['artist_alphabetic']) . '</div>';
@@ -184,40 +183,17 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
 }
 
 
-//  +------------------------------------------------------------------------+
-//  | Tile for artist                                                        |
-//  +------------------------------------------------------------------------+
-function draw_tile_artist_($size,$album, $retType = "echo") {
-    global $db,$cfg, $t;
-    $res = "";
-    $md = "";
-    
-    $res = '<div class="tile_artist pointer" style="width: ' . $size . 'px;" title="Go to artist ' . html($album['artist']) .  '" onclick=\'location.href="index.php?action=view2&amp;tileSizePHP=' . $size . '&amp;artist=' . $album['artist'] . '&amp;order=year&amp;tidalArtistId=' . $album['tidalArtistId'] . '"\'>
-    <div class="tile_artist_info" style="width: ' . $size * 0.95 . 'px; height: ' . $size * 0.95 . 'px;">
-     <div class="tile_artist_pic">
-      ' . $album["cover"]  . '
-      </div>
-      </div>
-      <div class="tile_artist_name" style="width: ' . $size * 0.95 . 'px">'. $album['artist'] .'</div>
-    </div>';
-
-    if ($retType == 'echo') {
-      echo $res;
-    }
-    else {
-      return $res;
-    }
-}
-
-
 
 //  +------------------------------------------------------------------------+
 //  | Tile for artist                                                        |
 //  +------------------------------------------------------------------------+
-function draw_tile_artist($size,$album, $retType = "echo", $scale=1) {
+function draw_tile_artist($size,$album, $retType = "echo", $layout='horizontal') {
   global $db,$cfg, $t;
   $res = "";
-  $md = "";
+  $scale = 0.8;
+  if ($layout == 'grid') {
+    $scale = 0.95;
+  }
   $res= '<div class="tile_artist pointer" style="width: ' . $size . 'px; display: inline-flex; flex-direction: column; vertical-align: top; margin-top: 2px; align-items: center;" title="Go to artist ' . html($album['artist']) .  '" onclick=\'location.href="index.php?action=view2&amp;tileSizePHP=' . $size . '&amp;artist=' . $album['artist'] . '&amp;order=year&amp;tidalArtistId=' . $album['tidalArtistId'] . '"\'>
   <div class="tile_artist_info" style="width: ' . $size * $scale . 'px; height: ' . $size * $scale . 'px;">
     <div class="tile_artist_pic">
@@ -236,6 +212,64 @@ function draw_tile_artist($size,$album, $retType = "echo", $scale=1) {
 }
 
 
+// +------------------------------------------------------------------------+
+// | Draws Tidal items                                                      |
+// +------------------------------------------------------------------------+
+
+function drawTidalTileItems($res, $tileSize) {
+  global $cfg, $t;
+  $albums = array();
+  if (strtolower($res['type']) == 'album'){
+    $albums['album_id'] = 'tidal_' . $res['data']['id'];
+    $albums['album'] = $res['data']['title'];
+    $albums['cover'] = $t->albumCoverToURL($res['data']['cover'],'lq');
+    $albums['artist_alphabetic'] = $res['data']['artists'][0]['name'];
+    if ($cfg['show_album_format']) {
+      //$albums['audio_quality'] = $res['data']['audioQuality'];
+      $albums['audio_quality'] = getTidalAudioQualityMediaMetadata($res['data']);
+    }
+    draw_tile ( $tileSize, $albums, '', 'echo', $res['data']['cover'] );
+  }
+  if (strtolower($res['type']) == 'mix'){
+    $albums['album_id'] = 'tidal_' . $res['data']['id'];
+    $albums['album'] = $res['data']['titleTextInfo']['text'];
+    $albums['cover'] = $res['data']['mixImages'][0]['url'];
+    $albums['artist_alphabetic'] = $res['data']['subtitleTextInfo']['text'];
+    draw_tile ( $tileSize, $albums, '', 'echo', $res['data']['mixImages'][0]['url'], "mixlist");
+  }
+  if (strtolower($res['type']) == 'playlist'){
+    $albums['album_id'] = 'tidal_' . $res['data']['uuid'];
+    $albums['album'] = $res['data']['title'];
+    $albums['cover'] = $t->albumCoverToURL($res['data']['squareImage'],"lq");
+    if (!$albums['cover']) {
+      $albums['cover'] = $t->albumCoverToURL($res['data']['image'],'');
+    }
+    $albums['artist_alphabetic'] = getTidalPlaylistCreator($res['data']);
+    draw_tile ( $tileSize, $albums, '', 'echo', $albums['cover'],"playlist");
+  }
+  if (strtolower($res['type']) == 'artist'){
+
+    if (isset($res['data']['picture'])) {
+      $pic = $t->artistPictureToURL($res['data']['picture']);
+      $pic = '<img src="' . $pic . '" style="width: 100%; height: 100%;">';
+    }
+    else {
+      $pic = '<i class="fa fa-user" style="font-size: 8em;"></i>';
+    }
+    $albums['artist'] =  $res['data']['name'];
+    $albums['cover'] = $pic;
+    $albums['tidalArtistId'] = $res['data']['id'];
+    draw_tile_artist ( $tileSize, $albums, 'echo','horizontal');
+  }
+  if (strtolower($res['type']) == 'track'){
+    $albums['album_id'] = 'tidal_' . $res['data']['mixes']['TRACK_MIX'];
+    $albums['album'] = $res['data']['title'];
+    $albums['cover'] = $t->albumCoverToURL($res['data']['album']['cover']);
+    $albums['artist_alphabetic'] = $res['data']['artists'][0]['name'];
+    draw_tile ( $tileSize, $albums, '', 'echo', $albums['cover'], "mixlist");
+  }
+  //$cfg['items_count'] = $results['totalNumberOfItems'];
+}
 
 
 //  +---------------------------------------------------------------------------+
