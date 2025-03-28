@@ -1303,6 +1303,11 @@ function evaluateTrack(data) {
   
   //console.log ('data.album_id = ' + data.album_id);
   $("#image a").attr("href","#");
+  $("#image a").attr("target","");
+  if (data.image_url){
+    $("#image a").attr("href",data.image_url);
+    $("#image a").attr("target","_blank");
+  }
   if (data.album_id) {
     if (data.thumbnail){
       //temporary solution for HRA streams

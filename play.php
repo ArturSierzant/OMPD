@@ -2383,7 +2383,16 @@ function playlistTrack() {
 		}
 		/* else
 			$table_track['title']	= $currentsong['file']; */
-		
+    $data['image_url'] = '';
+		if (isRadio($data['track_mpd_url'])){
+      $browser = initRadioBrowser();
+      if($browser) {
+        $radio = $browser->getStationsByUuid(getRadioId($data['track_mpd_url']));
+        if ($radio) {
+          $data['image_url'] = $radio[0]['homepage'];
+        }
+      }
+    }
 		$data['album_artist'] = (string) ($currentsong['AlbumArtist']);
 		//$track_artist = array();
 		//$track_artist[] = $currentsong['Artist'];

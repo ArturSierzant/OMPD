@@ -2320,7 +2320,7 @@ h1 {
   text-align: center;
 }
 .break-word {
-  word-wrap: break-word;
+  word-wrap: anywhere;
   white-space: normal !important;
 }
 .break-all {

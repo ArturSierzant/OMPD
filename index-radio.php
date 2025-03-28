@@ -50,10 +50,11 @@ require 'vendor/autoload.php';
 $tileSize = $_GET['tileSizePHP'];
 $searchTag = $_GET['searchTag'];
 
-//$languages = $browser->getLanguages();
-$server = RadioBrowser::pickAServer();
-$browser = new RadioBrowser($server);
-$countries = $browser->getCountries();
+//$server = RadioBrowser::pickAServer();
+//$browser = new RadioBrowser($server);
+if ($browser = initRadioBrowser()){
+  $countries = $browser->getCountries();
+}
 ?>
 <h1>Search radio stations</h1>
 <table cellspacing="0" cellpadding="0" id="searchRadio" class="border">
@@ -68,7 +69,7 @@ $countries = $browser->getCountries();
 	<td><input type="text" id="tag" value="<?= $searchTag ?>" style="width: 100%; max-width: 400px; margin-bottom: 4px;"></td>
 </tr>
 <tr>
-	<td>Country:</td>
+	<td>Country:&nbsp;</td>
 	<td>
     <select id="country" style="width: 100%; max-width: 400px;">
     <option value="0">All countries</option>
@@ -145,6 +146,7 @@ $countries = $browser->getCountries();
     
     request.done(function(data) {  
       $("#stationContainer").html(data);
+      $("#stationContainer").show();
       $("#loadingIndicator").hide();
     }); 
     
@@ -179,12 +181,8 @@ $countries = $browser->getCountries();
     
     request.done(function(data) {
       if (data){
-        /*$("#searchType").html('Saved radio stations');
-        $("#stationsCount").html('');
-        $("#searchResults").show();
-        $("#stationContainer").html('');
-        */
         $("#stationContainer").html(data);
+        $("#stationContainer").show();
       }
       else {
         $("#stationContainer").hide();

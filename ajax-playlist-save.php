@@ -38,6 +38,11 @@ $saveTrackMpdUrl = getTrackMpdUrl($_GET['track_mpd_url']);
 //add to/save as from track submenu for streams (Tidal/YT)
 if (!$saveTrackMpdUrl){
   $saveTrackMpdUrl = createStreamUrlMpd($saveTrackId);
+  if (!$saveTrackMpdUrl){
+    $data['not_compatible'] = true;
+    echo safe_json_encode($data);
+    return;
+  }
 }
 //$saveTrackMpdUrl = str_replace(NJB_HOME_URL, '_NJB_HOME_URL_',$saveTrackMpdUrl);
 //$data['saveTrackMpdUrl'] = $saveTrackMpdUrl;

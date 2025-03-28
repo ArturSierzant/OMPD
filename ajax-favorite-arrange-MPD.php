@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright ï¿½ 2015-2021 Artur Sierzant                            |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -67,9 +67,7 @@ $playlist = mpd('listplaylistinfo "' . $favorite_id . '"');
 <tr class="header">
 	
 	<td class="icon"></td><!-- optional play -->
-	<td<?php if ($cfg['access_play']) echo' class="space"'; ?>></td>
 	<td>Title/file</td>
-	<td class="textspace"></td>
 	<td>Artist</td>
 	<td></td><!-- delete -->
 </tr>
@@ -92,7 +90,6 @@ $playlist = mpd('listplaylistinfo "' . $favorite_id . '"');
 	}
 	
 	?></td>
-	<td><?php // echo $artist; ?></td>
 	<td><?php 
 	if ($cfg['access_play']) {
 		echo '<a id="fav_play_track' . $i . '" href="javascript:ajaxRequest(\'play.php?action=insertSelect&amp;playAfterInsert=yes&amp;filepath=' . myUrlencode($playlist['file'][$i]) . '&amp;menu=favorite&amp;track_id=' . $i . '\',evaluateAdd);" onMouseOver="return overlib(\'play track\');" onMouseOut="return nd();">' . html($title) . '</a>';
@@ -109,7 +106,6 @@ $playlist = mpd('listplaylistinfo "' . $favorite_id . '"');
 		$break_method = 'break-word';
 	}
 	?>
-	<td></td>
 	<td class="<?php echo $break_method;?>"><?php echo html($artist); ?></td>
 	<td align="right" class="iconDel" style="position: relative">
 		<div  id="menu-icon-div<?php echo $i ?>" <?php echo 'onclick="toggleMenuSub(' . $i . ');"'; ?>>

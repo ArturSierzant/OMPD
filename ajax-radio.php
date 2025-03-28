@@ -20,9 +20,10 @@
 
 global $cfg,$db;
 
-use AdinanCenci\RadioBrowser\RadioBrowser;
+//use AdinanCenci\RadioBrowser\RadioBrowser;
 
 require_once('include/initialize.inc.php');
+require_once('include/library.inc.php');
 
 $name = $_POST['name'];
 $tag = $_POST['tag'];
@@ -44,40 +45,63 @@ if ($action == 'savePic') {
   echo savePic($picUrl, $streamUrl);
   return;
 } 
-$server = RadioBrowser::pickAServer();
-$browser = new RadioBrowser($server);
+//$server = RadioBrowser::pickAServer();
+//$browser = new RadioBrowser($server);
+$browser = initRadioBrowser();
+
 if ($action == 'searchRadios') {
   if ($countrycode == '0') $countrycode = null;
   $searchTerms = array('tag'=>$tag,'name'=>$name,'countrycode'=>$countrycode, 'limit'=>$limit,'order'=>$orderBy,'reverse'=>$reverse);
+  if ($browser){
+    $stations = $browser->searchStation($searchTerms);
 
-  $stations = $browser->searchStation($searchTerms);
+    $stationsCount = count($stations);
 
-  $stationsCount = count($stations);
-
-  if ($stationsCount == 0){
+    if ($stationsCount == 0){
+      ?>
+      <script>
+        $("#stationsCount").html('');
+      </script>
+      <br>No matching stations found.
+      <?php
+      return;
+    }
+  }
+  else{
     ?>
     <script>
       $("#stationsCount").html('');
     </script>
-    <br>No matching stations found.
+    <br>Error in connection to the radio browser.
     <?php
     return;
   }
 }
 
 elseif ($action == 'showSavedRadios') {
-  $query = mysqli_query($db, "SELECT DISTINCT SUBSTRING_INDEX(stream_url,'ompd_stationuuid=',-1) AS 'stationuuid' FROM favoriteitem WHERE stream_url LIKE '%ompd_stationuuid=%'");
+  $query = mysqli_query($db, "SELECT DISTINCT SUBSTRING_INDEX(stream_url,'ompd_stationuuid=',-1) AS 'stationuuid', stream_url FROM favoriteitem WHERE stream_url LIKE '%ompd_stationuuid=%'");
   $stationsCount = mysqli_num_rows($query);
   if ($stationsCount == 0){
+    ?>
+    <script>
+    $("#stationsCount").html('');
+    </script>
+    <br>No saved stations found.
+    <?php
     return;
   }
   else {
     $stations = array();
     while ($row = mysqli_fetch_assoc($query)) {
       $stationuuid = $row['stationuuid'];
-      $station = $browser->getStationsByUuid($stationuuid);
+      if ($browser){
+        $station = $browser->getStationsByUuid($stationuuid);
+      }
       if ($station) {
         $stations[] = $station[0];
+      }
+      else {
+        $stations[] = array('name'=>$row['stream_url'],'url'=>$row['stream_url'],'tags'=>'','bitrate'=>'0','homepage'=>'','stationuuid'=>$stationuuid,'connection'=>'error');
       }
     }
   }
@@ -96,13 +120,13 @@ $disc = 1;
     <td>Quality</td>
     <td class="pl-genre">Votes</td>
     <td></td>
-    <td></td>
   </tr>
   <?php
 
 $i = 0;
 
 foreach ($stations as $track) {
+
   radioListItem($track, $i, $disc);
   $i++;
 }

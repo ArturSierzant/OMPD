@@ -671,11 +671,14 @@ function radioListItem($track, $i, $disc) {
     if ($track['url_resolved']) {
       $url = $track['url_resolved'];
     }
-    if (strpos($url, '?') !== false) {
-      $url .= '&ompd_stationuuid=' . $track['stationuuid'];
-    }
-    else {
-      $url .= '?ompd_stationuuid=' . $track['stationuuid'];
+    if (strpos($url, 'ompd_stationuuid') === false) {
+      if (strpos($url, '?') !== false) {
+        $url .= '&';
+      }
+      else {
+        $url .= '?';
+      }
+      $url .= 'ompd_stationuuid=' . $track['stationuuid'];
     }
 
     if ($url_path = parse_url($url, PHP_URL_PATH)) {
@@ -718,10 +721,12 @@ function radioListItem($track, $i, $disc) {
 
     <td class="time"><?php 
     
-    if ($cfg['access_play']) 		echo '<span id="a_play_track'. $position_id .'" class="pointer" streamUrl="' . ($url) . '" picUrl="' . $picUrl . '" position_id="' . $position_id . '"><div class="playlist_title break-word">' . html($track['name']) . '</div><div class="playlist_title_album break-all favoritePlaylistDescription">' . html($track['url']) . '</div></span>';
-    
-    else echo html($track['name']);
-    
+    if ($cfg['access_play']) {
+      echo '<span id="a_play_track'. $position_id .'" class="pointer" streamUrl="' . ($url) . '" picUrl="' . $picUrl . '" position_id="' . $position_id . '"><div class="playlist_title break-word">' . html($track['name']) . '</div><div class="playlist_title_album break-all favoritePlaylistDescription">' . html($track['url']) . '</div></span>';
+    }
+    else {
+      echo html($track['name']);
+    }
     ?>
 
     </td>
@@ -758,20 +763,27 @@ function radioListItem($track, $i, $disc) {
     </td>
 
     <?php
-    
-    $isFavorite = false;
-    $isBlacklist = false;
-    if (isInFavorite($tid,$cfg['favorite_id'])) $isFavorite = true;
-    if (isInFavorite($tid,$cfg['blacklist_id'])) $isBlacklist = true;
+    if ($track['connection'] != 'error') {
+      $isFavorite = false;
+      $isBlacklist = false;
+      if (isInFavorite($tid,$cfg['favorite_id'])) $isFavorite = true;
+      if (isInFavorite($tid,$cfg['blacklist_id'])) $isBlacklist = true;
+      ?>
+      <td onclick="toggleStarSub(<?php echo $i + $disc * 100 ?>,'<?php echo $tid ?>');" class="pl-favorites">
+        <span id="blacklist-star-bg<?php echo $tid ?>"
+          class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
+          <i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
+        </span>
+      </td>
+    <?php
+    }
+    else {
     ?>
-    <td></td>
-     <td onclick="toggleStarSub(<?php echo $i + $disc * 100 ?>,'<?php echo $tid ?>');" class="pl-favorites">
-      <span id="blacklist-star-bg<?php echo $tid ?>"
-        class="<?php if ($isBlacklist) echo ' blackstar blackstar-selected'; ?>">
-        <i class="fa fa-star<?php if (!$isFavorite) echo '-o'; ?> fa-fw" id="favorite_star-<?php echo $tid; ?>"></i>
-      </span>
-    </td>
-      
+      <td class="pl-favorites">
+      </td>
+    <?php
+    }
+    ?>
   </tr>
   <tr class="line">
     <td></td>
@@ -3702,13 +3714,34 @@ function isRadio($id) {
 	return false;
 }
 
+
+//  +------------------------------------------------------------------------+
+//  | Init RadioBrowser                                                      |
+//  +------------------------------------------------------------------------+
+
+function initRadioBrowser(){
+  $server = RadioBrowser::pickAServer();
+  //$server = 'https://de3.api.radio-browser.info';
+  $browser = new AdinanCenci\RadioBrowser\RadioBrowser($server);
+  try {
+    $stats = $browser->getServerStats();
+  } catch (Exception $e) {
+    return false;
+  }
+  return $browser;
+}
+
+
 //  +------------------------------------------------------------------------+
 //  | Get radio stream URL                                                   |
 //  +------------------------------------------------------------------------+
 
 function getRadioMPDUrl($track_id) {
-  $server = RadioBrowser::pickAServer();
-  $browser = new AdinanCenci\RadioBrowser\RadioBrowser($server);
+  //$server = RadioBrowser::pickAServer();
+  //$browser = new AdinanCenci\RadioBrowser\RadioBrowser($server);
+  if (!$browser = initRadioBrowser()) {
+    return false;
+  };
   $stations = $browser->getStationsByUuid($track_id);
   $url = $stations[0]['url'];
   if ($stations[0]['url_resolved']) {
@@ -3741,8 +3774,12 @@ function getRadioId($id){
 //  +------------------------------------------------------------------------+
 
 function getRadioById($id){
-   $server = RadioBrowser::pickAServer();
-   $browser = new AdinanCenci\RadioBrowser\RadioBrowser($server);
+  //$server = RadioBrowser::pickAServer();
+  //$browser = new AdinanCenci\RadioBrowser\RadioBrowser($server);
+
+  if (!$browser = initRadioBrowser()) {
+    return false;
+  };
    $radio = array();
    $stations = $browser->getStationsByUuid($id);
    $name = $stations[0]['name'];
@@ -5241,7 +5278,10 @@ function createStreamUrlMpd($track_id) {
 	}
   elseif (isRadio($track_id)) {
     $stream_url_mpd = getRadioMPDUrl(getRadioId($track_id));
-    //$stream_url_mpd = 'http://wp.pl/';
+    if (!$stream_url_mpd) {
+      return false;
+    }
+      //$stream_url_mpd = 'http://wp.pl/';
   }
 	
 	return $stream_url_mpd;

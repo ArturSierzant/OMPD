@@ -130,9 +130,7 @@ elseif ($action == 'removeItem') {
 <tr class="header">
 	
 	<td class="icon"></td><!-- optional play -->
-	<td <?php if ($cfg['access_play'] && $favorite['stream'] == false) echo' class="space"'; ?>></td>
 	<td><?php echo $favorite['stream'] ? 'Stream/title' : 'Title' ?></td>
-	<td<?php if ($favorite['stream'] == false) echo ' class="textspace"'; ?>></td>
 	<td class="_delArtist"><?php echo $favorite['stream'] ? 'Artist' : 'Artist' ?></td>
 	<td class="_delSource center">Source</td>
 	<td class="_delFrom">Album</td>
@@ -233,7 +231,6 @@ elseif ($action == 'removeItem') {
 	}
 	
 	?></td>
-	<td><?php //echo 'acc pl: ' . print_r($cfg); ?></td>
 	<?php 
 	$title_array = explode(" ", $title);
 	$lengths = array_map('strlen', $title_array);
@@ -252,13 +249,15 @@ elseif ($action == 'removeItem') {
     if (isRadio($favoriteitem['stream_url'])){
       $uuid = getRadioId($favoriteitem['stream_url']);
       $radio = getRadioById($uuid);
-      $title = $radio['name'] . '<br><span style="font-size: smaller;">' . $radio['url'] . '</span>';
+      $title = $favoriteitem['stream_url'];
+      if ($radio){
+        $title = $radio['name'] . '<br><span style="font-size: smaller;">' . $radio['url'] . '</span>';
+      }
     }
 		echo '<a id="fav_play_track' . $favoriteitem['position'] . '" href="javascript:ajaxRequest(\'play.php?action=playStreamDirect&amp;playAfterInsert=yes&amp;position=' . $favoriteitem['position'] . '&amp;favorite_id=' . $favorite_id . '&amp;menu=favorite\',evaluateAdd);" onMouseOver="return overlib(\'Play stream\');" onMouseOut="return nd();">' . ($title) . '</a>';
 	}
 	else echo html($title); ?>
 	</td>
-	<td></td>
 	<?php 
 	$artist_array = explode(" ", $artist);
 	$lengths = array_map('strlen', $artist_array);
