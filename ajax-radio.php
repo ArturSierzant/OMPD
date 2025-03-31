@@ -72,7 +72,7 @@ if ($action == 'searchRadios') {
     <script>
       $("#stationsCount").html('');
     </script>
-    <br>Error in connection to the radio browser.
+    <br>Error in connection to the Radio Browser server.
     <?php
     return;
   }

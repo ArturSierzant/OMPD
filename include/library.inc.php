@@ -3720,8 +3720,32 @@ function isRadio($id) {
 //  +------------------------------------------------------------------------+
 
 function initRadioBrowser(){
-  $server = RadioBrowser::pickAServer();
   //$server = 'https://de3.api.radio-browser.info';
+  $servers = RadioBrowser::getServers();
+  foreach ($servers as $server) {
+    $ch = curl_init();
+    $url = $server;
+    $timeout = 1;
+    $connected = false;
+
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+    
+    $result = curl_exec($ch);
+    
+    if (!curl_errno($ch)) {
+      curl_close($ch);
+      $connected = true;
+      break;
+    }
+    curl_close($ch);
+  }
+
+  if (!$connected) {
+    return false;
+  }
+  
   $browser = new AdinanCenci\RadioBrowser\RadioBrowser($server);
   try {
     $stats = $browser->getServerStats();
