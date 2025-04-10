@@ -166,8 +166,8 @@ function draw_tile($size,$album,$multidisc = '', $retType = "echo",$tidal_cover 
       $played = $rows['c'];
       $pop = 0;
       if ($maxPlayed > 0 && $size > 0) {
-        if ($played > 0 && $played < 2) { //for rounded tile to be visible
-          $played = 2;
+        if ($played > 0 && $played < 3) { //for rounded tile to be visible
+          $played = 3;
         }
         $pop = $played/$maxPlayed * $size;
       }
@@ -1982,6 +1982,127 @@ function tidalTracksList($tracks, $i = 0, $playlist_type = '') {
 //  | Display list of tracks from Tidal (API v2)                             |
 //  +------------------------------------------------------------------------+
 
+function tidalTracksList_v2_new($tracks, $i = 0, $playlist_type = '')
+{
+  global $cfg;
+  // Use an initial value if none provided.
+  if ($i == 0) {
+    $i = 40000;
+  }
+  ob_start();
+  ?>
+  <table class="border" cellspacing="0" cellpadding="0">
+    <tr class="header">
+    <td class="icon"></td><!-- track menu -->
+    <td class="icon">
+      <?php if ($cfg["access_add"] && false): ?>
+      <span onMouseOver="return overlib('Add all tracks');" onMouseOut="return nd();">
+        <i id="add_all_TOPT" class="fa fa-plus-circle fa-fw icon-small pointer"></i>
+      </span>
+      <?php endif; ?>
+    </td><!-- add track -->
+    <td style="min-width: 30%">Title&nbsp;</td>
+    <?php if ($playlist_type != "PODCAST"): ?>
+      <td class="track-list-artist">Artist&nbsp;</td>
+      <td style="min-width: 30%">Album&nbsp;</td>
+    <?php endif; ?>
+    <td></td>
+    <td align="right" class="time time_w">Time</td>
+    </tr>
+    <?php foreach ($tracks as $track): 
+      $trackId = 'tidal_' . $track['data']['id'];
+      $isFavorite = isInFavorite($trackId, $cfg['favorite_id']);
+      $isBlacklist = isInFavorite($trackId, $cfg['blacklist_id']);
+      $rowClass = ($i & 1) ? 'even' : 'odd';
+    ?>
+    <tr class="line <?= $rowClass ?> mouseover">
+    <td class="icon">
+      <span id="menu-track<?= $i ?>">
+      <div onclick="toggleMenuSub(<?= $i ?>);">
+        <i id="menu-icon<?= $i ?>" class="fa fa-bars icon-small"></i>
+      </div>
+      </span>
+    </td>
+    <td class="icon">
+      <span>
+      <?php if ($cfg['access_add']): ?>
+        <a href="javascript:ajaxRequest('play.php?action=addSelect&amp;track_id=<?= $trackId ?>',evaluateAdd);" 
+         onMouseOver="return overlib('Add track <?= addslashes($track['data']['title']) ?>');" onMouseOut="return nd();">
+        <i id="add_tidal_<?= $track['data']['id'] ?>" class="fa fa-plus-circle fa-fw icon-small"></i>
+        </a>
+      <?php endif; ?>
+      </span>
+    </td>
+    <td style="word-break: break-word;">
+      <a id="a_play_track<?= $i ?>" href="javascript:ajaxRequest('play.php?action=insertSelect&amp;playAfterInsert=yes&amp;track_id=<?= $trackId ?>&amp;position_id=<?= $i ?>',evaluateAdd);" 
+       onMouseOver="return overlib('Play track <?= $track['data']['trackNumber'] ?>');" onMouseOut="return nd();">
+      <?= $track['data']['title'] ?>
+      </a>
+      <?php if ($playlist_type != "PODCAST"): ?>
+      <span class="track-list-artist-narrow">
+        <?= html($track['data']['artists'][0]['name']) ?>
+        <?php if (count($track['data']['artists']) > 1): ?>
+        <?php foreach ($track['data']['artists'] as $key => $artist): ?>
+          <?php if ($key > 0): ?>
+          &amp; <?= html($artist['name']) ?>
+          <?php endif; ?>
+        <?php endforeach; ?>
+        <?php endif; ?>
+      </span>
+      <?php endif; ?>
+    </td>
+    <?php if ($playlist_type != "PODCAST"): ?>
+      <td class="track-list-artist">
+      <a href="index.php?action=view2&amp;artist=<?= rawurlencode($track['data']['artists'][0]['name']) ?>&amp;order=year">
+        <?= html($track['data']['artists'][0]['name']) ?>
+      </a>
+      <?php if (count($track['data']['artists']) > 1): ?>
+        <?php foreach ($track['data']['artists'] as $key => $artist): ?>
+        <?php if ($key > 0): ?>
+          &amp; <a href="index.php?action=view2&amp;artist=<?= rawurlencode($artist['name']) ?>&amp;order=year">
+            <?= html($artist['name']) ?>
+            </a>
+        <?php endif; ?>
+        <?php endforeach; ?>
+      <?php endif; ?>
+      </td>
+      <td style="word-break: break-word;">
+      <a id="a_album<?= $i ?>" href="index.php?action=view3&amp;album_id=tidal_<?= $track['data']['album']['id'] ?>">
+        <?= $track['data']['album']['title'] ?>
+      </a>
+      </td>
+    <?php endif; ?>
+    <td onclick="toggleStarSub(<?= $i ?>, '<?= $trackId ?>');" class="pl-favorites">
+      <span id="blacklist-star-bg<?= $trackId ?>" class="<?= $isBlacklist ? 'blackstar blackstar-selected' : '' ?>">
+        <i class="fa fa-star<?= !$isFavorite ? '-o' : '' ?> fa-fw" id="favorite_star-<?= $trackId ?>"></i>
+      </span>
+    </td>
+    <td align="right"><?= formattedTime($track['data']['duration'] * 1000) ?></td>
+    </tr>
+    <tr>
+    <td colspan="20">
+      <?= starSubMenu($i, $isFavorite, $isBlacklist, $trackId, 'string') ?>
+    </td>
+    </tr>
+    <tr>
+    <td colspan="20">
+      <?= trackSubMenu($i, $track, 'tidal_' . $track['data']['album']['id'], 'string') ?>
+    </td>
+    </tr>
+    <?php 
+      $i++;
+    endforeach; 
+    ?>
+  </table>
+  <?php
+  return ob_get_clean();
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Display list of tracks from Tidal (API v2)                             |
+//  +------------------------------------------------------------------------+
+
 function tidalTracksList_v2($tracks, $i = 0, $playlist_type = '') {
 	global $cfg;
 	$tracksList = '<table class="border" cellspacing="0" cellpadding="0">';
@@ -3027,7 +3148,7 @@ function getTidalTrack($trackList, $i) {
 
 function isTidal($id) {
 	global $cfg;
-	if (strpos($id,"tidal_") !== false || strpos($id,'tidal.com/') !== false || strpos($id,MPD_TIDAL_URL) !== false || ($cfg['upmpdcli_tidal'] && strpos($id,$cfg['upmpdcli_tidal']) !== false)) {
+	if (strpos($id,"tidal_") !== false || strpos($id,'tidal.com/') !== false || strpos($id,MPD_TIDAL_URL) !== false || ($cfg['upmpdcli_tidal'] && strpos($id,$cfg['upmpdcli_tidal']) !== false) || strpos($id,'streamTidal') !== false) {
 		return true;
 	}
 	return false;
@@ -5510,5 +5631,32 @@ function setChkBox ($value, $item) {
   }
 }
 
+
+//  +------------------------------------------------------------------------+
+//  | Check if process is running using posix extension                      |
+//  +------------------------------------------------------------------------+
+function isProcessRunning($pid)
+{
+  if ($pid <= 0 || !ctype_digit((string)$pid)) {
+    return false;
+  }
+  //if (!extension_loaded("posix")) die("Posix extension is not available");
+  return posix_kill($pid, 0);
+}
+
+
+//  +------------------------------------------------------------------------+
+//  | Check if auto_queue is running                                         |
+//  +------------------------------------------------------------------------+  
+function isAutoQueueRunning() {
+  if (file_exists(AUTO_QUEUE_FILE)){
+    $pid=file_get_contents(AUTO_QUEUE_FILE);
+    if (@isProcessRunning($pid)){
+      return true;
+    }
+  }
+  unlink(AUTO_QUEUE_FILE);
+  return false;
+}
 
 ?>

@@ -371,6 +371,9 @@ function evaluateTrack(data) {
 	else {
 		document.getElementById('image_container_mini').innerHTML = '<a href="playlist.php"><img id="image_in_mini" src="<?php echo 'image/'; ?>large_file_not_found.png" alt=""></a>';
 	}
+  if(data.listpos == data.totalTracks - 1) {
+    //ajaxRequest('ajax-similar-song.php?action=addSimilar');
+  }
 }
 
 function evaluatePlaytime(data) {

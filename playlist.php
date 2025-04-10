@@ -61,7 +61,8 @@ elseif ($cfg['player_type'] == NJB_MPD)	{
   $listlength		= $status['playlistlength'];
   $bottom = ($listlength > 1) ? ($listlength - 1) : 0;
   $volume			= (isset($status['volume']) == false || $status['volume'] == -1) ? false : true;
-  $max_volume		= 100;	
+  $max_volume		= 100;
+  
 }
 elseif ($cfg['player_type'] == NJB_VLC)
   message(__FILE__, __LINE__, 'warning', '[b]videoLAN playlist not supported yet[/b]');
@@ -725,6 +726,7 @@ function evaluateStatus(data) {
   evaluateIsplaying(data.isplaying, data.listpos, data.Time);
   evaluateVolume(data.volume);
   evaluateGain(data.gain);
+  evaluateAutoQueue(data.auto_queue);
   evaluateConsume(data);
 }
 
@@ -919,6 +921,21 @@ function evaluateGain(gain) {
     if (gain == 'track')	document.getElementById('gain_text').innerHTML = 'gain: track';
     previous_gain = gain;
     
+  }
+}
+
+function evaluateAutoQueue(status) {
+  if (status['action']) {
+    status = status['action'];
+  }
+
+  if(status=='on') {
+    $("#auto_queue_text").html("auto queue: on");
+    $("#auto_queue").attr("href", "javascript:ajaxRequest('ajax-auto-queue.php?action=off',evaluateAutoQueue);");
+  }
+  if(status=='off'){
+    $("#auto_queue_text").html("auto queue: off");
+    $("#auto_queue").attr("href", "javascript:ajaxRequest('ajax-auto-queue.php?action=on',evaluateAutoQueue);");
   }
 }
 
@@ -1341,6 +1358,10 @@ function evaluateTrack(data) {
   changeTileSizeInfo();
   resizeImgContainer();
   getFavoritesList(current_track_id,current_track_mpd_url);
+
+  if(data.listpos == data.totalTracks - 1) {
+    //ajaxRequest('ajax-similar-song.php?action=addSimilar');
+  }
   
   /* spinnerImg.stop();
   $('#image').css('position', 'relative');*/

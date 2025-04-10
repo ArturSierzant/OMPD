@@ -36,6 +36,7 @@ class TidalAPI {
   const LOGOUT_URL = 'https://api.tidal.com/v1/logout';
   const API_URL = "https://api.tidal.com/v1/";
   const API_V2_URL = "https://api.tidal.com/v2/";
+  const OPEN_API_V2_URL = "https://openapi.tidal.com/v2/";
   const RESOURCES_URL = "https://resources.tidal.com/images/";
   
 
@@ -185,6 +186,12 @@ class TidalAPI {
 
   function getTrack($track_id) {
     curl_setopt($this->curl, CURLOPT_URL, self::API_URL . "tracks/" . $track_id . "?countryCode=" . $this->countryCode);
+    return $this->request();
+  }
+
+  function getSimilarTracks($track_id) {
+
+    curl_setopt($this->curl, CURLOPT_URL, self::OPEN_API_V2_URL . "tracks/" . $track_id . "/relationships/similarTracks?countryCode=" . $this->countryCode . "&include=similarTracks");
     return $this->request();
   }
 

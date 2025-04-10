@@ -2139,6 +2139,11 @@ function playlistStatus() {
 			$data['gain'] = (string) $gain['replay_gain_mode'];
 		}
 		
+    $data['auto_queue'] = 'off';
+    if (isAutoQueueRunning()) {
+      $data['auto_queue'] = 'on';
+    }
+
 		// get mute volume
 		if ($data['volume'] == 0) {
 			$query	= mysqli_query($db,'SELECT mute_volume FROM player WHERE player_id = ' . (int) $cfg['player_id']);
@@ -2166,6 +2171,8 @@ function playlistTrack() {
 	$data['audio_sample_rate'] = '---';
 	$title = '';
 	$currentsong	= mpd('currentsong');
+  $status 	= mpd('status');
+
 /*
 	if (!$currentsong['file']) { //mpd in unknown state
 		$data['album_artist'] = '&nbsp;';
@@ -2190,6 +2197,9 @@ function playlistTrack() {
 */
 	
 	$track_artist = array();
+
+  $data['listpos']		= isset($status['song']) ? (int) $status['song'] : 0;
+	$data['totalTracks']		= (int) $status['playlistlength'];
 	$data['track_mpd_url'] = getTrackMpdUrl($currentsong['file']);
 	
 	if ($track_id !='') {

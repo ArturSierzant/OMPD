@@ -82,6 +82,8 @@ define('NJB_COUNTER_DOWNLOAD', 2);
 define('NJB_COUNTER_COVER', 3);
 define('NJB_COUNTER_RECORD', 4);
 
+define('AUTO_QUEUE_FILE','tmp/auto_queue.pid');
+
 $cfg						= array();
 $cfg['menu']				= 'media';
 $cfg['sign']				= '';
@@ -225,6 +227,8 @@ if (function_exists('ctype_alnum') == false)
 	message(__FILE__, __LINE__, 'error', '[b]CTYPE not loaded[/b][list][*]Compile PHP with CTYPE support.[*]Or use a loadable module in the php.ini[/list]');
 if (function_exists('curl_init') == false)
   message(__FILE__, __LINE__, 'error', '[b]CURL not loaded[/b][list][*]Compile PHP with CURL support.[*]Or use a loadable module in the php.ini[/list]');
+if (function_exists('posix_kill') == false)
+  message(__FILE__, __LINE__, 'error', '[b]POSIX not loaded[/b][list][*]Compile PHP with POSIX support.[*]Or use a loadable module in the php.ini[/list]');
 
 
 

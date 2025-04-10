@@ -896,6 +896,8 @@ if ($cfg['use_hra']) {
 	}
 	else if ($cfg['menu'] == 'playlist') {
 	?>
+  <div id="gradientLeft" class="menuGradient left">&nbsp;</div>
+  <div id="gradientRight" class="menuGradient right">&nbsp;</div>
 	<div id="menuMiddleMedia">
 	<a id="deletePlayed" class="pointer noselect">delete played</a>
 	<!-- <a id="deletePlayed" href="javascript:ajaxRequest('play.php?action=deletePlayed&amp;menu=playlist');">delete played</a> --> 
@@ -920,6 +922,9 @@ if ($cfg['use_hra']) {
 	<span id="addUrl" onclick='toggleSubMiddle("AddUrl");'>add <i id="iconmenuSubMiddleMediaAddUrl" class="fa fa-chevron-circle-down"></i></span>
 	<?php echo $header['seperation']; ?>
 	<span id="savePlaylist" onclick='toggleSubMiddle("SavePlaylist");'>save <i id="iconmenuSubMiddleMediaSavePlaylist" class="fa fa-chevron-circle-down"></i></span>
+  <?php echo $header['seperation']; ?>
+	<a href="javascript:ajaxRequest('ajax-auto-queue.php?action=on',evaluateAutoQueue);" id="auto_queue"><span id="auto_queue_text" class="gain">auto queue:</span></a>
+
 	</div>
 	
 	<div id="menuSubMiddleMediaAddUrl">
