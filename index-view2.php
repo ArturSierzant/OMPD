@@ -470,17 +470,46 @@ $pic = '';
 
 if ($cfg['use_tidal']) {
   if (!$tidalArtistId){
+    $artists = array();
     $artist_name = moveTheToBegining($artistRequested);
     $res = $t->search("artists",$artist_name);
     if ($res["totalNumberOfItems"] > 0) {
-      foreach ($res["items"] as $a) {
+      foreach ($res["items"] as $idx=>$a) {
         if (tidalEscapeChar(strtolower($a["name"])) == tidalEscapeChar(strtolower($artist_name))) {
           $tidalArtistId = $a["id"];
-          break;
+          $artists[] = $idx;
         }
       }
     }
+    if (count($artists) > 1) {
+      echo '<h1>Found more than one artist with name \'' . $artistRequested . '\'</h1>';
+      echo '<div class="album_container">';
+      foreach ($artists as $idx){
+        if (isset($res["items"][$idx]['picture'])) {
+          $pic = $t->artistPictureToURL($res["items"][$idx]['picture']);
+          $pic = '<img src="' . $pic . '" style="width: 100%; height: 100%;">';
+        }
+        elseif(isset($res["items"][$idx]['mixes']['ARTIST_MIX'])){
+          $artist_mix = $res["items"][$idx]['mixes']['ARTIST_MIX'];
+          $mix = $t->getMixList($artist_mix);
+          $pic = $mix['rows'][0]['modules'][0]['mix']['images']['SMALL']['url'];
+          $pic = '<img src="' . $pic . '" style="width: 100%; height: 100%;">';
+        }
+        else {
+          $pic = '<i class="fa fa-user" style="font-size: 8em;"></i>';
+        }
+        $albums = array();
+        $albums['artist'] = $res["items"][$idx]['name'];
+        $albums['cover'] = $pic;
+        $albums['tidalArtistId'] = $res["items"][$idx]['id'];
+        draw_tile_artist ($tileSize, $albums, 'echo', 'grid');
+      }
+      echo '</div>';
+      require_once('include/footer.inc.php');
+      exit;
+    }
   }
+
 
   $artistAll = $t->getArtistAll($tidalArtistId);
   
