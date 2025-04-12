@@ -1,4 +1,4 @@
-<h1>&nbsp;<span id="suggestedNewTidal">Suggested new albums from</span> <a href="index.php?action=viewTidal">Tidal</a> <a id="suggestedNewLink" href="index.php?action=viewNewFromTidal&type=suggested_new">(more...)</a></h1>
+<h1>&nbsp;<span id="suggestedNewTidal">Suggested new albums from</span> <a href="index.php?action=viewTidal">Tidal</a> <a id="suggestedNewLink" href="index.php?action=viewMoreFromTidal_v2&type=general_list&apiPath=home%2Fpages%2FNEW_ALBUM_SUGGESTIONS%2Fview-all&moduleName=Suggested new albums for you">(more...)</a></h1>
 	<script>
 		calcTileSize();
 		var size = $tileSize;

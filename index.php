@@ -65,7 +65,7 @@ elseif	($action == 'viewNew')			viewNew();
 elseif	($action == 'viewHRA')			viewHRA();
 elseif	($action == 'viewNewFromHRA')			viewNewFromHRA();
 elseif	($action == 'viewTidal')			viewTidal();
-elseif	($action == 'viewNewFromTidal')			viewNewFromTidal();
+//elseif	($action == 'viewNewFromTidal')			viewNewFromTidal();
 elseif	($action == 'viewMoreFromTidal')			viewMoreFromTidal();
 elseif	($action == 'viewMoreFromTidal_v2')			viewMoreFromTidal_v2();
 elseif	($action == 'viewTidalPlaylist')			viewTidalPlaylist();
@@ -1918,7 +1918,7 @@ function viewTidal() {
 //  +------------------------------------------------------------------------+
 //  | View new from Tidal                                                    |
 //  +------------------------------------------------------------------------+
-function viewNewFromTidal() {
+function DEL_viewNewFromTidal() {
 	global $cfg, $db, $t;
 	global $base_size, $spaces, $scroll_bar_correction;
 	

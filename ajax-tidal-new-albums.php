@@ -32,22 +32,11 @@ $countryCode = isset($_POST["countryCode"]) ? $_POST["countryCode"] : '';
 
 authenticate('access_media');
 
-/* $t = new TidalAPI;
-$t->username = $cfg["tidal_username"];
-$t->password = $cfg["tidal_password"];
-$t->token = $cfg["tidal_token"];
-$t->audioQuality = $cfg["tidal_audio_quality"];
-$t->fixSSLcertificate();
- *///usleep(rand(0,10000));
 $conn = $t->connect($sessionId, $countryCode);
 if ($conn === true){
   switch ($type){
     case "suggested_new":
       $results = $t->getSuggestedNew();
-      if (!$results['items']) {
-        $results = $t->getSuggestedNewForYou($limit, $offset);
-        echo "<script> changeSuggested('" . $results['apiPath'] . "');</script>";
-      }
       break;
     case "featured_new":
       $results = $t->getFeatured($limit, $offset);
@@ -68,7 +57,7 @@ if ($conn === true){
       $results = $t->getSuggestedForYou($limit, $offset);
       break;
   }
-  if ($results['items']){
+/*   if ($results['items']){
     foreach($results['items'] as $res) {
       $albums = array();
       $albums['album_id'] = 'tidal_' . $res['id'];
@@ -80,6 +69,11 @@ if ($conn === true){
         $albums['audio_quality'] = getTidalAudioQualityMediaMetadata($res);
       }
       draw_tile ( $size, $albums, '', 'echo', $res['cover'] );
+    }
+  } */
+  if (strtolower($results[0]['type'])=='album'){
+    foreach($results as $res) {
+      drawTidalTileItems($res, $size);
     }
   }
   else {

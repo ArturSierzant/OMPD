@@ -284,6 +284,16 @@ class TidalAPI {
   }
     
   function getSuggestedNew($limit = 50, $offset = 0, $getMore = false) {
+    $res = $this->getHomePage_v2();
+    foreach($res['items'] as $key => $row){
+      if (strtolower($row['moduleId']) == 'new_album_suggestions') {
+        return ($res['items'][$key]['items']);
+      }
+    }
+    return false;
+  }
+
+  function getSuggestedNew_old($limit = 50, $offset = 0, $getMore = false) {
     $res = $this->getHomePage();
     foreach($res['rows'] as $key => $row){
       if (strtolower($row['modules'][0]['title']) == 'suggested new albums') {
