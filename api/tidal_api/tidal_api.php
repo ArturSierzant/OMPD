@@ -285,6 +285,7 @@ class TidalAPI {
     
   function getSuggestedNew($limit = 50, $offset = 0, $getMore = false) {
     $res = $this->getHomePage_v2();
+   
     foreach($res['items'] as $key => $row){
       if (strtolower($row['moduleId']) == 'new_album_suggestions') {
         return ($res['items'][$key]['items']);
@@ -546,7 +547,20 @@ class TidalAPI {
     return $this->getMixList($mixlist_id)["rows"][1]["modules"][0]["pagedList"];
   }
 
-  function getHomePage_v2($cursor = '') {
+  function getHomePage_v2() {
+    $hp = $this->getHomePage_v2_part();
+    if (strlen($hp['page']['cursor']) > 1){
+      $hp2 = $this->getHomePage_v2_part($hp['page']['cursor']);
+      if (count($hp2['items']) > 0) {
+        foreach($hp2['items'] as $key1 => $row1){
+          $hp['items'][]=$hp2['items'][$key1];
+        }
+      }
+    }
+    return $hp;
+  }
+
+  function getHomePage_v2_part($cursor = '') {
     if ($cursor){
       $cursor = '&cursor=' . $cursor;
     }

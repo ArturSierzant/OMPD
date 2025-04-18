@@ -56,14 +56,6 @@ if ($conn){
     require_once('include/footer.inc.php');
     exit();
   }
-  if (strlen($hp['page']['cursor']) > 1){
-    $hp2 = $t->getHomePage_v2($hp['page']['cursor']);
-    if (count($hp2['items']) > 0) {
-      foreach($hp2['items'] as $key1 => $row1){
-        $hp['items'][]=$hp2['items'][$key1];
-      }
-    }
-  }
 }
 ?>
 <div class="area">

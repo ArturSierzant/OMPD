@@ -145,8 +145,11 @@ function addSimilarSongToQueue($host, $port) {
         $trackId = $res['tracks']['items'][0]['id'];
         cliLog("Found track in Tidal: track_id=" . $trackId);
         $similarSongs = $t->getSimilarTracks($trackId);
-        if(count($similarSongs['data']) > 0){
+        if(isset($similarSongs['data']) && count($similarSongs['data']) > 0){
           $next_track_id = getNextTrackId($similarSongs);
+        }
+        else{
+          $next_track_id = false;
         }
         if(!empty($next_track_id)){
           return addTrackToQueue($next_track_id, $host, $port);
