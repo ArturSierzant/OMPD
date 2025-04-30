@@ -1,6 +1,6 @@
  <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright � 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015 Artur Sierzant                                 |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  | This program is free software: you can redistribute it and/or modify   |
@@ -28,14 +28,22 @@
 
 require_once('include/initialize.inc.php');
 
-if (cookie('netjukebox_width')<385) {$base_size = 90;}
-elseif (cookie('netjukebox_width')<641) {$base_size = 120;}
-else {$base_size = 150;}
+if ($_GET['tileSizePHP']) {
+  $tileSizePHP = $_GET['tileSizePHP'];
+  if ($tileSizePHP > 0) {
+    $size = $tileSizePHP;
+  }
+}
+else {
+  if (cookie('netjukebox_width')<385) {$base_size = 90;}
+  elseif (cookie('netjukebox_width')<641) {$base_size = 120;}
+  else {$base_size = 150;}
 
-$base		= (cookie('netjukebox_width') - 20) / ($base_size + 10);
-$colombs	= floor($base);
-$aval_width = (cookie('netjukebox_width') - 20 - $scroll_bar_correction) - ($colombs - 1) * $spaces;
-$size = floor($aval_width / $colombs);
+  $base		= (cookie('netjukebox_width') - 20) / ($base_size + 10);
+  $colombs	= floor($base);
+  $aval_width = (cookie('netjukebox_width') - 20 - $scroll_bar_correction) - ($colombs - 1) * $spaces;
+  $size = floor($aval_width / $colombs);
+}
 
 
 $cfg['menu']		= 'Library';
@@ -1316,7 +1324,7 @@ function tidal_artist(){
 ?>
 <div>
 <h1 onclick='toggleSearchResults("TIA");' class="pointer" id="tidalArtists"><i id="iconSearchResultsTIA" class="fa fa-chevron-circle-down icon-anchor"></i> Artists</h1>
-<div id="searchResultsTIA">
+<div id="searchResultsTIA" class="albums_container">
 <span id="artistsLoadingIndicator">
 		<i class="fa fa-cog fa-spin icon-small"></i> Loading artists list...
 </span>

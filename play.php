@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright � 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015 Artur Sierzant                                 |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright � 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -2063,11 +2063,25 @@ function playlistStatus() {
 				$filepath = urldecode($filepath);
 				$data['title'] = basename($filepath);
 			}
-
-			else {
-				$data['title']	= basename($currentsong['file']);
-				$data['title_core']	= pathinfo($currentsong['file'],PATHINFO_FILENAME);
-			}
+      elseif (isRadio($currentsong['file'])) {
+        if (isset($currentsong['Name'])) {
+          $data['title'] = $currentsong['Name'];
+        } 
+        else {
+          $browser = initRadioBrowser();
+          if ($browser) {
+            $radio = $browser->getStationsByUuid(getRadioId($currentsong['file']));
+            if ($radio) {
+              $data['title'] = $radio[0]['name'];
+              $data['title_core'] = $radio[0]['name'];
+            }
+          } 
+          else {
+            $data['title']	= basename($currentsong['file']);
+            $data['title_core']	= pathinfo($currentsong['file'],PATHINFO_FILENAME);
+          }
+        }
+      }
 		}
 		if (!isset($data['track_artist'])) $data['track_artist'] = isset($currentsong['Artist']) ? $currentsong['Artist'] : null;
 		$data['relative_file'] = $currentsong['file'];
@@ -2162,7 +2176,7 @@ function playlistStatus() {
 //  | Playlist track                                                            |
 //  +---------------------------------------------------------------------------+
 function playlistTrack() {
-	global $cfg, $db;
+	global $cfg, $db, $t;
 	authenticate('access_playlist', false, false, true);
 	require_once('include/play.inc.php');
 	
@@ -2219,7 +2233,20 @@ function playlistTrack() {
 			$query = mysqli_query($db,$sql);
       }
 			$track = mysqli_fetch_assoc($query);
-			
+    	$conn = $t->connect();
+      if ($conn === true){
+        $trackTidalInfo = $t->getTrack($track_id);
+        if ($trackTidalInfo) {
+          if ($trackTidalInfo['artists'][0]) {
+            foreach ($trackTidalInfo['artists'] as $artist) {
+              $data['track_artist_tidal_id'][]= $artist['id'];
+            }
+          }
+          elseif ($trackTidalInfo['artist']['id']){
+            $data['track_artist_tidal_id'][]= $trackTidalInfo['artist']['id'];
+          }
+        }
+      }
 			/* $query = mysqli_query($db,'SELECT image_front FROM bitmap WHERE image_id="' . mysqli_real_escape_string($db,$track['image_id']) . '"');
 			$bitmap = mysqli_fetch_assoc($query); */
 		}
@@ -2233,6 +2260,8 @@ function playlistTrack() {
 			$query = mysqli_query($db,'SELECT image_front FROM bitmap WHERE image_id="' . mysqli_real_escape_string($db,$track['image_id']) . '"');
 			$bitmap = mysqli_fetch_assoc($query);
 		}
+
+
 		$other_track_version = false;
 		$title = $track['title'];
 		
@@ -2388,8 +2417,8 @@ function playlistTrack() {
 				$title	= $currentsong['Title'];
 			}
 			elseif ($title == '') {
-				$title	= basename($currentsong['file']);
-			}
+        $title	= basename($currentsong['file']);
+      }
 		}
 		/* else
 			$table_track['title']	= $currentsong['file']; */
@@ -2400,6 +2429,14 @@ function playlistTrack() {
         $radio = $browser->getStationsByUuid(getRadioId($data['track_mpd_url']));
         if ($radio) {
           $data['image_url'] = $radio[0]['homepage'];
+          if ($title	== basename($currentsong['file'])) {
+            $title = $radio[0]['name'];
+            $track_artist = $currentsong['Artist'];
+          }
+          $album = $radio[0]['name'];
+          if ($radio[0]['homepage']) {
+            $album = '<a href = "' . $radio[0]['homepage'] .'" target="_blank">' . $radio[0]['name'] . '</a>';
+          }
         }
       }
     }
@@ -2517,7 +2554,10 @@ function playlistTrack() {
 	
 	$data['inFavorite'] = (boolean) $inFavorite;
 	$data['onBlacklist'] = (boolean) $onBlacklist;
-	
+	$data['isplaying'] = 0;
+		if ($status['state'] == 'stop')		$data['isplaying'] = 0;
+		if ($status['state'] == 'play')		$data['isplaying'] = 1;
+		if ($status['state'] == 'pause')	$data['isplaying'] = 3;
 	
 	echo safe_json_encode($data);
 }

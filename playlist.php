@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015 Artur Sierzant                                 |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -341,22 +341,34 @@ for ($i=0; $i < $listlength; $i++) {
       }
     }
     else {
-      if (isset($playlistinfo['Artist'])) 
-        $table_track['track_artist']	= $playlistinfo['Artist'];
-      /* else 
-        $table_track['track_artist']	= basename($playlistinfo['file']); */
-      
-      if (isset($playlistinfo['Name'])) 
-        $table_track['title']	= $playlistinfo['Name'];
-      else if (isset($playlistinfo['Title']))
-        $table_track['title']	= $playlistinfo['Title'];
-      else
-        $table_track['title']	= basename($playlistinfo['file']);
-      
-      if (isset($playlistinfo['Album']))
-        $table_track['album']	= $playlistinfo['Album'];
-      else 
-        $table_track['album']	= $playlistinfo['file'];
+      if (isRadio($playlistinfo['file'])){
+        $browser = initRadioBrowser();
+        if($browser) {
+          $radio = $browser->getStationsByUuid(getRadioId($playlistinfo['file']));
+          if ($radio) {
+            $table_track['title'] = $radio[0]['name'];
+            $table_track['track_artist']	= '';
+            /* $table_track['album']	= explode('ompd', $playlistinfo['file'])[0];
+            $table_track['album']	= rtrim($table_track['album'],'?');
+            $table_track['album']	= rtrim($table_track['album'],'&'); */
+            $table_track['album']	= $radio[0]['url'];
+          }
+        }
+      }
+      else{
+        if (isset($playlistinfo['Artist'])) 
+          $table_track['track_artist']	= $playlistinfo['Artist'];
+        if (isset($playlistinfo['Name'])) 
+          $table_track['title']	= $playlistinfo['Name'];
+        else if (isset($playlistinfo['Title']))
+          $table_track['title']	= $playlistinfo['Title'];
+        else
+          $table_track['title']	= basename($playlistinfo['file']);
+        if (isset($playlistinfo['Album']))
+          $table_track['album']	= $playlistinfo['Album'];
+        else 
+          $table_track['album']	= $playlistinfo['file'];
+      }
     }
     
     if ($table_track['hra']) {
@@ -374,6 +386,7 @@ for ($i=0; $i < $listlength; $i++) {
   //this is stream of a file
   elseif ($is_file_stream) {
     //TODO: take info from file using getid3
+  
     $playlistinfo = mpd('playlistinfo ' . $i);
     $table_track['number'] = $playlistinfo['Pos'] + 1;
     $filepath = substr($file[$i],$pos + 9, strlen($file[$i]) - $pos);
@@ -381,6 +394,7 @@ for ($i=0; $i < $listlength; $i++) {
     $table_track['title'] = basename($filepath);
     $pos = strpos($filepath, $table_track['title']);
     $table_track['album'] = substr($filepath, 0, $pos);
+    
   }
   
   if ($table_track['youtube']) { //for youtube streams
@@ -677,8 +691,12 @@ function evaluateStatus(data) {
       var title = data.title;
       document.getElementById('title1').innerHTML = document.getElementById('title').innerHTML =  title;
       
-      var query_artist = '';
       if (data.track_artist) {
+        artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist) + '">' + data.track_artist + '</a>';
+        document.getElementById('artist1').innerHTML = (!data.track_artist) ? '&nbsp;' : 'by ' + artist;
+        document.getElementById('artist').innerHTML = artist; 
+        
+        var query_artist = '';
         query_artist = data.track_artist;
         query_artist = query_artist.toString().replace(/"/g,"");
         query_artist = query_artist.toString().replace(/'/g,"");
@@ -1081,7 +1099,9 @@ function evaluateTrack(data) {
   }
   if (data.isStream == 'true' && data.miliseconds == 0) {
     document.getElementById('tracktime').innerHTML = '--:--';
-    $("#timebar").addClass("timebar-stream-anim");
+    if (data.isplaying == 1) {
+      $("#timebar").addClass("timebar-stream-anim");
+    }
   }
   else {
     $("#timebar").removeClass("timebar-stream-anim");
@@ -1100,11 +1120,15 @@ function evaluateTrack(data) {
     }
   ?>
   artist = '';
+  tidalArtistId = '';
   if ($.isArray(data.track_artist)) {
     l = data.track_artist.length;
     if (l>1) {
       for (i=0; i<l; i++) {
-        artist = artist + '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[i]) + '">' + data.track_artist[i] + '</a>';
+        if ($.isArray(data.track_artist_tidal_id)){
+          tidalArtistId = "&tidalArtistId=" + data.track_artist_tidal_id[i];
+        }
+        artist = artist + '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[i]) + tidalArtistId + '">' + data.track_artist[i] + '</a>';
         if (i!=l-1) {
           var delimiter = data.track_artist_all.match(escapeRegExp(data.track_artist_url[i]) + "(.*)" + escapeRegExp(data.track_artist_url[i+1]));
           if (testing == 'on') {
@@ -1115,8 +1139,11 @@ function evaluateTrack(data) {
       }
     } 
     else if (l>0) {
+      if ($.isArray(data.track_artist_tidal_id)){
+          tidalArtistId = "&tidalArtistId=" + data.track_artist_tidal_id[0];
+      }
       if (data.track_artist[0] != '&nbsp;') {
-        artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[0]) + '">' + data.track_artist[0] + '</a>';
+        artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[0]) + tidalArtistId + '">' + data.track_artist[0] + '</a>';
       }
       else {
         artist = '-';

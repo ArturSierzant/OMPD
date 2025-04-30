@@ -83,7 +83,6 @@ elseif ($cfg['debug']) {
 	<td rowspan="3" valign="top"><img src="<?php echo $cfg['img']; ?>medium_message_<?php echo $type; ?>.png" alt=""></td>
 	<td><?php echo $message; ?></td>
 </tr>
-<tr class="line"><td></td></tr>
 <!--
 <tr>
 	<td>

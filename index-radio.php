@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015 Artur Sierzant                                 |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -61,24 +61,24 @@ if ($browser = initRadioBrowser()){
 
 <tr class="textspace"><td colspan="2"></td></tr>
 <tr>
-	<td>Name:</td>
-	<td><input type="text" id="name" value=""  style="width: 100%; max-width: 400px; margin-bottom: 4px"></td>
+	<td style="width: 5.5em;">Name:</td>
+	<td><input type="text" id="name" value="" style="width: 100%; max-width: 400px; margin-bottom: 4px"></td>
 </tr>
 <tr>
 	<td>Tag:</td>
 	<td><input type="text" id="tag" value="<?= $searchTag ?>" style="width: 100%; max-width: 400px; margin-bottom: 4px;"></td>
 </tr>
 <tr>
-	<td>Country:&nbsp;</td>
+	<td><label for="country">Country:&nbsp;</label></td>
 	<td>
-    <select id="country" style="width: 100%; max-width: 400px;">
-    <option value="0">All countries</option>
-    <?php 
-    foreach ($countries as $country) {
-      echo '<option value="' . $country['iso_3166_1'] . '">' . $country['name'] . '</option>';
-    }
-    ?>
-  </select>
+    <input id="country" list="countryList" style="width: 100%; max-width: 400px;" placeholder="All countries">
+    <datalist id="countryList">
+      <?php 
+      foreach ($countries as $country) {
+      echo '<option value="' . $country['iso_3166_1'] . ' - ' . $country['name'] . '">' . $country['iso_3166_1'] . ' - ' . $country['name'] . '</option>';
+      }
+      ?>
+    </datalist>
   </td>
 </tr>
 
@@ -110,12 +110,6 @@ if ($browser = initRadioBrowser()){
     //echo 'searchRadio();';
   }
   ?>
-  if ($("#tag").val() != '' || $("#name").val() != ''){
-    searchRadio();
-  }
-  else {
-    showSavedRadios();
-  }
 
   $('#searchRadio :input').keypress(function (e) {
     var key = e.which;
@@ -158,7 +152,7 @@ if ($browser = initRadioBrowser()){
   function clearForm(){
     $("#name").val('');
     $("#tag").val('');
-    $("#country").val('0');
+    $("#country").val('');
     $("#searchResults").hide();
     //showSavedRadios();
   }
@@ -195,6 +189,14 @@ if ($browser = initRadioBrowser()){
     }); 
   }
 
+  $(document).ready(function() {
+    if ($("#name").val() != '' || $("#tag").val() != '' || $("#country").val() != ''){
+      searchRadio();
+    }
+    else {
+      showSavedRadios();
+    }
+  })
 </script>
 
 <?php

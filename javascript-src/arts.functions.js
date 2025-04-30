@@ -21,34 +21,34 @@
 function changeTileSizeInfo() {
 	$("a[href]")
 	.each(function() {
-	if (this.href.indexOf('tileSizePHP')<0) {
-		if (this.href.indexOf('index.php?')<0) {
-			this.href = this.href.replace('index.php','index.php?tileSizePHP=' + $tileSizeArr[0]);
-			}
-		else {
-			this.href = this.href.replace('index.php?','index.php?tileSizePHP=' + $tileSizeArr[0] + '&');
-		}
-    if (this.href.indexOf('statistics.php?')<0) {
-			this.href = this.href.replace('statistics.php','statistics.php?tileSizePHP=' + $tileSizeArr[0]);
-			}
-		else {
-			this.href = this.href.replace('statistics.php?','statistics.php?tileSizePHP=' + $tileSizeArr[0] + '&');
-		}
-	}
-	else {
-		pos1 = this.href.indexOf('PHP=');
-		ts = this.href.substr(pos1 + 4, 3);
-		/* pos2 = this.href.indexOf('&', pos1);
-		if (pos2<0) {
-			ts = this.href.substr(pos1 + 4, this.href.length - pos1 + 4);
-		}
-		else {
-			ts = this.href.substr(pos1 + 4, pos2 - pos1);
-		} 
-		console.log ('ts: ' + ts);
-		*/
-		this.href = this.href.replace('?tileSizePHP=' + ts,'?tileSizePHP=' + $tileSizeArr[0]);
-	}
+    if (this.href.indexOf('tileSizePHP')<0) {
+      if (this.href.indexOf('index.php?')<0) {
+        this.href = this.href.replace('index.php','index.php?tileSizePHP=' + $tileSizeArr[0]);
+        }
+      else {
+        this.href = this.href.replace('index.php?','index.php?tileSizePHP=' + $tileSizeArr[0] + '&');
+      }
+      if (this.href.indexOf('statistics.php?')<0) {
+        this.href = this.href.replace('statistics.php','statistics.php?tileSizePHP=' + $tileSizeArr[0]);
+        }
+      else {
+        this.href = this.href.replace('statistics.php?','statistics.php?tileSizePHP=' + $tileSizeArr[0] + '&');
+      }
+    }
+    else {
+      pos1 = this.href.indexOf('PHP=');
+      ts = this.href.substr(pos1 + 4, 3);
+      /* pos2 = this.href.indexOf('&', pos1);
+      if (pos2<0) {
+        ts = this.href.substr(pos1 + 4, this.href.length - pos1 + 4);
+      }
+      else {
+        ts = this.href.substr(pos1 + 4, pos2 - pos1);
+      } 
+      console.log ('ts: ' + ts);
+      */
+      this.href = this.href.replace('?tileSizePHP=' + ts,'?tileSizePHP=' + $tileSizeArr[0]);
+    }
 	});
 	
 	$("[onclick]")
@@ -70,6 +70,8 @@ function changeTileSizeInfo() {
 			$(this).attr('onclick', v2);	
 		}
 	});
+  //change hidden input value in searchFormAll form using jquery
+  $('#searchFormAll input[name=tileSizePHP]').val($tileSizeArr[0]);
 }
 
 function calcTileSize() {
@@ -441,6 +443,13 @@ function resizeImgContainer() {
 		$("#file-info-mini").css("max-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));
 		$("#media_control_mini").css("display","table-cell");
 	}
+
+  if ($(window).width() > 1280) {
+		$(".back-to-top").css("right",($(window).width() - 1275)/2);
+	}
+	else {
+		$(".back-to-top").css("right","2px");
+	}
   
 	//prevent resizing when virtual keybord is visible on mobile devices 
 	//if ($("#savePlaylistAsName").is(":focus") || $("#savePlaylistComment").is(":focus") || $("#addUrlAddress").is(":focus")) 
@@ -581,14 +590,6 @@ function resizeImgContainer() {
 	$("#file-info-mini").css("max-width",(miniplayerW - $("#image_container_mini").width() - $("#media_control_mini").width()));
 	
 	$("#media_control_mini").css("display","table-cell"); */
-	
-	if ($(window).width() > 1280) {
-		$(".back-to-top").css("right",($(window).width() - 1275)/2);
-	}
-	else {
-		$(".back-to-top").css("right","2px");
-	}
-	
 	
 } 
 

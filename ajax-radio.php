@@ -1,6 +1,6 @@
 <?php 
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015 Artur Sierzant                                 |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -27,7 +27,7 @@ require_once('include/library.inc.php');
 
 $name = $_POST['name'];
 $tag = $_POST['tag'];
-$countrycode = $_POST['countrycode'];
+$countrycode = ($_POST['countrycode'] != "") ? substr($_POST['countrycode'], 0, 2) : null;
 $action = $_POST['action'];
 $picUrl = $_POST['picUrl'];
 $streamUrl = $_POST['streamUrl'];
@@ -50,7 +50,7 @@ if ($action == 'savePic') {
 $browser = initRadioBrowser();
 
 if ($action == 'searchRadios') {
-  if ($countrycode == '0') $countrycode = null;
+  //if ($countrycode == '0') $countrycode = null;
   $searchTerms = array('tag'=>$tag,'name'=>$name,'countrycode'=>$countrycode, 'limit'=>$limit,'order'=>$orderBy,'reverse'=>$reverse);
   if ($browser){
     $stations = $browser->searchStation($searchTerms);

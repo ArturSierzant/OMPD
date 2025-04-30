@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015 Artur Sierzant                                 |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -71,15 +71,9 @@ function turnOn(){
       $port = $row['player_port'];
       $pass = $row['player_pass'];
     
-      /* $data['player'] = $session1['pl'];
-      $cfg['player_host'] = $data['host'] = $session1['player_host'];
-      $cfg['player_port'] = $session1['player_port'];
-      $cfg['player_pass'] = $session1['player_pass']; */
-      
-      //$status = mpd('status',$host,$port);
       $status 	= mpdSilent('status',$host,$port);
-      cliLog('host: ' . $host);
-      cliLog('status: ' . $status);
+      //cliLog('host: ' . $host);
+      //cliLog('status: ' . $status);
       if (!$status) {
         continue;
       }
@@ -94,10 +88,6 @@ function turnOn(){
         }
       }
     }
-
-    /* echo $listpos . '/' . $totalTracks . '<br>';
-    @ob_flush();
-    flush(); */
   }
 }
 
@@ -113,6 +103,7 @@ function turnOff(){
   echo safe_json_encode($response);
   exit();
 }
+
 // Function to find and add a similar song to the MPD queue
 function addSimilarSongToQueue($host, $port) {
   global $cfg, $db, $t, $response;
@@ -125,7 +116,66 @@ function addSimilarSongToQueue($host, $port) {
   }
   
   $currentSongFile = $currentSong['file'];
+
+  if (isRadio($currentSongFile)) {
+    cliLog("Current song is a radio stream, skipping.");
+    return false;
+  }
   
+  $relative_file = str_replace($cfg['media_dir'], '', $currentSongFile);
+  
+  $similarityConditions = array();
+  $artist = null;
+  $genre = null;
+  $date = null;
+  $title = null;
+  $track_id = getTrackIdFromUrl($relative_file);
+  
+  if ($track_id) { 
+    $currentSongQuery = "SELECT * FROM track WHERE track_id = '" . mysqli_real_escape_string($db, $track_id) . "' LIMIT 1";
+    
+    $currentSongResult = mysqli_query($db, $currentSongQuery);
+    if ($currentSongResult && mysqli_num_rows($currentSongResult) > 0) {
+      cliLog("Song $relative_file found in DB: track_id = " . $track_id);
+      $currentSongDB = mysqli_fetch_assoc($currentSongResult);
+      $artist = $currentSongDB['artist'];
+      $genre = $currentSongDB['genre'];
+      $date = $currentSongDB['year'];
+      $title = $currentSongDB['title'];
+    }
+  }
+  
+  if(isYoutube($relative_file)){
+    $ytData = getYouTubeMPDUrlData($relative_file);
+    if ($ytData) {
+      $artist = $ytData['artist'];
+      $title = $ytData['title'];
+    }
+  }
+
+  // If no track_id is found in DB, use the current song's metadata from mpd
+  if (!$artist){
+    if (!empty($currentSong['Artist']) && isset($currentSong['Artist'])) {
+      $artist = $currentSong['Artist'];
+    }
+    if (!empty($currentSong['Genre']) && isset($currentSong['Genre'])) {
+      $genre = $currentSong['Genre'];
+    }
+    if (!empty($currentSong['Date']) && isset($currentSong['Date'])) {
+      $date = $currentSong['Date'];
+    }
+    if (!empty($currentSong['Title']) && isset($currentSong['Title'])) {
+      $title = $currentSong['Title'];
+    }
+  }
+
+  cliLog("Use_tidal: " . $cfg['use_tidal']);
+  cliLog("Artist: " . $artist);
+  cliLog("Title: " . $title);
+  cliLog("Genre: " . $genre);
+  cliLog("Date: " . $date);
+
+
   if ($cfg['use_tidal']){
     if (isTidal($currentSongFile)) {
       $trackId = getTrackIdFromUrl($currentSongFile);
@@ -139,48 +189,46 @@ function addSimilarSongToQueue($host, $port) {
       }
     }
     else{
-      $res = $t->searchAll($currentSong['Artist'] . " " . $currentSong['Title]']);
-      cliLog("Search result: " . print_r($res,true));
-      if(count($res['tracks']['items']) > 0){
-        $trackId = $res['tracks']['items'][0]['id'];
-        cliLog("Found track in Tidal: track_id=" . $trackId);
-        $similarSongs = $t->getSimilarTracks($trackId);
-        if(isset($similarSongs['data']) && count($similarSongs['data']) > 0){
-          $next_track_id = getNextTrackId($similarSongs);
+      if($artist || $title){
+        $res = $t->searchAll($artist . " " . $title);
+        //cliLog("Search result: " . print_r($res['artists']['items'][0],true));
+        if(count($res['tracks']['items']) > 0){
+          $trackId = $res['tracks']['items'][0]['id'];
+          cliLog("Found track in Tidal: track_id=" . $trackId);
+          $similarSongs = $t->getSimilarTracks($trackId);
+          if(isset($similarSongs['data']) && count($similarSongs['data']) > 0){
+            $next_track_id = getNextTrackId($similarSongs);
+          }
+          else{
+            $next_track_id = false;
+          }
+          if(!empty($next_track_id)){
+            return addTrackToQueue($next_track_id, $host, $port);
+          }
         }
-        else{
-          $next_track_id = false;
-        }
-        if(!empty($next_track_id)){
-          return addTrackToQueue($next_track_id, $host, $port);
-        }
+        cliLog("Track not found in Tidal - trying to find similar song in DB.");
       }
     }
   }
 
-  $relative_file = str_replace($cfg['media_dir'], '', $currentSongFile);
- 
- $similarityConditions = array();
-
- if (!empty($currentSong['Artist'])) {
-   $similarityConditions[] = "artist LIKE '%" . mysqli_real_escape_string($db, $currentSong['Artist']) . "%'";
-    //$similarityConditions[] = "composer LIKE '%" . mysqli_real_escape_string($db, $currentSong['Artist']) . "%'";
+  if ($artist) {
+    $similarityConditions[] = "artist LIKE '%" . mysqli_real_escape_string($db, $artist) . "%'";
   }
 
-  if (!empty($currentSong['Genre'])) {
-    $similarityConditions[] = "genre = '" . mysqli_real_escape_string($db, $currentSong['Genre']) . "'";
+  if ($genre) {
+    $similarityConditions[] = "genre = '" . mysqli_real_escape_string($db, $genre) . "'";
   }
   
-  $whereClause = " relative_file != '" . mysqli_real_escape_string($db, $relative_file) . "'";
+  $whereClause = " relative_file != '" . mysqli_real_escape_string($db, $relative_file) . "' AND track_id != '" . mysqli_real_escape_string($db, $track_id) . "'";
 
-  if (!empty($currentSong['Date']) && isset($currentSong['Date'])) {
-    $whereClause .= " AND year BETWEEN " . mysqli_real_escape_string($db, $currentSong['Date'] - 3) . " AND " . mysqli_real_escape_string($db, $currentSong['Date'] + 3);
+  if ($date) {
+    $whereClause .= " AND year BETWEEN " . mysqli_real_escape_string($db, $date - 3) . " AND " . mysqli_real_escape_string($db, $date + 3);
   }
 
-  //$whereClause = "";
+  $whereClause = "WHERE " . $whereClause;
 
   if (!empty($similarityConditions)) {
-    $whereClause = "WHERE " . $whereClause . " AND (" . implode(" OR ", $similarityConditions) . ")";
+    $whereClause .= " AND (" . implode(" OR ", $similarityConditions) . ")";
   }
 
   cliLog("file: " . $currentSong['file']);
@@ -198,18 +246,16 @@ function addSimilarSongToQueue($host, $port) {
 
   $similarSongFile = $similarSong['relative_file'];
 
-  //if ($mpdResult == 'ACK_ERROR_NO_EXIST') {
-    //file not found in MPD database - add stream
-    $extension = substr(strrchr($similarSong['relative_file'], '.'), 1);
-		$extension = strtolower($extension);
-    $stream_id = -1;
-		if (sourceFile($extension, $similarSong['audio_bitrate'], $stream_id))
-			$stream_extension = $extension;
-		else
-			$stream_extension = $cfg['encode_extension'][$stream_id];
+  //add local file as stream
+  $extension = substr(strrchr($similarSong['relative_file'], '.'), 1);
+  $extension = strtolower($extension);
+  $stream_id = -1;
+  if (sourceFile($extension, $similarSong['audio_bitrate'], $stream_id))
+    $stream_extension = $extension;
+  else
+    $stream_extension = $cfg['encode_extension'][$stream_id];
 
-		$url = NJB_HOME_URL . 'stream.php?action=streamTo&stream_id=' . $stream_id . '&track_id=' . $similarSong['track_id'] . '&ext=.' . $stream_extension;
-  //}
+  $url = NJB_HOME_URL . 'stream.php?action=streamTo&stream_id=' . $stream_id . '&track_id=' . $similarSong['track_id'] . '&ext=.' . $stream_extension;
   $mpdResult = mpd('add "' . mpdEscapeChar($url) . '"', $host, $port);
   if ($mpdResult === false) {
     cliLog("Error adding similar song to MPD queue.");
@@ -221,12 +267,12 @@ function addSimilarSongToQueue($host, $port) {
 }
 
 function getNextTrackId($similarSongs){
-  global $cfg, $db, $t, $response;
+  global $t;
   $next_track_id = '';
   $next_track_id = $similarSongs['data'][rand(0,count($similarSongs['data'])-1)]['id'];
   $next_track = $t->getTrack($next_track_id);
   $album_id = $next_track['album']['id'];
-  cliLog("Tidal album_id: " . $album_id);
+  cliLog("Next track Tidal album_id: " . $album_id);
   getAlbumFromTidal($album_id);
   getTracksFromTidalAlbum($album_id);
   return $next_track_id;

@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright � 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015 Artur Sierzant                                 |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright � 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |

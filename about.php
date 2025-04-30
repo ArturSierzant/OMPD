@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015 Artur Sierzant                                 |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -84,7 +84,7 @@ function about() {
 <tr class="header header_bigger">
 	<td class="space"></td>
 	<td colspan="3" style="white-space: normal;">
-	O!MPD&nbsp;<?php echo html(NJB_VERSION); ?>,&nbsp;Copyright&nbsp;&copy;&nbsp;2015-2021&nbsp;Artur&nbsp;Sier&#380;ant<br>
+	O!MPD&nbsp;<?php echo html(NJB_VERSION); ?>,&nbsp;Copyright&nbsp;&copy;&nbsp;2015&nbsp;Artur&nbsp;Sier&#380;ant<br>
 	
 	</td>
 	<td class="space"></td>
@@ -98,7 +98,7 @@ function about() {
 	<i class="fa fa-github fa-fw"></i>&nbsp;&nbsp;<a href="https://github.com/ArturSierzant/OMPD" target="_blank">https://github.com/ArturSierzant/OMPD</a><br>
 	<i class="fa fa-envelope-o fa-fw"></i>&nbsp;&nbsp;<a href="mailto:info@ompd.pl">info@ompd.pl</a><br><br>
 	This program comes with <a href="about.php?action=license#nowarranty">ABSOLUTELY NO WARRANTY</a>.<br>
-	This is free software, and you are welcome to redistribute it<br>
+	This is free software and you are welcome to redistribute it.<br>
 	under certain <a href="about.php?action=license#conditions">conditions</a>.
 	<br><br>
 	O!MPD is fork of netjukebox&nbsp;Copyright&nbsp;&copy;&nbsp;2001-2012&nbsp;Willem&nbsp;Bartels <a href="http://www.netjukebox.nl/" target = "_blank">http://www.netjukebox.nl</a>
@@ -160,16 +160,17 @@ function about() {
 <tr class="line"><td colspan="5"></td></tr>
 <tr class="<?php echo ($i++ & 1) ? 'even' : 'odd'; ?>">
 	<td>&nbsp;</td>
-	<td style="vertical-align: top;">v1.08 <br>202?.??.??</td>
+	<td style="vertical-align: top;">v1.08 <br>2025.04.30</td>
 	<td></td>
 	<td>
 	<ul style="padding-left: 1em;">
-	<li> most of settings from config.inc.php moved to Config -> Settings</li>
-	<li> added Radio Browser (based on <a href="https://radio-browser.info" target="_blank">radio-browser.info</a>)</li>
-	<li> added Auto Queue (based on Tidal or local files)</li>
-	<li> added support for more Tidal items (playlists, mixlists, podcasts)</li>
-	<li> added more items in artist view (when using Tidal)</li>
-	<li> added [experimental] update DB from command line (<code>php update.php "/path/to/updated/directory"</code>) - thanks to <a href="https://github.com/tomchiverton" target="_blank">tomchiverton</a></li>
+    <li> added Radio Browser (based on <a href="https://radio-browser.info" target="_blank">radio-browser.info</a>)</li>
+    <li> added Auto Queue (based on Tidal or local files)</li>
+    <li> added support for more Tidal items (playlists, mixlists, podcasts)</li>
+    <li> added more items in artist view (when using Tidal)</li>
+    <li> most of settings from config.inc.php moved to Config -> Settings</li>
+    <li> added [experimental] update DB from command line (<code>php update.php "/path/to/updated/directory"</code>) - thanks to <a href="https://github.com/tomchiverton" target="_blank">tomchiverton</a></li>
+    <li> added new skin ompd_darker_2 (modified ompd_darker)</li>
 	<li> fixed bugs</li>
 	</ul>
 	<br>

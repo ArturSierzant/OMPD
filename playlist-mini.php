@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright � 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015 Artur Sierzant                                 |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -276,11 +276,15 @@ function evaluateTrack(data) {
 	
 	
 	artist = '';
+  tidalArtistId = '';
 	if ($.isArray(data.track_artist)) {
 		l = data.track_artist.length;
 		if (l>1) {
 			for (i=0; i<l; i++) {
-				artist = artist + '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[i]) + '">' + data.track_artist[i] + '</a>';
+        if ($.isArray(data.track_artist_tidal_id)){
+          tidalArtistId = "&tidalArtistId=" + data.track_artist_tidal_id[i];
+        }
+				artist = artist + '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[i]) + tidalArtistId + '">' + data.track_artist[i] + '</a>';
 				if (i!=l-1) {
 					var delimiter = data.track_artist_all.match(escapeRegExp(data.track_artist_url[i]) + "(.*)" + escapeRegExp(data.track_artist_url[i+1]));
 					if (testing == 'on') {
@@ -291,8 +295,11 @@ function evaluateTrack(data) {
 			}
 		} 
 		else if (l>0) {
+      if ($.isArray(data.track_artist_tidal_id)){
+          tidalArtistId = "&tidalArtistId=" + data.track_artist_tidal_id[0];
+      }
 			if (data.track_artist[0] != '&nbsp;') {
-			artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[0]) + '">' + data.track_artist[0] + '</a>';
+			artist = '<a href="index.php?action=view2&order=year&sort=asc&artist=' + encodeURIComponent(data.track_artist_url[0]) + tidalArtistId + '">' + data.track_artist[0] + '</a>';
 			}
 		}
 	}
@@ -343,6 +350,9 @@ function evaluateTrack(data) {
 	} */
 	else if (data.album != '&nbsp;') {
 		document.getElementById('artist_mini').innerHTML = data.album;
+	}
+  else if (artist) {
+		document.getElementById('artist_mini').innerHTML = 'by ' + artist;
 	}
 	else {
 		$("#artist_mini").hide();

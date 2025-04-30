@@ -738,6 +738,7 @@ $query2 = mysqli_query($db,'SELECT player_name, player_type, player_id, player_h
 	<input type="text" id="search_string" name="search_string" autocomplete="off" value=""><div onclick="goSearch();" class="icon-selected">GO</div>
 	<input type="hidden" name="filter" value="base">
 	<input type="hidden" name="action" value="search_all">
+	<input type="hidden" name="tileSizePHP" value="">
 	</div>
 	</form>
 </div>

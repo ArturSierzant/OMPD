@@ -1,6 +1,6 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright © 2015 Artur Sierzant                                 |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
@@ -1726,14 +1726,31 @@ function showAllFromTidal($searchStr, $size) {
 	if (count($results['artists']['items']) == 0) {
 		$data['artists_results'] = 0;
 	}
+
 	if ($results['artists']['items']) {
 		$data['artists_results'] = count($results['artists']['items']);
-		$artistsList = '<table class="border" cellspacing="0" cellpadding="0">';
-		foreach ($results['artists']['items'] as $art) {
-			$artistsList .= '<tr class="artist_list"><td class="space"></td><td><a href="index.php?action=view2&order=year&sort=asc&artist=' . rawurlencode($art['name']) . '&amp;tidalArtistId=' . rawurlencode($art['id']). '&amp;order=year">' . html($art['name']) . '</a></td></tr>';
-			}
-		$artistsList .= '</table>';
-		$data['artists'] = $artistsList;
+    $artistsList = '';
+    foreach($results['artists']['items'] as $res) {
+      if (isset($res['picture'])) {
+        $pic = $t->artistPictureToURL($res['picture']);
+        $pic = '<img src="' . $pic . '" style="width: 100%; height: 100%;">';
+      }
+      elseif(isset($res['mixes']['ARTIST_MIX'])){
+        $artist_mix = $res['mixes']['ARTIST_MIX'];
+        $mix = $t->getMixList($artist_mix);
+        $pic = $mix['rows'][0]['modules'][0]['mix']['images']['SMALL']['url'];
+        $pic = '<img src="' . $pic . '" style="width: 100%; height: 100%;">';
+      }
+      else {
+        $pic = '<i class="fa fa-user" style="font-size: 8em;"></i>';
+      }
+      $albums = array();
+      $albums['artist'] = $res['name'];
+      $albums['cover'] = $pic;
+      $albums['tidalArtistId'] = $res['id'];
+      $artistsList .= draw_tile_artist ( $size, $albums, '', 'grid');
+    }
+    $data['artists'] = $artistsList;
 	}
 	
 	if (count($results['albums']['items']) == 0) {
@@ -3791,6 +3808,31 @@ function getYouTubeMPDUrl($url, $title = ''){
 	return $ytStreamUrl;
 }
 
+//  +------------------------------------------------------------------------+
+//  | Get data from Youtube MPD url                                          |
+//  +------------------------------------------------------------------------+
+
+function getYouTubeMPDUrlData($url){
+  global $cfg;
+ //get query from url
+  $query = parse_url($url, PHP_URL_QUERY);
+  parse_str($query, $params);
+  $id = $params['track_id'];
+  $ompd_title = $params['ompd_title'];
+  $ompd_duration = $params['ompd_duration'];
+  $ompd_artist = $params['ompd_artist'];
+  $ompd_thumbnail = $params['ompd_thumbnail'];
+  $ompd_year = $params['ompd_year'];
+  $ompd_webpage = $params['ompd_webpage'];
+  
+  return array('id' => $id,
+              'title' => $ompd_title,
+              'duration' => $ompd_duration,
+              'artist' => $ompd_artist,
+              'thumbnail' => $ompd_thumbnail,
+              'year' => $ompd_year,
+              'webpage' => $ompd_webpage);
+}
 
 //  +------------------------------------------------------------------------+
 //  | Get Youtube stream URL                                                 |
@@ -5380,6 +5422,7 @@ function getTrackMpdUrl($track_mpd_url) {
 //  +------------------------------------------------------------------------+
 
 function getTrackIdFromUrl($track_mpd_url, $type='') {
+  global $cfg, $db;
 	$parts = parse_url($track_mpd_url);
 	parse_str(isset($parts['query']) ? $parts['query'] : '', $query);
 	if ($type == 'radio') {
@@ -5392,6 +5435,14 @@ function getTrackIdFromUrl($track_mpd_url, $type='') {
 	if ($track_id) {
 		return $track_id;
 	}
+
+  //search db for track_id based on relative_file
+  $query = mysqli_query($db, "SELECT track_id FROM track WHERE relative_file = '" . mysqli_real_escape_string($db, $track_mpd_url) . "'");
+  if ($query && mysqli_num_rows($query) > 0) {
+    $result = mysqli_fetch_assoc($query);
+    return $result['track_id'];
+  }
+
 	return '';
 }
 

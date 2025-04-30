@@ -1,10 +1,10 @@
 <?php
 //  +------------------------------------------------------------------------+
-//  | O!MPD, Copyright © 2015-2021 Artur Sierzant                            |
+//  | O!MPD, Copyright Â© 2015 Artur Sierzant                                 |
 //  | http://www.ompd.pl                                                     |
 //  |                                                                        |
 //  |                                                                        |
-//  | netjukebox, Copyright © 2001-2012 Willem Bartels                       |
+//  | netjukebox, Copyright Â© 2001-2012 Willem Bartels                       |
 //  |                                                                        |
 //  | http://www.netjukebox.nl                                               |
 //  | http://forum.netjukebox.nl                                             |
@@ -23,7 +23,7 @@
 //  | along with this program.  If not, see <http://www.gnu.org/licenses/>.  |
 //  +------------------------------------------------------------------------+
 
-/* (c) 2004 by £ukasz Tomicki <tomicki(at)o2(dot)pl> 		*/
+/* (c) 2004 by ï¿½ukasz Tomicki <tomicki(at)o2(dot)pl> 		*/
 /* Most recent version available @ : http://tomicki.net/	*/
 /* Version: 0.8    											*/
 /*
